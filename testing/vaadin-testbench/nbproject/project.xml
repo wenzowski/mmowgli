@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.ant.freeform</type>
+    <configuration>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
+            <name>MMOWGLI Test Bench</name>
+        </general-data>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
+            <!-- Do not use Project Properties customizer when editing this file manually. -->
+            <name>MMOWGLI Test Bench</name>
+            <properties/>
+            <folders>
+                <source-folder>
+                    <label>MMOWGLI Test Bench</label>
+                    <location>.</location>
+                    <encoding>MacRoman</encoding>
+                </source-folder>
+                <source-folder>
+                    <label>mmowgli/temp-dir/src</label>
+                    <type>java</type>
+                    <location>mmowgli/temp-dir/src</location>
+                    <encoding>MacRoman</encoding>
+                </source-folder>
+            </folders>
+            <ide-actions>
+                <action name="build">
+                    <target>compile.tests</target>
+                </action>
+                <action name="clean">
+                    <target>clean</target>
+                </action>
+                <action name="rebuild">
+                    <target>clean</target>
+                    <target>compile.tests</target>
+                </action>
+                <action name="run">
+                    <target>run.tests</target>
+                </action>
+            </ide-actions>
+            <export>
+                <type>folder</type>
+                <location>mmowgli/temp-dir/classes</location>
+                <build-target>compile.tests</build-target>
+            </export>
+            <view>
+                <items>
+                    <source-folder style="packages">
+                        <label>mmowgli/temp-dir/src</label>
+                        <location>mmowgli/temp-dir/src</location>
+                    </source-folder>
+                    <source-file>
+                        <location>build.xml</location>
+                    </source-file>
+                </items>
+                <context-menu>
+                    <ide-action name="build"/>
+                    <ide-action name="rebuild"/>
+                    <ide-action name="clean"/>
+                    <ide-action name="run"/>
+                </context-menu>
+            </view>
+            <subprojects/>
+        </general-data>
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
+            <compilation-unit>
+                <package-root>mmowgli/temp-dir/src</package-root>
+                <classpath mode="compile">vaadin-testbench-2.2.0.jar</classpath>
+                <built-to>mmowgli/temp-dir/classes</built-to>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+        </java-data>
+    </configuration>
+</project>
