@@ -10,8 +10,8 @@
 @REM	cd not needed since in same directory
 @REM	cd H:\vaadin-testbench
 
-SET  ANT_HOME=C:\Program Files\apache-ant-1.8.2
-SET JAVA_HOME=C:\Program Files\Java\jdk1.6.0_24
+IF NOT EXIST  %ANT_HOME% SET  ANT_HOME=C:\Program Files\apache-ant-1.8.2
+IF NOT EXIST %JAVA_HOME% SET JAVA_HOME=C:\Program Files\Java\jdk1.6.0_24
 SET Path=%ANT_HOME%\bin;%JAVA_HOME%\bin;%Path%;
 
 @ECHO Clearing cache Internet Explorer...
