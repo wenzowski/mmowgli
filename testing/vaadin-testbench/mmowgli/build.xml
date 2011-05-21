@@ -51,6 +51,11 @@
         <include name="*.html" />
     </fileset>
 
+    <!-- warning: clean and compile require moving files between directories -->
+    <!-- OK to compile -->
+    <!-- TODO cp compiled files -->
+    <target name="all" depends="run.tests"/>
+
     <target name="open.game.site">
 
         <exec executable="open" osfamily="mac">
@@ -154,7 +159,7 @@
     </target>
 
     <!-- NOTE: Use from command line only as this will kill all java processes currently running -->
-    <target name="kill.hub.rc">
+    <target name="kill.all.java">
 
         <exec executable="sh" osfamily="mac">
             <arg value="-c"/>
