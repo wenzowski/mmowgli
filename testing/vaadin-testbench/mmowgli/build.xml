@@ -186,4 +186,34 @@
 
     <target name="clean" depends="remove.temp.files,remove.error.screens"/>
 
+    <!-- these are VaadinTestbench extensions of a jUnit test -->
+    <!-- TODO create tests are currently dependent on OSX:  create similar directors for winxp and search/replace osx to winxp -->
+    <target name="setup.createClusterUser">
+        <mkdir  dir="temp-dir/src/" />
+        <copy todir="temp-dir/src/"  overwrite="true" verbose="true">
+            <fileset dir="temp-dir.save/src/" includes="createClusterUser/**"/>
+        </copy>
+    </target>
+    <target name="setup.createMmowgliUser">
+        <mkdir  dir="temp-dir/src/" />
+        <copy todir="temp-dir/src/"  overwrite="true" verbose="true">
+            <fileset dir="temp-dir.save/src/" includes="createMmowgliUser/**"/>
+        </copy>
+    </target>
+    <target name="setup.loadTestCluster">
+        <mkdir  dir="temp-dir/src/" />
+        <copy todir="temp-dir/src/"  overwrite="true" verbose="true">
+            <fileset dir="temp-dir.save/src/" includes="loadTestCluster/**"/>
+        </copy>
+    </target>
+    <target name="setup.loadTestMmowgli" depends="clean">
+        <mkdir  dir="temp-dir/src/" />
+        <copy todir="temp-dir/src/"  overwrite="true" verbose="true">
+            <fileset dir="temp-dir.save/src/" includes="loadTestMmowgli/**"/>
+        </copy>
+    </target>
+    <!-- reconfiguration after database wipe; TODO note that both /mmowgli/ and /cluster/ will change to /game/ (on different servers) -->
+    <target name="setup.MmowgliTests" depends="clean,setup.createMmowgliUser,setup.loadTestMmowgli"/>
+    <target name="setup.ClusterTests" depends="clean,setup.createClusterUser,setup.loadTestCluster"/>
+
 </project>
