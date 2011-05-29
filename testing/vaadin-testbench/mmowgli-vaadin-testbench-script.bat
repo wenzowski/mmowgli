@@ -13,8 +13,10 @@ IF NOT EXIST  %ANT_HOME%    SET  ANT_HOME=C:\Program Files\apache-ant-1.8.2
 IF NOT EXIST  %ANT_HOME%    SET  ANT_HOME=C:\Program Files\apache-ant-1.8.1
 IF NOT EXIST  %ANT_HOME%    PAUSE Error, Ant not found!
 IF NOT EXIST  %ANT_HOME%    EXIT
-IF NOT EXIST %JAVA_HOME%    SET JAVA_HOME=C:\Program Files\Java\jdk1.6.0_24
+
+IF NOT EXIST %JAVA_HOME%    SET JAVA_HOME=..\java\jdk1.6.0_25
 IF NOT EXIST %JAVA_HOME%    SET JAVA_HOME=C:\Program Files\Java\jdk1.6.0_25
+IF NOT EXIST %JAVA_HOME%    SET JAVA_HOME=C:\Program Files\Java\jdk1.6.0_24
 IF NOT EXIST %JAVA_HOME%    PAUSE Error, Java not found!
 IF NOT EXIST %JAVA_HOME%    EXIT
 
