@@ -29,8 +29,8 @@ SET Path=%ANT_HOME%\bin;%JAVA_HOME%\bin;%Path%;
 @ECHO  kill all running java tasks:
 start "kill.all.java"	ant kill.all.java
 
-REM pause 5 seconds
-PING 1.1.1.1 -n 1 -w 5000 > NUL
+REM Pause 10 seconds...
+PING 1.1.1.1 -n 1 -w 10000 > NUL
 
 TASKLIST
 
