@@ -33,5 +33,12 @@ PING 1.1.1.1 -n 1 -w 5000 > NUL
 
 start "run.tests"	ant run.tests
 
-@REM PAUSE
+REM pause 25 minutes = 1500 seconds = 1500000 milliseconds
+REM    or 55 minutes = 3300 seconds = 3300000 milliseconds
+PING 1.1.1.1 -n 1 -w 3300000 > NUL
+
+@ECHO killing all running java tasks
+ant kill.all.java
+
+@REM PAUSE to inspect console output
 @REM exit
