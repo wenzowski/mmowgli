@@ -26,14 +26,12 @@ IF NOT EXIST "%JAVA_HOME%"    EXIT
 SET Path=%ANT_HOME%\bin;%JAVA_HOME%\bin;%Path%;
 @ECHO PATH=%PATH%
 
-@ECHO  kill all running java tasks:
-start "kill.all.java"	ant kill.all.java
+@ECHO Kill all running java tasks, then pause 10 seconds...
+start /B "kill.all.java"	ant kill.all.java
 
-REM Pause 10 seconds...
 PING 1.1.1.1 -n 1 -w 10000 > NUL
 
 TASKLIST
 
 PAUSE to inspect console output, press any key to exit
-
-@REM exit
+EXIT
