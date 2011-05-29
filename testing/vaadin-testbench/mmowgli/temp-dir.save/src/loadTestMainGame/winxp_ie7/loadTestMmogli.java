@@ -3,7 +3,7 @@ package loadTestMmogli.winxp_ie7;
 import com.vaadin.testbench.testcase.AbstractVaadinTestCase;
 import com.vaadin.testbench.util.CurrentCommand;
 
-public class loadTestMmogli extends AbstractVaadinTestCase {
+public class loadTestMainGame extends AbstractVaadinTestCase {
 
     int MAX_USERS = 55;
     int count = 0;

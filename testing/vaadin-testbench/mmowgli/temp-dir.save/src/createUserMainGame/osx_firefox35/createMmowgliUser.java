@@ -3,7 +3,7 @@ package createMmowgliUser.osx_firefox35;
 import com.vaadin.testbench.testcase.AbstractVaadinTestCase;
 import com.vaadin.testbench.util.CurrentCommand;
 
-public class createMmowgliUser extends AbstractVaadinTestCase {
+public class createUserMainGame extends AbstractVaadinTestCase {
 
     int MAX_USERS = 55;
     int count = 0;
