@@ -21,6 +21,9 @@ IF NOT EXIST %JAVA_HOME%    EXIT
 SET Path=%ANT_HOME%\bin;%JAVA_HOME%\bin;%Path%;
 @ECHO PATH=%PATH%
 
+@ECHO Killing prior Ant and Java tasks...
+start "kill.all.java"	ant kill.all.java
+
 @ECHO Clearing cache Internet Explorer...
 RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 255 
 
@@ -38,7 +41,7 @@ start "run.rc"		ant run.rc
 REM pause 5 seconds
 PING 1.1.1.1 -n 1 -w 5000 > NUL
 
-start "run.tests"	ant run.tests
+start "run.15tests"	ant run.15tests
 
 REM pause 25 minutes = 1500 seconds = 1500000 milliseconds
 REM    or 55 minutes = 3300 seconds = 3300000 milliseconds
