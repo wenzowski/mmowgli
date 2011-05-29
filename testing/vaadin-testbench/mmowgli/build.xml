@@ -23,7 +23,7 @@
     <!-- browsers to use for testing:  first property is used -->
     <!--<property name="browsers" value="winxp-ie6,winxp-ie7,winxp-ie8,winxp-firefox3,winxp-safari4,winxp-opera10,winxp-googlechrome4" />-->
 
-    <!-- Savage Lab machines (Windows XP) and  Windows 7 -->
+    <!-- Savage Lab machines (Windows XP) and Windows 7 -->
     <property name="browsers" value="winxp-ie8,winxp-firefox36"/>
 
     <!-- NPS lab machines (e.g. SP-250) -->
@@ -72,8 +72,7 @@
         
     </target>
 
-    <!-- This target converts HTML tests files to java junit tests. One java file for each test is created. -->
-    <target name="create.tests">
+    <target name="create.tests" description="This target converts HTML tests files to java junit tests. One java file for each test is created.">
         <pathconvert pathsep=" " property="testfiles" refid="html-test-files">
             <regexpmapper from="^(.*)$$" to="'\1'" />
         </pathconvert>
@@ -94,8 +93,7 @@
         </java>
     </target>
 
-    <!-- Must be started first before running the remote control -->
-    <target name="run.hub">
+    <target name="run.hub" description="runs VaadinTestbench hub, must be started first before running the remote control">
 
         <java classpath="../grid/hub:${selenium-hub.jar}"
               classname="com.thoughtworks.selenium.grid.hub.HubServer"
@@ -103,7 +101,7 @@
 
     </target>
 
-    <target name="run.rc">
+    <target name="run.rc" description="runs VaadinTestbench remote control">
 
         <java classpath="${selenium-rc.jar}:${selenium-server.jar}"
               classname="com.thoughtworks.selenium.grid.remotecontrol.SelfRegisteringRemoteControlLauncher"
@@ -114,8 +112,7 @@
 
     </target>
 
-    <!-- This target complies the generated java junit tests. -->
-    <target name="compile.tests" depends="create.tests">
+    <target name="compile.tests" depends="create.tests" description="compiles the generated java junit tests">
         <mkdir dir="${temp-dir}" />
         <mkdir dir="${temp-dir}/src" />
         <mkdir dir="${temp-dir}/classes" />
@@ -131,8 +128,7 @@
         </javac>
     </target>
 
-    <!-- This target runs the generated and compiled junit tests -->
-    <target name="run.tests" depends="remove.error.screens,compile.tests">
+    <target name="run.tests" depends="remove.error.screens,compile.tests" description="This target runs the generated and compiled junit tests">
         <junit fork="yes">
             <classpath>
                 <path refid="classpath" />
@@ -158,8 +154,7 @@
 
     </target>
 
-    <!-- NOTE: Use from command line only as this will kill all java processes currently running -->
-    <target name="kill.all.java">
+    <target name="kill.all.java" description="warning: this will kill all java processes currently running, including Ant">
 
         <echo message="running kill.all.java (which also kills ant)"/>
         <exec executable="sh" osfamily="mac">
@@ -185,7 +180,7 @@
         <delete dir="${temp-dir}"    verbose="true"/>
     </target>
 
-    <target name="setup.initialize">
+    <target name="setup.initialize" description="create directories for copying over originally recorded scripts and compiled tests">
         <mkdir  dir="${testscripts}/" />
         <mkdir  dir="${temp-dir}/src/" />
     </target>
@@ -230,6 +225,14 @@
         </copy>
         <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
             <fileset dir="temp-dir.save/src/" includes="TestClusterAdd2Cards/**"/>
+        </copy>
+    </target>
+    <target name="setup.TestClusterCardPlayButtons" depends="setup.initialize">
+        <copy todir="${testscripts}/"  overwrite="true" verbose="true">
+            <fileset dir="testscripts.save/" includes="TestClusterCardPlayButtons.html"/>
+        </copy>
+        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
+            <fileset dir="temp-dir.save/src/" includes="TestClusterCardPlayButtons/**"/>
         </copy>
     </target>
     <!-- reconfiguration after database wipe; directories are /game/ (on both servers) and /cluster/ (on test server) -->
