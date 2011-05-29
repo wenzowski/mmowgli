@@ -128,6 +128,35 @@
         </javac>
     </target>
 
+    <target name="run.5tests">
+        <antcall target="run.tests"/>
+        <antcall target="run.tests"/>
+        <antcall target="run.tests"/>
+        <antcall target="run.tests"/>
+        <antcall target="run.tests"/>
+    </target>
+
+    <target name="run.15tests">
+        <antcall target="run.5tests"/>
+        <antcall target="run.5tests"/>
+        <antcall target="run.5tests"/>
+    </target>
+
+    <target name="run.25tests">
+        <antcall target="run.5tests"/>
+        <antcall target="run.5tests"/>
+        <antcall target="run.5tests"/>
+        <antcall target="run.5tests"/>
+        <antcall target="run.5tests"/>
+    </target>
+
+    <target name="run.100tests">
+        <antcall target="run.25tests"/>
+        <antcall target="run.25tests"/>
+        <antcall target="run.25tests"/>
+        <antcall target="run.25tests"/>
+    </target>
+
     <target name="run.tests" depends="remove.error.screens,compile.tests" description="This target runs the generated and compiled junit tests">
         <junit fork="yes">
             <classpath>
