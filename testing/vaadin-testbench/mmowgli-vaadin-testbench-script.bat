@@ -41,6 +41,12 @@ start "run.rc"		ant run.rc
 REM pause 5 seconds
 PING 1.1.1.1 -n 1 -w 5000 > NUL
 
+@REM choose number of tests based on duration, typical launch periodicity is 60 minutes
+@REM    start "run.tests"	ant run.tests
+@REM    start "run.5tests"	ant run.5tests
+@REM    start "run.15tests"	ant run.15tests
+@REM    start "run.25tests"	ant run.25tests
+
 start "run.15tests"	ant run.15tests
 
 REM pause 25 minutes = 1500 seconds = 1500000 milliseconds
