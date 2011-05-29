@@ -161,6 +161,7 @@
     <!-- NOTE: Use from command line only as this will kill all java processes currently running -->
     <target name="kill.all.java">
 
+        <echo message="running kill.all.java (which also kills ant)"/>
         <exec executable="sh" osfamily="mac">
             <arg value="-c"/>
             <arg value="ps -ef | grep java | awk '{print $2}' | xargs kill"/>
@@ -170,7 +171,8 @@
          <exec executable="taskkill" osfamily="windows">
             <arg line="-f /im java.exe"/>
         </exec>
-
+        <!-- TODO unreachable -->
+        <echo message="kill.all.java complete"/>
     </target>
 
     <!-- Remove old error screenshots. -->
@@ -188,16 +190,16 @@
 
     <!-- these are VaadinTestbench extensions of a jUnit test -->
     <!-- TODO create tests are currently dependent on OSX:  create similar directors for winxp and search/replace osx to winxp -->
-    <target name="setup.createClusterUser">
+    <target name="setup.createUserCluster">
         <mkdir  dir="temp-dir/src/" />
         <copy todir="temp-dir/src/"  overwrite="true" verbose="true">
-            <fileset dir="temp-dir.save/src/" includes="createClusterUser/**"/>
+            <fileset dir="temp-dir.save/src/" includes="createUserCluster/**"/>
         </copy>
     </target>
-    <target name="setup.createMmowgliUser">
+    <target name="setup.createUserMainGame">
         <mkdir  dir="temp-dir/src/" />
         <copy todir="temp-dir/src/"  overwrite="true" verbose="true">
-            <fileset dir="temp-dir.save/src/" includes="createMmowgliUser/**"/>
+            <fileset dir="temp-dir.save/src/" includes="createUserMainGame/**"/>
         </copy>
     </target>
     <target name="setup.loadTestCluster">
@@ -206,14 +208,31 @@
             <fileset dir="temp-dir.save/src/" includes="loadTestCluster/**"/>
         </copy>
     </target>
-    <target name="setup.loadTestMmowgli" depends="clean">
+    <target name="setup.loadTestMainGame" depends="clean">
         <mkdir  dir="temp-dir/src/" />
         <copy todir="temp-dir/src/"  overwrite="true" verbose="true">
-            <fileset dir="temp-dir.save/src/" includes="loadTestMmowgli/**"/>
+            <fileset dir="temp-dir.save/src/" includes="loadTestMainGame/**"/>
         </copy>
     </target>
-    <!-- reconfiguration after database wipe; TODO note that both /mmowgli/ and /cluster/ will change to /game/ (on different servers) -->
-    <target name="setup.MmowgliTests" depends="clean,setup.createMmowgliUser,setup.loadTestMmowgli"/>
-    <target name="setup.ClusterTests" depends="clean,setup.createClusterUser,setup.loadTestCluster"/>
+    <!-- reconfiguration after database wipe; directories are /game/ (on both servers) and /cluster/ (on test server) -->
+    <target name="setup.MainGameTests" depends="clean,setup.createUserMainGame,setup.loadTestMainGame"/>
+
+    <target name="setup.ClusterTests"  depends="clean,setup.createUserCluster,setup.loadTestCluster"/>
+
+    <property name="zip.filename" value="mmowgli-vaadin-testbench.zip" />
+    <target name="zip">
+        <zip destfile="../../${zip.filename}" >
+            <zipfileset dir=".." prefix="">
+                <include name="**/*"/>
+                <exclude name="**/.svn/*"/>
+                <exclude name="**/*.bak"/>
+                <exclude name="**/*.$$$$$$"/>
+                <exclude name="**/*.$$$$$$"/><!-- escape $ as $$ -->
+                <exclude name="**/Thumbs.db"/>
+            </zipfileset>
+        </zip>
+        <length property="zip.filename.length" file="../../${zip.filename}"/>
+        <echo>${zip.filename} (${zip.filename.length} bytes) complete</echo>
+    </target>
 
 </project>
