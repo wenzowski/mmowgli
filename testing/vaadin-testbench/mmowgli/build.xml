@@ -26,7 +26,7 @@
     <!-- Savage Lab machines -->
     <!--property name="browsers" value="winxp-ie8,winxp-firefox36"/-->
 
-    <!-- VDI User machines (Lab machines SP-250) -->
+    <!-- NPS User machines (Lab machines SP-250) -->
     <property name="browsers" value="winxp-ie7"/>
 
     <!-- Mac ,osx-safari4-->
@@ -57,7 +57,7 @@
     <target name="all" depends="run.tests"/>
 
     <target name="open.game.site">
-
+        <echo message="connecting to ${com.vaadin.testbench.deployment.url}"/>
         <exec executable="open" osfamily="mac">
             <arg value="-a"/>
             <arg value="FireFox"/>
