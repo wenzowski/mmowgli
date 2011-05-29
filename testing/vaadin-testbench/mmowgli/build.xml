@@ -20,20 +20,22 @@
     <property name="com.vaadin.testbench.deployment.url" value="http://test.mmowgli.nps.edu/cluster/"/>
     <property name="com.vaadin.testbench.deployment.url" value="http://mmowgli.nps.edu/game/"/>
 
-    <!-- Browsers to use for testing -->
+    <!-- browsers to use for testing:  first property is used -->
     <!--<property name="browsers" value="winxp-ie6,winxp-ie7,winxp-ie8,winxp-firefox3,winxp-safari4,winxp-opera10,winxp-googlechrome4" />-->
 
-    <!-- Savage Lab machines -->
-    <!--property name="browsers" value="winxp-ie8,winxp-firefox36"/-->
+    <!-- Savage Lab machines (Windows XP) and  Windows 7 -->
+    <property name="browsers" value="winxp-ie8,winxp-firefox36"/>
 
-    <!-- NPS User machines (Lab machines SP-250) -->
+    <!-- NPS lab machines (e.g. SP-250) -->
     <property name="browsers" value="winxp-ie7"/>
 
     <!-- Mac ,osx-safari4-->
-    <!--property name="browsers" value="osx-firefox35"/-->
+    <property name="browsers" value="osx-firefox35"/>
 
-    <!-- Temporary output directory, created and removed by this script -->
-    <property name="temp-dir" value="temp-dir" />
+    <!-- Temporary script and output directories, created and removed by this script -->
+    <!-- various setup.* targets are used to initialize choice of scripts from the *.save directories in version control -->
+    <property name="testscripts" value="testscripts" />
+    <property name="temp-dir"    value="temp-dir" />
 
     <!-- Base directory for screenshots. References are stored in reference/, errors in error/ -->
     <property name="com.vaadin.testbench.screenshot.directory" location="screenshots" />
@@ -47,13 +49,11 @@
     </path>
 
     <!-- fileset containing all tests to run -->
-    <fileset dir="testscripts" id="html-test-files">
+    <fileset dir="${testscripts}" id="html-test-files">
         <include name="*.html" />
     </fileset>
 
     <!-- warning: clean and compile require moving files between directories -->
-    <!-- OK to compile -->
-    <!-- TODO cp compiled files -->
     <target name="all" depends="run.tests"/>
 
     <target name="open.game.site">
@@ -115,7 +115,7 @@
     </target>
 
     <!-- This target complies the generated java junit tests. -->
-    <target name="compile.tests">
+    <target name="compile.tests" depends="create.tests">
         <mkdir dir="${temp-dir}" />
         <mkdir dir="${temp-dir}/src" />
         <mkdir dir="${temp-dir}/classes" />
@@ -132,7 +132,7 @@
     </target>
 
     <!-- This target runs the generated and compiled junit tests -->
-    <target name="run.tests" depends="compile.tests,remove.error.screens">
+    <target name="run.tests" depends="remove.error.screens,compile.tests">
         <junit fork="yes">
             <classpath>
                 <path refid="classpath" />
@@ -175,49 +175,67 @@
         <echo message="kill.all.java complete"/>
     </target>
 
-    <!-- Remove old error screenshots. -->
-    <target name="remove.error.screens">
+    <target name="remove.error.screens" description="Remove old error screenshots">
         <delete dir="${com.vaadin.testbench.screenshot.directory}" failonerror="false"/>
         <mkdir dir="${com.vaadin.testbench.screenshot.directory}/errors" />
     </target>
 
-    <!-- Remove temporary source and compiled java files -->
-    <target name="remove.temp.files">
-        <delete dir="${temp-dir}"/>
+    <target name="clean" depends="remove.error.screens" description="Remove temporary source and compiled java files">
+        <delete dir="${testscripts}" verbose="true"/>
+        <delete dir="${temp-dir}"    verbose="true"/>
     </target>
 
-    <target name="clean" depends="remove.temp.files,remove.error.screens"/>
+    <target name="setup.initialize">
+        <mkdir  dir="${testscripts}/" />
+        <mkdir  dir="${temp-dir}/src/" />
+    </target>
 
     <!-- these are VaadinTestbench extensions of a jUnit test -->
     <!-- TODO create tests are currently dependent on OSX:  create similar directors for winxp and search/replace osx to winxp -->
     <target name="setup.createUserCluster">
-        <mkdir  dir="temp-dir/src/" />
-        <copy todir="temp-dir/src/"  overwrite="true" verbose="true">
+        <copy todir="${testscripts}/"  overwrite="true" verbose="true">
+            <fileset dir="testscripts.save/" includes="createUserCluster.html"/>
+        </copy>
+        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
             <fileset dir="temp-dir.save/src/" includes="createUserCluster/**"/>
         </copy>
     </target>
-    <target name="setup.createUserMainGame">
-        <mkdir  dir="temp-dir/src/" />
-        <copy todir="temp-dir/src/"  overwrite="true" verbose="true">
+    <target name="setup.createUserMainGame" depends="setup.initialize">
+        <copy todir="${testscripts}/"  overwrite="true" verbose="true">
+            <fileset dir="testscripts.save/" includes="createUserMainGame.html"/>
+        </copy>
+        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
             <fileset dir="temp-dir.save/src/" includes="createUserMainGame/**"/>
         </copy>
     </target>
-    <target name="setup.loadTestCluster">
-        <mkdir  dir="temp-dir/src/" />
-        <copy todir="temp-dir/src/"  overwrite="true" verbose="true">
+    <target name="setup.loadTestCluster" depends="setup.initialize">
+        <copy todir="${testscripts}/"  overwrite="true" verbose="true">
+            <fileset dir="testscripts.save/" includes="loadTestCluster.html"/>
+        </copy>
+        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
             <fileset dir="temp-dir.save/src/" includes="loadTestCluster/**"/>
         </copy>
     </target>
-    <target name="setup.loadTestMainGame" depends="clean">
-        <mkdir  dir="temp-dir/src/" />
-        <copy todir="temp-dir/src/"  overwrite="true" verbose="true">
+    <target name="setup.loadTestMainGame" depends="setup.initialize">
+        <copy todir="${testscripts}/"  overwrite="true" verbose="true">
+            <fileset dir="testscripts.save/" includes="loadTestMainGame.html"/>
+        </copy>
+        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
             <fileset dir="temp-dir.save/src/" includes="loadTestMainGame/**"/>
         </copy>
     </target>
+    <target name="setup.TestClusterAdd2Cards" depends="setup.initialize">
+        <copy todir="${testscripts}/"  overwrite="true" verbose="true">
+            <fileset dir="testscripts.save/" includes="TestClusterAdd2Cards.html"/>
+        </copy>
+        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
+            <fileset dir="temp-dir.save/src/" includes="TestClusterAdd2Cards/**"/>
+        </copy>
+    </target>
     <!-- reconfiguration after database wipe; directories are /game/ (on both servers) and /cluster/ (on test server) -->
-    <target name="setup.MainGameTests" depends="clean,setup.createUserMainGame,setup.loadTestMainGame"/>
+    <target name="setup.testsMainGame" depends="clean,setup.createUserMainGame,setup.loadTestMainGame"/>
 
-    <target name="setup.ClusterTests"  depends="clean,setup.createUserCluster,setup.loadTestCluster"/>
+    <target name="setup.testsCluster"  depends="clean,setup.createUserCluster,setup.loadTestCluster"/>
 
     <property name="zip.filename" value="mmowgli-vaadin-testbench.zip" />
     <target name="zip">
