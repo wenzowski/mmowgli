@@ -256,6 +256,14 @@
             <fileset dir="temp-dir.save/src/" includes="TestClusterAdd2Cards/**"/>
         </copy>
     </target>
+    <target name="setup.MainGameClusterAdd2Cards" depends="setup.initialize">
+        <copy todir="${testscripts}/"  overwrite="true" verbose="true">
+            <fileset dir="testscripts.save/" includes="MainGameClusterAdd2Cards.html"/>
+        </copy>
+        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
+            <fileset dir="temp-dir.save/src/" includes="TestClusterAdd2Cards/**"/>
+        </copy>
+    </target>
     <target name="setup.TestClusterCardPlayButtons" depends="setup.initialize">
         <copy todir="${testscripts}/"  overwrite="true" verbose="true">
             <fileset dir="testscripts.save/" includes="TestClusterCardPlayButtons.html"/>
