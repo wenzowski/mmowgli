@@ -24,8 +24,8 @@ IF NOT EXIST "%JAVA_HOME%"    EXIT
 SET Path=%ANT_HOME%\bin;%JAVA_HOME%\bin;%Path%;
 @ECHO PATH=%PATH%
 
-@ECHO  Kill all prior Ant and Java tasks...
-start "kill.all.java"	ant kill.all.java
+@ECHO Kill all prior Ant and Java tasks...
+start /B "kill.all.java"	ant kill.all.java
 
 @ECHO Clearing cache Internet Explorer...
 RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 255 
