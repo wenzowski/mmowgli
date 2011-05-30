@@ -72,6 +72,22 @@
         
     </target>
 
+    <property name="lab.test.drive"     value="\\luq\movesTest01$"/>
+    <property name="lab.test.directory" value="vaadin-testbench\mmowgli"/>
+
+    <target name="deploy.tests" description="Copy tests to NPS lab infrastructure.">
+        <delete dir="${lab.test.drive}\${lab.test.directory}\${temp-dir}" failonerror="false"/>
+        <mkdir  dir="${lab.test.drive}\${lab.test.directory}\${temp-dir}" />
+        <copy todir="${lab.test.drive}\${lab.test.directory}\${temp-dir}/"  overwrite="true" verbose="true">
+            <fileset dir="${temp-dir}/" includes="**/*"/>
+        </copy>
+        <delete dir="${lab.test.drive}\${lab.test.directory}\${testscripts}" failonerror="false"/>
+        <mkdir  dir="${lab.test.drive}\${lab.test.directory}\${testscripts}" />
+        <copy todir="${lab.test.drive}\${lab.test.directory}\${testscripts}/"  overwrite="true" verbose="true">
+            <fileset dir="${testscripts}/" includes="*.*"/>
+        </copy>
+    </target>
+
     <target name="create.tests" description="This target converts HTML tests files to java junit tests. One java file for each test is created.">
         <pathconvert pathsep=" " property="testfiles" refid="html-test-files">
             <regexpmapper from="^(.*)$$" to="'\1'" />
