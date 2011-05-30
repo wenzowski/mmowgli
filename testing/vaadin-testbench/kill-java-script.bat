@@ -3,10 +3,6 @@
 @REM Authors Don Brutzman and Terry Norbraten
 @REM created 14 May 2011
 
-@REM debug these statements, probably overkill anyway:
-@REM IF NOT EXIST  %ANT_HOME%	 ANT_HOME=C:\Program Files\apache-ant-1.8.2
-@REM IF NOT EXIST %JAVA_HOME%	JAVA_HOME=C:\Program Files\Java\jdk1.6.0_24
-
 @REM	cd not needed since in same directory
 @REM	cd H:\vaadin-testbench
 
@@ -33,5 +29,5 @@ PING 1.1.1.1 -n 1 -w 10000 > NUL
 
 TASKLIST
 
-PAUSE to inspect console output, press any key to exit
-EXIT
+@REM PAUSE to inspect console output, press any key to exit
+@REM EXIT

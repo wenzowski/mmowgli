@@ -3,8 +3,6 @@
 @REM Authors Don Brutzman and Terry Norbraten
 @REM created 14 May 2011
 
-@REM IF NOT EXIST %JAVA_HOME%	JAVA_HOME=C:\Program Files\Java\jdk1.6.0_24
-
 @REM	cd not needed since in same directory
 @REM	cd H:\vaadin-testbench
 
@@ -21,11 +19,16 @@ IF NOT EXIST "%JAVA_HOME%"    SET JAVA_HOME=C:\Program Files\Java\jdk1.6.0_24
 IF NOT EXIST "%JAVA_HOME%"    PAUSE Error, Java not found!
 IF NOT EXIST "%JAVA_HOME%"    EXIT
 
-SET Path=%ANT_HOME%\bin;%JAVA_HOME%\bin;%Path%;
+SET PATH=%ANT_HOME%\bin;%JAVA_HOME%\bin;%Path%;
 @ECHO PATH=%PATH%
 
 @ECHO Kill all prior Ant and Java tasks...
 start /B "kill.all.java"	ant kill.all.java
+
+@REM --------------------------------------
+@ECHO  Shutting down, no tests launched.
+@REM   EXIT
+@REM --------------------------------------
 
 @ECHO Clearing cache Internet Explorer...
 RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 255 
