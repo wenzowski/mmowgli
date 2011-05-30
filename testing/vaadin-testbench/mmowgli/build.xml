@@ -9,16 +9,18 @@
        the properties for "Windows Target Environments"
     -->
 
-    <property name="selenium-hub.jar" location="../grid/hub/lib/selenium-grid-hub-standalone-vaadin-testbench-2.2.0.jar"/>
-    <property name="selenium-rc.jar" location="../grid/remote-control/lib/selenium-grid-remote-control-standalone-vaadin-testbench-2.2.0.jar"/>
+    <property name="selenium-hub.jar"    location="../grid/hub/lib/selenium-grid-hub-standalone-vaadin-testbench-2.2.0.jar"/>
+    <property name="selenium-rc.jar"     location="../grid/remote-control/lib/selenium-grid-remote-control-standalone-vaadin-testbench-2.2.0.jar"/>
     <property name="selenium-server.jar" location="../grid/remote-control/lib/selenium-server-1.0.1.jar"/>
 
     <!-- Host running TestBench RC or TestBench Hub -->
     <property name="com.vaadin.testbench.tester.host" value="127.0.0.1" />
 
     <!-- Base url where the testable application is deployed.  first property is set. -->
-    <property name="com.vaadin.testbench.deployment.url" value="http://test.mmowgli.nps.edu/cluster/"/>
+    <property name="com.vaadin.testbench.deployment.url" value="http://mmowgli.nps.edu/cluster/"/>
     <property name="com.vaadin.testbench.deployment.url" value="http://mmowgli.nps.edu/game/"/>
+    <property name="com.vaadin.testbench.deployment.url" value="http://test.mmowgli.nps.edu/cluster/"/>
+    <property name="com.vaadin.testbench.deployment.url" value="http://test.mmowgli.nps.edu/game/"/>
 
     <!-- browsers to use for testing:  first property is used -->
     <!--<property name="browsers" value="winxp-ie6,winxp-ie7,winxp-ie8,winxp-firefox3,winxp-safari4,winxp-opera10,winxp-googlechrome4" />-->
@@ -78,6 +80,9 @@
     <target name="deploy.tests" description="Copy tests to NPS lab infrastructure.">
         <delete dir="${lab.test.drive}\${lab.test.directory}\${temp-dir}" failonerror="false"/>
         <mkdir  dir="${lab.test.drive}\${lab.test.directory}\${temp-dir}" />
+        <copy todir="${lab.test.drive}\${lab.test.directory}\"  overwrite="true" verbose="true">
+            <fileset dir="." includes="build.xml"/>
+        </copy>
         <copy todir="${lab.test.drive}\${lab.test.directory}\${temp-dir}/"  overwrite="true" verbose="true">
             <fileset dir="${temp-dir}/" includes="**/*"/>
         </copy>
@@ -86,6 +91,13 @@
         <copy todir="${lab.test.drive}\${lab.test.directory}\${testscripts}/"  overwrite="true" verbose="true">
             <fileset dir="${testscripts}/" includes="*.*"/>
         </copy>
+        <echo message="deployed build.xml file is set to host ${com.vaadin.testbench.deployment.url}"/>
+        <!-- usually manually deployed to avoid turning on/off automatic testing inadvertantly:
+        <copy todir="${lab.test.drive}\${lab.test.directory}\.."  overwrite="true" verbose="true">
+            <fileset dir=".." includes="kill-java-script.bat"/>
+            <fileset dir=".." includes="mmowgli-vaadin-testbench-script.bat"/>
+        </copy>
+        -->
     </target>
 
     <target name="create.tests" description="This target converts HTML tests files to java junit tests. One java file for each test is created.">
@@ -174,6 +186,7 @@
     </target>
 
     <target name="run.tests" depends="remove.error.screens,compile.tests" description="This target runs the generated and compiled junit tests">
+        <echo message="connecting to ${com.vaadin.testbench.deployment.url}"/>
         <junit fork="yes">
             <classpath>
                 <path refid="classpath" />
@@ -231,61 +244,39 @@
     </target>
 
     <!-- these are VaadinTestbench extensions of a jUnit test -->
-    <!-- TODO create tests are currently dependent on OSX:  create similar directors for winxp and search/replace osx to winxp -->
     <target name="setup.createUserCluster">
         <copy todir="${testscripts}/"  overwrite="true" verbose="true">
             <fileset dir="testscripts.save/" includes="createUserCluster.html"/>
-        </copy>
-        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
-            <fileset dir="temp-dir/src/" includes="createUserCluster/**"/>
         </copy>
     </target>
     <target name="setup.createUserMainGame" depends="setup.initialize">
         <copy todir="${testscripts}/"  overwrite="true" verbose="true">
             <fileset dir="testscripts.save/" includes="createUserMainGame.html"/>
         </copy>
-        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
-            <fileset dir="temp-dir/src/" includes="createUserMainGame/**"/>
-        </copy>
     </target>
     <target name="setup.loadTestCluster" depends="setup.initialize">
         <copy todir="${testscripts}/"  overwrite="true" verbose="true">
             <fileset dir="testscripts.save/" includes="loadTestCluster.html"/>
-        </copy>
-        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
-            <fileset dir="temp-dir/src/" includes="loadTestCluster/**"/>
         </copy>
     </target>
     <target name="setup.loadTestMainGame" depends="setup.initialize">
         <copy todir="${testscripts}/"  overwrite="true" verbose="true">
             <fileset dir="testscripts.save/" includes="loadTestMainGame.html"/>
         </copy>
-        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
-            <fileset dir="temp-dir/src/" includes="loadTestMainGame/**"/>
-        </copy>
     </target>
     <target name="setup.TestClusterAdd2Cards" depends="setup.initialize">
         <copy todir="${testscripts}/"  overwrite="true" verbose="true">
             <fileset dir="testscripts.save/" includes="TestClusterAdd2Cards.html"/>
-        </copy>
-        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
-            <fileset dir="temp-dir/src/" includes="TestClusterAdd2Cards/**"/>
         </copy>
     </target>
     <target name="setup.MainGameClusterAdd2Cards" depends="setup.initialize">
         <copy todir="${testscripts}/"  overwrite="true" verbose="true">
             <fileset dir="testscripts.save/" includes="MainGameClusterAdd2Cards.html"/>
         </copy>
-        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
-            <fileset dir="temp-dir/src/" includes="MainGameClusterAdd2Cards/**"/>
-        </copy>
     </target>
     <target name="setup.TestClusterCardPlayButtons" depends="setup.initialize">
         <copy todir="${testscripts}/"  overwrite="true" verbose="true">
             <fileset dir="testscripts.save/" includes="TestClusterCardPlayButtons.html"/>
-        </copy>
-        <copy todir="${temp-dir}/src/"  overwrite="true" verbose="true">
-            <fileset dir="temp-dir/src/" includes="TestClusterCardPlayButtons/**"/>
         </copy>
     </target>
     <!-- reconfiguration after database wipe; directories are /game/ (on both servers) and /cluster/ (on test server) -->
