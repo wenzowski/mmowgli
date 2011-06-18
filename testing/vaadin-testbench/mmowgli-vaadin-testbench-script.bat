@@ -56,7 +56,7 @@ PING 1.1.1.1 -n 1 -w 5000 > NUL
 @REM    start "run.50tests"	ant run.50tests
 @REM    start "run.100tests"	ant run.100tests
 
-start "run.25tests"	ant run.100tests
+start "run.100tests"	ant run.100tests
 
 REM pause 25 minutes = 1500 seconds = 1500000 milliseconds
 REM    or 55 minutes = 3300 seconds = 3300000 milliseconds
