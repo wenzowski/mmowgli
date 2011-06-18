@@ -14,6 +14,7 @@ IF NOT EXIST  "%ANT_HOME%"    EXIT
 @ECHO ANT_HOME=%ANT_HOME%
 
 IF NOT EXIST "%JAVA_HOME%"    SET JAVA_HOME=..\java\jdk1.6.0_25
+IF NOT EXIST "%JAVA_HOME%"    SET JAVA_HOME=C:\Program Files\Java\jdk1.6.0_26
 IF NOT EXIST "%JAVA_HOME%"    SET JAVA_HOME=C:\Program Files\Java\jdk1.6.0_25
 IF NOT EXIST "%JAVA_HOME%"    SET JAVA_HOME=C:\Program Files\Java\jdk1.6.0_24
 IF NOT EXIST "%JAVA_HOME%"    PAUSE Error, Java not found!
@@ -52,8 +53,10 @@ PING 1.1.1.1 -n 1 -w 5000 > NUL
 @REM    start "run.5tests"	ant run.5tests
 @REM    start "run.15tests"	ant run.15tests
 @REM    start "run.25tests"	ant run.25tests
+@REM    start "run.50tests"	ant run.50tests
+@REM    start "run.100tests"	ant run.100tests
 
-start "run.15tests"	ant run.15tests
+start "run.25tests"	ant run.100tests
 
 REM pause 25 minutes = 1500 seconds = 1500000 milliseconds
 REM    or 55 minutes = 3300 seconds = 3300000 milliseconds
