@@ -178,6 +178,11 @@
         <antcall target="run.5tests"/>
     </target>
 
+    <target name="run.50tests">
+        <antcall target="run.25tests"/>
+        <antcall target="run.25tests"/>
+    </target>
+
     <target name="run.100tests">
         <antcall target="run.25tests"/>
         <antcall target="run.25tests"/>
