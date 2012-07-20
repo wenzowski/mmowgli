@@ -1,4 +1,4 @@
-@REM kill-java-script.bat
+@REM kill-java-script.bat 
 
 @REM Authors Don Brutzman and Terry Norbraten
 @REM created 14 May 2011
