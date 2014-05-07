@@ -45,4 +45,15 @@
 		<nature>com.vaadin.integration.eclipse.widgetsetNature</nature>
 		<nature>org.apache.ivyde.eclipse.ivynature</nature>
 	</natures>
+	<filteredResources>
+		<filter>
+			<id>1399483488558</id>
+			<name></name>
+			<type>6</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-.DS_Store</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
 </projectDescription>
