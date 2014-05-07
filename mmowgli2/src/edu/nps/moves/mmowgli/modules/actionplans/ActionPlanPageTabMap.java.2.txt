@@ -1,0 +1,731 @@
+/*
+* Copyright (c) 1995-2010 held by the author(s).  All rights reserved.
+*  
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions
+* are met:
+*  
+*  * Redistributions of source code must retain the above copyright
+*       notice, this list of conditions and the following disclaimer.
+*  * Redistributions in binary form must reproduce the above copyright
+*       notice, this list of conditions and the following disclaimer
+*       in the documentation and/or other materials provided with the
+*       distribution.
+*  * Neither the names of the Naval Postgraduate School (NPS)
+*       Modeling Virtual Environments and Simulation (MOVES) Institute
+*       (http://www.nps.edu and http://www.MovesInstitute.org)
+*       nor the names of its contributors may be used to endorse or
+*       promote products derived from this software without specific
+*       prior written permission.
+*  
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+* COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+* LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+* ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
+*/
+package edu.nps.moves.mmowgli.modules.actionplans;
+
+import static edu.nps.moves.mmowgli.components.MmowgliMap.GOOGLEMAPS_KEY;//MmowgliConstants.GOOGLEMAPS_KEY;
+
+import java.awt.geom.Point2D;
+import java.io.Serializable;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Resource;
+import com.vaadin.tapio.googlemaps.client.LatLon;
+import com.vaadin.ui.*;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.themes.BaseTheme;
+import com.vaadin.ui.themes.Reindeer;
+
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
+import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.SessionManager;
+import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
+
+/**
+ * ActionPlanPageTabMap.java
+ * Created on Mar 26, 2014
+ *
+ * MOVES Institute
+ * Naval Postgraduate School, Monterey, CA, USA
+ * www.nps.edu
+ *
+ * @author Mike Bailey, jmbailey@nps.edu
+ * @version $Id$
+ */
+public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
+{
+  private static final long serialVersionUID = -3754499030292286082L;
+  private static String MAPWIDTH  = "685px";
+  private static String MAPHEIGHT = "670px";
+  private static String MAPHEIGHT_WITH_BUTTONS = "650px";
+  private static double MAPW_CALC = 685.0d;
+  private static double MAPH_CALC = 670.0d;
+  private static double MAPH_CALC_WITH_BUTTONS = 650.0d;
+
+  private boolean editingOK = false;
+  private long markerIdx = 1;
+  private edu.nps.moves.mmowgli.db.GoogleMap mmowgliMap;
+  private MmowgliMapWidget mMapWidget;
+  private GridLayout flagGrid;
+  private MapSaveButtPan savePanel;
+  
+  public ActionPlanPageTabMap(Object apId, boolean isMockup)
+  {
+    super(apId,isMockup);
+  }
+  
+  @Override
+  public void initGui()
+  {
+    ActionPlan ap = ActionPlan.get(apId);
+    mmowgliMap = ap.getMap();
+    if(mmowgliMap == null) {
+      mmowgliMap = new edu.nps.moves.mmowgli.db.GoogleMap();
+      GoogleMap.save(mmowgliMap);
+      
+      ap.setMap(mmowgliMap);
+      ActionPlan.update(ap);
+    }
+    setSizeUndefined();
+    VerticalLayout leftLay = getLeftLayout();
+    leftLay.setSpacing(false);
+    leftLay.setMargin(false);
+       
+    Label missionLab = new Label("Authors, put your plan on the map!");
+    leftLay.addComponent(missionLab);
+    leftLay.setComponentAlignment(missionLab, Alignment.TOP_LEFT);
+    missionLab.addStyleName("m-actionplan-mission-title-text");
+        
+    Label missionContentLab;
+    if(!isMockup)
+      missionContentLab = new HtmlLabel(ap.getMapInstructions());
+    else {
+      Game g = Game.get(1L);
+      missionContentLab = new HtmlLabel(g.getDefaultActionPlanMapText());
+    }
+    
+    leftLay.addComponent(missionContentLab);
+    leftLay.setComponentAlignment(missionContentLab, Alignment.TOP_LEFT);
+    leftLay.addStyleName("m-actionplan-mission-content-text");
+   
+    Component c;
+    c=buildMapFlags(leftLay);  // does the addComponent
+    leftLay.setComponentAlignment(c, Alignment.TOP_CENTER);
+    toggleFlags(editingOK);
+    
+    Label sp;
+    leftLay.addComponent(sp=new Label());
+    sp.setHeight("1px");
+    leftLay.setExpandRatio(sp, 1.0f);
+
+    // Build a mmowgliMap widget from our content
+    
+    mMapWidget = new MmowgliMapWidget(toLatLon(mmowgliMap.getLatLonCenter()), mmowgliMap.getZoom(), GOOGLEMAPS_KEY);
+
+    mMapWidget.getMapWidget().setWidth(MAPWIDTH);
+    mMapWidget.getMapWidget().setHeight(editingOK ? MAPHEIGHT_WITH_BUTTONS : MAPHEIGHT);
+ /*   googleMapWidget.addControl(MapControl.MenuMapTypeControl);
+    googleMapWidget.addControl(MapControl.SmallMapControl);
+    //googleMapWidget.addListener(new MyMapClickListener());
+    googleMapWidget.addListener(new MyMapMoveListener());
+    //googleMapWidget.addListener(new MyMarkerClickListener());
+    googleMapWidget.addListener(new MyMarkerMovedListener());
+    googleMapWidget.reportMapBounds();
+*/
+    loadMarkers(ap);
+    
+    VerticalLayout rightLay = getRightLayout();
+   
+    rightLay.setSizeUndefined();
+    rightLay.setSpacing(false);
+    rightLay.setMargin(false);
+
+    rightLay.addComponent(sp=new Label());
+    sp.setHeight("10px"); //"15px");
+   
+    savePanel = new MapSaveButtPan();
+    rightLay.addComponent(savePanel);
+    rightLay.setComponentAlignment(savePanel, Alignment.TOP_CENTER);
+    savePanel.setVisible(editingOK);
+    MapSaveListener msLis = new MapSaveListener();
+    savePanel.setClickHearers(msLis.mapLocListener,msLis.mapMarkerListener,msLis.cancelListener);
+   
+    DragAndDropWrapper ddw = new DragAndDropWrapper(mMapWidget.getMapWidget());
+    ddw.addStyleName("m-darkgreyborder");
+//todo    ddw.setDropHandler(new MapDropHandler());
+    ddw.setSizeFull();
+    
+    rightLay.addComponent(ddw);
+    rightLay.setExpandRatio(ddw, 1.0f);
+    
+  }
+
+  private void toggleSaveButtPan(boolean enabled)
+  {
+//    savePanel.setVisible(enabled);
+    mMapWidget.wrappedMap.setHeight(enabled ? MAPHEIGHT_WITH_BUTTONS : MAPHEIGHT);
+  }
+  
+  private void toggleFlags(boolean enabled)
+  {
+//    Iterator<Component> itr = flagGrid.iterator();
+//    while(itr.hasNext())
+//      itr.next().setEnabled(enabled);
+  }
+  
+  private void togglePopupsAndMarkers(boolean show)
+  {
+    // Cycle through all the markers and tell their content obj to show or hide the bottom tools
+//    List<Marker> lis = googleMapWidget.getMarkers();
+//    for (Marker m : lis) {
+//      PopupContent pop = (PopupContent) m.getInfoWindowContent()[0].getContent();
+//      pop.setToolsVisible(show);
+//      ((MmowgliMarker)m).setDraggable(show);
+//    }
+  }
+  private LatLon toLatLon(Point2D.Double pt) //todo
+  {
+    return new LatLon(pt.y,pt.x);
+  }
+  private Point2D.Double toPoint2D(LatLon latlon)
+  {
+    return new Point2D.Double(latlon.getLon(),latlon.getLat());
+  }
+  private void reloadMarkers(ActionPlan ap)
+  {
+    mMapWidget.getMarkers().clear();
+    loadMarkers(ap);
+  }  
+
+  private void loadMarkers(ActionPlan ap)
+  {
+    List<GoogleMapMarker> lis = ap.getMap().getMarkers();
+    for(GoogleMapMarker gmm : lis) {
+      MmowgliMarker mm;
+      mMapWidget.addMarker(mm=new MmowgliMarker(ap.getMap(),markerIdx++,gmm));
+      mm.setDraggable(true);
+    }    
+  }
+  
+//@formatter:off
+  public static String NUMBERTAG = "${num}";
+  public static String ALPHATAG  = "${let}";
+  static Object [][] flagData = {
+    { -1, "http://google-maps-icons.googlecode.com/files/redblank.png",               "http://google-maps-icons.googlecode.com/files/redblank.png"},
+    { -1, "http://google-maps-icons.googlecode.com/files/blackblank.png",             "http://google-maps-icons.googlecode.com/files/blackblank.png"},
+    
+    { 21,  "http://google-maps-icons.googlecode.com/files/teal"    +NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/teal"     +"(\\p{Digit}+)" + "\\.png"},// 00 - 20
+    { 21,  "http://google-maps-icons.googlecode.com/files/green"   +NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/green"    +"(\\p{Digit}+)" + "\\.png"},
+    { 21,  "http://google-maps-icons.googlecode.com/files/yellow"  +NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/yellow"   +"(\\p{Digit}+)" + "\\.png"},
+    { 21,  "http://google-maps-icons.googlecode.com/files/orange"  +NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/orange"   +"(\\p{Digit}+)" + "\\.png"},
+    { 101, "http://google-maps-icons.googlecode.com/files/red"     +NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/red"      +"(\\p{Digit}+)" + "\\.png"},
+    { 21,  "http://google-maps-icons.googlecode.com/files/pink"    +NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/pink"     +"(\\p{Digit}+)" + "\\.png"},
+    { 21,  "http://google-maps-icons.googlecode.com/files/purple"  +NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/purple"   +"(\\p{Digit}+)" + "\\.png"},
+    { 21,  "http://google-maps-icons.googlecode.com/files/blue"    +NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/blue"     +"(\\p{Digit}+)" + "\\.png"},
+    { 21,  "http://google-maps-icons.googlecode.com/files/darkblue"+NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/darkblue" +"(\\p{Digit}+)" + "\\.png"},
+    { 101, "http://google-maps-icons.googlecode.com/files/black"   +NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/black"    +"(\\p{Digit}+)" + "\\.png"},
+    { 21, "http://google-maps-icons.googlecode.com/files/brown"    +NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/brown"    +"(\\p{Digit}+)" + "\\.png"},
+    { 21, "http://google-maps-icons.googlecode.com/files/gray"     +NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/gray"     +"(\\p{Digit}+)" + "\\.png"},
+    { 21, "http://google-maps-icons.googlecode.com/files/white"    +NUMBERTAG+".png", "http://google-maps-icons.googlecode.com/files/white"    +"(\\p{Digit}+)" + "\\.png"},
+
+    { 26, "http://google-maps-icons.googlecode.com/files/blue"     +ALPHATAG+".png",  "http://google-maps-icons.googlecode.com/files/blue"     +"(\\p{Upper}+)" + "\\.png"},
+    { 26, "http://google-maps-icons.googlecode.com/files/black"    +ALPHATAG+".png",  "http://google-maps-icons.googlecode.com/files/black"    +"(\\p{Upper}+)" + "\\.png"},
+
+     };
+//@formatter:on
+
+  Component buildMapFlags(VerticalLayout vl)
+  {
+    flagGrid = new GridLayout();
+    vl.addComponent(flagGrid);
+    flagGrid.setSizeUndefined();
+    flagGrid.addStyleName("m-greyborder");
+    flagGrid.setColumns(6);
+    
+    for (Object[] row : flagData) {
+      int num    = (Integer)row[0];
+      String url = (String)row[1];
+      if(num == -1)
+        flagGrid.addComponent(MapFlag.getMapFlag(1,null,url));
+      else {
+        if(url.indexOf(NUMBERTAG) != -1 )
+          flagGrid.addComponent(MapFlag.getMapFlag(num, null, url, false));
+
+        else if(url.indexOf(ALPHATAG) != -1 )
+          flagGrid.addComponent(MapFlag.getMapFlag(num, null, url, true));
+      }
+    }
+    return flagGrid;    
+  }
+
+  
+  @Override
+  public void setImAuthor(boolean yn)
+  {
+    editingOK = yn;
+    toggleSaveButtPan(yn);
+    toggleFlags(yn);
+    togglePopupsAndMarkers(yn);    
+  }
+  
+  @Override
+  public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
+  {
+    // This panel does NOT do a dynamic update of someone else's changes....too problematic for losing work.
+    return false;
+  }
+  
+  class MmowgliMapWidget 
+  {
+    ArrayList<MmowgliMarker> markers = new ArrayList<MmowgliMarker>();
+
+    com.vaadin.tapio.googlemaps.GoogleMap wrappedMap;
+    public MmowgliMapWidget(LatLon center, int zoom, String apiKey)
+    {
+      wrappedMap = new com.vaadin.tapio.googlemaps.GoogleMap(center, zoom, apiKey);
+    }
+    public com.vaadin.tapio.googlemaps.GoogleMap getMapWidget()
+    {
+      return wrappedMap;
+    }
+
+
+    public void addMarker(MmowgliMarker marker)
+    {
+      markers.add(marker);
+      wrappedMap.addMarker(marker);
+    }
+    
+    public List<MmowgliMarker> getMarkers()
+    {
+      return markers;
+    }
+
+    public void removeMarker(MmowgliMarker marker)
+    {
+      markers.remove(marker);
+      wrappedMap.removeMarker(marker);      
+    }
+
+   // @Override
+    public void removeAllMarkers()
+    {
+      markers.clear();
+      wrappedMap.clearMarkers();
+    }  
+ 
+  }
+  class MmowgliMarker extends com.vaadin.tapio.googlemaps.client.overlays.GoogleMapMarker
+  {
+    private static final long serialVersionUID = -209755812291672141L;
+    
+    GoogleMapMarker wrappee;
+    PopupContent popContent;
+    int numberIndx;
+    
+    public MmowgliMarker(GoogleMap googleMap, long idx, GoogleMapMarker gmm)
+    {
+
+      super(gmm.getTitle(),toLatLon(gmm.getLatLon()),true);
+      wrappee=gmm;
+      
+      super.setIconUrl    (gmm.getIconUrl());
+ //todo     super.setIconAnchor (gmm.getIconAnchorXY());
+ //todo     super.setVisible    (gmm.isVisible());
+      super.setDraggable  (gmm.isDraggable());
+      
+ //todo     super.setInfoWindowContent(googleMap,popContent = new PopupContent(this,gmm.getTitle(),gmm.getPopupContent()));
+      
+//todo      numberIndx = MapFlag.deriveMapFlag(gmm.getIconUrl()).indx;
+    }
+    
+    @Override
+    public void setIconUrl(String imageUrl)
+    {
+      super.setIconUrl(imageUrl);
+      wrappee.setIconUrl(imageUrl);
+    }
+    
+ //   @Override
+    public void setIconAnchor(Point2D.Double iconAnchor)
+    {
+ //     super.setIconAnchor(iconAnchor);
+      wrappee.setIconAnchorXY(iconAnchor);
+    }
+    public Point2D.Double getIconAnchor()
+    {
+      return wrappee.getIconAnchorXY();
+    }
+    public void setPopupContent(String title, String text)
+    {
+      popContent.setTitle(title);
+      popContent.setContentText(text);
+    }
+  }
+ 
+  class PopupContent extends VerticalLayout
+  {
+    private static final long serialVersionUID = 9058881592618551224L;
+    private MmowgliMarker marker;
+    Label titleLabel;
+    Label contentLabel;
+    PopupContent(MmowgliMarker mark, String labtxt, String txt)
+    {
+      this.marker = mark;
+
+      setSizeUndefined(); //setHeight("75px");
+      setWidth("215px");  // about the min width
+      setSpacing(true);
+
+      titleLabel = new Label(labtxt);
+      addComponent(titleLabel);
+      setComponentAlignment(titleLabel,Alignment.TOP_CENTER);
+      contentLabel = new HtmlLabel(txt);
+      contentLabel.setWidth("99%");
+      addComponent(contentLabel);
+      setComponentAlignment(contentLabel,Alignment.TOP_LEFT);
+
+      makeFooterTools();
+    }
+    
+    public void setToolsVisible(boolean yn)
+    {
+      footerSpacer.setVisible(yn);
+      buttLayout.setVisible(yn); 
+    }
+       
+    private Label footerSpacer;
+    private HorizontalLayout buttLayout;
+    
+    @SuppressWarnings("serial")
+    private void makeFooterTools()
+    {
+      addComponent(footerSpacer = new Label());
+      footerSpacer.setHeight("12px");
+
+      buttLayout = new HorizontalLayout();
+      buttLayout.setMargin(false);
+      addComponent(buttLayout);
+      setComponentAlignment(buttLayout,Alignment.MIDDLE_CENTER);
+
+      Button deleteButt = new Button("delete this marker");
+      deleteButt.setStyleName(BaseTheme.BUTTON_LINK);
+      deleteButt.setWidth("110px");   // can't get vaadin to size it properly
+      buttLayout.addComponent(deleteButt);
+      
+      Label sp;
+      buttLayout.addComponent(sp = new Label());
+      sp.setWidth("10px");
+     
+      Button editButt = new Button("edit this text");
+      editButt.setStyleName(BaseTheme.BUTTON_LINK);
+      editButt.setWidth("70px");// can't get vaadin to size it properly
+      buttLayout.addComponent(editButt);
+      
+      deleteButt.addClickListener(new ClickListener()
+      {
+        @Override
+        public void buttonClick(ClickEvent event)
+        {
+          if (marker != null) {
+            
+ //todo           mMapWidget.removeMarker(marker);
+            marker = null; 
+ //todo           savePanel.saveMarkerButt.setEnabled(true);
+          }
+        }
+      });
+      editButt.addClickListener(new ClickListener()
+      {
+        @Override
+        public void buttonClick(ClickEvent event)
+        {
+//todo          showDropWindow(marker);         
+        }
+      });
+    }
+    public String getContentText()
+    {
+      return contentLabel.getValue().toString();
+    }    
+    public String getTitle()
+    {
+      return titleLabel.getValue().toString();
+    }
+    public void setContentText(String text)
+    {
+      contentLabel.setValue(text);     
+    }
+    public void setTitle(String title2)
+    {
+      titleLabel.setValue(title2);      
+    }
+  }
+  @SuppressWarnings("serial")
+  static class MapFlag extends DragAndDropWrapper
+  {
+    public static MapFlag getMapFlag(int count, String caption, String urlBase)
+    {
+      return getMapFlag(count,caption,urlBase, false);
+    }
+    public static MapFlag getMapFlag(int count, String caption, String urlBase, boolean isAlpha)
+    {
+      String url = urlBase;
+      if(count > 1) {
+        if(isAlpha)
+          url = url.replace(ALPHATAG, "A");
+        else
+          url = url.replace(NUMBERTAG, "00");
+      }
+      Resource res = new ExternalResource(url);
+      Embedded embedded = new Embedded(caption,res);
+      embedded.setWidth("27px");  // These 2 shouldn't be required, and AREN'T on my desktop machine.
+      embedded.setHeight("27px");
+      return new MapFlag(count,embedded,urlBase, isAlpha);
+    }
+    
+    public static MapFlag deriveMapFlag(String iconUrl)
+    {
+      boolean matched = false;
+      String group=null;
+      int row;
+      for(row = 0; row<flagData.length; row++) {
+        Pattern p = Pattern.compile(flagData[row][2].toString());  // reg expr = indx 2
+        Matcher m = p.matcher(iconUrl);
+        matched = m.matches();
+        if(matched) {  // got a match
+          if(m.groupCount() == 0)
+            ; //System.out.println("Whole thing matches");
+          else
+            group = m.group(1);
+          break;
+        }
+      }
+      
+      if(! matched)
+        return getMapFlag(1,null,flagData[0][1].toString()); //redblank
+            
+      int range = (Integer)flagData[row][0];
+      if(range == -1)
+        return getMapFlag(1,null,flagData[row][1].toString());
+      
+      MapFlag mf = getMapFlag(range,null,flagData[row][1].toString(),!Character.isDigit(group.charAt(0)));
+      if(group != null)
+        mf.indx = decodeGroup(group);
+      
+      return mf;
+    }
+    
+    private static int decodeGroup(String s)
+    {
+      if(Character.isDigit(s.charAt(0)))
+          return Integer.parseInt(s);
+      return Character.getNumericValue(s.charAt(0));
+    }
+    
+    Embedded embedded;
+    int count;
+    String urlBase;
+    boolean isAlpha;
+    int indx = -1;
+    private MapFlag(int count, Embedded comp, String urlBase, boolean isAlpha)
+    {
+      this(count,comp,urlBase,isAlpha,-1);
+    }
+    private MapFlag(int count, Embedded comp, String urlBase, boolean isAlpha, int idx)
+    {
+      super(comp);
+      this.setSizeUndefined();
+      this.count = count;
+      this.embedded = comp;
+      this.urlBase = urlBase;
+      this.isAlpha = isAlpha;
+      this.indx = idx;
+      
+      setDragStartMode(DragStartMode.COMPONENT);
+    }
+    public String urlFromCount(Object obj)
+    {
+      int val=0;
+      if(obj instanceof Integer)
+        val = (Integer)obj;
+      else if(obj instanceof Double)
+        val = ((Double)obj).intValue();
+      else if(obj instanceof Float)
+        val = ((Float)obj).intValue();
+      count = val;
+      
+      if(isAlpha)
+        return urlBase.replace(ALPHATAG, alphaFromCount(val));
+      else
+        return urlBase.replace(NUMBERTAG,fmtr.format(val));
+    }
+    
+    private DecimalFormat fmtr = new DecimalFormat("00");
+    
+    static char[]  charArray = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+    String alphaFromCount(int idx)
+    {
+       if(idx < 1)
+         idx = 1;
+       if(idx>26)
+         idx = 26;
+      return String.valueOf(charArray[idx-1]);
+    }
+    public MapFlag clone()
+    {
+      Embedded emb = new Embedded(null,embedded.getSource());
+      return new MapFlag(count, emb, urlBase, isAlpha);
+    }
+  }
+  public static class MapSaveButtPan extends HorizontalLayout
+  {
+    private static final long serialVersionUID = 1L;
+    public static int SAVELOC_BUTTON = 0;
+    public static int SAVEMARKER_BUTTON = 1;
+
+    Button saveLocButt, saveMarkerButt, canMarkerButt;;
+   
+    public MapSaveButtPan()
+    {
+      setSpacing(true);
+      setMargin(false);
+      Label lab;
+      addComponent(lab = new Label());
+      lab.setWidth("1px");
+      setExpandRatio(lab, 1.0f);
+      saveLocButt = new Button("Save map location");
+      addComponent(saveLocButt);
+      saveLocButt.setStyleName(Reindeer.BUTTON_SMALL);
+      saveLocButt.addStyleName("m-greenbutton");
+      saveLocButt.setEnabled(false);
+      saveLocButt.setImmediate(true);
+      saveLocButt.setDescription("Saves map dimensions so map is initially shown this way for all viewers.  Without saving, the map reverts to its startup size and zoom when you leave this page.");
+
+      saveMarkerButt = new Button("Save marker changes");
+      addComponent(saveMarkerButt);
+      saveMarkerButt.setStyleName(Reindeer.BUTTON_SMALL);
+      saveMarkerButt.addStyleName("m-greenbutton");
+      saveMarkerButt.setEnabled(false);
+      saveMarkerButt.setImmediate(true);
+      saveMarkerButt.setDescription("Save marker locations and text.  Without saving, leaving this action plan then returning will display previous marker information.");
+
+      canMarkerButt = new Button("Cancel");
+      addComponent(canMarkerButt);
+      canMarkerButt.setStyleName(Reindeer.BUTTON_SMALL);
+      canMarkerButt.addStyleName("m-greenbutton");
+      canMarkerButt.setEnabled(false);
+      canMarkerButt.setImmediate(true);
+      canMarkerButt.setDescription("Cancel pending marker and position changes");
+          
+      addComponent(lab=new Label());
+      lab.setWidth("5px");
+    }
+    
+    public void setClickHearers(ClickListener saveLocLis, ClickListener saveMarkerLis, ClickListener cancelLis)
+    {
+      saveMarkerButt.addClickListener(saveMarkerLis);
+      saveLocButt.addClickListener(saveLocLis);
+      canMarkerButt.addClickListener(cancelLis);
+    }
+    
+    public void setClickHearer(ClickListener lis)
+    {
+      setClickHearers(lis,lis,lis);
+    }
+  }
+  @SuppressWarnings("serial")
+  class MapSaveListener
+  {
+    public ClickListener mapLocListener = new ClickListener()
+    {
+      public void buttonClick(ClickEvent event)
+      {
+        ActionPlan ap = ActionPlan.get(apId);
+        mmowgliMap = ap.getMap();
+     
+        mmowgliMap.setLatLonCenter(toPoint2D(mMapWidget.wrappedMap.getCenter()));
+        mmowgliMap.setZoom((int)mMapWidget.wrappedMap.getZoom());
+        GoogleMap.update(mmowgliMap);
+        ActionPlan.update(ap);
+        User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+        GameEventLogger.logActionPlanUpdate(ap, "map changed", u.getId()); //u.getUserName());
+
+        savePanel.saveLocButt.setEnabled(false);
+        if(!savePanel.saveMarkerButt.isEnabled())
+          savePanel.canMarkerButt.setEnabled(false);
+        //messageSent = false;
+      }
+    };
+    
+    public ClickListener cancelListener = new ClickListener()
+    {
+      public void buttonClick(ClickEvent event)
+      {
+        reloadMarkers(ActionPlan.get(apId));
+
+        savePanel.saveMarkerButt.setEnabled(false);
+        savePanel.saveLocButt.setEnabled(false);
+        savePanel.canMarkerButt.setEnabled(false);
+      }     
+    };
+    
+    public ClickListener mapMarkerListener = new ClickListener()
+    {
+      public void buttonClick(ClickEvent event)
+      {
+        ActionPlan ap = ActionPlan.get(apId);
+        mmowgliMap = ap.getMap();
+        mmowgliMap.setDescription(mMapWidget.wrappedMap.getDescription());
+
+        List<MmowgliMarker> lis =mMapWidget.getMarkers();
+        
+        List<GoogleMapMarker> dbMarkerList = mmowgliMap.getMarkers();
+        for(GoogleMapMarker gmm : dbMarkerList)
+          GoogleMapMarker.delete(gmm);
+        dbMarkerList.clear();
+        
+        for(MmowgliMarker m : lis) {
+          GoogleMapMarker gmm = new GoogleMapMarker();
+          gmm.setIconAnchorXY(m.getIconAnchor());
+          gmm.setLatLon(toPoint2D(m.getPosition())); //getLatLng());
+//todo          PopupContent pop = (PopupContent)m.getInfoWindowContent()[0].getContent();
+//todo          gmm.setPopupContent(pop.getContentText());
+          gmm.setIconUrl(m.getIconUrl());
+          gmm.setTitle(m.getCaption()); //getTitle());
+          GoogleMapMarker.save(gmm);
+          dbMarkerList.add(gmm);
+        }
+        GoogleMap.update(mmowgliMap);
+        ActionPlan.update(ap);
+        User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+        GameEventLogger.logActionPlanUpdate(ap, "map marker changed", u.getId()); //u.getUserName());
+
+        savePanel.saveMarkerButt.setEnabled(false);
+        if(!savePanel.saveLocButt.isEnabled())
+          savePanel.canMarkerButt.setEnabled(false);
+      }
+    };     
+  }
+
+
+
+}
