@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  * Copyright (c) 1995-2014 held by the author(s).  All rights reserved.
+  *  
+  * Redistribution and use in source and binary forms, with or without
+  * modification, are permitted provided that the following conditions
+  * are met:
+  *  
+  *  * Redistributions of source code must retain the above copyright
+  *       notice, this list of conditions and the following disclaimer.
+  *  * Redistributions in binary form must reproduce the above copyright
+  *       notice, this list of conditions and the following disclaimer
+  *       in the documentation and/or other materials provided with the
+  *       distribution.
+  *  * Neither the names of the Naval Postgraduate School (NPS)
+  *       Modeling Virtual Environments and Simulation (MOVES) Institute
+  *       (http://www.nps.edu and http://www.MovesInstitute.org)
+  *       nor the names of its contributors may be used to endorse or
+  *       promote products derived from this software without specific
+  *       prior written permission.
+  *  
+  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+  * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+  * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+  * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  * POSSIBILITY OF SUCH DAMAGE.
+-->
+<ivysettings>
+	<settings defaultResolver="default" />
+	<resolvers>
+		<chain name="default">
+			<!-- Public Maven repository -->
+			<ibiblio name="public" m2compatible="true" />
+
+			<!-- Vaadin Add-on repository -->
+			<ibiblio name="vaadin-addons" usepoms="true" m2compatible="true" root="http://maven.vaadin.com/vaadin-addons" />
+
+			<!-- Vaadin snapshots repository -->
+			<ibiblio name="vaadin-snapshots" usepoms="true" m2compatible="true" root="https://oss.sonatype.org/content/repositories/vaadin-snapshots" />
+
+			<!-- Repository used for Vaadin modified smartsprites library -->
+			<dual name="custom-smartsprites">
+				<filesystem name="smartsprites-ivy">
+					<ivy pattern="${basedir}/ivymodule/[module]-ivy-[revision].xml" />
+				</filesystem>
+				<url name="smartsprites-artifact">
+					<artifact
+						pattern="http://dev.vaadin.com/svn/versions/6.8/build/smartsprites/lib/[artifact](-[revision]).[ext]" />
+				</url>
+			</dual>
+		</chain>
+	</resolvers>
+	<modules>
+		<!-- Vaadin patched SmartSprites -->
+		<module organisation="com.carrotsearch" name="smartsprites" revision="0.2.3-itmill" resolver="custom-smartsprites" />
+	</modules>
+
+
+</ivysettings>
