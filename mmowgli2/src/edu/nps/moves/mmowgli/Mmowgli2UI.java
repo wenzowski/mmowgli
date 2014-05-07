@@ -331,7 +331,8 @@ abstract public class Mmowgli2UI extends UI
 
   public void gameEvent_oob(SingleSessionManager sessMgr, char typ, String message)
   {
-     outerFr.gameEvent_oob(sessMgr, typ, message);    
+	if(outerFr != null)  // might not be ready yet
+      outerFr.gameEvent_oob(sessMgr, typ, message);    
   }
   
   public String getUUID()
