@@ -1708,6 +1708,21 @@ div div .m-useradmin-search-combo .v-filterselect-button {
 	color: black;
 	background-color: yellow;
 }
+.v-Notification.m-yellow-notification {
+  color: black;
+  background-color: yellow;
+  border: 2px solid black;
+  width: 400px;
+}
+.v-Notification.m-green-notification {
+  color: white;
+  background-color: green;
+  border: 2px solid white;
+  width: 400px;
+}
+.v-Notification.m-default-notification {
+  width: 400px;
+}
 
 /* CARDS */
 /* Duplicate in mobile style file */
