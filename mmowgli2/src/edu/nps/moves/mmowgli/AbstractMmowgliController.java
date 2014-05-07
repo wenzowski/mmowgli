@@ -1,33 +1,81 @@
 package edu.nps.moves.mmowgli;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import static edu.nps.moves.mmowgli.MmowgliConstants.GAMEEVENT;
+import static edu.nps.moves.mmowgli.MmowgliConstants.INSTANCEREPORTCOMMAND;
+import static edu.nps.moves.mmowgli.MmowgliConstants.NEW_ACTIONPLAN;
+import static edu.nps.moves.mmowgli.MmowgliConstants.NEW_CARD;
+import static edu.nps.moves.mmowgli.MmowgliConstants.NEW_MESSAGE;
+import static edu.nps.moves.mmowgli.MmowgliConstants.NEW_USER;
+import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
+import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_ACTIONPLAN;
+import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_CARD;
+import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_CARDTYPE;
+import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_CHAT;
+import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_GAME;
+import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_MEDIA;
+import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_USER;
+import static edu.nps.moves.mmowgli.MmowgliConstants.USER_LOGON;
+import static edu.nps.moves.mmowgli.MmowgliConstants.USER_LOGOUT;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.UUID;
 
-import com.vaadin.navigator.*;
+import com.vaadin.navigator.Navigator;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewProvider;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.MenuBar;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
-import edu.nps.moves.mmowgli.components.*;
-import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.export.*;
-import edu.nps.moves.mmowgli.hibernate.*;
-import edu.nps.moves.mmowgli.messaging.*;
-import edu.nps.moves.mmowgli.messaging.InterTomcatIO.Receiver;
+import edu.nps.moves.mmowgli.components.Leaderboard;
+import edu.nps.moves.mmowgli.components.LeafletMap;
+import edu.nps.moves.mmowgli.components.SignupsTable;
+import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.GameEvent;
+import edu.nps.moves.mmowgli.db.GameLinks;
+import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.export.ActionPlanExporter;
+import edu.nps.moves.mmowgli.export.CardExporter;
+import edu.nps.moves.mmowgli.export.GameExporter;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.messaging.Broadcaster;
+import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.messaging.MessagingManager.MessageListener;
-import edu.nps.moves.mmowgli.modules.actionplans.*;
+import edu.nps.moves.mmowgli.modules.actionplans.ActionDashboard;
+import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2;
+import edu.nps.moves.mmowgli.modules.actionplans.HowToWinActionPopup;
 import edu.nps.moves.mmowgli.modules.administration.GameDesignPanel;
 import edu.nps.moves.mmowgli.modules.administration.VipListManager;
-import edu.nps.moves.mmowgli.modules.cards.*;
-import edu.nps.moves.mmowgli.modules.gamemaster.*;
+import edu.nps.moves.mmowgli.modules.cards.CallToActionPage;
+import edu.nps.moves.mmowgli.modules.cards.CardChainPage;
+import edu.nps.moves.mmowgli.modules.cards.CardChainTreeTablePopup;
+import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
+import edu.nps.moves.mmowgli.modules.cards.HowToPlayCardsPopup;
+import edu.nps.moves.mmowgli.modules.cards.IdeaDashboard;
+import edu.nps.moves.mmowgli.modules.cards.PlayAnIdeaPage2;
+import edu.nps.moves.mmowgli.modules.gamemaster.AddAuthorEventHandler;
+import edu.nps.moves.mmowgli.modules.gamemaster.EventMonitorPanel;
+import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
+import edu.nps.moves.mmowgli.modules.gamemaster.UserAdminPanel;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
 import edu.nps.moves.mmowgli.modules.userprofile.UserProfilePage3;
-import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
+import edu.nps.moves.mmowgli.utility.IDButtonIF;
+import edu.nps.moves.mmowgli.utility.M;
 /**
  * AbstractMmowgliController.java
  * Created on Mar 6, 2014
@@ -323,9 +371,13 @@ public abstract class AbstractMmowgliController implements MmowgliController, Me
         break;
         
       case MAPCLICK:
-        OpenLayersMap olMap = new OpenLayersMap();
+        /*OpenLayersMap olMap = new OpenLayersMap();
         Mmowgli2UI.getAppUI().setFrameContent(olMap);
-        olMap.initGui();
+        olMap.initGui();*/
+        LeafletMap lMap = new LeafletMap();
+        Mmowgli2UI.getAppUI().setFrameContent(lMap);
+        lMap.initGui();
+
    
       case PLAYIDEACLICK:
       case CALLTOACTIONCLICK:
@@ -614,7 +666,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, Me
           myView = new CardChainPage(Long.parseLong(param.toString()));
           break;
         case MAPCLICK:
-          myView = new OpenLayersMap();
+          myView = new LeafletMap();//new OpenLayersMap();
           break;
         case LEADERBOARDCLICK:
           myView = new Leaderboard();
