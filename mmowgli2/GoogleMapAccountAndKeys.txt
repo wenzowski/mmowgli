@@ -1,0 +1,15 @@
+google map api project browser keys
+maritime: AIzaSyBeWoPydbJRnvH0D8DnCCeLDP1VVPURKh0
+chds:     AIzaSyC3UjtJ4aWcfSQDFn0L6EvJ-9oyqD46yeY
+
+account name: mmowgli.mapping
+account pw:   fuzzywalrus
+(fictional "person": m.mmowgli)
+
+http://console.developers.google.com
+
+For every game (at above site):
+1. Make project
+2. Enable Google Maps Embed api
+3. Enable Static Maps api
+4. Get authorization "browser key" (allow all access...can't get .nps.edu/* to work)

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Mmowgli" default="allWars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+
+	<macrodef name="deployOne">
+		<attribute name="outfile"/>
+		<attribute name="webxml"/>
+		<sequential>
+			<delete file="dist/@{outfile}"/>
+			<war destfile="dist/@{outfile}" webxml="WebContent/WEB-INF/@{webxml}">
+				<classes dir="build/classes"/>
+				<lib dir="build/ivylibs"/>
+				<fileset dir="WebContent" includes="VAADIN/**"/>
+			</war>
+		</sequential>
+	</macrodef>
+
+	<target name="zipVaadinDir" depends="expandVaadinJars">
+		<delete file="dist/VAADIN.ZIP"/>
+		<zip destfile="dist/VAADIN.ZIP" basedir="WebContent/VAADIN"/>
+	</target>
+
+	<target name="fetchlibs" description="put ivy dependencies in place">
+		<ivy:retrieve conf="default" pattern="build/ivylibs/[artifact](-[classifier]).[ext]"/>
+	</target>
+
+	<!-- This is new in V7, some of this had been done previously by hand -->
+	<target name="expandVaadinJars">
+	  <unzip dest="WebContent">
+		<patternset>
+		  <include name="VAADIN/**" />
+		</patternset>
+		<fileset dir="build/ivylibs">
+		  <include name="vaadin-server.jar" />
+		  <include name="vaadin-themes.jar" />
+		  <include name="vaadin-client-compiled.jar" />
+		</fileset>
+	  </unzip>
+      <delete dir="WebContent/VAADIN/themes/chameleon"/>
+	  <delete dir="WebContent/VAADIN/themes/liferay"/>
+	  <delete dir="WebContent/VAADIN/themes/reindeer-tests"/>
+	  <delete dir="WebContent/VAADIN/themes/runo"/>
+	  <delete dir="WebContent/VAADIN/themes/tests-book"/>
+	  <delete dir="WebContent/VAADIN/themes/tests-calendar"/>
+	  <delete dir="WebContent/VAADIN/themes/tests-components"/>
+	  <delete dir="WebContent/VAADIN/themes/tests-tickets"/>
+	</target>
+	
+	<target name="confirmClean">
+		<input message="Suggest Project->Clean then rebuild first. OK or return to continue..." />
+	</target>
+	<target name="am.war"           depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="am.war"           webxml="am_web.xml"                     />
+	</target>
+	<target name="armyscitechfutures.war"
+	                                depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="armyscitechfutures.war"
+	                                	      webxml="armyscitechfutures_web.xml"     />
+	</target>
+	<target name="bii.war"          depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="bii.war"          webxml="bii_web.xml"                    />
+	</target>
+	<target name="cap2con.war"      depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="cap2con.war"      webxml="cap2con_web.xml"                />
+	</target>
+	<target name="darkportal.war"   depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="darkportal.war"   webxml="darkportal_web.xml"             />
+	</target>
+	<target name="em2.war"          depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="em2.war"          webxml="em2_web.xml"                    />
+	</target>
+	<target name="energy.war"       depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="energy.war"       webxml="energy_web.xml"                 />
+	</target>
+	<target name="evtp.war"         depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="evtp.war"         webxml="evtp_web.xml"                   />
+	</target>
+	<target name="hamming.war"      depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="hamming.war"      webxml="hamming_web.xml"                />
+	</target>
+	<target name="ig.war"           depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="ig.war"           webxml="ig_web.xml"                     />
+	</target>
+	<target name="piracy.war"       depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="piracy.war"       webxml="piracy_web.xml"                 />
+	</target>
+	<target name="training.war"     depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="training.war"     webxml="training_web.xml"               />
+	</target>
+	<target name="uxvdm.war"        depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="uxvdm.war"        webxml="uxvdm_web.xml"                  />
+	</target>
+	<!--
+	<target name="localOneHost.war" depends="confirmClean,zipVaadinDir"> <deployOne outFile="localOneHost.war" webxml="localonehost_web.xml"           /></target>
+	-->
+	<target name="piracy2011_1.war" depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="piracy2011_1.war" webxml="2011_1_initial_archived_web.xml"/>
+	</target>
+	<target name="piracy2011_2.war" depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="piracy2011_2.war" webxml="2011_2_alfa_archived_web.xml"   />
+	</target>
+	<target name="piracy2011_3.war" depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="piracy2011_3.war" webxml="2011_3_bravo_archived_web.xml"  />
+	</target>
+
+	<target name="amTest.war"         depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="amTest.war"         webxml="test_am_web.xml"            />
+	</target>
+	<target name="biiTest.war"        depends="confirmClean,zipVaadinDir,fetchlibs">
+		<deployOne outFile="biiTest.war"        webxml="test_bii_web.xml"           />
+	</target>
+	<target name="darkportalTest.war" depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="darkportalTest.war" webxml="test_darkportal_web.xml"    />
+	</target>
+	<target name="dangTest.war"       depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="dangTest.war"       webxml="test_dang_web.xml"          />
+	</target>
+	<target name="em2Test.war"        depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="em2Test.war"        webxml="test_em2_web.xml"           />
+	</target>
+	<target name="energyTest.war"     depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="energyTest.war"     webxml="test_energy_web.xml"        />
+	</target>
+	<target name="evtpTest.war"       depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="evtpTest.war"       webxml="test_evtp_web.xml"          />
+	</target>
+	<target name="igTest.war"         depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="igTest.war"         webxml="test_ig_web.xml"            />
+	</target>
+	<target name="piracyTest.war"     depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="piracyTest.war"     webxml="test_piracy_web.xml"        />
+	</target>
+	<target name="uxvdmTest.war"      depends="confirmClean,zipVaadinDir">
+		<deployOne outFile="uxvdmTest.war"      webxml="test_uxvdm_web.xml"         />
+	</target>
+
+
+	<target name="allWars" depends=	
+	   "am.war,
+		armyscitechfutures.war,
+		bii.war,
+		cap2con.war,
+		darkportal.war,
+		em2.war,
+		energy.war,
+		evtp.war,
+		hamming.war,
+		ig.war,
+		piracy.war,
+		piracy2011_1.war,
+		piracy2011_2.war,
+		piracy2011_3.war,
+		training.war,
+		uxvdm.war,		
+		amTest.war,
+		biiTest.war,
+		darkportalTest.war,
+		dangTest.war,
+		em2Test.war,
+		energyTest.war,
+		evtpTest.war,
+		igTest.war,
+		piracyTest.war,
+        uxvdmTest.war"/>
+
+</project>
