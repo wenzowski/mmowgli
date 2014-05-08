@@ -68,7 +68,7 @@ public abstract class ActionPlanPageTabPanel extends HorizontalLayout implements
   {
     this.apId = apId;
     this.isMockup = isMockup;
-    
+
     setSpacing(true);
     setMargin(false);
     

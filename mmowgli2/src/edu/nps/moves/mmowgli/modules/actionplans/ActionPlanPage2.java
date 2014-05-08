@@ -33,17 +33,32 @@
  */
 package edu.nps.moves.mmowgli.modules.actionplans;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
-import static edu.nps.moves.mmowgli.MmowgliEvent.*;
+import static edu.nps.moves.mmowgli.MmowgliConstants.ACTIONPLAN_TAB_IMAGES;
+import static edu.nps.moves.mmowgli.MmowgliConstants.ACTIONPLAN_TAB_MAP;
+import static edu.nps.moves.mmowgli.MmowgliConstants.ACTIONPLAN_TAB_THEPLAN;
+import static edu.nps.moves.mmowgli.MmowgliConstants.ACTIONPLAN_TAB_VIDEO;
+import static edu.nps.moves.mmowgli.MmowgliEvent.ACTIONPLANSHOWCLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.CARDCHAINPOPUPCLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.RFECLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.SHOWUSERPROFILECLICK;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 
-import com.vaadin.data.*;
+import com.vaadin.data.Container;
+import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.IndexedContainer;
@@ -54,24 +69,57 @@ import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.Position;
-import com.vaadin.ui.*;
+import com.vaadin.ui.AbsoluteLayout;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Embedded;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.ListSelect;
+import com.vaadin.ui.NativeButton;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.Reindeer;
 
-import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.AppEvent;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
-import edu.nps.moves.mmowgli.components.*;
-import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
-import edu.nps.moves.mmowgli.messaging.*;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
+import edu.nps.moves.mmowgli.components.MmowgliComponent;
+import edu.nps.moves.mmowgli.components.ToggleLinkButton;
+import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.ChatLog;
+import edu.nps.moves.mmowgli.db.Edits;
+import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.MSessionManager;
+import edu.nps.moves.mmowgli.hibernate.Sess;
+import edu.nps.moves.mmowgli.hibernate.SessionManager;
+import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.messaging.WantsActionPlanEdits;
+import edu.nps.moves.mmowgli.messaging.WantsActionPlanTimeouts;
+import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
+import edu.nps.moves.mmowgli.messaging.WantsChatLogUpdates;
+import edu.nps.moves.mmowgli.messaging.WantsMediaUpdates;
 import edu.nps.moves.mmowgli.modules.gamemaster.CreateActionPlanPanel;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
-import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.HistoryDialog;
 import edu.nps.moves.mmowgli.utility.HistoryDialog.DoneListener;
+import edu.nps.moves.mmowgli.utility.IDNativeButton;
+import edu.nps.moves.mmowgli.utility.M;
+import edu.nps.moves.mmowgli.utility.MediaLocator;
+import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
 
 /**
  * ActionPlanPage.java Created on Feb 8, 2011
@@ -112,7 +160,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
   ActionPlanPageTabImages imagesTab;
   ActionPlanPageTabVideos videosTab;
-//  ActionPlanPageTabMap mapTab;
+  ActionPlanPageTabMap mapTab;
   ActionPlanPageTabTalk talkTab;
   ActionPlanPageTabThePlan2 thePlanTab;
   NativeButton thePlanTabButt, talkTabButt, imagesTabButt, videosTabButt, mapTabButt;
@@ -175,7 +223,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     talkTab = new ActionPlanPageTabTalk(actPlnId, isMockup);
     imagesTab = new ActionPlanPageTabImages(actPlnId, isMockup);
     videosTab = new ActionPlanPageTabVideos(actPlnId, isMockup);
-    //mapTab = new ActionPlanPageTabMap(actPlnId, isMockup);
+    mapTab = new ActionPlanPageTabMap(actPlnId, isMockup);
     mapLab = new Label("Hi mom");
     thePlanTabButt = new NativeButton();
     talkTabButt = new NativeButton();
@@ -279,7 +327,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     mainVL.setMargin(false);
 
     VerticalLayout mainVLayout = new VerticalLayout();
-mainVLayout.addStyleName("m-greenborder");
+
     mainVLayout.setSpacing(false);
     mainVLayout.setMargin(false);
     mainVLayout.addStyleName("m-actionplan-background2");
@@ -528,6 +576,7 @@ mainVLayout.addStyleName("m-greenborder");
 
     // stack the pages
     HorizontalLayout hsp = new HorizontalLayout();
+    hsp.setHeight("742px"); // allows for differing ghost box heights
     mainVLayout.addComponent(hsp);
 
     hsp.addComponent(sp = new Label());
@@ -547,17 +596,13 @@ mainVLayout.addStyleName("m-greenborder");
     hsp.addComponent(videosTab);
     videosTab.initGui();
     videosTab.setVisible(false);
-
-    Label lab;
-    hsp.addComponent(mapLab);
-    mapLab.setVisible(false);
-    /*
+    
     hsp.addComponent(mapTab);
     mapTab.initGui();
     mapTab.setVisible(false);
-    */
+    
     mainVLayout.addComponent(sp = new Label());
-    sp.setHeight("140px");
+    sp.setHeight("90px");
     HorizontalLayout buttLay = new HorizontalLayout();
     buttLay.addStyleName("m-marginleft-60");
     mainVLayout.addComponent(buttLay);
@@ -1100,10 +1145,8 @@ mainVLayout.addStyleName("m-greenborder");
       }
       else if (b == mapTabButt) {
         mapTabButt.removeStyleName("m-transparent-background");
-        //currentTabPanel = mapTab;
-        //mapTab.setVisible(true);
-        currentTabPanel = null;
-        mapLab.setVisible(true);
+        currentTabPanel = mapTab;
+        mapTab.setVisible(true);
       }
     }
   }
@@ -1381,7 +1424,7 @@ mainVLayout.addStyleName("m-greenborder");
 
       imagesTab.actionPlanUpdatedOob(sessMgr, apId);
       videosTab.actionPlanUpdatedOob(sessMgr, apId);
-  //    mapTab.actionPlanUpdatedOob(sessMgr, apId);
+      mapTab.actionPlanUpdatedOob(sessMgr, apId);
       talkTab.actionPlanUpdatedOob(sessMgr, apId);
       thePlanTab.actionPlanUpdatedOob(sessMgr, apId);
 
@@ -1456,7 +1499,7 @@ mainVLayout.addStyleName("m-greenborder");
 
     imagesTab.setImAuthor(au && !ro); // todo, separate into author, gm and ro
     videosTab.setImAuthor(au && !ro);
-  //  mapTab.setImAuthor(au && !ro);
+    mapTab.setImAuthor(au && !ro);
 
     titleUnion.setRo(!au || ro); // titleTA.setReadOnly (!au || ro);
     titleHistoryButt.setVisible(au && !ro);
