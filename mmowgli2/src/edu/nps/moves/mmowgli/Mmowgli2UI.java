@@ -219,10 +219,9 @@ abstract public class Mmowgli2UI extends UI
     layout.addStyleName("m-background");
     layout.setMargin(false);
     // This is the layout that fills the browser window
+    // layout spans browser window and tracks its resize
     // the outerframe below is centered
-    layout.setWidth("100%"); //layout.setSizeUndefined(); //setSizeFull();
-
-    layout.addStyleName("m-greenborder");
+    layout.setWidth("100%");
     
     outerFr = new MmowgliOuterFrame();  // contains header and footer
     layout.addComponent(outerFr);
