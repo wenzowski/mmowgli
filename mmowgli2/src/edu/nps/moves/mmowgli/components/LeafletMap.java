@@ -36,6 +36,7 @@ package edu.nps.moves.mmowgli.components;
 import org.vaadin.addon.leaflet.LMap;
 import org.vaadin.addon.leaflet.LOpenStreetMapLayer;
 import org.vaadin.addon.leaflet.LTileLayer;
+import edu.nps.moves.mmowgli.components.LeafletLayers.LayerKey;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -43,6 +44,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
+import edu.nps.moves.mmowgli.components.LeafletLayers.LeafletProvider;
 import edu.nps.moves.mmowgli.db.Game;
 
 /**
@@ -68,6 +70,10 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
   public static String DEF_TITLE_FIRST_PART = "<b style=\"color:#4F4F4F;font-family:'Arial';font-size:2.0em;line-height:150%;margin-left:20px;\">";
   public static String DEF_TITLE_LAST_PART  = "</b>";
  
+  private LTileLayer esriWorldPhysicalTiles = new LTileLayer("http://server.arcgisonline.com/arcgis/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}");
+ 
+  // Find providers at http://leaflet-extras.github.io/leaflet-providers/preview/index.html
+  
   public LeafletMap()
   {
     this(DEF_TITLE_FIRST_PART +Game.get().getMapTitle()+DEF_TITLE_LAST_PART);
@@ -94,16 +100,39 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
     map.addStyleName("m-greyborder");
     map.removeAllComponents();
     
-   // map.addBaseLayer(osmTiles,  "OSM");
+   // esriWorldPhysicalTiles.setAttributionString("Tiles &copy; Esri &mdash; Source: US National Park Service");
+   // map.addBaseLayer(esriWorldPhysicalTiles,"ESRI world physical");
+
+    installLayer(LayerKey.ESRI_WORLDPHYSICAL, map);
+    installLayer(LayerKey.ESRI_NATGEOWORLDMAP, map);
+    installLayer(LayerKey.OPENWEATHERMAP_CLOUDS, map);
+    installLayer(LayerKey.OPENWEATHERMAP_RAINCLASSIC, map);
+    installLayer(LayerKey.OPENWEATHERMAP_TEMPERATURE, map);
+    installLayer(LayerKey.MAPQUESTOPEN_AERIAL, map);
+    installLayer(LayerKey.STAMEN_TONERLITE, map);
+
     map.addBaseLayer(new LOpenStreetMapLayer(), "CloudMade");
-    map.setCenter(36.610902,-121.8674989);
-    map.setZoomLevel(13);
+    
+    Game g = Game.get();    
+    map.setCenter(g.getMapLatitude(),g.getMapLongitude());
+    map.setZoomLevel(g.getMapZoom());
     
     addComponent(map);
 
     setExpandRatio(map, 1);
     map.setHeight("600px");
     map.setWidth("950px");
+  }
+  
+  private LeafletProvider installLayer(LayerKey key, LMap map)
+  {
+    try {
+      return LeafletLayers.installProvider(key, map);
+    }
+    catch (Exception ex) {
+      System.err.println("Error installing leaflet layer "+key.toString());
+      return null;
+    }   
   }
   
   @Override 

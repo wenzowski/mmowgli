@@ -81,7 +81,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     setSizeUndefined();
     setWidth(APPLICATION_SCREEN_WIDTH);
     setSpacing(false);
-    addStyleName("m-greenborder");
+
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     Label sp;
     

@@ -81,6 +81,9 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
     setResizable(false);
     setStyleName("m-mmowglidialog");
     addStyleName("m-transparent");   // don't know why I need this, .mmowglidialog sets it too
+    // The following makes the scroll bars go away on vaadin 7
+    setWidth("625px");
+    setHeight("400px");
   }
 
   @Override
