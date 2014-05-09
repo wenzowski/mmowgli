@@ -101,7 +101,7 @@ div .m-textarea-greyborder, .m-greyborder {
     background-color: transparent;
     background-image:url('#{$imageRepo}/nauticalBackground.jpg');
     background-repeat:repeat; /*no-repeat;*/
-    background-attachment:scroll;
+    background-attachment:fixed;
     background-position:top center;
   }
   .m-background-red {
@@ -744,7 +744,7 @@ div .m-textarea-greyborder, .m-greyborder {
 
 .m-dialog-header {
     background: transparent no-repeat;
-    background-image:url('#{$imageRepo}/lightboxDialogHeaderBckgrnd.png');	
+    background-image:url('#{$imageRepo}/lightboxDialogHeaderBckgrnd.png');
 }
 .m-transparent .popupContent .v-window-wrap .v-window-wrap2 .v-window-contents {
 	background-color: transparent;
