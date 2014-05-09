@@ -86,7 +86,10 @@ public class Game implements Serializable
     Media        headerBranding;
     
     String       mapTitle;
-
+    double       mapLatitude;
+    double       mapLongitude;
+    int          mapZoom;
+    
     String       backgroundImageLink;
     String       headerBannerImage;
     String       playIdeaButtonImage;
@@ -993,6 +996,38 @@ public String getGameHandle()
 public void setGameHandle(String s)
 {
   gameHandle = s;
+}
+
+@Basic
+public double getMapLatitude()
+{
+  return mapLatitude;
+}
+
+public void setMapLatitude(double mapLatitude)
+{
+  this.mapLatitude = mapLatitude;
+}
+
+@Basic
+public double getMapLongitude()
+{
+  return mapLongitude;
+}
+
+public void setMapLongitude(double mapLongitude)
+{
+  this.mapLongitude = mapLongitude;
+}
+
+@Basic
+public int getMapZoom()
+{
+  return mapZoom;
+}
+
+public void setMapZoom(int mapZoom) {
+	this.mapZoom = mapZoom;
 }
 
 }
