@@ -45,7 +45,7 @@ package edu.nps.moves.mmowgli;
 public class MmowgliConstants
 {
   // Database version matching this code
-  public static long DATABASE_VERSION = 20131206; // db which matches this code
+  public static long DATABASE_VERSION = 20140509; // db which matches this code
 
   public static long DATABASE_VERSION_BEFORE_EMAILPII_DIGESTS = 20130626;
   public static long DATABASE_VERSION_AFTER_EMAILPII_DIGESTS = 20130627;
