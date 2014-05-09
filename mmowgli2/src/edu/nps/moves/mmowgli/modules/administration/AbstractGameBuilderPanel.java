@@ -479,7 +479,8 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
           AbstractTextField atf = (AbstractTextField)eLine.ta;
           boolean origRo = atf.isReadOnly();
           atf.setReadOnly(false);
-          atf.setValue(getter.invoke(dbObj, (Object[]) null).toString());
+          Object val = getter.invoke(dbObj, (Object[])null);
+          atf.setValue(val==null?"":val.toString());
           atf.setReadOnly(origRo);
         }
         else if (eLine.ta instanceof CheckBox) {
@@ -488,13 +489,15 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
           Object dbObj = eLine.getter.invoke(null, new Object[] { eLine.objId });
           boolean origRo = cb.isReadOnly();
           cb.setReadOnly(false);
-          ((CheckBox) eLine.ta).setValue((Boolean)getter.invoke(dbObj, (Object[]) null));
+          Object val = getter.invoke(dbObj, (Object[]) null);
+          ((CheckBox) eLine.ta).setValue(val==null?Boolean.FALSE:(Boolean)val);
           cb.setReadOnly(origRo);
         }
       }
       catch (Exception exc) {
         System.err.println("Programming error in AbstractGameBuilderPanel.populateEditLine: " + exc.getClass().getSimpleName() + ": "
             + exc.getLocalizedMessage());
+        exc.printStackTrace();
       }
     }
   }
