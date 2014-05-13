@@ -31,12 +31,9 @@
 * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
-package edu.nps.moves.mmowgli.components;
+package edu.nps.moves.mmowgli.modules.maps;
 
 import org.vaadin.addon.leaflet.LMap;
-import org.vaadin.addon.leaflet.LOpenStreetMapLayer;
-import org.vaadin.addon.leaflet.LTileLayer;
-import edu.nps.moves.mmowgli.components.LeafletLayers.LayerKey;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -44,7 +41,8 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
-import edu.nps.moves.mmowgli.components.LeafletLayers.LeafletProvider;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
+import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.Game;
 
 /**
@@ -64,13 +62,9 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
   private static final long serialVersionUID = 6277983933298162890L;
   private String title;
   private LMap map= new LMap();
- // private LTileLayer osmTiles = new LTileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
-  private LTileLayer mapBoxTiles = new LTileLayer();
-  private LTileLayer mapQstTiles = new LTileLayer();
+
   public static String DEF_TITLE_FIRST_PART = "<b style=\"color:#4F4F4F;font-family:'Arial';font-size:2.0em;line-height:150%;margin-left:20px;\">";
   public static String DEF_TITLE_LAST_PART  = "</b>";
- 
-  private LTileLayer esriWorldPhysicalTiles = new LTileLayer("http://server.arcgisonline.com/arcgis/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}");
  
   // Find providers at http://leaflet-extras.github.io/leaflet-providers/preview/index.html
   
@@ -99,19 +93,8 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
     map.setAttributionPrefix("Powered by Leaflet with v-leaflet");
     map.addStyleName("m-greyborder");
     map.removeAllComponents();
-    
-   // esriWorldPhysicalTiles.setAttributionString("Tiles &copy; Esri &mdash; Source: US National Park Service");
-   // map.addBaseLayer(esriWorldPhysicalTiles,"ESRI world physical");
-
-    installLayer(LayerKey.ESRI_WORLDPHYSICAL, map);
-    installLayer(LayerKey.ESRI_NATGEOWORLDMAP, map);
-    installLayer(LayerKey.OPENWEATHERMAP_CLOUDS, map);
-    installLayer(LayerKey.OPENWEATHERMAP_RAINCLASSIC, map);
-    installLayer(LayerKey.OPENWEATHERMAP_TEMPERATURE, map);
-    installLayer(LayerKey.MAPQUESTOPEN_AERIAL, map);
-    installLayer(LayerKey.STAMEN_TONERLITE, map);
-
-    map.addBaseLayer(new LOpenStreetMapLayer(), "CloudMade");
+     
+    installAllLayers(map);
     
     Game g = Game.get();    
     map.setCenter(g.getMapLatitude(),g.getMapLongitude());
@@ -123,8 +106,8 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
     map.setHeight("600px");
     map.setWidth("950px");
   }
-  
-  private LeafletProvider installLayer(LayerKey key, LMap map)
+/*
+  private LeafletProvider installLayer(String key, LMap map)
   {
     try {
       return LeafletLayers.installProvider(key, map);
@@ -134,7 +117,17 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
       return null;
     }   
   }
-  
+*/
+  private void installAllLayers(LMap map)
+  {
+    try {
+      LeafletLayers.installAllProviders(map);
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      System.err.println("Error installing all leaflet layers / "+ex.getLocalizedMessage());
+    }   
+  }
   @Override 
   public void enter(ViewChangeEvent event)
   {
