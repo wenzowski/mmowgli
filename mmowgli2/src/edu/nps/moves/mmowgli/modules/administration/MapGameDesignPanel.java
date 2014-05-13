@@ -37,15 +37,20 @@ import java.io.Serializable;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Embedded;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextArea;
 
-import edu.nps.moves.mmowgli.*;
-import edu.nps.moves.mmowgli.components.MmowgliMap;
-import edu.nps.moves.mmowgli.components.MmowgliMap.MapParms;
+import edu.nps.moves.mmowgli.AppEvent;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliEvent;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.GameLinks;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
+import edu.nps.moves.mmowgli.modules.maps.MmowgliMap;
+import edu.nps.moves.mmowgli.modules.maps.MmowgliMap.MapParms;
 
 /**
  * HeaderFooterGameDesignPanel.java
