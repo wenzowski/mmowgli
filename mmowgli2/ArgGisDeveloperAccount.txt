@@ -1,0 +1,8 @@
+ArcGIS developer account (for leaflet layers)
+Joseph Bailey
+jmbailey@nps.edu
+
+user name: mmowgli
+pw: gwtservelet
+
+http://mmowgli.maps.arcgis.com
