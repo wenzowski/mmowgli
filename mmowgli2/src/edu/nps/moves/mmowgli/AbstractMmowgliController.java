@@ -38,7 +38,6 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
 import edu.nps.moves.mmowgli.components.Leaderboard;
-import edu.nps.moves.mmowgli.components.LeafletMap;
 import edu.nps.moves.mmowgli.components.SignupsTable;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.Card;
@@ -71,6 +70,7 @@ import edu.nps.moves.mmowgli.modules.gamemaster.AddAuthorEventHandler;
 import edu.nps.moves.mmowgli.modules.gamemaster.EventMonitorPanel;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.modules.gamemaster.UserAdminPanel;
+import edu.nps.moves.mmowgli.modules.maps.LeafletMap;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
 import edu.nps.moves.mmowgli.modules.userprofile.UserProfilePage3;
 import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
