@@ -31,15 +31,21 @@
 * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
-package edu.nps.moves.mmowgli.components;
+package edu.nps.moves.mmowgli.modules.maps;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.JavaScript;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.VerticalLayout;
 
+import edu.nps.moves.mmowgli.components.HtmlLabel;
+import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.Game;
 
 /**
