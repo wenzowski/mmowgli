@@ -33,23 +33,34 @@
  */
 package edu.nps.moves.mmowgli.export;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.hibernate.Session;
-import org.w3c.dom.*;
+import org.w3c.dom.Comment;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Notification;
 
 import edu.nps.moves.mmowgli.AppMaster;
-import edu.nps.moves.mmowgli.components.MmowgliMap;
-import edu.nps.moves.mmowgli.components.MmowgliMap.MapParms;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.GameLinks;
+import edu.nps.moves.mmowgli.db.Media;
+import edu.nps.moves.mmowgli.db.Move;
+import edu.nps.moves.mmowgli.db.MovePhase;
 import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.modules.maps.MmowgliMap;
+import edu.nps.moves.mmowgli.modules.maps.MmowgliMap.MapParms;
 import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
 
 /**
