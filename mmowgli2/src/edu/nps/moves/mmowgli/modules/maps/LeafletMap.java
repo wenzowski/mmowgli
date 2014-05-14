@@ -34,6 +34,7 @@
 package edu.nps.moves.mmowgli.modules.maps;
 
 import org.vaadin.addon.leaflet.LMap;
+import org.vaadin.addon.leaflet.control.LScale;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -93,7 +94,7 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
     map.setAttributionPrefix("Powered by Leaflet with v-leaflet");
     map.addStyleName("m-greyborder");
     map.removeAllComponents();
-     
+    map.addControl(new LScale());
     installAllLayers(map);
     
     Game g = Game.get();    
