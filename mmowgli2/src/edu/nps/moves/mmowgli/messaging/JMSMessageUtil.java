@@ -59,20 +59,15 @@ public class JMSMessageUtil
   private JMSMessageUtil()
   {}
   
-  public static Message create(Session sess, char typ, String text, String sourceUiId, String sourceTomcatId) throws JMSException
-  {
-    return create(sess, typ, text, sourceUiId, sourceTomcatId, UUID.randomUUID());
-  }
-  
-  public static Message create(Session sess, char typ, String text, String sourceUiId, String sourceTomcatId, UUID uuid) throws JMSException
+  public static Message create(Session sess, char typ, String text, String sourceUiId, String sourceTomcatId, String msg_uuid) throws JMSException
   {
     TextMessage msg = sess.createTextMessage("mmowgli event update");
     char[] mtyp = { typ };
     msg.setStringProperty(JMS_MESSAGE_TYPE, new String(mtyp));
     msg.setStringProperty(JMS_MESSAGE_TEXT, text);
-    msg.setStringProperty(JMS_MESSAGE_SOURCE_UI_ID, sourceUiId);
+    msg.setStringProperty(JMS_MESSAGE_SOURCE_SESSION_ID, sourceUiId);
     msg.setStringProperty(JMS_MESSAGE_SOURCE_TOMCAT_ID, sourceTomcatId);
-    msg.setStringProperty(JMS_MESSAGE_UUID, uuid.toString());
+    msg.setStringProperty(JMS_MESSAGE_UUID, msg_uuid);
     return msg;
   }
   
@@ -89,10 +84,10 @@ public class JMSMessageUtil
   {
     char type = message.getStringProperty(JMS_MESSAGE_TYPE).charAt(0);
     String text = message.getStringProperty(JMS_MESSAGE_TEXT);
-    String sourceUiId = message.getStringProperty(JMS_MESSAGE_SOURCE_UI_ID);
+    String sourceSessionId = message.getStringProperty(JMS_MESSAGE_SOURCE_SESSION_ID);
     String sourceTomcatId = message.getStringProperty(JMS_MESSAGE_SOURCE_TOMCAT_ID);
-    //String uuid = message.getStringProperty(JMS_MESSAGE_UUID);
-    MMessagePacket mpkt = new MMessagePacket(type,text,sourceUiId,sourceTomcatId);
+    String msg_uuid = message.getStringProperty(JMS_MESSAGE_UUID);
+    MMessagePacket mpkt = new MMessagePacket(type,text,msg_uuid, sourceSessionId,sourceTomcatId);
     return mpkt;
   }
   public static JMSPacket xdecode(Message message) throws JMSException
@@ -101,9 +96,12 @@ public class JMSMessageUtil
     
     pkt.type = message.getStringProperty(JMS_MESSAGE_TYPE).charAt(0);
     pkt.text = message.getStringProperty(JMS_MESSAGE_TEXT);
-    pkt.sourceUiId = message.getStringProperty(JMS_MESSAGE_SOURCE_UI_ID);
+    pkt.sourceUiId = message.getStringProperty(JMS_MESSAGE_SOURCE_SESSION_ID);
     pkt.sourceTomcatId = message.getStringProperty(JMS_MESSAGE_SOURCE_TOMCAT_ID);
     pkt.uuid = message.getStringProperty(JMS_MESSAGE_UUID);
+    if(pkt.uuid == null)
+      pkt.uuid = UUID.randomUUID().toString();
+    
     return pkt;
   }
   
@@ -113,9 +111,10 @@ public class JMSMessageUtil
       SysOut.println(s +
                        mess.getStringProperty(JMS_MESSAGE_TYPE) + ", " +
                        mess.getStringProperty(JMS_MESSAGE_TEXT) + ", " +
-                       mess.getStringProperty(JMS_MESSAGE_SOURCE_UI_ID) + ", " +
-                       mess.getStringProperty(JMS_MESSAGE_SOURCE_TOMCAT_ID) + ", " +
-                       mess.getStringProperty(JMS_MESSAGE_UUID)
+                       mess.getStringProperty(JMS_MESSAGE_SOURCE_SESSION_ID) + ", " +
+                       mess.getStringProperty(JMS_MESSAGE_UUID) + ", " +
+                       mess.getStringProperty(JMS_MESSAGE_SOURCE_TOMCAT_ID)
+
                        + " \t/" + getHHMMSSmmm());
     }
     catch(JMSException ex) {
@@ -144,10 +143,10 @@ public class JMSMessageUtil
   {
     TextMessage newM = sess.createTextMessage("mmowgli event update");
 
-    if(key.equals(JMS_MESSAGE_SOURCE_UI_ID))
+    if(key.equals(JMS_MESSAGE_SOURCE_SESSION_ID))
       newM.setStringProperty(key, value);
     else
-      newM.setStringProperty(JMS_MESSAGE_SOURCE_UI_ID,mess.ui_id);//getStringProperty(JMS_MESSAGE_SOURCE_UI_ID));
+      newM.setStringProperty(JMS_MESSAGE_SOURCE_SESSION_ID,mess.session_id);//getStringProperty(JMS_MESSAGE_SOURCE_UI_ID));
     
     if(key.equals(JMS_MESSAGE_SOURCE_TOMCAT_ID))
       newM.setStringProperty(key, value);
@@ -167,7 +166,7 @@ public class JMSMessageUtil
     if(key.equals(JMS_MESSAGE_UUID))
         newM.setStringProperty(key, value);
     else
-      newM.setStringProperty(JMS_MESSAGE_UUID,mess.UUID); //getStringProperty(JMS_MESSAGE_UUID));
+      newM.setStringProperty(JMS_MESSAGE_UUID,mess.message_uuid); //getStringProperty(JMS_MESSAGE_UUID));
    
     return newM;
   }

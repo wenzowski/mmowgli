@@ -25,10 +25,10 @@ public class MessagingManager implements BroadcastListener
   private Mmowgli2UI ui;
   private LinkedBlockingQueue<Object> messageQueue = new LinkedBlockingQueue<Object>();
   private Thread messageRunnerThread;
-  private HashSet<MessageListener> listenersInThisSession = new HashSet<MessageListener>();
+  private HashSet<MMMessageListener> listenersInThisSession = new HashSet<MMMessageListener>();
   private static int seq = 1;
   private int myseq = -1;
-  public interface MessageListener
+  public interface MMMessageListener
   {
     /**
      * @return whether UI changes need to be pushed
@@ -56,47 +56,46 @@ public class MessagingManager implements BroadcastListener
     Broadcaster.unregister(this);
   }
   
-  public void addMessageListener(MessageListener ml)
+  public void addMessageListener(MMMessageListener ml)
   {
     listenersInThisSession.add(ml);
   }
   
-  public void removeMessageListener(MessageListener ml)
+  public void removeMessageListener(MMMessageListener ml)
   {
     listenersInThisSession.remove(ml);
   }
 
+  public void sendSessionMessage(MMessagePacket message)
+  {
+    message.session_id = ui.getUUID();
+    Broadcaster.broadcast(message);
+  }
   /*
    * After registering with Broadcaster singleton, this is where messages come in.
    * This must not block and be quick.
    */
   @Override
-  public void receiveBroadcast(final MMessagePacket message)
+  public void handleIncomingSessionMessage(final MMessagePacket message)
   {
-    System.out.println("MessageManager"+myseq+": receiving broadcast");
     // If this message is from this session, we know we're in the session thread
     // try to deliver the message to us directly  
 
     // Can be hit before any session exists
-    System.out.println("MessagingManager"+myseq+" testing for inline delivery: ui = "+(ui==null?"null":ui.hashCode())+" msg.uuid: "+message.getUi_id()+" ui.uuid: "+(ui==null?"null":ui.getUUID()));
-    if(ui != null && (message.getUi_id().equals(ui.getUUID())) ) {
+    if(ui != null && (message.getSession_id().equals(ui.getUUID())) ) {
       System.out.println("MessagingManager"+myseq+" delivering inline");
       deliverInLine(message);
-      System.out.println("MessagingManager"+myseq+" back from delivering inline");
     }
     else {
       System.out.println("MessagingManager"+myseq+" queing for polling or pushing");
       messageQueue.add(message);
-      System.out.println("MessagingManager"+myseq+" back from enqueing for polling or pushing");
    }
   }
   
   private void deliverInLine(MMessagePacket msg)
   {
     if (!listenersInThisSession.isEmpty()) {
-      System.out.println("MessagingManager"+myseq+": delivering inline");;
-
-      for (MessageListener lis : listenersInThisSession)
+      for (MMMessageListener lis : listenersInThisSession)
         lis.receiveMessage((MMessagePacket) msg,null);
     }
     else
@@ -110,14 +109,10 @@ public class MessagingManager implements BroadcastListener
     public void run()
     {
       boolean alive = true;
-      System.out.println("MessagingManager.queueReader" + myseq + " queReader startup");
       while (alive) {
         try {
-          System.out.println("MessagingManager.queueReader" + myseq + " taking");
           Object message = messageQueue.take();
-          System.out.println("MessagingManager.queueReader" + myseq + " dequeued new Message from Broadcaster, calling ui.access()");
           ui.access(new MessageRunner(message, ui)); // this makes sure our access of the UI does not conflict with normal Vaadin
-          System.out.println("MessagingManager.queueReader" + myseq + " Back from ui.access()");
         }
         catch (InterruptedException ex) {
           System.err.println("InterruptedException in MessagingManager.queueReader" + myseq);
@@ -155,7 +150,7 @@ try{Thread.sleep(1000l);}catch(InterruptedException ex){}
         System.out.println("MessageRunner(through UI.access())"+myseq+": delivering to local listeners");
         SingleSessionManager mgr = new SingleSessionManager();
 
-        for (MessageListener lis : listenersInThisSession)
+        for (MMMessageListener lis : listenersInThisSession)
           if (lis.receiveMessage((MMessagePacket) msg, mgr))
             ;//push = true;
 

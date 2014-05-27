@@ -36,9 +36,9 @@ package edu.nps.moves.mmowgli.messaging;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashSet;
-import java.util.UUID;
 
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.DeferredSysOut;
 
 /**
@@ -54,7 +54,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.DeferredSysOut;
  */
 public abstract class DefaultInterSessionIO extends InterSessionIOBase
 {
-  protected HashSet<Receiver> receivers;
+  protected HashSet<InterTomcatReceiver> receivers;
   protected SingleSessionManager sessMgr;
   
   public DefaultInterSessionIO()
@@ -62,17 +62,16 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
     this(null);
   }
   
-  public DefaultInterSessionIO(Receiver recvr)
+  public DefaultInterSessionIO(InterTomcatReceiver recvr)
   {
-    receivers = new HashSet<Receiver>();
+    receivers = new HashSet<InterTomcatReceiver>();
     addReceiver(recvr);
   }
   
   @Override
-  abstract public void send(char messageType, String message, String ui_id);
-
+  abstract public void send(MMessagePacket pkt);
   @Override
-  public void addReceiver(Receiver recvr)
+  public void addReceiver(InterTomcatReceiver recvr)
   {
     if(recvr != null) {
       synchronized(receivers) {
@@ -82,7 +81,7 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
   }
 
   @Override
-  public void removeReceiver(Receiver recvr)
+  public void removeReceiver(InterTomcatReceiver recvr)
   {
     if(recvr != null) {
       synchronized(receivers) {
@@ -91,18 +90,15 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
     }
   }
   
-  // These messages go out to 1) all listeners in an app instance, if SimpleEventBusIO, or 2) AppMaster listener in the
-  // case of JMSIO.
-  // Incoming thread is our own (SimpileEventBusIO) or the JMS interface thread (JMS)
-  public void deliverToReceivers(char messageType, String message, String ui_id, String tomcat_id, String uuid, boolean more)
+  public void deliverToReceivers(MMessagePacket packet, boolean more)
   {
     synchronized(receivers) {
-      deliverToReceivers(messageType, message, ui_id, tomcat_id, uuid, receivers, more);
+      deliverToReceivers(packet, receivers, more);
     }
   }
   
   /** this routine used to be synched, but JMS message delivery is single-thread */
-  public void deliverToReceivers(char messageType, String message, String ui_id, String tomcat_id, String uuid, HashSet<Receiver> rcvers, boolean more)
+  public void deliverToReceivers(MMessagePacket packet, HashSet<InterTomcatReceiver> receivers, boolean more)
   {
     if (VHib.getSessionFactory() == null)//HibernateContainers.sessionFactory == null)
       return; // we haven't gotten started yet
@@ -112,10 +108,10 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
 
    // HibernateContainers.oobThread = Thread.currentThread();
     VHib.setOobThread(Thread.currentThread());
-    for (Receiver rcvr : rcvers) {
+    for (InterTomcatReceiver rcvr : receivers) {
       // Attempt to keep thread alive
       try {
-        rcvr.messageReceivedOob(messageType, message, ui_id, tomcat_id, uuid, sessMgr);
+        rcvr.handleIncomingTomcatMessageOob(packet, sessMgr);
       } catch (Throwable t) {
         StringBuilder sb = new StringBuilder();
         sb.append(">>>>>>>>>>>>>\n");
@@ -138,13 +134,13 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
     }
     
     if (!more) {
-      for (Receiver rcvr : rcvers)
-       rcvr.oobEventBurstComplete(sessMgr);
+      for (InterTomcatReceiver rcvr : receivers)
+       rcvr.handleIncomingTomcatMessageEventBurstCompleteOob(sessMgr);
     
       sessMgr.endSession();
-    }
+    }  
   }
-
+  
   /**
    * Stop whatever is going on in IO object; 
    */

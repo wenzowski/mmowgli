@@ -1,6 +1,6 @@
 package edu.nps.moves.mmowgli.messaging;
 
-import edu.nps.moves.mmowgli.Mmowgli2UI;
+import java.util.UUID;
 
 /**
  * MMessagePacket.java
@@ -12,55 +12,55 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
  *
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
+ * 
+ * This is slightly similar to TCP/IP layering: JMS is lowest layer and adds its tomcat_id on to "end".  So senders don't normally deal with it.
  */
 public class MMessagePacket
 {
   public char msgType;
   public String msg;
 
-  public String ui_id;
+  public String session_id = "no_ui";
   public String tomcat_id;
-  public String UUID;
+  public String message_uuid = UUID.randomUUID().toString();
   
-  public MMessagePacket(char mt, String msg, String ui_id, String tomcat_id, String UUID)
+  public MMessagePacket(char mt, String msg, String message_uuid, String session_id, String tomcat_id)
   {
     this.msgType = mt;
     this.msg = msg;
-    this.ui_id = ui_id;
+    if(session_id != null)      
+      this.session_id = session_id;
     this.tomcat_id = tomcat_id;
-    this.UUID = UUID;
+    if(message_uuid != null)
+      this.message_uuid = message_uuid;
   }
   
-  public MMessagePacket(char mt, String msg, String ui_id, String tomcat_id)
+  public MMessagePacket(char mt, String msg, String session_id, String tomcat_id)
   {
-    this(mt,msg,ui_id,tomcat_id,null);
+    this(mt,msg,null,session_id,tomcat_id);
   }
   
-  public MMessagePacket(char mt, String msg, String ui_id)
+  public MMessagePacket(char mt, String msg, String session_id)
   {
-    this(mt,msg,ui_id,null);
+    this.msgType = mt;
+    this.msg = msg;
+    this.session_id = session_id;
   }
   
   public MMessagePacket(char mt, String msg)
   {
     this.msgType = mt;
     this.msg = msg;
- 
-    Mmowgli2UI ui = Mmowgli2UI.getAppUI();
-    if(ui != null)
-      this.ui_id = ui.getUUID();
-    else
-      this.ui_id = "no UI yet";
   }
-
+  
   @Override
   public String toString()
   {
-    return "" + msgType + " " + msg + " ui:" + ui_id;
+    return "" + msgType + " " + msg + " ui:" + session_id;
   }
 
-  public String getUi_id()
+  public String getSession_id()
   {
-    return ui_id;
+    return session_id;
   }
 }

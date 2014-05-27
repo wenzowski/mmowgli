@@ -60,7 +60,7 @@ public class Broadcaster implements Serializable
 
   public interface BroadcastListener
   {
-    void receiveBroadcast(MMessagePacket message);
+    void handleIncomingSessionMessage(MMessagePacket message);
   }
   
   private static LinkedList<BroadcastListener> listeners = new LinkedList<BroadcastListener>();
@@ -77,7 +77,7 @@ public class Broadcaster implements Serializable
   
   public static synchronized void broadcast(final MMessagePacket message)
   {
-    System.out.println("************* Got a db event, broadcasting");
+    System.out.println("Broadcaster deivering message");
     // Since we know the listeners need to be quick and not block, we don't need this
     /*
     for (final BroadcastListener listener: listeners)
@@ -89,7 +89,7 @@ public class Broadcaster implements Serializable
       });
     */
     for(BroadcastListener listener: listeners)
-      listener.receiveBroadcast(message);
+      listener.handleIncomingSessionMessage(message);
   }
   
   /* to keep this from being instantiated */
