@@ -61,6 +61,9 @@ public final class MobileVHib extends AbstractVHib implements SessionManager
     return sess;
   }
   
+  /*
+   * Get "Vaadin-Hibernate" session
+   */
   public static Session getVHSession()
   {
     //return instance()._getVHSession();
@@ -76,9 +79,7 @@ public final class MobileVHib extends AbstractVHib implements SessionManager
 
   public void installDataBaseListeners(AppMaster apMas)
   {
-    instance()._installDataBaseListeners(apMas);    
+    instance()._installDataBaseListeners(); //apMas);    
   }
-
-
 
 }
