@@ -44,12 +44,21 @@ import org.hibernate.Transaction;
 import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.components.BadgeManager;
 import edu.nps.moves.mmowgli.components.KeepAliveManager;
-import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
-import edu.nps.moves.mmowgli.messaging.*;
+import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.SearchManager;
+import edu.nps.moves.mmowgli.hibernate.SessionManager;
+import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.messaging.Broadcaster;
 import edu.nps.moves.mmowgli.messaging.Broadcaster.BroadcastListener;
-import edu.nps.moves.mmowgli.messaging.InterTomcatIO.Receiver;
+import edu.nps.moves.mmowgli.messaging.InterTomcatIO;
+import edu.nps.moves.mmowgli.messaging.InterTomcatIO.InterTomcatReceiver;
+import edu.nps.moves.mmowgli.messaging.JmsIO2;
 import edu.nps.moves.mmowgli.messaging.JmsIO2.FirstListener;
+import edu.nps.moves.mmowgli.messaging.MMessage;
+import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.utility.M;
 
 /**
@@ -64,14 +73,17 @@ import edu.nps.moves.mmowgli.utility.M;
  * @version $Id$
  */
 
-public class AppMasterMessaging implements Receiver, FirstListener, BroadcastListener
+public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, BroadcastListener
 {
   private AppMaster appMaster;
-  private InterTomcatIO _interNodeIO;
-  //private JmsIO2         _jmsIO;
-
+  private JmsIO2         _jmsIO;
+  private static int sequenceCount = 0;
+  private int mysequence = -1;
+  private String MY_BROADCAST_SESSION_ID = "AppMasterMessageBroadcastId";
+  
   public AppMasterMessaging(AppMaster appMaster)
   {
+    mysequence = sequenceCount++;
     this.appMaster = appMaster;
     getInterTomcatIO(); // may fail, will get retried in sender thread
     Broadcaster.register(this);
@@ -79,22 +91,19 @@ public class AppMasterMessaging implements Receiver, FirstListener, BroadcastLis
 
   public InterTomcatIO getInterTomcatIO()
   {
-    if (_interNodeIO == null) {
-      InterTomcatIO _sIO = null;
+    if (_jmsIO == null) {
       try {
-        _sIO = new JmsIO2();
-        _sIO.addReceiver(this);
-        _interNodeIO = _sIO;
-//        if(_sIO instanceof JmsIO2) {
-//          ((JmsIO2)_sIO).addFirstExternalListener(this);
-//          _jmsIO = (JmsIO2)_sIO;
-//        }
+        _jmsIO = new JmsIO2();
+        _jmsIO.addReceiver(this);
+        _jmsIO.addFirstExternalListener(this);
+        System.out.println("*****Internode IO built in AppMasterMessaging");
       }
       catch (Exception ex) {
         System.err.println("Can't build internode IO in ApplicationMaster: "+ex.getClass().getSimpleName()+" "+ex.getLocalizedMessage());
       }
     }
-    return _interNodeIO;
+
+    return _jmsIO;
   }
   
   // FirstListener
@@ -108,6 +117,7 @@ public class AppMasterMessaging implements Receiver, FirstListener, BroadcastLis
   @Override
   public boolean doPreviewMessage(MMessagePacket pkt)
   {
+    System.out.println("AppMasterMessaging.doPreviewMessage()...got external message");
     Session sess = VHib.getSessionFactory().openSession();
     Transaction tx = sess.beginTransaction();
     tx.setTimeout(HIBERNATE_TRANSACTION_TIMEOUT_IN_SECONDS);
@@ -130,14 +140,14 @@ public class AppMasterMessaging implements Receiver, FirstListener, BroadcastLis
         sess.refresh(u);
         srcobj = DBGet.getUserFresh(msg.id,sess);// updates cache
         break;
-
+/*test
       case GAMEEVENT:
         msg = MMessage.MMParse(pkt.msgType,pkt.msg);
         GameEvent ge = GameEvent.get(msg.id,sess);
         sess.refresh(ge);
        // does nothing DBGet.getGameEvent(msg.id, sess); // updates cache
         break;
-
+*/
       case UPDATED_ACTIONPLAN:
         srcobj = ActionPlan.get(MMessage.MMParse(pkt.msgType,pkt.msg).id,sess);
         sess.refresh(srcobj);
@@ -170,38 +180,6 @@ public class AppMasterMessaging implements Receiver, FirstListener, BroadcastLis
     if(badgeMgr == null)
       badgeMgr = appMaster.getBadgeManager();
     return badgeMgr;
-  }
-  //Receiver
-  // Handler of messages off the local messager
-  @Override
-  public boolean messageReceivedOob(char messageType, String message, String ui_id, String tomcat_id, String uuid, SessionManager sessMgr)
-  {
-    System.out.println("AppMasterMessaging.messageReceivedOob()");
-    if(getMcache() != null)
-      mcache.messageReceivedOob(messageType, message, ui_id, tomcat_id, uuid, sessMgr);
-
-    if(getBadgeManager() != null)
-      badgeMgr.messageReceivedOob(messageType, message, ui_id, tomcat_id, uuid, sessMgr);
-
-    switch (messageType) {
-      case JMSKEEPALIVE:
-        KeepAliveManager kmgr = appMaster.getKeepAliveManager();
-        if(kmgr != null)
-          kmgr.receivedKeepAlive(message, sessMgr);
-        break;
-      case UPDATE_SESSION_COUNT:
-        handleSessionCountMsg(message);
-        break;
-
-      default:
-    }
-
-    // We also pass the message to the SearchManager, which can cause Lucene/Hibernate Search, to index specific
-    // object types that are annotated as @Indexed. We sort out which objects to index on the
-    // receiving end and ignore the rest.
-    SearchManager.indexObjectFromMessage(messageType, message, M.getSession(sessMgr));
-
-    return false; // don't want a retry
   }
   
   private HashMap<String,Integer> serverSessionCounts = new HashMap<String,Integer>();
@@ -247,24 +225,56 @@ public class AppMasterMessaging implements Receiver, FirstListener, BroadcastLis
     }
     return oa;
   }
-
-
-  @Override
-  public void oobEventBurstComplete(SessionManager sessMgr)
+  
+  // edu.nps.moves.mmowgli.messaging.InterTomcatIO.Receiver
+  // Handler of messages off the JmsIO2 object, which is receiving msgs from other custer nodes
+  @Override 
+  public boolean handleIncomingTomcatMessageOob(MMessagePacket pkt, SessionManager sessMgr)
   {
+    System.out.println("AppMasterMessaging/JMSIO2.messageReceivedOob()");
+    if(getMcache() != null)
+      mcache.handleIncomingTomcatMessageOob(pkt, sessMgr);
 
-    
+    if(getBadgeManager() != null)
+      badgeMgr.messageReceivedOob(pkt, sessMgr);
+
+    switch (pkt.msgType) {
+      case JMSKEEPALIVE:
+        KeepAliveManager kmgr = appMaster.getKeepAliveManager();
+        if(kmgr != null)
+          kmgr.receivedKeepAlive(pkt.msg, sessMgr);
+        break;
+      case UPDATE_SESSION_COUNT:
+        handleSessionCountMsg(pkt.msg);
+        break;
+
+      default:
+        Broadcaster.broadcast(pkt);
+    }
+
+    // We also pass the message to the SearchManager, which can cause Lucene/Hibernate Search, to index specific
+    // object types that are annotated as @Indexed. We sort out which objects to index on the
+    // receiving end and ignore the rest.
+    SearchManager.indexObjectFromMessage(pkt.msgType, pkt.msg, M.getSession(sessMgr));
+
+    return false; // don't want a retry    
+  }
+ 
+  // edu.nps.moves.mmowgli.messaging.InterTomcatIO.Receiver
+  // Handler of messages off the JmsIO2 object, which is receiving msgs from other custer nodes
+  @Override
+  public void handleIncomingTomcatMessageEventBurstCompleteOob(SessionManager sessMgr)
+  { 
   }
 
   /**
-   * This is where locally generated message, including db messages, com in
+   * This is where all messages generated from user sessions in this cluster come in, including db messages
    */
   @Override
-  public void receiveBroadcast(MMessagePacket message)
+  public void handleIncomingSessionMessage(MMessagePacket message)
   {
-    System.out.println("AppMasterMessaging.receiveBroadcast()");
-    this.messageReceivedOob(message.msgType, message.msg, message.ui_id, message.tomcat_id, message.UUID, null);
+    System.out.println("AppMasterMessaging, seq "+mysequence+", incomingSessionMessageHandler(receiveBroadcast())");
+    ((JmsIO2)getInterTomcatIO()).sendSessionMessage(message);
   }
-
 
 }

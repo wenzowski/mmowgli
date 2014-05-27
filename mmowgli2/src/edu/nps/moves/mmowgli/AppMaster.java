@@ -56,7 +56,7 @@ import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.export.ReportGenerator;
 import edu.nps.moves.mmowgli.hibernate.*;
 import edu.nps.moves.mmowgli.messaging.*;
-import edu.nps.moves.mmowgli.messaging.InterTomcatIO.Receiver;
+import edu.nps.moves.mmowgli.messaging.InterTomcatIO.InterTomcatReceiver;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.modules.scoring.ScoreManager2;
 import edu.nps.moves.mmowgli.utility.*;
@@ -95,8 +95,11 @@ public class AppMaster
   private static String userImagesFileSystemPath;
   private static String userImagesUrlString;
   
-  public AppMaster(ServletContext context) {
+  public AppMaster(ServletContext context)
+  {
     servletContext = context;
+ 
+    setConstants();
     
     appMasterMessaging = new AppMasterMessaging(this);
     initEncryption();
@@ -120,21 +123,8 @@ public class AppMaster
       }
     }
 
-    keepAliveManager = new KeepAliveManager(this, keepAliveInterval); // latter
-                                                                      // may be
-                                                                      // null
+    keepAliveManager = new KeepAliveManager(this, keepAliveInterval); // latter maybe null
 
-    JMS_INTERNODE_URL = context.getInitParameter(WEB_XML_JMS_URL_KEY); // ApplicationConstants
-    JMS_INTERNODE_TOPIC = context.getInitParameter(WEB_XML_JMS_TOPIC_KEY);
-
-  /*  JMS_LOCAL_HANDLE = context.getInitParameter(WEB_XML_JMS_LOCALHANDLE_KEY);
-    JMS_LOCAL_TOPIC = context.getInitParameter(WEB_XML_JMS_LOCALTOPIC_KEY);
-    JMS_LOCAL_PORT = context.getInitParameter(WEB_XML_JMS_LOCALPORT_KEY);
-    JMS_LOCAL_BROKER_NAME = context.getInitParameter(WEB_XML_JMS_LOCALBROKER_KEY);
-*/
-    String s = context.getInitParameter(WEB_XML_SMTP_HOST_KEY);
-    if (s != null && s.length() > 0)
-      MmowgliConstants.SMTP_HOST = s;
 /*
     try {
       localJmsBrokerService = new BrokerService();
@@ -154,17 +144,32 @@ public class AppMaster
       System.err.println("Cannot build a localJms broker service from AppMaster: " + ex.getClass().getSimpleName() + " :" + ex.getLocalizedMessage());
     }
 */
-    DEPLOYMENT_TOKEN = context.getInitParameter(WEB_XML_DEPLOYMENT_TOKEN_KEY);
-    GAME_URL_TOKEN = context.getInitParameter(WEB_XML_GAME_URL_TOKEN_KEY);
+  }
+  private void setConstants()
+  {
+    
+    JMS_INTERNODE_URL   = servletContext.getInitParameter(WEB_XML_JMS_URL_KEY);
+    JMS_INTERNODE_TOPIC = servletContext.getInitParameter(WEB_XML_JMS_TOPIC_KEY);
 
-    DEPLOYMENT = context.getInitParameter(WEB_XML_DEPLOYMENT_KEY);
-    GAME_IMAGES_URL_RAW = context.getInitParameter(WEB_XML_GAME_IMAGES_URL_KEY);
-    USER_IMAGES_URL_RAW = context.getInitParameter(WEB_XML_USER_IMAGES_URL_KEY);
-    USER_IMAGES_FILESYSTEM_PATH_RAW = context.getInitParameter(WEB_XML_USER_IMAGES_FILESYSTEM_PATH_KEY);
+/*  JMS_LOCAL_HANDLE      = context.getInitParameter(WEB_XML_JMS_LOCALHANDLE_KEY);
+    JMS_LOCAL_TOPIC       = context.getInitParameter(WEB_XML_JMS_LOCALTOPIC_KEY);
+    JMS_LOCAL_PORT        = context.getInitParameter(WEB_XML_JMS_LOCALPORT_KEY);
+    JMS_LOCAL_BROKER_NAME = context.getInitParameter(WEB_XML_JMS_LOCALBROKER_KEY);
+*/
+    String s = servletContext.getInitParameter(WEB_XML_SMTP_HOST_KEY);
+    if (s != null && s.length() > 0)
+      MmowgliConstants.SMTP_HOST = s;
+    DEPLOYMENT_TOKEN = servletContext.getInitParameter(WEB_XML_DEPLOYMENT_TOKEN_KEY);
+    GAME_URL_TOKEN   = servletContext.getInitParameter(WEB_XML_GAME_URL_TOKEN_KEY);
 
-    setClamScanConstants(context);
+    DEPLOYMENT                      = servletContext.getInitParameter(WEB_XML_DEPLOYMENT_KEY);
+    GAME_IMAGES_URL_RAW             = servletContext.getInitParameter(WEB_XML_GAME_IMAGES_URL_KEY);
+    USER_IMAGES_URL_RAW             = servletContext.getInitParameter(WEB_XML_USER_IMAGES_URL_KEY);
+    USER_IMAGES_FILESYSTEM_PATH_RAW = servletContext.getInitParameter(WEB_XML_USER_IMAGES_FILESYSTEM_PATH_KEY);
 
-    REPORTS_FILESYSTEM_PATH_RAW = context.getInitParameter(WEB_XML_REPORTS_FILESYSTEM_PATH_KEY);
+    setClamScanConstants(servletContext);
+
+    REPORTS_FILESYSTEM_PATH_RAW = servletContext.getInitParameter(WEB_XML_REPORTS_FILESYSTEM_PATH_KEY);
 
     String reportPath = REPORTS_FILESYSTEM_PATH_RAW;
     REPORTS_FILESYSTEM_PATH = reportPath.replace(DEPLOYMENT_TOKEN, DEPLOYMENT);
@@ -172,7 +177,7 @@ public class AppMaster
     String userImageFileSystemPath = USER_IMAGES_FILESYSTEM_PATH_RAW;
     USER_IMAGES_FILESYSTEM_PATH = userImageFileSystemPath.replace(DEPLOYMENT_TOKEN, DEPLOYMENT);
 
-    REPORT_TO_IMAGE_URL_PREFIX = context.getInitParameter(WEB_XML_REPORTS_TO_IMAGES_RELATIVE_PATH_PREFIX);
+    REPORT_TO_IMAGE_URL_PREFIX = servletContext.getInitParameter(WEB_XML_REPORTS_TO_IMAGES_RELATIVE_PATH_PREFIX);
     
     gameImagesUrlString = GAME_IMAGES_URL_RAW;
     gameImagesUrlString = gameImagesUrlString.replace(DEPLOYMENT_TOKEN, DEPLOYMENT);
@@ -184,8 +189,7 @@ public class AppMaster
     
     userImagesUrlString = USER_IMAGES_URL_RAW;
     userImagesUrlString = userImagesUrlString.replace(DEPLOYMENT_TOKEN, DEPLOYMENT);
-    userImagesUrlString = userImagesUrlString.replace(GAME_URL_TOKEN, appUrlString);
-    
+    userImagesUrlString = userImagesUrlString.replace(GAME_URL_TOKEN, appUrlString); 
   }
 
   public MailManager getMailManager()
@@ -224,7 +228,7 @@ public class AppMaster
   {
     piiHibernate = VHibPii.instance(); // This has already been initialized through the sessioninterceptor
     vaadinHibernate = VHib.instance(); // ditto
-    vaadinHibernate.installDataBaseListeners(this);
+    vaadinHibernate.installDataBaseListeners(); //this);
 
     mCacheManager = MCacheManager.instance();
     //handleMoveSwitchScoring();
@@ -440,9 +444,29 @@ public class AppMaster
 
     public InstancePollerThread(String name) {
       super(name);
-      getInterNodeIO().addReceiver(new Receiver() {
+      getInterNodeIO().addReceiver(new InterTomcatReceiver() {
         @Override
-        public boolean messageReceivedOob(char messageType, String message, String ui_id, String tomcat_id, String uuid, SessionManager sessMgr)
+        public boolean handleIncomingTomcatMessageOob(MMessagePacket pkt, SessionManager sessMgr)
+        {
+          if (pkt.msgType == INSTANCEREPORT) {
+            System.out.println("Instance report received: " + pkt.msg);
+            AppMaster.this.logPollReport(pkt.msg);
+          }
+          return false;
+        }
+/*        @Override
+        //todo discard
+        public boolean handleIncomingTomcatMessageOob(char messageType, String message, String message_id, String session_id, String tomcat_id, SessionManager sessMgr)
+        {
+          if (messageType == INSTANCEREPORT) {
+            System.out.println("Instance report received: " + message);
+            AppMaster.this.logPollReport(message);
+          }
+          return false;          
+        }
+        @Override
+        //todo discard
+        public boolean xincomingInterTomcatMessageHandlerOob(char messageType, String message, String ui_id, String tomcat_id, String uuid, SessionManager sessMgr)
         {
           if (messageType == INSTANCEREPORT) {
             System.out.println("Instance report received: " + message);
@@ -450,9 +474,9 @@ public class AppMaster
           }
           return false;
         }
-
+*/
         @Override
-        public void oobEventBurstComplete(SessionManager sessMgr)
+        public void handleIncomingTomcatMessageEventBurstCompleteOob(SessionManager sessMgr)
         {
         }
       });
@@ -638,5 +662,15 @@ public class AppMaster
     }
     return oa;
   }
-
+  
+  /* This is where database listener messages come in */
+  public void sendToOtherNodes(MMessagePacket mMessagePacket)
+  {
+    appMasterMessaging.handleIncomingSessionMessage(mMessagePacket);   
+  }
+/* this was called directly from JMS2IO...should go through AppMastermessaging  
+  public void receivedFromOtherNodes(MMessagePacket pkt)
+  {
+    Broadcaster.broadcast(pkt);
+  } */
 }

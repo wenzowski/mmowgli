@@ -51,9 +51,9 @@ import edu.nps.moves.mmowgli.export.CardExporter;
 import edu.nps.moves.mmowgli.export.GameExporter;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
-import edu.nps.moves.mmowgli.messaging.Broadcaster;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
-import edu.nps.moves.mmowgli.messaging.MessagingManager.MessageListener;
+import edu.nps.moves.mmowgli.messaging.MessagingManager;
+import edu.nps.moves.mmowgli.messaging.MessagingManager.MMMessageListener;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionDashboard;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2;
 import edu.nps.moves.mmowgli.modules.actionplans.HowToWinActionPopup;
@@ -87,10 +87,10 @@ import edu.nps.moves.mmowgli.utility.M;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public abstract class AbstractMmowgliController implements MmowgliController, MessageListener
+public abstract class AbstractMmowgliController implements MmowgliController, MMMessageListener
 {
   private boolean initted = false;
-  private Navigator navigator;
+  //private Navigator navigator;
   
   private AbstractMmowgliControllerHelper helper;
   public AbstractMmowgliController()
@@ -119,7 +119,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, Me
   
   public void setupNavigator(Navigator nav)
   {
-    this.navigator = nav;
+    //this.navigator = nav;
     nav.addProvider(new MyViewProvider());
     nav.addView("", CallToActionPage.class);  // to start with
   }
@@ -128,7 +128,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, Me
   {
     MmowgliEvent mEv = appEvent.getEvent();
     Object param = appEvent.getData();
-    Component source = appEvent.getSource();
+    //Component source = appEvent.getSource();
     Mmowgli2UI ui = Mmowgli2UI.getAppUI();
     ActionPlan ap;
     ActionPlanPage2 appg;
@@ -353,8 +353,9 @@ public abstract class AbstractMmowgliController implements MmowgliController, Me
       case SIGNOUTCLICK:
         Serializable uid = ui.getSessionGlobals().getUserID();
         GameEventLogger.logUserLogout(uid);
-        Broadcaster.broadcast(new MMessagePacket(USER_LOGOUT,""+uid));
-        Mmowgli2UI.getGlobals().getMessagingManager().unregisterSession();
+        MessagingManager mgr = Mmowgli2UI.getGlobals().getMessagingManager();
+        mgr.sendSessionMessage(new MMessagePacket(USER_LOGOUT,""+uid));
+        mgr.unregisterSession();
         
       /*  sendToBus(USER_LOGOUT, "" + uid, false);
         
