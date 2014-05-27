@@ -102,7 +102,8 @@ public class UserProfileMyActionsPanel extends UserProfileTabPanel
     
     // put table in place
     getRightLayout().addComponent(tab); 
-    tab.setWidth("670px");
+    getRightLayout().setWidth("669px");
+    tab.setWidth("100%");
     tab.setHeight("720px");
     tab.addStyleName("m-greyborder");
   }

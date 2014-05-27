@@ -101,10 +101,10 @@ public class UserProfileMyBuddiesPanel extends UserProfileTabPanel implements It
     tab.addItemClickListener((ItemClickListener)this);
     
     // put table in place
-    getRightLayout().setWidth("100%");
+    getRightLayout().setWidth("669px");
     getRightLayout().addComponent(tab);
     tab.setWidth("100%");
-    tab.setHeight("100%"); // fill the background
+    tab.setHeight("720px");
     tab.addStyleName("m-greyborder");
     getRightLayout().setExpandRatio(tab, 1.0f);
    }
