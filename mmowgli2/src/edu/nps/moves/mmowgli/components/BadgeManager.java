@@ -33,17 +33,32 @@
 */
 package edu.nps.moves.mmowgli.components;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import static edu.nps.moves.mmowgli.MmowgliConstants.NEW_ACTIONPLAN;
+import static edu.nps.moves.mmowgli.MmowgliConstants.NEW_CARD;
+import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_ACTIONPLAN;
+import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_CARD;
+import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_USER;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.*;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 import edu.nps.moves.mmowgli.AppMaster;
-import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.Badge;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.Sess;
+import edu.nps.moves.mmowgli.hibernate.SessionManager;
+import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
 
@@ -92,22 +107,22 @@ public class BadgeManager implements Runnable
     thread.setDaemon(true);
     thread.start();
   }
-
-  public void messageReceivedOob(char messageType, String message, String ui_id, String tomcat_id, String uuid, SessionManager sessMgr)
+  
+  public void messageReceivedOob(MMessagePacket pkt, SessionManager sessMgr)
   {
-    switch (messageType) {
+    switch (pkt.msgType) {
     case NEW_CARD :
     case UPDATED_CARD:
     case NEW_ACTIONPLAN:
     case UPDATED_ACTIONPLAN:
     case UPDATED_USER:
-      enQ(messageType,message);
+      enQ(pkt.msgType,pkt.msg);
       break;
 
     default:
-    }
+    }    
   }
-
+  
   private void enQ(char msgTyp, String msg)
   {
     long id = Long.parseLong(msg);   // db key

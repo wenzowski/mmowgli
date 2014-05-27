@@ -90,10 +90,13 @@ public class MmowgliDialogContent extends HorizontalLayout implements MmowgliCom
   }
   public MmowgliDialogContent()
   {
-    leftVL = new VerticalLayout();        leftVL.setSpacing(false);
+    leftVL = new VerticalLayout();
+    leftVL.setSpacing(false);
     headerWrapper = new HorizontalLayout();
-    contentVLayout = new VerticalLayout();       contentVLayout.setSpacing(false);
-    rightShadowVL = new VerticalLayout(); rightShadowVL.setSpacing(false);
+    contentVLayout = new VerticalLayout();
+    contentVLayout.setSpacing(false);
+    rightShadowVL = new VerticalLayout();
+    rightShadowVL.setSpacing(false);
     
     footer = new Label();
     footer.addStyleName("m-mmowglidialog2-footer"); // has the background
