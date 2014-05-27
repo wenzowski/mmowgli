@@ -39,7 +39,7 @@ import java.util.Vector;
 
 import org.hibernate.Session;
 
-import com.porotype.iconfont.FontAwesome.Icon;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -150,7 +150,8 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
    // start.setWidth("15px");
    //   start.setHeight("15px");
     start.setHtmlContentAllowed(true);
-    start.setCaption(Icon.step_backward.toString());
+    //start.setCaption(Icon.step_backward.toString());
+    start.setIcon(FontAwesome.STEP_BACKWARD);
       addComponent(start);
     
       left = new NativeButton(null,leftLis);
@@ -161,7 +162,8 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
    //   left.setWidth("15px");
    //   left.setHeight("15px");
       left.setHtmlContentAllowed(true);
-      left.setCaption(Icon.backward.toString());
+      //left.setCaption(Icon.backward.toString());
+      left.setIcon(FontAwesome.BACKWARD);
       addComponent(left);
       
       addComponent(sp=new Label());
@@ -175,7 +177,8 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       //right.setWidth("15px");
      // right.setHeight("15px");
       right.setHtmlContentAllowed(true);
-      right.setCaption(Icon.play.toString());
+      //right.setCaption(Icon.play.toString());
+      right.setIcon(FontAwesome.PLAY);
       addComponent(right);
       
       end = new NativeButton(null,endLis);
@@ -186,7 +189,8 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       //end.setWidth("15px");
       //end.setHeight("15px");
       end.setHtmlContentAllowed(true);
-      end.setCaption(Icon.step_forward.toString());
+      //end.setCaption(Icon.step_forward.toString());
+      end.setIcon(FontAwesome.STEP_FORWARD);
      addComponent(end);
       
       addComponent(sp=new Label());
