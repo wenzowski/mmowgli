@@ -24,7 +24,7 @@
 	</target>
 
 	<!-- This is new in V7, some of this had been done previously by hand -->
-	<target name="expandVaadinJars">
+	<target name="expandVaadinJars" description="put selected vaadin components in VAADIN dir from distribution jars">
 	  <unzip dest="WebContent">
 		<patternset>
 		  <include name="VAADIN/**" />
@@ -43,6 +43,9 @@
 	  <delete dir="WebContent/VAADIN/themes/tests-calendar"/>
 	  <delete dir="WebContent/VAADIN/themes/tests-components"/>
 	  <delete dir="WebContent/VAADIN/themes/tests-tickets"/>
+	  <delete dir="WebContent/VAADIN/themes/tests-table"/>
+	  <delete dir="WebContent/VAADIN/themes/tests-responsive"/>
+	  <delete dir="WebContent/VAADIN/widgetsets/com.vaadin.DefaultWidgetSet"/>
 	</target>
 	
 	<target name="confirmClean">
