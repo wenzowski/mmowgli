@@ -37,11 +37,12 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import org.hibernate.HibernateException;
 import org.hibernate.event.internal.*;
-import org.hibernate.event.service.spi.EventListenerRegistry;
+//import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.*;
 import org.hibernate.service.ServiceRegistry;
 
 import edu.nps.moves.mmowgli.AppMaster;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.messaging.*;
@@ -54,13 +55,13 @@ public class DatabaseListeners
   public MySaveOrUpdateListener saveOrUpdateListener;
   //public MyMergeListener mergeListener;
   public MyDeleteListener deleteListener;
-
+ // private AppMaster appMaster;
   private MCacheManager mcache;
   //private AppMaster appMaster;
-  public DatabaseListeners(ServiceRegistry sRegistry, AppMaster appMaster)
+  public DatabaseListeners(ServiceRegistry sRegistry) //, AppMaster appMaster)
   {
     System.out.println("Creating db listeners");
-   // this.appMaster = appMaster;
+    //this.appMaster = appMaster;
     saveListener = new MySaveListener();
     updateListener = new MyUpdateListener();
     saveOrUpdateListener = new MySaveOrUpdateListener();
@@ -155,7 +156,7 @@ public class DatabaseListeners
         return;
       }
 
-      messageToOtherNodes(event,msgTyp,msg);
+      messageOut(event,msgTyp,msg);
     }
   }
   
@@ -215,8 +216,7 @@ public class DatabaseListeners
         //System.err.println("Unprocessed db update in ApplicationMaster: " + obj.getClass().getSimpleName());
         return;
       }
-
-      messageToOtherNodes(event,msgTyp,msg);
+      messageOut(event,msgTyp,msg);
     }
   }
   @SuppressWarnings("serial")
@@ -271,7 +271,7 @@ public class DatabaseListeners
         return;
       }
 
-      messageToOtherNodes(event,msgTyp,msg);
+      messageOut(event,msgTyp,msg);
     }
   }
   
@@ -294,9 +294,15 @@ public class DatabaseListeners
     }
   }
 
-  private void messageToOtherNodes(AbstractEvent event, char msgTyp, String msg)
+  private void messageOut(AbstractEvent event, char msgTyp, String msg)
   {
-    Broadcaster.broadcast(new MMessagePacket(msgTyp,msg));
+    Mmowgli2UI ui = Mmowgli2UI.getAppUI();
+    String session_id=null;
+    if(ui != null)
+      session_id = ui.getUUID();
+    Broadcaster.broadcast(new MMessagePacket(msgTyp,msg,session_id,AppMaster.getServerName()));
+    
+    
 //    InterTomcatIO interNodeIOSess = getInterNodeIO();
 //    if (interNodeIOSess != null)
 //      interNodeIOSess.sendDelayed(msgTyp, msg, 500l);

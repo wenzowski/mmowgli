@@ -223,9 +223,9 @@ public abstract class AbstractVHib// implements SessionManager
     throw new ExceptionInInitializerError(t);
   }
   DatabaseListeners dbLis;
-  protected void _installDataBaseListeners(AppMaster apMas)
+  protected void _installDataBaseListeners()//AppMaster apMas)
   {
-    DatabaseListeners dlis = new DatabaseListeners(sr, apMas);
+    DatabaseListeners dlis = new DatabaseListeners(sr);
     System.out.println("Installing db listeners");
     EventListenerRegistry registry = ((SessionFactoryImpl) sf).getServiceRegistry().getService(EventListenerRegistry.class);
 
@@ -282,7 +282,7 @@ public abstract class AbstractVHib// implements SessionManager
       File[] files = dbFiles.listFiles();
       for (File f : files) {
         String nm = f.getName();
-        if (nm.endsWith(".class")) {
+        if (nm.endsWith(".class") && nm.indexOf('$')==-1) {
           String full = pkg + '.' + nm;
           try {
             Class<?> c = Class.forName(full.substring(0, full.lastIndexOf('.')));
