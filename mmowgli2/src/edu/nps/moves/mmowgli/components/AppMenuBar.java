@@ -6,7 +6,7 @@ import static edu.nps.moves.mmowgli.MmowgliEvent.*;
 
 import org.hibernate.Session;
 
-import com.porotype.iconfont.FontAwesome.Icon;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.*;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
@@ -124,28 +124,31 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
    */
   private MenuBar.MenuItem buildGameMasterMenu()
   {
-    MenuBar.MenuItem ret = menubar.addItem(Icon.legal+"&nbsp;Game Master", null);
+    MenuBar.MenuItem ret = menubar.addItem("Game Master", null);
+    ret.setIcon(FontAwesome.GAVEL);
     ret.addItem("Monitor Game Master Events Log", new MCommand(MENUGAMEMASTERMONITOREVENTS));
-    ret.addItem(Icon.comment_alt+"&nbsp;Post comment to Game Master Event Log", new MCommand(MENUGAMEMASTERPOSTCOMMENT));
+    ret.addItem("Post comment to Game Master Event Log", new MCommand(MENUGAMEMASTERPOSTCOMMENT)).setIcon(FontAwesome.COMMENT_O);
     ret.addSeparator();
-    ret.addItem(Icon.bullhorn+"&nbsp;Broadcast message to game masters", new MCommand(MENUGAMEMASTERBROADCASTTOGMS));
-    ret.addItem(Icon.bullhorn+"&nbsp;Broadcast message to all players", new MCommand(MENUGAMEMASTERBROADCAST));
+    
+    ret.addItem("Broadcast message to game masters", new MCommand(MENUGAMEMASTERBROADCASTTOGMS)).setIcon(FontAwesome.BULLHORN);
+    ret.addItem("Broadcast message to all players", new MCommand(MENUGAMEMASTERBROADCAST)).setIcon(FontAwesome.BULLHORN);
+    
     ret.addItem("Set blog headline", new MCommand(MENUGAMEMASTERBLOGHEADLINE));
     ret.addSeparator();
 
     if (Game.get().isActionPlansEnabled()) {
         ret.addItem("Create Action Plan", new MCommand(MENUGAMEMASTERCREATEACTIONPLAN));
-        ret.addItem("Invite additional players to be Action Plan authors", new MCommand(MENUGAMEMASTERINVITEAUTHORSCLICK));
+        ret.addItem("Invite additional players to be Action Plan authors", new MCommand(MENUGAMEMASTERINVITEAUTHORSCLICK)).setIcon(FontAwesome.USER_MD);
     }
 
     //ret.addItem("Unlock Action Plan editing", new MCommand(MENUGAMEMASTERUNLOCKEDITSCLICK));
     ret.addSeparator();
-    ret.addItem("Show active player count overall", new MCommand(MENUGAMEMASTERACTIVECOUNTCLICK));
-    ret.addItem("Show active player count by server", new MCommand(MENUGAMEMASTERACTIVECOUNTBYSERVERCLICK));
-    ret.addItem("Show user polling data for this server",  new MCommand(MENUGAMEMASTERUSERPOLLINGCLICK));
+    ret.addItem("Show active player count overall", new MCommand(MENUGAMEMASTERACTIVECOUNTCLICK)).setIcon(FontAwesome.USER_MD);
+    ret.addItem("Show active player count by server", new MCommand(MENUGAMEMASTERACTIVECOUNTBYSERVERCLICK)).setIcon(FontAwesome.USER_MD);
+    ret.addItem("Show user polling data for this server",  new MCommand(MENUGAMEMASTERUSERPOLLINGCLICK)).setIcon(FontAwesome.USER_MD);
     ret.addItem("Show card count", new MCommand(MENUGAMEMASTERCARDCOUNTCLICK));
-    ret.addItem("Show registered users counts", new MCommand(MENUGAMEMASTERTOTALREGISTEREDUSERS));
-    ret.addItem("View game login permissions buttons", viewGamePermissionsClicked);
+    ret.addItem("Show registered users counts", new MCommand(MENUGAMEMASTERTOTALREGISTEREDUSERS)).setIcon(FontAwesome.USER_MD);
+    ret.addItem("View game login permissions buttons", viewGamePermissionsClicked).setIcon(FontAwesome.SIGN_IN);
 
     ret.addSeparator();
 
@@ -153,7 +156,7 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
         ret.addItem("Show displayed Action Plan as html", new MCommand(MENUGAMEMASTER_EXPORT_SELECTED_ACTIONPLAN));
     
     ret.addItem("Show displayed Idea Card tree as html", new MCommand(MENUGAMEMASTER_EXPORT_SELECTED_CARD));
-    ret.addItem("Open game Reports Index page", new MCommand(MENUGAMEMASTEROPENREPORTSPAGE));
+    ret.addItem("Open game Reports Index page", new MCommand(MENUGAMEMASTEROPENREPORTSPAGE)).setIcon(FontAwesome.FILE_TEXT_O);
     ret.addSeparator();
     ret.addItem("View (read-only) game designer values", new MCommand(MENUGAMEADMIN_BUILDGAMECLICK_READONLY));
     //ret.addItem("Log out", new MCommand(MENUGAMEMASTERLOGOUTCLICK));
@@ -165,10 +168,12 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
    */
   private MenuBar.MenuItem buildDesignerMenu()
   {
-    MenuBar.MenuItem ret = menubar.addItem("<span style='width:100px'>"+Icon.edit+"&nbsp;Game Designer</span>",null);
-    ret.addItem("Customize game", new MCommand(MENUGAMEADMIN_BUILDGAMECLICK));
-    ret.addItem("Publish updated game design report ", new MCommand(MENUGAMEADMIN_EXPORTGAMESETTINGS));
-    ret.addItem("Show signup email addresses and feedback", new MCommand(MENUGAMEADMINDUMPSIGNUPS));
+    MenuBar.MenuItem ret = menubar.addItem("<span style='width:100px'>Game Designer</span>",null);
+    ret.setIcon(FontAwesome.PENCIL_SQUARE_O);
+    
+    ret.addItem("Customize game", new MCommand(MENUGAMEADMIN_BUILDGAMECLICK)).setIcon(FontAwesome.PENCIL);
+    ret.addItem("Publish updated game design report ", new MCommand(MENUGAMEADMIN_EXPORTGAMESETTINGS)).setIcon(FontAwesome.FILE_TEXT_O);
+    ret.addItem("Show signup email addresses and feedback", new MCommand(MENUGAMEADMINDUMPSIGNUPS)).setIcon(FontAwesome.USER_MD);
     return ret;
   }
 
@@ -178,10 +183,10 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
   private MenuBar.MenuItem buildAdminMenu()
   {
     Game game = Game.get(1L);
-    //MovePhase mp = game.getCurrentMove().getCurrentMovePhase();
 
-    MenuBar.MenuItem ret = menubar.addItem(Icon.cog+"&nbsp;Game Administrator", null); //configuration", null);
-    ret.addItem(Icon.user_md+"&nbsp;Player administration", new MCommand(MENUGAMEMASTERUSERADMIN));
+    MenuBar.MenuItem ret = menubar.addItem("Game Administrator", null); ret.setIcon(FontAwesome.COG);
+    ret.addItem("Player administration", new MCommand(MENUGAMEMASTERUSERADMIN)).setIcon(FontAwesome.USER_MD);
+    
     maxUsersMI = ret.addItem("null text", new MCommand(MENUGAMEADMINLOGINLIMIT));
     setMaxUsersMIText(game);
 
@@ -193,24 +198,25 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     // ret.addItem("Edit game parameters", new MCommand(MENUGAMEMASTEREDITCLICK));
     // sources removed ret.addItem("Game setup", new MCommand(MENUGAMESETUPCLICK));
     // ret.addItem("Zero basic scores for this move", new MCommand(MENUGAMEMASTERZEROBASICSCORES));
-    ret.addItem("Dump player emails in plain text", new MCommand(MENUGAMEADMINDUMPEMAILS));
-    ret.addItem("Dump game master emails in plain text", new MCommand(MENUGAMEADMINDUMPGAMEMASTERS));
+    ret.addItem("Dump player emails in plain text", new MCommand(MENUGAMEADMINDUMPEMAILS)).setIcon(FontAwesome.USER_MD);
+    ret.addItem("Dump game master emails in plain text", new MCommand(MENUGAMEADMINDUMPGAMEMASTERS)).setIcon(FontAwesome.USER_MD);
     //ret.addItem("Cleanup action plan invitees and authors", new MCommand(MENUGAMEADMINCLEANINVITEES));
     ret.addSeparator();
 
-    topCardsRoMI = ret.addItem(Icon.lock+"&nbsp;Top idea cards read-only", topCardsReadOnlyChecked);
+    topCardsRoMI = ret.addItem("Top idea cards read-only", topCardsReadOnlyChecked); topCardsRoMI.setIcon(FontAwesome.LOCK);
     topCardsRoMI.setCheckable(true);
     topCardsRoMI.setChecked(game.isTopCardsReadonly());
 
-    cardsRoMI=ret.addItem(Icon.lock+"&nbsp;Card-play read-only", cardsReadOnlyChecked);
+    cardsRoMI=ret.addItem("Card-play read-only", cardsReadOnlyChecked); cardsRoMI.setIcon(FontAwesome.LOCK);
     cardsRoMI.setCheckable(true);
     cardsRoMI.setChecked(game.isCardsReadonly());
-    gameRoMI = ret.addItem(Icon.lock+"&nbsp;Entire game read-only", gameReadOnlyChecked);
+
+    gameRoMI = ret.addItem("Entire game read-only", gameReadOnlyChecked); gameRoMI.setIcon(FontAwesome.LOCK);
     gameRoMI.setCheckable(true);
     gameRoMI.setChecked(game.isReadonly());
     ret.addSeparator();
 
-    ret.addItem("Game login button displays and permissions", gamePermissionsClicked);
+    ret.addItem("Game login button displays and permissions", gamePermissionsClicked).setIcon(FontAwesome.SIGN_IN);
     //allLoginsMI = ret.addItem("Allow all logins", allLoginsChecked); //new MCommand(MENUGAMEADMINSETLOGINS));
     //allLoginsMI.setCheckable(true);
     //allLoginsMI.setChecked(mp.isLoginAllowAll());
@@ -253,20 +259,21 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     emailConfirmationMI.setChecked(game.isEmailConfirmation());
     ret.addSeparator();
 
-    ret.addItem("Manage signup and VIP lists", new MCommand(MENUGAMEADMINMANAGESIGNUPS));
-    ret.addItem("Add to VIP list", new MCommand(MENUGAMEMASTERADDTOVIPLIST));
-    ret.addItem("View and/or delete from VIP list", new MCommand(MENUGAMEMASTERVIEWVIPLIST));
+    ret.addItem("Manage signup and VIP lists", new MCommand(MENUGAMEADMINMANAGESIGNUPS)).setIcon(FontAwesome.USER_MD);
+    ret.addItem("Add to VIP list", new MCommand(MENUGAMEMASTERADDTOVIPLIST)).setIcon(FontAwesome.USER_MD);
+    ret.addItem("View and/or delete from VIP list", new MCommand(MENUGAMEMASTERVIEWVIPLIST)).setIcon(FontAwesome.USER_MD);
 
     ret.addSeparator();
 
     String gameReports = Game.get().isActionPlansEnabled() ? "Publish Action Plan, Idea Card and Game Design reports now" : "Publish Idea Card and Game Design reports now";
-    ret.addItem(gameReports, new MCommand(MENUGAMEADMINPUBLISHREPORTS));
+    ret.addItem(gameReports, new MCommand(MENUGAMEADMINPUBLISHREPORTS)).setIcon(FontAwesome.FILE_TEXT_O);
 
     if (Game.get().isActionPlansEnabled()) {
-        ret.addItem("Create and show Action Plans report in browser", new MCommand(MENUGAMEADMINEXPORTACTIONPLANS));
+        ret.addItem("Create and show Action Plans report in browser", new MCommand(MENUGAMEADMINEXPORTACTIONPLANS)).setIcon(FontAwesome.FILE_TEXT_O);
     }
 
-    ret.addItem("Create and show Cards report in browser", new MCommand(MENUGAMEADMINEXPORTCARDS));
+    ret.addItem("Create and show Cards report in browser", new MCommand(MENUGAMEADMINEXPORTCARDS)).setIcon(FontAwesome.FILE_TEXT_O);
+
 //    ret.addSeparator();
 //    cardDBTestStartMI = ret.addItem("Begin Card db read test, 120Hz", new MCommand(MENUGAMEADMIN_START_CARD_DB_TEST));
 //    cardDBTestEndMI   = ret.addItem("End Card db read test, 120Hz",   new MCommand(MENUGAMEADMIN_END_CARD_DB_TEST));
@@ -288,7 +295,7 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
 //    ret.addItem("Perform post-game score recalculation", new MCommand(MENUGAMEADMINPOSTGAMERECALCULATION));
 
     ret.addSeparator();
-    ret.addItem("Advance game round and/or phase", advanceRoundClicked);
+    ret.addItem("Advance game round and/or phase", advanceRoundClicked).setIcon(FontAwesome.ARROW_RIGHT);
     return ret;
   }
 
