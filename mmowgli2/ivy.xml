@@ -1,13 +1,12 @@
 <?xml version="1.0"?>
 <!DOCTYPE ivy-module [
-	<!ENTITY vaadin.version "7.1.15">
+	<!ENTITY vaadin.version "7.2.0">
 ]>
 
 <ivy-module version="2.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
 	<info organisation="com.example" module="v7proj" />
-	<!--<!ENTITY vaadin.version "7.2.0.beta1">-->
 	<configurations>
 		<!-- The default configuration, which should be deployed to the server -->
 		<conf name="default" />
@@ -21,8 +20,10 @@
 	
 	<dependencies defaultconf="default" defaultconfmapping="default->default">
 		<!-- The core server part of Vaadin -->
-		<dependency org="com.vaadin" name="vaadin-server" rev="&vaadin.version;" />
-
+		<dependency org="com.vaadin" name="vaadin-server" rev="&vaadin.version;" >
+		  <!-- this is since we incude guava below, see https://vaadin.com/forum#!/thread/5395743 -->
+		  <exclude org="com.vaadin.external.google" name="guava"/>
+        </dependency>
 		<!-- Vaadin themes -->
 		<dependency org="com.vaadin" name="vaadin-themes" rev="&vaadin.version;" />
 
@@ -54,7 +55,7 @@
         <dependency org="org.apache.commons" name="commons-lang3" rev="3.1"/>
         <dependency org="org.vaadin.addons" name="hbncontainer" rev="2.0.1" />
  		<dependency org="org.vaadin.addons" name="cssinject" rev="2.0.3" />
- 		<dependency org="com.vaadin.addon" name="vaadin-touchkit-agpl" rev="4.0.0.alpha2" conf="default->default" />
+ 	    <dependency org="com.vaadin.addon" name="vaadin-touchkit-agpl" rev="4.0.0.alpha3"/>
 	    <dependency org="org.vaadin.addons" name="animator" rev="2.0.0" />
 	    <dependency org="org.vaadin.addons" name="dom" rev="0.1.0" /> <!-- for animator -->
  		<dependency org="org.vaadin.addon" name="confirmdialog" rev="2.0.5" />
@@ -78,7 +79,6 @@
         <dependency org="org.vaadin.addon" name="ios7hotfixes" rev="6.0.2" />
         <!-- for hbncontainer -->
         <dependency org="com.google.guava" name="guava" rev="16.0.1" />
-        <dependency org="org.vaadin.addons" name="fonticon" rev="7.1.1" />
         <dependency org="net.sf.saxon" name="Saxon-HE" rev="9.5.1-5"/>
         <dependency org="org.peimari" name="maddon" rev="1.5" />
         <!-- won't work with V 7.* 
