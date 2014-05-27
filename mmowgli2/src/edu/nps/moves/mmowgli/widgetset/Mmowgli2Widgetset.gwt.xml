@@ -30,13 +30,9 @@
 
     <inherits name="org.vaadin.jouni.animator.AnimatorWidgetset" />
 
-    <inherits name="com.vaadin.addon.touchkit.gwt.TouchKitWidgetSet" />
-
     <inherits name="fi.jasoft.qrcode.QrcodeWidgetset" />
 
     <inherits name="org.vaadin.addon.leaflet.draw.DrawWidgetset" />
-
-    <inherits name="edu.nps.moves.mmowgliMobile.gwt.MmowgliMobileWidgetSet" />
 
     <inherits name="com.vaadin.addon.charts.Widgetset" />
 
@@ -46,15 +42,11 @@
 
     <inherits name="com.vaadin.addon.timeline.gwt.TimelineWidgetSet" />
 
-    
-
     <inherits name="org.vaadin.jouni.restrain.RestrainWidgetset" />
-
-    
 
     <inherits name="org.vaadin.jouni.dom.DomWidgetset" />
 
-    
+    <inherits name="com.vaadin.addon.touchkit.gwt.TouchKitWidgetSet" />
 
-    
+    <inherits name="edu.nps.moves.mmowgliMobile.gwt.MmowgliMobileWidgetSet" />
 </module>
