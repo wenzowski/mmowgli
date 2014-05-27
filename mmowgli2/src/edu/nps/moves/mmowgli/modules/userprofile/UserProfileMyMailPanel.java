@@ -83,7 +83,6 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
     mailPanel = new Panel();
     mailPanel.setSizeFull();
     mailPanel.setContent(panelVL=new VerticalLayout());
-    mailPanel.addStyleName("m-cyanborder");
     panelVL.setSpacing(false);//(true);
   }
 

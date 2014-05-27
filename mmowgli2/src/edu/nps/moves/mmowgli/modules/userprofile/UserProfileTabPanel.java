@@ -91,11 +91,9 @@ public abstract class UserProfileTabPanel extends HorizontalLayout implements Mm
     setWidth("960px");
     setHeight("750px");  // must fill the background
     setSpacing(false); // new
-    addStyleName("m-greenborder");
     
     leftLay = new VerticalLayout();
     leftLay.addStyleName("m-userprofiletabpanel-left");
-    leftLay.addStyleName("m-redborder");
     leftLay.setWidth("245px"); //"205px"); // plus 45 padding = 250
     leftLay.setMargin(false);
     
@@ -120,7 +118,6 @@ public abstract class UserProfileTabPanel extends HorizontalLayout implements Mm
     rightLay = new VerticalLayout();
     rightLay.setSizeUndefined();  // will expand with content
 
-    rightLay.addStyleName("m-blueborder");
     rightLay.addStyleName("m-tabpanel-right");
     rightLay.addStyleName("m-userprofile-tabpanel-font");
     
