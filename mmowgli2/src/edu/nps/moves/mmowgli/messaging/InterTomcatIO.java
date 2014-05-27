@@ -48,23 +48,20 @@ import edu.nps.moves.mmowgli.hibernate.SessionManager;
  */
 public interface InterTomcatIO
 {
+  public void send(MMessagePacket pkt);
   public void send(char messageType, String message, String ui_id);
   public void sendDelayed(char messageType, String message, String ui_id);
   public void sendDelayed(char messageType, String message, String ui_id, long msec);
-  public void addReceiver(Receiver recvr);
-  public void removeReceiver(Receiver recvr);
+  public void addReceiver(InterTomcatReceiver recvr);
+  public void removeReceiver(InterTomcatReceiver recvr);
   public void kill();
   
-  public interface Receiver
+  public interface InterTomcatReceiver
   {
     /**
-     * @param messageType
-     * @param message
-     * @param uuid
-     * @param sessMgr
      * @return true if need to resend because db is lagging
      */
-    public boolean messageReceivedOob(char messageType, String message, String ui_id, String tomcat_id, String uuid, SessionManager sessMgr);
-    public void    oobEventBurstComplete(SessionManager sessMgr);
+    public boolean handleIncomingTomcatMessageOob(MMessagePacket packet, SessionManager sessMgr);
+    public void    handleIncomingTomcatMessageEventBurstCompleteOob(SessionManager sessMgr);
   }
 }

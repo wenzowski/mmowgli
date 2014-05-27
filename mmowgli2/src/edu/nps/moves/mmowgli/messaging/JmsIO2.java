@@ -33,17 +33,28 @@
  */
 package edu.nps.moves.mmowgli.messaging;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import static edu.nps.moves.mmowgli.MmowgliConstants.INSTANCEREPORT;
+import static edu.nps.moves.mmowgli.MmowgliConstants.INSTANCEREPORTCOMMAND;
+import static edu.nps.moves.mmowgli.MmowgliConstants.JMS_INTERNODE_TOPIC;
+import static edu.nps.moves.mmowgli.MmowgliConstants.JMS_INTERNODE_URL;
+import static edu.nps.moves.mmowgli.MmowgliConstants.JMS_MESSAGE_SOURCE_TOMCAT_ID;
 
 import java.util.UUID;
 
-import javax.jms.*;
+import javax.jms.Connection;
+import javax.jms.DeliveryMode;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.Session;
+import javax.jms.Topic;
+import javax.jms.TopicPublisher;
+import javax.jms.TopicSession;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQTopicPublisher;
 
 import edu.nps.moves.mmowgli.MmowgliConstants;
-import edu.nps.moves.mmowgli.messaging.Broadcaster.BroadcastListener;
 import edu.nps.moves.mmowgli.utility.SysOut;
 
 /**
@@ -64,7 +75,7 @@ import edu.nps.moves.mmowgli.utility.SysOut;
  * @author DMcG
  * @version $Id$
  */
-public class JmsIO2 extends DefaultInterSessionIO implements MessageListener, BroadcastListener
+public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
 {
 
   /**
@@ -114,7 +125,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements MessageListener, Br
     String jmsTopic = JMS_INTERNODE_TOPIC;
 
     if (jmsUrl == null || jmsTopic == null) {
-      SysOut.println("JmsIO2: No JMS server URL found, or no JMS Topic. Not performing any between-tomcat-servers event messaging");
+      SysOut.println("JmsIO2: No JMS server URL = "+jmsUrl + " jmsTopic = " + jmsTopic + ". Not performing any between-tomcat-servers event messaging");
     }
     else { // appropriate constants found, set up JMS
       try {
@@ -174,7 +185,6 @@ public class JmsIO2 extends DefaultInterSessionIO implements MessageListener, Br
         jmsExternalConsumer = null;
       }
       
-      Broadcaster.register(this);
 /*      try {
         subscribeToLocalJMS();
       }
@@ -210,12 +220,12 @@ public class JmsIO2 extends DefaultInterSessionIO implements MessageListener, Br
    * @param messageType
    * @param message
    */
-  public boolean sendJms(char messageType, String message, String ui_id, UUID msgID)
+  public boolean sendJms(char messageType, String message, String session_id, String msgID)
   {
     // If we've got a valid JMS connection, ie it didn't fail on setup
     if ((jmsExternalPublisher != null) && (JMS_INTERNODE_TOPIC != null)) {  
       try {
-        return sendJms(JMSMessageUtil.create(jmsExternalSession, messageType, message, ui_id, tomcatServerIdentifier,msgID));
+        return sendJms(JMSMessageUtil.create(jmsExternalSession, messageType, message, session_id, tomcatServerIdentifier,msgID));
       }
       catch(JMSException ex) {
         JMSMessageUtil.showException("Exception in JMSIO2.sendJms(): ",ex);
@@ -227,7 +237,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements MessageListener, Br
   /**
    * Sends out a locally-generated message to the external JMS side.
    */
-  public boolean sendJms(Message jmsMessage)
+  public boolean sendJms(Message jmsMessage)  // this is a javax.jms.Message
   {
     // If we've got a valid JMS connection, ie it didn't fail on setup
     if ((jmsExternalPublisher != null) && (JMS_INTERNODE_TOPIC != null)) {
@@ -238,7 +248,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements MessageListener, Br
         if (MmowgliConstants.FULL_MESSAGE_LOG)
           JMSMessageUtil.dump("JmsIO: Pub: ",jmsMessage);        
         else {
-          char mTyp = JMSMessageUtil.getType(jmsMessage);
+          //char mTyp = JMSMessageUtil.getType(jmsMessage);
           //doSysOut("P"+mTyp);
         }
         return true; // good send if we got here
@@ -255,43 +265,50 @@ public class JmsIO2 extends DefaultInterSessionIO implements MessageListener, Br
    * This is the "send" method to send to external
    */
   @Override
-  public void send(char messageType, String message, String ui_id)
+  public void send(char messageType, String message, String session_id)
   {
-    sendJms(messageType,message,ui_id,UUID.randomUUID());
+    sendJms(messageType,message,session_id,UUID.randomUUID().toString());
   }
 
-  /* Where messages from the local node come in
-   */
   @Override
-  public void receiveBroadcast(MMessagePacket pkt)
+  public void send(MMessagePacket pkt)
   {
+    sendJms(pkt.msgType,pkt.msg,pkt.session_id,pkt.message_uuid);
+  }
+  /* Where messages from the local tomcat broadcaster come in*/
+
+  public void sendSessionMessage(MMessagePacket pkt)
+  {
+    pkt.tomcat_id = tomcatServerIdentifier;  // mark  who's sending
     // First give to local receivers (AppMaster)
+    // is this required?
+    /*
     try {
-      deliverToReceivers(pkt.msgType, pkt.msg, pkt.ui_id, pkt.tomcat_id, pkt.UUID, false);
+      deliverToReceivers(pkt,false);
     }
     catch (Throwable ex) { // JMSException ex) {
       JMSMessageUtil.showException("JmsIO2: Cannot decode received message/ ", ex);
       return;
     }
+*/
+    if (jmsExternalSession == null) // no inter-node comms.
+      return;
 
-    if (jmsExternalSession == null)
-      return; // no inter-node comms.
     if (isLocalMessageOnly(pkt.msgType))
       return;
 
+
     String whichException = "";
     try {
-      // External msgs also end up here. We discard anything NOT sent by us to prevent loops.
-      // JMSMessageUtil.dump("*****Message received on appmaster (JmsIO2) from local jms, going to ext: ", mess);
-      if (pkt.tomcat_id.equals(tomcatServerIdentifier)) {
         whichException = "Error in JMSMessageUtil.clone(), ";
         Message newmess = JMSMessageUtil.clone(jmsExternalSession, pkt, JMS_MESSAGE_SOURCE_TOMCAT_ID, tomcatServerIdentifier);
+        
         whichException = "Error in sendJMS(newmess), ";
         sendJms(newmess);
-      }
     }
-    catch (Throwable e) { // JMSException e) {
+    catch (Throwable e) {
       JMSMessageUtil.showException("JmsIO2: Cannot send locally-generated JMS message (" + whichException + ")/ ", e);
+      e.printStackTrace();
     }
   }
 
@@ -307,6 +324,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements MessageListener, Br
   {
     try {
       //JMSMessageUtil.dump("*****Message received on appmaster (JmsIO2) from external jms: ",message);
+      System.out.println("*****Message received on appmaster (JmsIO2) from external jms");
       MMessagePacket pkt = JMSMessageUtil.decode(message);
       // We discard anything sent by us so we don't get into an infinite feedback loop      
       if (!pkt.tomcat_id.equals(tomcatServerIdentifier)) {
@@ -321,17 +339,24 @@ public class JmsIO2 extends DefaultInterSessionIO implements MessageListener, Br
             return; // consumed
 
          doSysOut("R"+pkt.msgType);
-         Broadcaster.broadcast(pkt);
-      }     
+
+         deliverToReceivers(pkt, false); // I think we let the registered receivers handle it
+         // Not this..
+         /*
+         MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
+         if(globs != null)
+           globs.getAppMaster().receivedFromOtherNodes(pkt);  */
+      }
+      else
+        JMSMessageUtil.dump("*****Message dumped because it's from me.", message);
     }
     catch (JMSException e) {
-      JMSMessageUtil.showException("JmsIO2: Error processing message received from external JMS: ",e);
+      JMSMessageUtil.showException("Exception in JmsIO2.onMessage(): ",e);
       return;
     }
     catch (Throwable t) {
-      System.err.println("Exception in JmsIO2.onMessage() (probably non-mmowgli message): "+t.getClass().getSimpleName()+": "+t.getLocalizedMessage());
-      if(message != null)
-        System.err.println("Message: "+message.toString());
+      System.err.println("Exception in JmsIO2.onMessage(): "+t.getClass().getSimpleName()+": "+t.getLocalizedMessage());
+      t.printStackTrace();
     }
   }
   

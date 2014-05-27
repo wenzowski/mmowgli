@@ -75,10 +75,10 @@ public abstract class InterSessionIOBase implements InterTomcatIO
   class MySender implements MessageSender
   {
     @Override
-    public void sendMessage(char msgType, String message, String ui_id, ScheduledFuture<?>sf)
+    public void sendMessage(char msgType, String message, String session_id, ScheduledFuture<?>sf)
     {
       tasks.remove(sf);
-      send(msgType, message, ui_id);
+      send(msgType, message, session_id);
     }   
   }
   
