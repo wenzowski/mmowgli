@@ -88,11 +88,8 @@ public class ActionDashboardTabActionPlans extends ActionDashboardTabPanel imple
     flowLay.setComponentAlignment(contentLab, Alignment.TOP_LEFT);
     flowLay.addStyleName("m-actionplan-mission-content-text");
 
-    AbsoluteLayout rightLay = getRightLayout(); // .addComponent(new Label("theplanright"), "top:0px;left:0px");
-
+    AbsoluteLayout rightLay = getRightLayout();
     flowLay = new VerticalLayout();
-    flowLay.setWidth("95%");
-    flowLay.setHeight("99%");
     rightLay.addComponent(flowLay, "top:0px;left:0px");
     flowLay.setSpacing(true);
     flowLay.setStyleName("m-actionplan-plan-rightside"); // set the style name so the css's below can use it (e.g.: .m-actionplan-plan-rightside
@@ -135,8 +132,9 @@ public class ActionDashboardTabActionPlans extends ActionDashboardTabPanel imple
       table = new ActionPlanTable(new AllPlansInThisMove<ActionPlan>(),sessMgr);
 
     flowLay.addComponent(table);
+    flowLay.setWidth("669px");
     table.setWidth("100%");
-    table.setHeight("650px");   
+    table.setHeight("680px");   
   }
 
   @Override
