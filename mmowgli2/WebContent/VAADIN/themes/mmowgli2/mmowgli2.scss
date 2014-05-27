@@ -7,12 +7,24 @@
 /* This contains all of your theme.*/
 /* If somebody wants to extend the theme she will include this mixin. */
 
-/* 13 Mar 2014: images gotten from "background: transparent url('#{$imageRepo}/blah.png') no-repeast;" don't get their token replaced
+/* 13 Mar 2014: images gotten from "background: transparent url('#{$imageRepo}/blah.png') no-repeat;" don't get their token replaced
    apparently have to use explicit background-image.... */
    
 @mixin mmowgli2 {
   /* Include all the styles from the reindeer theme */
   @include reindeer;
+
+.miketest .popupContent .v-window-wrap .v-window-outerheader {
+  background:transparent;
+}
+.miketest .popupContent .v-window-wrap .v-window-outerheader:hover {
+  background:grey;
+  opacity:.1;
+  border-bottom: thin solid grey;
+}
+.miketest .popupContent .v-window-wrap .v-window-maximizebox {
+  visibility:hidden;
+}
 
   /* these 2 work together */
   .m-mmowgliouterframe {
@@ -301,7 +313,7 @@ div .m-textarea-greyborder, .m-greyborder {
   height:124px;
  } 
   
-  .v-nativebutton-m-howToPlayButton {
+ .v-nativebutton-m-howToPlayButton {
   background: transparent no-repeat;
   background-image: url('#{$imageRepo}/howToPlay181w103h.png');
   border-style:none;
@@ -310,7 +322,7 @@ div .m-textarea-greyborder, .m-greyborder {
 } 
 .v-nativebutton-m-howToPlayButton:hover {
   background: transparent no-repeat;
-  background-image: url('#{$imageRepo}/howToPlayHover181w103h.png') no-repeat;
+  background-image: url('#{$imageRepo}/howToPlayHover181w103h.png');
   border-style:none;
   width:181px;
   height:103px;
@@ -479,27 +491,44 @@ div .m-textarea-greyborder, .m-greyborder {
     opacity:0.4;
     filter:alpha(opacity=40); /* For IE8 and earlier */		
 }
-  .v-nativebutton-m-continueButton {
+.m-cardsummary-movelabel {
+  color: #6C6D6F;
+  font-family: helvetica;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 100%;
+  font-style: italic;
+  text-align:center:
+}
+.m-cardsummary-movelabel-small {
+  color: #6C6D6F;
+  font-family: helvetica;
+  font-size: 8px;
+  line-height: 100%;
+  font-style: italic;
+  text-align:center:
+}
+.v-nativebutton-m-continueButton {
     background: transparent no-repeat;
     background-image: url('#{$imageRepo}/continueButt100w38h.png');
     border-style:none;
     width:100px;
     height:38px;
-  }
-  .v-nativebutton-m-continueButton:hover {
+}
+.v-nativebutton-m-continueButton:hover {
     background: transparent no-repeat;
     background-image: url('#{$imageRepo}/continueButtHover100w38h.png');
     border-style:none;
     width:100px;
     height:38px;
-  }
-  .v-nativebutton-m-cancelButton {
+}
+.v-nativebutton-m-cancelButton {
     background: transparent no-repeat;
     background-image:url('#{$imageRepo}/cancelButt89w38h.png');
     border-style:none;
     width:89px;
     height:38px;
-  }
+}
 .v-nativebutton-m-cancelButton:hover {
   background: transparent no-repeat;
   background-image:url('#{$imageRepo}/cancelButtHover89w38h.png');
@@ -606,22 +635,24 @@ div .m-textarea-greyborder, .m-greyborder {
   font-family: helvetica;
   font-size: 14px;	
   line-height: 100%;
-  }
+}  
 .m-mmowglidialog2 .popupContent .v-window-wrap {
-	border:none;
+  border:none;
 }
 .m-mmowglidialog2 .v-window-outerheader{
-	background-image: none;
-	background-color:transparent; /*display:none;*/
+  background-image: none;
+  background-color:transparent;
 }
 .m-mmowglidialog2 .v-window-outerheader:hover {
-	/*background:url("common/img/vertical-sprites.png") repeat-x scroll left -1936px black;*/
-	background-image:url("#{$imageRepo}/dialog2DragHere136w52h.png");
-	background-color:transparent;
-	background-position:center top;
-	background-repeat:no-repeat;
-	height:25px; /* try cutting off bottom */
-	/*background-color:blue;*/
+  background-color: grey;
+  opacity:.35;  	
+  margin-left:200px;
+  margin-right:200px;
+  border-top-left-radius:25px;
+  border-top-right-radius:25px;
+}
+.m-mmowglidialog2 .v-window-maximizebox {
+  visibility: hidden;
 }
 .m-mmowglidialog2 .v-window-footer {
 	background-color: transparent;
@@ -642,6 +673,7 @@ div .m-textarea-greyborder, .m-greyborder {
 .m-mmowglidialog2-header {
   background-image:url('#{$imageRepo}/dialog2Header2000w75h.png');
   background-repeat:no-repeat;
+  
 }
 .m-mmowglidialog2-footer {
   background-image:url('#{$imageRepo}/dialog2Footer2000w36h.png');
@@ -658,6 +690,7 @@ div .m-textarea-greyborder, .m-greyborder {
   
 /*
 .m-dialog-content .v-treetable .v-table-body,
+
 .m-tabpanel-right .v-treetable .v-table-body,
 .m-cardChainTreeTable .v-table-body {
 	background-color: transparent;
@@ -908,7 +941,14 @@ div div .m-vcr-fonticon{
 	font-family: helvetica;
 	font-size: 18px;
 }
-
+.m-cardlarge-movelabel {
+  color: #6C6D6F;
+  font-family: helvetica;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 100%;
+  text-align: right;
+}
 .m-cursor-pointer {
 	cursor: pointer;
 }
