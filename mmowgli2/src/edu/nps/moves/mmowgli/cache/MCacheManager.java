@@ -49,8 +49,9 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 //import edu.nps.moves.mmowgli.hibernate.HibernateContainers;
 import edu.nps.moves.mmowgli.hibernate.*;
-import edu.nps.moves.mmowgli.messaging.InterTomcatIO.Receiver;
+import edu.nps.moves.mmowgli.messaging.InterTomcatIO.InterTomcatReceiver;
 import edu.nps.moves.mmowgli.messaging.MMessage;
+import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.utility.BeanContainerWithCaseInsensitiveSorter;
 import edu.nps.moves.mmowgli.utility.M;
 
@@ -65,7 +66,7 @@ import edu.nps.moves.mmowgli.utility.M;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class MCacheManager implements Receiver
+public class MCacheManager implements InterTomcatReceiver
 {
   private SortedMap<Long,Card> allNegativeIdeaCardsCurrentMove;
   private SortedMap<Long,Card> unhiddenNegativeIdeaCardsCurrentMove;
@@ -402,31 +403,31 @@ public class MCacheManager implements Receiver
   }
 
   @Override
-  public boolean messageReceivedOob(char messageType, String message, String ui_id, String tomcat_id, String uuid, SessionManager sessMgr)
+  public boolean handleIncomingTomcatMessageOob(MMessagePacket packet, SessionManager sessMgr)
   {
     System.out.println("MCacheManager.messageReceivedOob");
-    switch (messageType) {
+    switch (packet.msgType) {
       case NEW_CARD:
       case UPDATED_CARD:
-        newOrUpdatedCard(messageType,message,sessMgr);
+        newOrUpdatedCard(packet.msgType,packet.msg,sessMgr);
         break;
       case NEW_USER:
       case UPDATED_USER:
-        newOrUpdatedUser(messageType,message,sessMgr);
+        newOrUpdatedUser(packet.msgType,packet.msg,sessMgr);
         break;
       case DELETED_USER:
-        deletedUser(messageType,message,sessMgr);
+        deletedUser(packet.msgType,packet.msg,sessMgr);
         break;
       case GAMEEVENT:
-        newGameEvent(messageType,message,sessMgr);
+        newGameEvent(packet.msgType,packet.msg,sessMgr);
         break;
       default:
     }
-    return false; // don't want a retry
+    return false; // don't want a retry    
   }
 
   @Override
-  public void oobEventBurstComplete(SessionManager sessMgr)
+  public void handleIncomingTomcatMessageEventBurstCompleteOob(SessionManager sessMgr)
   {
   }
 
