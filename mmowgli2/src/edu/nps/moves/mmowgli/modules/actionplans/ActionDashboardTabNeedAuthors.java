@@ -89,8 +89,6 @@ public class ActionDashboardTabNeedAuthors extends ActionDashboardTabPanel imple
     AbsoluteLayout rightLay = getRightLayout();
 
     flowLay = new VerticalLayout();
-    flowLay.setWidth("95%");
-    flowLay.setHeight("99%");
     rightLay.addComponent(flowLay, "top:0px;left:0px");
     flowLay.setSpacing(true);
     flowLay.setStyleName("m-actionplan-plan-rightside"); // set the style name so the css's below can use it (e.g.: .m-actionplan-plan-rightside
@@ -115,8 +113,9 @@ public class ActionDashboardTabNeedAuthors extends ActionDashboardTabPanel imple
    }
 
     flowLay.addComponent(table);
+    flowLay.setWidth("669px");
     table.setWidth("100%");
-    table.setHeight("650px");   
+    table.setHeight("680px");   
   }
   
   @Override

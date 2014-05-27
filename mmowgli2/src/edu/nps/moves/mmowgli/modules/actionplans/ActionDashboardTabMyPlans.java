@@ -125,8 +125,6 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
     AbsoluteLayout rightLay = getRightLayout();
 
     flowLay = new VerticalLayout();
-    flowLay.setWidth("95%");
-    flowLay.setHeight("99%");
     rightLay.addComponent(flowLay, "top:0px;left:0px");
     flowLay.setSpacing(true);
     flowLay.setStyleName("m-actionplan-plan-rightside"); // set the style name so the css's below can use it (e.g.: .m-actionplan-plan-rightside
@@ -213,13 +211,13 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
     {
       Table newtable = new ActionPlanTable(hCont);
       newtable.setCaption(caption);
-      newtable.setWidth("658px"); // parent is un sized 100%");
-      newtable.setHeight("650px");
-      newtable.addStyleName("m-redborder");
 
       if(table != null)
         flowLay.removeComponent(table);
       flowLay.addComponent(newtable);
+      flowLay.setWidth("669px");
+      newtable.setWidth("100%");
+      newtable.setHeight("680px");
       table = newtable;
     }
   }

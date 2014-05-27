@@ -62,16 +62,14 @@ public abstract class ActionDashboardTabPanel extends AbsoluteLayout implements 
   {
     setWidth(ACTIONDASHBOARD_TABCONTENT_W);
     setHeight(ACTIONDASHBOARD_TABCONTENT_H);
-    addStyleName("m-greenborder");
     
     leftAbsLay = new AbsoluteLayout();
     leftAbsLay.setWidth(ACTIONDASHBOARD_TABCONTENT_LEFT_W);
     leftAbsLay.setHeight(ACTIONDASHBOARD_TABCONTENT_LEFT_H);
     
     rightAbsLay = new AbsoluteLayout();
-    rightAbsLay.setWidth(ACTIONDASHBOARD_TABCONTENT_RIGHT_W);
+    rightAbsLay.setWidth("669px"); // this needs about 10 more px //ACTIONDASHBOARD_TABCONTENT_RIGHT_W);
     rightAbsLay.setHeight(ACTIONDASHBOARD_TABCONTENT_RIGHT_H);
-    rightAbsLay.addStyleName("m-cyanborder");
     
     addComponent(leftAbsLay,ACTIONDASHBOARD_TABCONTENT_LEFT_POS);
     addComponent(rightAbsLay,ACTIONDASHBOARD_TABCONTENT_RIGHT_POS);
