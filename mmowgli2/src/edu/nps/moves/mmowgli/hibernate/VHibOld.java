@@ -216,9 +216,9 @@ public class VHibOld implements SessionManager
     }
 
   }
-  public void addDataBaseListeners(AppMaster apMas)
+  public void addDataBaseListeners()//AppMaster apMas)
   {
-    new DatabaseListeners(sr, apMas);
+    new DatabaseListeners(sr);//, apMas);
   }
   
   private static void configureHibernateSearch()

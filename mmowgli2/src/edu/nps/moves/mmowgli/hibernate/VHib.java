@@ -84,9 +84,9 @@ public final class VHib extends AbstractVHib implements SessionManager
     return instance()._openSession();
   }
 
-  public void installDataBaseListeners(AppMaster apMas)
+  public void installDataBaseListeners()//AppMaster apMas)
   {
-    instance()._installDataBaseListeners(apMas);    
+    instance()._installDataBaseListeners();//apMas);    
   }
   
   @SuppressWarnings({ "rawtypes", "unchecked" })
