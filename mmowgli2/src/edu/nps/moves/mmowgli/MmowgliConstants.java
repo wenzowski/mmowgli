@@ -178,8 +178,8 @@ public class MmowgliConstants
   /** Our jms message properties */
   public static String JMS_MESSAGE_TYPE = "messageType";
   public static String JMS_MESSAGE_TEXT = "message";
-  public static String JMS_MESSAGE_UUID = "UUID";
-  public static String JMS_MESSAGE_SOURCE_UI_ID = "messageSourceUiId";
+  public static String JMS_MESSAGE_UUID = "messageUUID";
+  public static String JMS_MESSAGE_SOURCE_SESSION_ID = "messageSourceSessionId";
   public static String JMS_MESSAGE_SOURCE_TOMCAT_ID = "messageSourceTomcatId";
   
   public static final String CLUSTERMONITORURL = "http://test.mmowgli.nps.edu/ganglia";

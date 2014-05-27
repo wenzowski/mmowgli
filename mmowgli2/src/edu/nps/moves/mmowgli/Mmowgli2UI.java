@@ -39,7 +39,6 @@ import java.util.UUID;
 import org.hibernate.Session;
 import org.vaadin.cssinject.CSSInject;
 
-import com.porotype.iconfont.FontAwesome;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
@@ -53,7 +52,7 @@ import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.messaging.MessagingManager;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
-import edu.nps.moves.mmowgliMobile.VMShareTest;
+//import edu.nps.moves.mmowgliMobile.VMShareTest;
 
 /**
  * Mmowgli2UI.java
@@ -117,7 +116,7 @@ abstract public class Mmowgli2UI extends UI
     System.out.println("Into UI.init()");
     uuid = UUID.randomUUID();
     //pusher.extend(this);
-    FontAwesome.load();
+
     setWindowTitle();
     VerticalLayout layout = new VerticalLayout();
     setContent(layout);
@@ -126,9 +125,9 @@ abstract public class Mmowgli2UI extends UI
       layout.addComponent(new Label("Placeholder for main game entry point once Vaadin 7 port is complete."));
       return;
     }
-    System.out.println("VMShareTest="+VMShareTest.test);
-    System.out.println("VMShareTest now changed to Mmowgli2UI");
-    VMShareTest.test = "Mmowgli2UI";
+  //  System.out.println("VMShareTest="+VMShareTest.test);
+  //  System.out.println("VMShareTest now changed to Mmowgli2UI");
+  //  VMShareTest.test = "Mmowgli2UI";
       
     MmowgliSessionGlobals globs = getSession().getAttribute(MmowgliSessionGlobals.class);
     if(!globs.initted) {
@@ -263,8 +262,12 @@ abstract public class Mmowgli2UI extends UI
   
   public static MmowgliSessionGlobals getGlobals()
   {
-    return ((Mmowgli2UI)UI.getCurrent()).getSessionGlobals();
+    Mmowgli2UI mui = (Mmowgli2UI)UI.getCurrent();
+    if(mui != null)
+      return mui.getSessionGlobals();
+    return null;
   }
+  
   public static Mmowgli2UI getAppUI()
   {
     return (Mmowgli2UI)UI.getCurrent();
