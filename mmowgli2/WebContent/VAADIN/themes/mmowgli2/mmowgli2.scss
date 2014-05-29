@@ -14,18 +14,12 @@
   /* Include all the styles from the reindeer theme */
   @include reindeer;
 
-.miketest .popupContent .v-window-wrap .v-window-outerheader {
-  background:transparent;
-}
-.miketest .popupContent .v-window-wrap .v-window-outerheader:hover {
-  background:grey;
-  opacity:.1;
-  border-bottom: thin solid grey;
-}
-.miketest .popupContent .v-window-wrap .v-window-maximizebox {
-  visibility:hidden;
-}
-
+  /* this works around an apparent style bug for treetable where double arrows were showing */
+  .v-table-cell-content-m-cardchain-row .v-table-cell-wrapper .v-treetable-node-open,
+  .v-table-cell-content-m-cardchain-row .v-table-cell-wrapper .v-treetable-node-closed {
+    background:none;
+  }
+  
   /* these 2 work together */
   .m-mmowgliouterframe {
     padding-left: 45px;
