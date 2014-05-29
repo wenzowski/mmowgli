@@ -87,9 +87,9 @@ public class MmowgliLinkInserter
     ")"+
   ")";
   
-  public static final String ACTPLN_EVENTNUM  = "" + ACTIONPLANSHOWCLICK;
-  public static final String CARD_EVENTNUM    = "" + CARDCLICK;
-  public static final String USER_EVENTNUM    = "" + SHOWUSERPROFILECLICK;
+  public static final String ACTPLN_EVENTNUM  = "" + ACTIONPLANSHOWCLICK.ordinal();
+  public static final String CARD_EVENTNUM    = "" + CARDCLICK.ordinal();
+  public static final String USER_EVENTNUM    = "" + SHOWUSERPROFILECLICK.ordinal();
   
   private static Pattern userLinkPattern   = Pattern.compile(USERLINK_REGEX,  Pattern.CASE_INSENSITIVE);
   private static Pattern cardLinkPattern   = Pattern.compile(CARDLINK_REGEX,  Pattern.CASE_INSENSITIVE);
@@ -239,7 +239,7 @@ public class MmowgliLinkInserter
  
   private static String buildLink(linkType lTyp, String original, String objectId, String eventNum, Session sess, Object cardOrApOrUser)
   {
-    StringBuilder sb = new StringBuilder("#");
+    StringBuilder sb = new StringBuilder("#!");
     sb.append(eventNum);
     sb.append("_");
     sb.append(objectId);
