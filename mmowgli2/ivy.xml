@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE ivy-module [
-	<!ENTITY vaadin.version "7.2.0">
+	<!ENTITY vaadin.version "7.2.1">
 ]>
 
 <ivy-module version="2.0"
@@ -24,6 +24,7 @@
 		  <!-- this is since we incude guava below, see https://vaadin.com/forum#!/thread/5395743 -->
 		  <exclude org="com.vaadin.external.google" name="guava"/>
         </dependency>
+        
 		<!-- Vaadin themes -->
 		<dependency org="com.vaadin" name="vaadin-themes" rev="&vaadin.version;" />
 
