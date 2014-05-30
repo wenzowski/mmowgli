@@ -285,8 +285,11 @@ public class AbstractMmowgliControllerHelper
         return ret;  // Don't display messages during login sequence
 
       GameEvent ge = (GameEvent) M.getSession(sessMgr).get(GameEvent.class, MSG.id);
+      if(ge == null)
+        ge = ComeBackWhenYouveGotIt.fetchGameEventWhenPossible(MSG.id);
+      
       if(ge == null) {
-        System.err.println("Can't get Game Event from database: id="+MSG.id+", MmowgliOneApplicationController on "+AppMaster.getServerName());
+        System.err.println("Can't get Game Event from database: id="+MSG.id+", MmowgliOneApplicationController on "+AppMaster.getInstance().getServerName());
         return ret;
       }
       String bdcstMsg = ge.getDescription();
@@ -863,7 +866,7 @@ public class AbstractMmowgliControllerHelper
   
   public void handlePublishReports()
   {
-    Mmowgli2UI.getGlobals().getAppMaster().pokeReportGenerator();  //todo check if should be static
+    AppMaster.getInstance().pokeReportGenerator();
 
     Notification notification = new Notification("", "Report publication begun", Notification.Type.WARNING_MESSAGE);
 
