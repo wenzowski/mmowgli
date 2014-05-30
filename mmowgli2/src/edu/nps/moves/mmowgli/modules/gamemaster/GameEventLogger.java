@@ -65,7 +65,7 @@ public class GameEventLogger
   private static String svrName;
   private static int SVRNAME_LIMIT = 5;
   static {
-    svrName = AppMaster.getServerName();
+    svrName = AppMaster.getInstance().getServerName();
     if(svrName == null)
       svrName = "";
     else {
@@ -240,7 +240,7 @@ public class GameEventLogger
     sb.append(" from ");
     sb.append(u.getLocation());
     sb.append(" / ");
-    String browAddr = AppMaster.browserAddress();
+    String browAddr = AppMaster.getInstance().browserAddress();
     sb.append(browAddr==null?"null":browAddr);
     
     if(typ == GameEvent.EventType.USERLOGIN && u.isViewOnly())  // guest
@@ -393,7 +393,7 @@ public class GameEventLogger
   
   private static void logReportGeneration(SingleSessionManager sessMgr, String txt)
   {
-    String url = AppMaster.getAppUrlString();
+    String url = AppMaster.getInstance().getAppUrlString();
     if(!url.endsWith("/"))
       url = url+"/";
     txt = txt + " "+url+"reports";
