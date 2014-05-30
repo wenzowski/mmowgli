@@ -9,7 +9,6 @@ import org.hibernate.search.Search;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
-import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.db.User;
 
 /**
