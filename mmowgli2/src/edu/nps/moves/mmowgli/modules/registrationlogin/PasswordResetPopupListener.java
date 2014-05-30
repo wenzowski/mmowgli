@@ -54,19 +54,10 @@
  */
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
-import java.util.List;
-
-import org.hibernate.Session;
-
-import com.vaadin.data.validator.EmailValidator;
-import com.vaadin.event.ShortcutAction;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Button;
 
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
-import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.db.pii.EmailPii;
-import edu.nps.moves.mmowgli.db.pii.UserPii;
-import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.db.User;
 
 /**
  * Allow a registered user to reset their forgotten password
@@ -89,9 +80,9 @@ public class PasswordResetPopupListener extends MmowgliDialog implements Button.
     private static final long serialVersionUID = 8282736664554448888L;
 
     private User user; // what gets returned
-    private TextField userIDTf, emailTf;
+  //  private TextField userIDTf, emailTf;
 
-    private String email;
+  //  private String email;
     private boolean error = false;
 
     /**
