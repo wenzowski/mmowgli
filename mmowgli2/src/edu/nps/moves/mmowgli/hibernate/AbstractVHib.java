@@ -51,11 +51,7 @@ import org.hibernate.event.service.internal.EventListenerRegistryImpl;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
 import org.hibernate.internal.SessionFactoryImpl;
-import org.hibernate.search.FullTextSession;
-import org.hibernate.search.Search;
 import org.hibernate.service.ServiceRegistry;
-
-import edu.nps.moves.mmowgli.AppMaster;
 
 /**
  * Class to initialize, configure and manage single SessionFactory instance.  Global across all users sessions and servlets in the same context.  That
