@@ -1,9 +1,7 @@
 package edu.nps.moves.mmowgliMobile.ui;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Calendar;
 
 import com.google.gwt.thirdparty.guava.common.collect.Maps;
 import com.vaadin.addon.touchkit.ui.*;
@@ -12,12 +10,9 @@ import com.vaadin.data.Container;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.*;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
-import edu.nps.moves.mmowgliMobile.MmowgliMobileUI;
 import edu.nps.moves.mmowgliMobile.data.*;
 import edu.nps.moves.mmowgliMobile.data.Message;
 
