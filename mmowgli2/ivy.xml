@@ -20,11 +20,13 @@
 	
 	<dependencies defaultconf="default" defaultconfmapping="default->default">
 		<!-- The core server part of Vaadin -->
+       <dependency org="com.vaadin" name="vaadin-server" rev="&vaadin.version;" />
+		<!--
 		<dependency org="com.vaadin" name="vaadin-server" rev="&vaadin.version;" >
-		  <!-- this is since we incude guava below, see https://vaadin.com/forum#!/thread/5395743 -->
+		   this is since we incude guava below, see https://vaadin.com/forum#!/thread/5395743 
 		  <exclude org="com.vaadin.external.google" name="guava"/>
-        </dependency>
-        
+        </dependency> -->
+         
 		<!-- Vaadin themes -->
 		<dependency org="com.vaadin" name="vaadin-themes" rev="&vaadin.version;" />
 
