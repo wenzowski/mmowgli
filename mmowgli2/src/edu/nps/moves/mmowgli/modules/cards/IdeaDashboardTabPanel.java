@@ -107,13 +107,13 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
     titleHL.setWidth("100%");
     Label lab;
     lab=buildTitleLabel(titleHL,"<center>Creation<br/>Date</center>"); 
-    lab.setWidth(4.0f, UNITS_EM);
+    lab.setWidth(4.0f, Unit.EM); 
     lab=buildTitleLabel(titleHL,"<center>Card<br/>Type</center>");
-    lab.setWidth(6.0f, UNITS_EM);
+    lab.setWidth(6.0f, Unit.EM); 
     lab=buildTitleLabel(titleHL,"Text");
     titleHL.setExpandRatio(lab, 1.0f);
     lab=buildTitleLabel(titleHL,"Author");
-    lab.setWidth(8.0f, UNITS_EM);
+    lab.setWidth(8.0f, Unit.EM); 
     return titleHL;
   }
   
