@@ -1,14 +1,11 @@
 package edu.nps.moves.mmowgli;
 
-import javax.servlet.ServletException;
-
 import org.atmosphere.config.service.AtmosphereInterceptorService;
 import org.atmosphere.cpr.*;
 import org.hibernate.Session;
 import org.hibernate.StaleObjectStateException;
 
 import edu.nps.moves.mmowgli.hibernate.VHib;
-import edu.nps.moves.mmowgli.hibernate.VHibPii;
 
 /**
  * MmowgliAtmosphereInterceptor.java
@@ -24,8 +21,6 @@ import edu.nps.moves.mmowgli.hibernate.VHibPii;
 @AtmosphereInterceptorService
 public class MmowgliAtmosphereInterceptor implements AtmosphereInterceptor
 {
-  private VHib vHib;
-  private VHibPii vHibPii;
   private static int seq = 0;
 
   @Override
