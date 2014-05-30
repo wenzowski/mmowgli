@@ -51,7 +51,6 @@ import org.hibernate.event.service.internal.EventListenerRegistryImpl;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.service.ServiceRegistry;
 
-import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.db.User;
 
 /**
@@ -221,6 +220,7 @@ public class VHibOld implements SessionManager
     new DatabaseListeners(sr);//, apMas);
   }
   
+  @SuppressWarnings("unused")
   private static void configureHibernateSearch()
   {
     cnf.setProperty(HIB_SEARCH_PROVIDER_PROPERTY, HIB_FS_SEARCH_PROVIDER); // use hibernate search (lucene) and use a filesystem dir
