@@ -238,7 +238,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
         
       case MENUGAMEMASTEROPENREPORTSPAGE:
-        String url = AppMaster.getAppUrlString();
+        String url = AppMaster.getInstance().getAppUrlString();
         if(!url.endsWith("/"))
           url = url+"/";
         BrowserWindowOpener.open(url+"reports");
