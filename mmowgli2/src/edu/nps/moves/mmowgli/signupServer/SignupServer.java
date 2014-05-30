@@ -82,7 +82,7 @@ public class SignupServer extends UI
     }
     else {
       // Redirect to game site
-      String url = AppMaster.getAppUrl().toExternalForm();// String url = this.getURL().toExternalForm();
+      String url = AppMaster.getInstance().getAppUrl().toExternalForm();// String url = this.getURL().toExternalForm();
       if(url.endsWith("/") || url.endsWith("\\"))
         url = url.substring(0,url.length()-1);
       if(url.toLowerCase().endsWith(tail2))
