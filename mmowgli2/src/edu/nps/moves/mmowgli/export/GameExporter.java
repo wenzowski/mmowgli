@@ -111,8 +111,7 @@ public class GameExporter extends BaseExporter
   @Override
   public void exportToBrowser(String title)
   {
-    //app.globs().applicationMaster().pokeReportGenerator();
-    AppMaster.pokeReportGenerator();
+    AppMaster.getInstance().pokeReportGenerator();
     //Doesn't show for very long
     Notification notification = new Notification("", "Report publication initiated", Notification.Type.WARNING_MESSAGE);
     notification.setPosition(Position.TOP_CENTER);
@@ -120,7 +119,7 @@ public class GameExporter extends BaseExporter
     //pre v7app.getMainWindow().showNotification(notification);// Show it in the main window.
     notification.show(Page.getCurrent());
     
-    String url = AppMaster.getAppUrlString(); //.toExternalForm();
+    String url = AppMaster.getInstance().getAppUrlString(); //.toExternalForm();
     if(!url.endsWith("/"))
       url = url+"/";
     BrowserWindowOpener.open(url+"reports","_blank");
@@ -185,7 +184,7 @@ public class GameExporter extends BaseExporter
   {
     Element metaElem = createAppend(root,"ApplicationURLs");
     
-    String url = AppMaster.getAppUrlString();
+    String url = AppMaster.getInstance().getAppUrlString();
     url = url==null?"":url;
     
     addElementWithText(metaElem,"Game",url);
