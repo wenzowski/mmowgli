@@ -81,6 +81,7 @@ public class MessageView extends NavigationView implements ClickListener
       setMessage(m,mlist);
     }
     
+    @SuppressWarnings("serial")
     private void buildToolbar() {
         moveButton = new Button(null, this);
         composeButton = new Button(null, this);
