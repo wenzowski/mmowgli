@@ -52,7 +52,6 @@ import org.jasypt.hibernate4.type.EncryptedStringType;
 
 import edu.nps.moves.mmowgli.hibernate.Sess;
 import edu.nps.moves.mmowgli.hibernate.VHib;
-import edu.nps.moves.mmowgli.modules.scoring.ScoreManager2;
 
 /** Used for jasypt encryption of fields */
 
