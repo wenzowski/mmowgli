@@ -90,15 +90,15 @@ public class KeepAliveManager
     // else it's a request, we need to reply
 
     if(recvMsg.response) {
-      if(!recvMsg.responder.equals(AppMaster.getServerName())) {  // don't save my own responses
+      if(!recvMsg.responder.equals(AppMaster.getInstance().getServerName())) {  // don't save my own responses
         // dont save to db...to much toDatabase(recvMsg, sessMgr); // save response as receiver
       }
     }
     else { // request
-      if(!recvMsg.requester.equals(AppMaster.getServerName())) {  // don't answer myself
+      if(!recvMsg.requester.equals(AppMaster.getInstance().getServerName())) {  // don't answer myself
         // send a reply
         recvMsg.response = true;
-        recvMsg.responder = AppMaster.getServerName();
+        recvMsg.responder = AppMaster.getInstance().getServerName();
         recvMsg.respondTime = System.currentTimeMillis();
         toJms(recvMsg);
         // toDatabase(recvMsg, sessMgr);   // receiver adds to db
@@ -144,7 +144,7 @@ public class KeepAliveManager
     {
       sendMsg.uuid = UUID.randomUUID().toString();
       sendMsg.response = false;
-      sendMsg.requester = AppMaster.getServerName();
+      sendMsg.requester = AppMaster.getInstance().getServerName();
       sendMsg.requestTime = System.currentTimeMillis();
       sendMsg.responder = null;
       sendMsg.respondTime = null;
