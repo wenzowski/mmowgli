@@ -33,13 +33,14 @@
 */
 package edu.nps.moves.mmowgli.modules.actionplans;
 
-import static edu.nps.moves.mmowgli.MmowgliEvent.*;
-import static edu.nps.moves.mmowgli.MmowgliConstants.ACTIONPLAN_TABLE_TITLE_CELL;
+import static edu.nps.moves.mmowgli.MmowgliEvent.ACTIONPLANSHOWCLICK;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
@@ -48,7 +49,9 @@ import org.hibernate.criterion.Restrictions;
 import com.vaadin.data.Container;
 import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.data.hbnutil.HbnContainer.EntityItem;
-import com.vaadin.data.util.*;
+import com.vaadin.data.util.AbstractBeanContainer;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.ui.*;
@@ -58,10 +61,14 @@ import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.BaseTheme;
 
-import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.AppEvent;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.SessionManager;
+import edu.nps.moves.mmowgli.hibernate.VHib;
 
 /**
  * ActionPlanTable.java
