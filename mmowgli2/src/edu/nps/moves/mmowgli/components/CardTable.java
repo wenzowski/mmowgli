@@ -33,6 +33,9 @@
 */
 package edu.nps.moves.mmowgli.components;
 
+import static edu.nps.moves.mmowgli.MmowgliEvent.CARDCLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.SHOWUSERPROFILECLICK;
+
 import java.text.SimpleDateFormat;
 import java.util.Set;
 import java.util.Vector;
@@ -41,14 +44,16 @@ import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.data.hbnutil.HbnContainer.EntityItem;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.server.Sizeable;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.BaseTheme;
 
-import edu.nps.moves.mmowgli.*;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.AppEvent;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliController;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.utility.IDButton;
-import static edu.nps.moves.mmowgli.MmowgliEvent.*;
 
 /**
  * CardTable.java
@@ -303,7 +308,7 @@ public class CardTable extends Table implements ItemClickListener
     }
     IDButton uButt = new IDButton(auth.getUserName(), SHOWUSERPROFILECLICK, auth.getId());
     uButt.addStyleName(BaseTheme.BUTTON_LINK);
-    uButt.setWidth(8.0f, Sizeable.UNITS_EM);
+    uButt.setWidth(8.0f, Unit.EM); 
     
     hl.addComponent(uButt);
     hl.setComponentAlignment(uButt, Alignment.MIDDLE_LEFT);
