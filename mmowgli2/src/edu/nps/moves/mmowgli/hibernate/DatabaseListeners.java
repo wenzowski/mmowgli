@@ -300,7 +300,7 @@ public class DatabaseListeners
     String session_id=null;
     if(ui != null)
       session_id = ui.getUUID();
-    Broadcaster.broadcast(new MMessagePacket(msgTyp,msg,session_id,AppMaster.getServerName()));
+    Broadcaster.broadcast(new MMessagePacket(msgTyp,msg,session_id,AppMaster.getInstance().getServerName()));
     
     
 //    InterTomcatIO interNodeIOSess = getInterNodeIO();
