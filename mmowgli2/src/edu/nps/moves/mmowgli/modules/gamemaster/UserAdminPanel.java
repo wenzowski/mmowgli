@@ -710,7 +710,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
         User u = DBGet.getUserFresh(uid);
         List<String> lis = VHibPii.getUserPiiEmails(u.getId());
         String email = lis.get(0);
-        String gameUrl = AppMaster.getAppUrlString();
+        String gameUrl = AppMaster.getInstance().getAppUrlString();
         
         boolean warn = false;
         if(confirmedCb.getValue() == false) {
