@@ -59,6 +59,7 @@ import edu.nps.moves.mmowgli.messaging.JmsIO2;
 import edu.nps.moves.mmowgli.messaging.JmsIO2.FirstListener;
 import edu.nps.moves.mmowgli.messaging.MMessage;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
+import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.M;
 
 /**
@@ -79,7 +80,6 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   private JmsIO2         _jmsIO;
   private static int sequenceCount = 0;
   private int mysequence = -1;
-  private String MY_BROADCAST_SESSION_ID = "AppMasterMessageBroadcastId";
   
   public AppMasterMessaging(AppMaster appMaster)
   {
@@ -129,7 +129,10 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
       case UPDATED_CARD:
         msg = MMessage.MMParse(pkt.msgType,pkt.msg);
         Card c = Card.get(msg.id,sess);
-        sess.refresh(c);
+        if(c != null)
+          sess.refresh(c);
+        else
+          c = ComeBackWhenYouveGotIt.fetchCardWhenPossible(msg.id);
         srcobj = DBGet.getCardFresh(msg.id,sess); // updates cache
         break;
 
@@ -137,7 +140,10 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
       case UPDATED_USER:
         msg = MMessage.MMParse(pkt.msgType,pkt.msg);
         User u = User.get(msg.id,sess);
-        sess.refresh(u);
+        if(u != null)
+          sess.refresh(u);
+        else
+          u = ComeBackWhenYouveGotIt.fetchUserWhenPossible(msg.id);
         srcobj = DBGet.getUserFresh(msg.id,sess);// updates cache
         break;
 /*test
@@ -193,7 +199,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
     // We want to let everyone know we've been updated
     InterTomcatIO sessIO = getInterTomcatIO();
     if (sessIO != null)
-      sessIO.sendDelayed(UPDATE_SESSION_COUNT, AppMaster.getServerName()+"\t"+sessCount, ""); // let this thread return
+      sessIO.sendDelayed(UPDATE_SESSION_COUNT, AppMaster.getInstance().getServerName()+"\t"+sessCount, ""); // let this thread return
   }
 
   // This has come in off the message bus. Keep track of server/logins.  Our own is here too.
@@ -225,13 +231,14 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
     }
     return oa;
   }
-  
+    
   // edu.nps.moves.mmowgli.messaging.InterTomcatIO.Receiver
   // Handler of messages off the JmsIO2 object, which is receiving msgs from other custer nodes
   @Override 
   public boolean handleIncomingTomcatMessageOob(MMessagePacket pkt, SessionManager sessMgr)
   {
-    System.out.println("AppMasterMessaging/JMSIO2.messageReceivedOob()");
+    System.out.println("AppMasterMessaging/JMSIO2.handleIncomingTomcatMessageOob()");
+    
     if(getMcache() != null)
       mcache.handleIncomingTomcatMessageOob(pkt, sessMgr);
 
@@ -249,7 +256,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
         break;
 
       default:
-        Broadcaster.broadcast(pkt);
+        Broadcaster.broadcast(pkt,this);  // last param means I don't want to hear my own messages
     }
 
     // We also pass the message to the SearchManager, which can cause Lucene/Hibernate Search, to index specific
@@ -273,7 +280,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   @Override
   public void handleIncomingSessionMessage(MMessagePacket message)
   {
-    System.out.println("AppMasterMessaging, seq "+mysequence+", incomingSessionMessageHandler(receiveBroadcast())");
+    System.out.println("AppMasterMessaging, seq "+mysequence+", incomingSessionMessageHandler(receiveBroadcast()), tomcat_id = "+message.tomcat_id);
     ((JmsIO2)getInterTomcatIO()).sendSessionMessage(message);
   }
 
