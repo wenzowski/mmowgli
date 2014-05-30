@@ -75,7 +75,7 @@ public class Broadcaster implements Serializable
     listeners.remove(listener);
   }
   
-  public static synchronized void broadcast(final MMessagePacket message)
+  public static synchronized void broadcast(MMessagePacket message, BroadcastListener blackout)
   {
     System.out.println("Broadcaster deivering message");
     // Since we know the listeners need to be quick and not block, we don't need this
@@ -89,7 +89,13 @@ public class Broadcaster implements Serializable
       });
     */
     for(BroadcastListener listener: listeners)
-      listener.handleIncomingSessionMessage(message);
+      if(blackout == null || !blackout.equals(listener))
+        listener.handleIncomingSessionMessage(message);    
+  }
+  
+  public static synchronized void broadcast(final MMessagePacket message)
+  {
+    broadcast(message,null);
   }
   
   /* to keep this from being instantiated */
