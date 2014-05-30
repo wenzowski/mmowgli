@@ -108,7 +108,7 @@ public class Sess
       int lnNum = callingFrame. getLineNumber();
       int lnNum1= callingFrame1.getLineNumber();
       DeferredSysOut.defPrintln(title+objName+" from "+clsName+ "."+mthName+ "/"+lnNum+
-                                            ","+clsName1+"."+mthName1+"/"+lnNum1+"("+AppMaster.getServerName()+")");
+                                            ","+clsName1+"."+mthName1+"/"+lnNum1+"("+AppMaster.getInstance().getServerName()+")");
     }
   }
 }
