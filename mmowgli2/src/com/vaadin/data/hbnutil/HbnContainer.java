@@ -14,7 +14,9 @@
 package com.vaadin.data.hbnutil;
 
 import java.io.Serializable;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -27,8 +29,12 @@ import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.type.ComponentType;
 import org.hibernate.type.Type;
 
-import com.google.common.cache.*;
-import com.vaadin.data.*;
+import com.google.gwt.thirdparty.guava.common.cache.CacheBuilder;
+import com.google.gwt.thirdparty.guava.common.cache.CacheLoader;
+import com.google.gwt.thirdparty.guava.common.cache.LoadingCache;
+import com.vaadin.data.Container;
+import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.data.hbnutil.HbnContainer.EntityItem.EntityProperty;
 import com.vaadin.data.util.MethodProperty;
 import com.vaadin.data.util.converter.Converter.ConversionException;
