@@ -94,7 +94,7 @@ public class CardVisualizerBuilder
     String htmlFileTempPath = htmlFilePath+"temp";
     String d3jsFileTempPath = d3jsFilePath+"temp";
     
-    String appurl = AppMaster.getAppUrlString();
+    String appurl = AppMaster.getInstance().getAppUrlString();
     
     // To minimize synchronization issues, write the html and the json into temp files, then quickly rename properly
     try {
