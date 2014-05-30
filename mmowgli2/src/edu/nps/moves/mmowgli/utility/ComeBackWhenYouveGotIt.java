@@ -38,8 +38,10 @@ import java.lang.reflect.Method;
 
 import org.hibernate.Session;
 
+import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.GameEvent;
 import edu.nps.moves.mmowgli.db.Message;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.MSessionManager;
 import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 
@@ -89,7 +91,7 @@ public class ComeBackWhenYouveGotIt
       public void run()
       {
         for(int i=0; i<10; i++) { // try for 10 seconds
-          try{Thread.sleep(1000l+firstRandomDelay);}catch(InterruptedException ex){}
+          try{Thread.sleep(1000l+firstRandomDelay);}catch(InterruptedException ex){} 
           firstRandomDelay=0l;
           SingleSessionManager ssm = new SingleSessionManager();
           Session sess = ssm.getSession();
@@ -113,5 +115,78 @@ public class ComeBackWhenYouveGotIt
     thr.setName("ComeBackWhenYouveGotItDbGetter");
     thr.start();
   }
+  
+  public static Card fetchCardWhenPossible(Long id)
+  {
+    ObjHolder oh = new ObjHolder(id,Card.class);
+    fetchDbObjWhenPossible(oh,true);
+    return (Card)oh.obj;
+  }
 
+  public static User fetchUserWhenPossible(Long id)
+  {
+    ObjHolder oh = new ObjHolder(id, User.class);
+    fetchDbObjWhenPossible(oh,true);
+    return (User)oh.obj;
+  }
+  
+  public static GameEvent fetchGameEventWhenPossible(Long id)
+  {
+    ObjHolder oh = new ObjHolder(id,GameEvent.class);
+    fetchDbObjWhenPossible(oh,true);
+
+    return (GameEvent)oh.obj;
+  }
+
+  private static class ObjHolder
+  {
+    public Long id;
+    public Object obj;
+    public Class<?> cls;
+    public ObjHolder(Long id, Class<?> cls)
+    {
+      this.id = id;
+      this.cls = cls;
+    }
+  }
+
+  private static void fetchDbObjWhenPossible(final ObjHolder holder, boolean wait)
+  {
+    Thread thr = new Thread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        for(int i=0; i<10; i++) { // try for 10 seconds
+          try{Thread.sleep(1000l);}catch(InterruptedException ex){}
+
+          SingleSessionManager ssm = new SingleSessionManager();
+          Session thisSess = ssm.getSession();
+          
+          Object cd = thisSess.get(holder.cls, holder.id);
+          if(cd != null) {
+            System.out.println("Delayed fetch of "+holder.cls.getSimpleName()+" from db, got it on try "+i);
+            holder.obj = cd;
+            ssm.endSession();
+            return;
+          }
+          ssm.endSession();
+        }
+        System.out.println("ERROR: Couldn't get "+holder.cls.getSimpleName() +" "+holder.id+" in 10 seconds");// give up
+      }
+    });
+    thr.setPriority(Thread.NORM_PRIORITY);
+    thr.setDaemon(true);
+    thr.setName("GameDBObjGetter");
+    thr.start();
+    
+    if(wait){
+      try {
+        thr.join();
+      }
+      catch(InterruptedException ex) {
+
+      }
+    }
+  }
 }
