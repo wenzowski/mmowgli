@@ -38,7 +38,6 @@ import static edu.nps.moves.mmowgli.MmowgliEvent.IMPROVESCORECLICK;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
