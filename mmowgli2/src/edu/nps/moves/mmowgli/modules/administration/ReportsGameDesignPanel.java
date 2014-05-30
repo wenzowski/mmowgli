@@ -91,7 +91,7 @@ public class ReportsGameDesignPanel extends AbstractGameBuilderPanel
           GameEventLogger.logGameDesignChange("Report interval", ""+""+lg, globs.getUserID());
          
           // Wake it up
-          AppMaster.pokeReportGenerator();
+          AppMaster.getInstance().pokeReportGenerator();
         }
         catch (Exception ex) {
           Notification.show("Parameter error", "<html>Check for proper positive integer format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE);
