@@ -91,14 +91,14 @@ public class CardSummaryLine extends HorizontalLayout implements MmowgliComponen
     User auth = c.getAuthor();
     
     Label lab=new Label(dateForm.format(c.getCreationDate()));
-    lab.setWidth(6.0f, UNITS_EM);
+    lab.setWidth(6.0f, Unit.EM);
     addComponent(lab);
     setComponentAlignment(lab,Alignment.MIDDLE_LEFT);
     lab.addStyleName("m-cursor-pointer");
     lab.setDescription(tooltip);
     
     addComponent(lab=new Label(c.getCardType().getTitle()));
-    lab.setWidth(5.0f, UNITS_EM);
+    lab.setWidth(5.0f, Unit.EM);
     setComponentAlignment(lab, Alignment.MIDDLE_LEFT);
     lab.addStyleName("m-cursor-pointer");
     lab.setDescription(tooltip);
@@ -113,7 +113,7 @@ public class CardSummaryLine extends HorizontalLayout implements MmowgliComponen
     emb.setDescription(tooltip);
     
     addComponent(lab = new Label(c.getText()));
-    lab.setHeight(1.0f, UNITS_EM);
+    lab.setHeight(1.0f, Unit.EM); ;
     setComponentAlignment(lab, Alignment.MIDDLE_LEFT);
     setExpandRatio(lab, 1.0f); // all the extra
     lab.addStyleName("m-cursor-pointer");
@@ -130,7 +130,7 @@ public class CardSummaryLine extends HorizontalLayout implements MmowgliComponen
     }
     IDButton uButt = new IDButton(c.getAuthorName(),SHOWUSERPROFILECLICK,c.getAuthor().getId());
     uButt.addStyleName(BaseTheme.BUTTON_LINK);
-    uButt.setWidth(8.0f, UNITS_EM);
+    uButt.setWidth(8.0f, Unit.EM);
     addComponent(uButt);
     setComponentAlignment(uButt, Alignment.MIDDLE_LEFT);
     uButt.setDescription(tooltip);
