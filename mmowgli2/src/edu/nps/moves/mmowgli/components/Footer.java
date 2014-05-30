@@ -93,7 +93,7 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent
     }
     else */{
       Label svrLab=null;
-      mainAbsLay.addComponent(svrLab=new Label(AppMaster.getServerName()),"bottom:3px;right:15px;");    
+      mainAbsLay.addComponent(svrLab=new Label(AppMaster.getInstance().getServerName()),"bottom:3px;right:15px;");    
       svrLab.setSizeUndefined(); // lose the 100% w
       svrLab.addStyleName("m-footer-servername");  //small text
     }
