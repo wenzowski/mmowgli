@@ -35,7 +35,6 @@ package edu.nps.moves.mmowgli.modules.actionplans;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
 
-import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,7 +43,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.components.HtmlLabel;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.Media;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
 import edu.nps.moves.mmowgli.db.Media.Source;
 
@@ -225,7 +224,7 @@ public class AddVideoDialog extends Window
   }
   private void fillDefaults(Media med, String id)
   {
-    String feed = "https://gdata.youtube.com/feeds/api/videos/"+id;
+//    String feed = "https://gdata.youtube.com/feeds/api/videos/"+id;
     try {
 //todo
       /*
