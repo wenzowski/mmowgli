@@ -77,8 +77,8 @@ public class MediaLocator implements Serializable
   
 	public MediaLocator()
 	{		
-		gameImagesUrlStr = AppMaster.getGameImagesUrlString();
-		userImagesUrlStr = AppMaster.getUserImagesUrlString();
+		gameImagesUrlStr = AppMaster.getInstance().getGameImagesUrlString();
+		userImagesUrlStr = AppMaster.getInstance().getUserImagesUrlString();
 		
     if(!gameImagesUrlStr.endsWith("/"))
       gameImagesUrlStr = gameImagesUrlStr+"/";
@@ -86,8 +86,8 @@ public class MediaLocator implements Serializable
 	  if(!userImagesUrlStr.endsWith("/"))
 	    userImagesUrlStr = userImagesUrlStr+"/";
 	  
-		gameImagesUrl = buildGameImagesUrl(AppMaster.getAppUrl(), gameImagesUrlStr);
-		userImagesUrl = buildUserImagesUrl(AppMaster.getAppUrl());  // this sets a static variable from an instance constructor, but got to have an app instance to do it
+		gameImagesUrl = buildGameImagesUrl(AppMaster.getInstance().getAppUrl(), gameImagesUrlStr);
+		userImagesUrl = buildUserImagesUrl(AppMaster.getInstance().getAppUrl());  // this sets a static variable from an instance constructor, but got to have an app instance to do it
 	}
 	
 //@formatter:off
