@@ -244,7 +244,7 @@ public class MailManager
       String from = buildMmowgliReturnAddress(); //"mmowgli<mmowgli@nps.navy.mil>";
       String subj = "Thank you for registering in "+gameName+" "+gameHandle+"game";
 
-      String gameUrl = AppMaster.getAppUrlString(); //((Mmowgli2UI)UI.getCurrent()).getGlobalse().gameUrl();app.globs().gameUrl();
+      String gameUrl = AppMaster.getInstance().getAppUrlString(); //((Mmowgli2UI)UI.getCurrent()).getGlobalse().gameUrl();app.globs().gameUrl();
       if(gameUrl.endsWith("/"))
         gameUrl = gameUrl.substring(0, gameUrl.length()-1);
       String gameTrouble = GameLinks.get().getTroubleLink();
