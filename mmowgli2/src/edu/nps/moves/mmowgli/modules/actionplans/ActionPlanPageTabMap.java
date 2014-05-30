@@ -33,10 +33,9 @@
 */
 package edu.nps.moves.mmowgli.modules.actionplans;
 
-import java.awt.geom.Point2D;
 import java.io.Serializable;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,22 +43,11 @@ import org.vaadin.addon.leaflet.LMap;
 import org.vaadin.addon.leaflet.LOpenStreetMapLayer;
 import org.vaadin.addon.leaflet.LTileLayer;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
-import com.vaadin.event.dd.acceptcriteria.AcceptAll;
-import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Resource;
-import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.DragAndDropWrapper.WrapperTargetDetails;
-import com.vaadin.ui.Window.CloseEvent;
-import com.vaadin.ui.Window.CloseListener;
-import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.Reindeer;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
@@ -850,7 +838,7 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
     }    
   }
   */ 
-  @SuppressWarnings("serial")
+
   /*   class DropWindow extends Window
   {
     Label numberLab;
