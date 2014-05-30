@@ -41,8 +41,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.vaadin.annotations.Push;
-import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.*;
 
 /**
@@ -121,7 +119,8 @@ public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet impl
     */
     // end try
     System.out.println("Mmowgli: contextPath: "+context.getContextPath());
-    appMaster = new AppMaster(context);    // Initialize app master, global across on user sessions on this cluster node
+    appMaster = AppMaster.getInstance(context);// Initialize app master, global across on user sessions on this cluster node
+   
     context.setAttribute(MmowgliConstants.APPLICATION_MASTER_ATTR_NAME, appMaster);
     appMaster.init();
   }
