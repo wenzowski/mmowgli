@@ -80,8 +80,8 @@ public class AppMaster
   private BadgeManager badgeManager;
   private MCacheManager mCacheManager;
   private ReportGenerator reportGenerator; 
-  private static URL appUrl;
-  private static String appUrlString = ""; // gets setup before any logons, then
+  private URL appUrl;
+  private String appUrlString = ""; // gets setup before any logons, then
                                      // completed on first login.
   private TransactionCommitWaiter myTransactionWaiter;
   private BrokerService xlocalJmsBrokerService;
@@ -91,11 +91,27 @@ public class AppMaster
 
   private AppMasterMessaging appMasterMessaging;
 
-  private static String gameImagesUrlString;
-  private static String userImagesFileSystemPath;
-  private static String userImagesUrlString;
+  private String gameImagesUrlString;
+  private String userImagesFileSystemPath;
+  private String userImagesUrlString;
   
-  public AppMaster(ServletContext context)
+  private static AppMaster instance=null;
+  
+  public static AppMaster getInstance(ServletContext context)
+  {
+    if(instance == null)
+      instance = new AppMaster(context);
+    return instance;
+  }
+  
+  public static AppMaster getInstance()
+  {
+    if(instance == null)
+      throw new RuntimeException("AppMaster must be initialized from servlet");
+    return instance;
+  }
+  
+  private AppMaster(ServletContext context)
   {
     servletContext = context;
  
@@ -197,12 +213,12 @@ public class AppMaster
     return mailManager;
   }
 
-  public static String getAppUrlString()
+  public String getAppUrlString()
   {
     return appUrlString;
   }
   
-  public static URL getAppUrl()
+  public URL getAppUrl()
   {
     try {
       return UI.getCurrent().getPage().getLocation().toURL();
@@ -351,7 +367,7 @@ public class AppMaster
     }
   }
 
-  public static String getServerName()
+  public String getServerName()
   {
     String name = "unknown";
     try
@@ -491,10 +507,11 @@ public class AppMaster
 
           InterTomcatIO sessIO = getInterNodeIO();
           if (sessIO != null) {
-            System.out.println(AppMaster.getServerName() + " ApplicationMaster requesting instances to respond with \"YES-IM_AWAKE\"");
+            AppMaster me = AppMaster.getInstance();
+            System.out.println(me.getServerName() + " ApplicationMaster requesting instances to respond with \"YES-IM_AWAKE\"");
             AppMaster.this.resetPollReports();
             //sessIO.send(INSTANCEREPORTCOMMAND, AppMaster.getServerName() + "\n","");// add EOMessage token
-            Broadcaster.broadcast(new MMessagePacket(INSTANCEREPORTCOMMAND,AppMaster.getServerName() + "\n","",AppMaster.getServerName()));
+            Broadcaster.broadcast(new MMessagePacket(INSTANCEREPORTCOMMAND,me.getServerName() + "\n","",me.getServerName()));
           }
         }
         catch (InterruptedException intEx) {
@@ -571,13 +588,12 @@ public class AppMaster
     }
   }
 
-  public static void pokeReportGenerator()
+  public void pokeReportGenerator()
   {
-    // TODO Auto-generated method stub
-    
+    reportGenerator.poke();   
   }
 
-  public static String browserAddress()
+  public String browserAddress()
   {
     // TODO Auto-generated method stub
     return null;
@@ -603,17 +619,17 @@ public class AppMaster
     return sb.toString();
   }
 
-  public static String getGameImagesUrlString()
+  public String getGameImagesUrlString()
   {
     return gameImagesUrlString;
   }
 
-  public static String getUserImagesUrlString()
+  public String getUserImagesUrlString()
   {
     return userImagesUrlString;
   }
   
-  public static String getUserImagesFileSystemPath()
+  public String getUserImagesFileSystemPath()
   {
     return userImagesFileSystemPath;
   }
