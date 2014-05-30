@@ -206,7 +206,7 @@ public class Pages implements Serializable
     {
       map = new HashMap<String,String> (15);
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-      map.put(gmurlT, AppMaster.getAppUrlString());//.toExternalForm());
+      map.put(gmurlT, AppMaster.getInstance().getAppUrlString());//.toExternalForm());
       map.put(unameT, User.get(globs.getUserID(), sess).getUserName());
       map.put(dtimeT, new SimpleDateFormat("MM/dd HH:mm z").format(new Date()));
       map.put(portlT, MmowgliConstants.PORTALWIKI_URL);      
