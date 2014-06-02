@@ -76,6 +76,10 @@ public class LeafletLayers
           continue;
         }
         String[] sa = line.split("\t");
+        
+        if(sa.length > 0 && sa[0].startsWith("//"))    //comment
+          continue;
+        
         LeafletProvider prov = new LeafletProvider();
 
         if(sa.length>=KEY+1) {
