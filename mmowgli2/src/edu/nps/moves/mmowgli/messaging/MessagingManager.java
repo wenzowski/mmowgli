@@ -131,34 +131,32 @@ public class MessagingManager implements BroadcastListener
   class MessageRunner implements Runnable
   {
     private Object msg;
-  //  private UI ui;
 
     public MessageRunner(Object msg, UI ui)
     {
       this.msg = msg;
-     // this.ui = ui;
     }
 
     @Override
     public void run()
     {
-   //   boolean push = false;
+      boolean push = false;
       System.out.println("MessageRunner(through UI.access())"+myseq+" got mess");
-try{Thread.sleep(1000l);}catch(InterruptedException ex){}
-//Thread.currentThread().setPriority(Thread.NORM_PRIORITY-1); Thread.yield();
       if (!listenersInThisSession.isEmpty()) {
         System.out.println("MessageRunner(through UI.access())"+myseq+": delivering to local listeners");
         SingleSessionManager mgr = new SingleSessionManager();
 
         for (MMMessageListener lis : listenersInThisSession)
           if (lis.receiveMessage((MMessagePacket) msg, mgr))
-            ;//push = true;
+            ; // not working push = true;
 
         mgr.endSession();
-        /*
-        if (push)
-          Mmowgli2UI.getAppUI().icePush();
-          //try{ui.push();}catch(Throwable t){System.err.println("Yeah, I know, MessageRunner");}  */
+
+        if (push) {
+          //Mmowgli2UI.getAppUI().icePush();
+          System.out.println("calling push");
+          try{ui.push();}catch(Throwable t){System.err.println("Yeah, I know, MessageRunner");System.err.println(t.getClass().getSimpleName()+" "+t.getLocalizedMessage());}
+        }
       }
       else
         System.out.println("MessageManager: no listeners");
