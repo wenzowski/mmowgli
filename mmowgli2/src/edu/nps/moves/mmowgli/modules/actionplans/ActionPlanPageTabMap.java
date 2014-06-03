@@ -159,10 +159,11 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
     leftLay.addComponent(missionContentLab);
     leftLay.setComponentAlignment(missionContentLab, Alignment.TOP_LEFT);
     leftLay.addStyleName("m-actionplan-mission-content-text");
-    
+    /*
     Component c;
     c=buildMapFlags(leftLay);  // does the addComponent
     leftLay.setComponentAlignment(c, Alignment.TOP_CENTER);
+    */
     toggleFlags(editingOK);
     
     Label sp;
@@ -302,6 +303,9 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
   
   private void toggleFlags(boolean enabled)
   {
+    // mike temp:
+    if(true)return;
+    // end mike temp
     Iterator<Component> itr = flagGrid.iterator();
     while(itr.hasNext())
       itr.next().setEnabled(enabled);
