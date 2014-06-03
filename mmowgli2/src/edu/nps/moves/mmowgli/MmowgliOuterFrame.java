@@ -63,7 +63,7 @@ public class MmowgliOuterFrame extends VerticalLayout
     setSizeUndefined();
     setWidth("1040px"); // with padding"990px"); //MMOWGLI_FRAME_WIDTH);
     addStyleName("m-mmowgliouterframe");
-    addStyleName("m-redborder"); 
+   // addStyleName("m-redborder");   this is a good debugging border
     
     addComponent(menubar = new AppMenuBar(true,true,true));  //todo only if gm,gd andor ga
     addComponent(header=new Header());
