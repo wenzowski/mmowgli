@@ -437,7 +437,8 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
         imagesInAp.add(m);
     }
     
-    Iterator<Component> cItr = this.imageScroller.iterator();
+    GridLayout gl = (GridLayout)this.imageScroller.getContent();
+    Iterator<Component> cItr = gl.iterator();
     while(cItr.hasNext()) {
       Component c = cItr.next();
       MPanelWrapper mpw = (MPanelWrapper)c;
