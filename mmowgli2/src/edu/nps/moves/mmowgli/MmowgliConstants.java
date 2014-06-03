@@ -119,11 +119,13 @@ public class MmowgliConstants
   public static String WEB_XML_GAME_URL_TOKEN_KEY   = "gameUrlToken";
   public static String WEB_XML_HIBERNATE_SEARCH_KEY = "hibernateSearchIndexPath"; 
   public static String WEB_XML_JMS_KEEPALIVE_KEY    = "jmsKeepAliveIntervalMS"; 
+  /* not used
   public static String WEB_XML_JMS_LOCALBROKER_KEY  = "jmsLocalBrokerName"; 
   public static String WEB_XML_JMS_LOCALHANDLE_KEY  = "jmsLocalHandle";  
   public static String WEB_XML_JMS_LOCALPORT_KEY    = "jmsLocalPort";  
   public static String WEB_XML_JMS_LOCALTOPIC_KEY   = "jmsLocalTopic";
-  public static String WEB_XML_JMS_LOCALURL_KEY     = "jmsLocalUrl";  
+  public static String WEB_XML_JMS_LOCALURL_KEY     = "jmsLocalUrl";
+  */  
   public static String WEB_XML_JMS_TOPIC_KEY        = "jmsTopic";  
   public static String WEB_XML_JMS_URL_KEY          = "jmsUrl"; 
   public static String WEB_XML_SMTP_HOST_KEY        = "smtpHost";
