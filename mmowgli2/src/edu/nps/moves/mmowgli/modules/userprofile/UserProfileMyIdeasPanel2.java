@@ -395,7 +395,6 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     hl.addComponent(butt);
     hl.setExpandRatio(butt,0.5f);
     hl.setComponentAlignment(butt, Alignment.MIDDLE_LEFT);
-    hl.addStyleName("m-redborder");
     return hl;
   }
   
@@ -424,7 +423,6 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
         Label lab;
         vl.addComponent(lab = new Label());
         vl.setExpandRatio(lab, 1.0f);
-        vl.addStyleName("m-redborder");
         //return new Label((String)nullComponent);
         return vl;
       }
