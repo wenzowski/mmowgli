@@ -358,7 +358,6 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
     VerticalLayout vl = new VerticalLayout();
     vl.addComponent(titleUnion); // titleTA);
-    titleUnion.initGui();
 
     titleHistoryButt = new NativeButton();
     titleHistoryButt.setCaption("history");
@@ -377,6 +376,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     titleUnion.addStyleName("m-lightgrey-border");
     // titleUnion.addStyleName("m-opacity-75");
     titleUnion.setHeight("95px"); // 120 px); must make it this way for alignment of r/o vs rw
+    titleUnion.initGui();
 
     // titleTA.setWidth(ACTIONPLAN_TITLE_W);
     // titleTA.setRows(2);
