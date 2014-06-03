@@ -66,7 +66,7 @@ public class SessionInterceptor implements Filter
   @Override
   public void init(FilterConfig filterConfig) throws ServletException
   {
-    System.out.println("SessionInterceptor: One time initializing global Hibernate helper class, VHib");
+    //System.out.println("SessionInterceptor: One time initializing global Hibernate helper class, VHib");
     ServletContext ctx = filterConfig.getServletContext();
     vHib = VHib.instance();
     vHib.init(ctx);
@@ -93,49 +93,48 @@ public class SessionInterceptor implements Filter
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
   {
     int myseq = seq++;
-    System.out.println("-------SessionInterceptor.doFilter()"+myseq);
+    //System.out.println("-------SessionInterceptor.doFilter() "+myseq);
     final Session session = VHib.getSessionFactory().getCurrentSession();
     //System.out.println("-------current sess = "+session.hashCode());
     try {
       if (!session.getTransaction().isActive()) {
         session.beginTransaction();
-        System.out.println(".....SessionInterceptor Transaction begun"+myseq);
+        //System.out.println(".....SessionInterceptor Transaction begun "+myseq);
       }
       else
-        System.out.println(".....SessionInterceptor Transaction already active"+myseq);
+        //System.out.println(".....SessionInterceptor Transaction already active "+myseq);
 
       chain.doFilter(request, response);
 
       if (session.getTransaction().isActive()) {
         session.getTransaction().commit();
-        System.out.println(".....SessionInterceptor Active transaction committed "+session.hashCode()+" "+myseq);
+        //System.out.println(".....SessionInterceptor Active transaction committed "+session.hashCode()+" "+myseq);
       }
       else
-        System.out.println(".....SessionInterceptor Inactive transaction not committed "+session.hashCode()+" "+myseq);
+        ;//System.out.println(".....SessionInterceptor Inactive transaction not committed "+session.hashCode()+" "+myseq);
     }
     catch (StaleObjectStateException e) {
-      // logger.error(e);
-      System.out.println("*****SessionInterceptor StaleObjectStateException"+myseq);
+
+      //System.out.println("*****SessionInterceptor StaleObjectStateException "+myseq);
       if (session.getTransaction().isActive()) {
         session.getTransaction().rollback();
-        System.out.println("*****SessionInterceptor Active transaction rolled back"+myseq);
+        //System.out.println("*****SessionInterceptor Active transaction rolled back "+myseq);
       }
       else
-        System.out.println("*****SessionInterceptor Inactive transaction not rolled back"+myseq);
+        ;//System.out.println("*****SessionInterceptor Inactive transaction not rolled back "+myseq);
 
       throw e;
     }
     catch (Throwable e) {
-      // logger.error(e);
-      System.out.println("!!!!!SessionInterceptor Throwable: "+e.getClass().getSimpleName()+": "+e.getLocalizedMessage()+myseq);
+      //System.out.println("!!!!!SessionInterceptor Throwable: "+e.getClass().getSimpleName()+": "+e.getLocalizedMessage()+myseq);
       if (session.getTransaction().isActive()) {
         session.getTransaction().rollback();
-        System.out.println("!!!!!SessionInterceptor Active transaction rolled back"+myseq);
+        //System.out.println("!!!!!SessionInterceptor Active transaction rolled back "+myseq);
       }
       else
-        System.out.println("!!!!!SessionInterceptor Inactive transaction not rolled back"+myseq);
+        ;//System.out.println("!!!!!SessionInterceptor Inactive transaction not rolled back "+myseq);
       throw new ServletException(e);
     }
-    System.out.println("-------out of SessionInterceptor.doFilter()"+myseq);
+    //System.out.println("-------out of SessionInterceptor.doFilter()"+myseq);
   }
 }
