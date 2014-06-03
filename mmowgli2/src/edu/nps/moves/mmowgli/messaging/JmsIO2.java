@@ -327,7 +327,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
       System.out.println("*****Message received on appmaster (JmsIO2) from external jms");
       MMessagePacket pkt = JMSMessageUtil.decode(message);
       // We discard anything sent by us so we don't get into an infinite feedback loop      
-      if (!pkt.tomcat_id.equals(tomcatServerIdentifier)) {
+      if (pkt.tomcat_id==null || !pkt.tomcat_id.equals(tomcatServerIdentifier)) {
               
         // Want our local object cache to be updated first so all the instances on this local machine
         // are able to use the fresh object in the cache.  So we give to cache mgr, but message also comes
