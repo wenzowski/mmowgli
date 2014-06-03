@@ -56,6 +56,7 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.SessionManager;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
+import edu.nps.moves.mmowgli.modules.maps.LeafletLayers;
 
 //import com.google.maps.gwt.client.Marker;
 
@@ -174,9 +175,12 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
     map.setAttributionPrefix("Powered by Leaflet with v-leaflet");
     map.addStyleName("m-greyborder");
     map.removeAllComponents();
-    
-   // map.addBaseLayer(osmTiles,  "OSM");
-    map.addBaseLayer(new LOpenStreetMapLayer(), "CloudMade"); 
+    try {
+      LeafletLayers.installAllProviders(map);
+    }
+    catch(Exception ex) {
+      System.err.println("ActionPlanPageTabMap error loading layers: "+ex.getClass().getSimpleName()+" "+ex.getLocalizedMessage());
+    }
     double lat = mmowgliMap.getLatCenter();
     double lon = mmowgliMap.getLonCenter();
     map.setCenter(lat,lon);
