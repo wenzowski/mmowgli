@@ -247,7 +247,7 @@ public class VipListManager
             if (lis.size() > 0)
               sess.delete(lis.get(0));
             else
-              System.out.println("didn't find to delete in VipListManager.showViewOrDelete");
+              System.err.println("didn't find VipPii to delete in VipListManager.showViewOrDelete");
           }
           sess.getTransaction().commit();
           sess.close();
