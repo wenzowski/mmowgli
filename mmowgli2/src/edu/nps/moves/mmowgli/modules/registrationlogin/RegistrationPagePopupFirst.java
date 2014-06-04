@@ -33,7 +33,9 @@
  */
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import static edu.nps.moves.mmowgli.MmowgliConstants.QUERY_END_MARKER;
+import static edu.nps.moves.mmowgli.MmowgliConstants.QUERY_MARKER_FIELD;
+import static edu.nps.moves.mmowgli.MmowgliConstants.QUERY_START_MARKER;
 
 import java.util.Date;
 import java.util.List;
@@ -55,10 +57,13 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.AvatarPanel;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.db.pii.*;
+import edu.nps.moves.mmowgli.db.pii.EmailPii;
+import edu.nps.moves.mmowgli.db.pii.Query2Pii;
+import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * RegistrationPagePopupFirst.java Created on Nov 29, 2010
@@ -285,7 +290,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       if(u != null)
         try{ User.delete(u); }catch(Throwable t) {}
 
-      System.out.println("Checking new user, name = "+uName+"; unexpected exception: "+ex.getClass().getSimpleName()+" "+ex.getLocalizedMessage());
+      MSysOut.println("Checking new user, name = "+uName+"; unexpected exception: "+ex.getClass().getSimpleName()+" "+ex.getLocalizedMessage());
       return null;
     }
     //User u = User.getUserWithUserName(HibernateContainers.getSession(), uName);  // this is a case-insensitive search, a function of the field being varchar in the db instead of varbinary
