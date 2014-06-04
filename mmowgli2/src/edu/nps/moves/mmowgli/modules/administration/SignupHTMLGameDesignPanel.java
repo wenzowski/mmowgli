@@ -191,9 +191,7 @@ public class SignupHTMLGameDesignPanel extends AbstractGameBuilderPanel implemen
     @Override
     public void valueChange(ValueChangeEvent event)
     {
-      System.out.println("valuechange");
       if(!nocommit) {
-        System.out.println("valuechange commit");
         String val = event.getProperty().toString();
         if(val != null && val.trim().length()<=0)
           val = null;
