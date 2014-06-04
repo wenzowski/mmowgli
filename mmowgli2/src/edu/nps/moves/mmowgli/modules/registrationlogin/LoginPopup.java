@@ -52,7 +52,7 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
-import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.DeferredSysOut;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 /**
  * LoginPopup.java Created on Dec 15, 2010
  * Updated Mar 6, 2014 Vaadin 7
@@ -250,7 +250,7 @@ public class LoginPopup extends MmowgliDialog
       }
       WrappedSession wSess = Mmowgli2UI.getCurrent().getSession().getSession();
     
-      DeferredSysOut.println("Web.xml session timeout = "+wSess.getMaxInactiveInterval()+" seconds");
+      MSysOut.println("Web.xml session timeout = "+wSess.getMaxInactiveInterval()+" seconds");
       // Set session timeout to two hours if gamemaster or admin
       int tmo = USER_SESSION_TIMEOUT_IN_SECONDS;
 
@@ -258,7 +258,7 @@ public class LoginPopup extends MmowgliDialog
         tmo = GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS;
       
       wSess.setMaxInactiveInterval(tmo);// units = seconds
-      DeferredSysOut.println("Session timeout now "+tmo+" seconds");
+      MSysOut.println("Session timeout now "+tmo+" seconds");
       
       listener.buttonClick(event); // back up the chain
     }
