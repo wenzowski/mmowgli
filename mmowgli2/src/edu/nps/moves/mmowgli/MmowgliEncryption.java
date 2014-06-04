@@ -44,6 +44,8 @@ import org.jasypt.hibernate4.encryptor.HibernatePBEEncryptorRegistry;
 import org.jasypt.salt.RandomSaltGenerator;
 import org.jasypt.salt.SaltGenerator;
 
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+
 /**
  * MmowgliEncryption.java
  * Created on Jan 22, 2014
@@ -78,11 +80,11 @@ public class MmowgliEncryption
       String msg;
       if(t instanceof ExceptionInInitializerError) {
         msg = "Error with encryptor key: "+((ExceptionInInitializerError)t).getException().getLocalizedMessage();
-        System.out.println(msg);
+        MSysOut.println(msg);
       }
       else {
         msg ="Error with encryptor key: "+t.getClass().getSimpleName()+": "+t.getLocalizedMessage();
-        System.out.println(msg);
+        MSysOut.println(msg);
       }
       context.setAttribute(MmowgliConstants.APPLICATION_STARTUP_ERROR_STRING, msg);
       return;
