@@ -242,7 +242,7 @@ public class WordCloudPanel extends Panel
       return styles[getGroup(i)];
       }
       catch(Throwable t) {
-        System.out.println("error in WordCloudPanel");
+        System.err.println("error in WordCloudPanel");
         return "";
       }
     }
@@ -270,7 +270,7 @@ public class WordCloudPanel extends Panel
           return grpBounds.length - n -1 ;  // flip array
         }
       
-      System.out.println("program error getGroup?");
+      System.err.println("program error getGroup?");
       return grpBounds.length-1;
     }
     private void figureBounds()
