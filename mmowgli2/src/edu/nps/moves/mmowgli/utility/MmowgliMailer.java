@@ -39,19 +39,12 @@ import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.SendFailedException;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import javax.mail.*;
+import javax.mail.internet.*;
 
-import com.sun.mail.smtp.SMTPAddressFailedException;
-import com.sun.mail.smtp.SMTPAddressSucceededException;
-import com.sun.mail.smtp.SMTPSendFailedException;
-import com.sun.mail.smtp.SMTPTransport;
+import com.sun.mail.smtp.*;
+
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 public class MmowgliMailer implements Runnable
 {
@@ -77,13 +70,13 @@ public class MmowgliMailer implements Runnable
       @Override
       public void uncaughtException(Thread arg0, Throwable arg1)
       {
-        System.out.println("!!!!!!!!!!!!!!");
-        System.out.println("MmowgliMailer queue handler thread killed by UncaughtException: " + arg1.getClass().getSimpleName() + " "
-            + arg1.getLocalizedMessage());
-        System.out.println("Stack dump follows:");
+        System.err.println("!!!!!!!!!!!!!!");
+        System.err.println("MmowgliMailer queue handler thread killed by UncaughtException: " + arg1.getClass().getSimpleName() + " "
+                           + arg1.getLocalizedMessage());
+        System.err.println("Stack dump follows:");
         arg1.printStackTrace();
-        System.out.println("End of stack dump");
-        System.out.println("!!!!!!!!!!!!!!!");
+        System.err.println("End of stack dump");
+        System.err.println("!!!!!!!!!!!!!!!");
       }
     });
 
@@ -179,12 +172,12 @@ public class MmowgliMailer implements Runnable
       }
       finally {
         if (debugAndVerbose)
-          System.out.println("Response: " + t.getLastServerResponse());
+          MSysOut.println("Response: " + t.getLastServerResponse());
         t.close();
       }
 
       if (debugAndVerbose)
-        System.out.println("\nMail was sent successfully.");
+        MSysOut.println("\nMail was sent successfully.");
 
       // return from here
     }
