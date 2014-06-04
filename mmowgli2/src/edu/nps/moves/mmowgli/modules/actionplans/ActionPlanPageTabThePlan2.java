@@ -440,7 +440,7 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
           dial.center();
         }
         catch(Exception ex) {
-          System.out.println("bp");
+          System.err.println("ActionPlanPageTabThePlan2.buttonClick() "+ex.getClass().getSimpleName()+" "+ex.getLocalizedMessage());
         }
       } 
       
