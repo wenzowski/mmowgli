@@ -156,7 +156,7 @@ public class SearchManager
       return hQuery.list(); // execute search
     }
     catch (Throwable t) {
-      System.out.println("Caught exception when searching: "+t.getClass().getSimpleName()+" "+t.getLocalizedMessage()+" search terms: "+termString);
+      System.err.println("Caught exception when searching: "+t.getClass().getSimpleName()+" "+t.getLocalizedMessage()+" search terms: "+termString);
       return new ArrayList<Object>(); // empty
     }
   }
@@ -225,7 +225,7 @@ public class SearchManager
 		  // This is thrown if the object passed in is null, or does not use the
 		  // @Indexed hibernate search annotation. As of this writing, Card and User use the 
 		  // @Indexed annotation.
-		  System.out.println("Object to be Lucene-indexed does not implement the @Indexed annotation, ignored");
+		  System.err.println("Object to be Lucene-indexed does not implement the @Indexed annotation, ignored");
 	  }
 	  catch(Exception e)
 	  {
