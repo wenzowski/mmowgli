@@ -38,6 +38,8 @@ import java.util.LinkedList;
 //import java.util.concurrent.ExecutorService;
 //import java.util.concurrent.Executors;
 
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+
 /* This is straight out of the vaadin 7 book.  Simple is good */
 /* This singleton will be global across all sessions */
 
@@ -77,7 +79,7 @@ public class Broadcaster implements Serializable
   
   public static synchronized void broadcast(MMessagePacket message, BroadcastListener blackout)
   {
-    System.out.println("Broadcaster deivering message");
+    MSysOut.println("Broadcaster delivering message");
     // Since we know the listeners need to be quick and not block, we don't need this
     /*
     for (final BroadcastListener listener: listeners)
