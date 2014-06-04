@@ -53,6 +53,8 @@ import org.hibernate.event.spi.EventType;
 import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.service.ServiceRegistry;
 
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+
 /**
  * Class to initialize, configure and manage single SessionFactory instance.  Global across all users sessions and servlets in the same context.  That
  * means this is shared by any other entry points, like mmowgliMobile.  This is built as a singleton object, but could theoretically be written as a pure
@@ -131,11 +133,11 @@ public abstract class AbstractVHib// implements SessionManager
     String dbDropAndCreateS = ctx.getInitParameter(WEB_XML_DB_DROPCREATE_KEY);
     
     c3p0Params c3 = new c3p0Params();
-    c3.maxSize          = ctx.getInitParameter(WEB_XML_C3P0_MAX_SIZE);          System.out.println("db c3p0 max: "+c3.maxSize);
-    c3.minSize          = ctx.getInitParameter(WEB_XML_C3P0_MIN_SIZE);          System.out.println("db c3p0 min: "+c3.minSize);
-    c3.acquireIncrement = ctx.getInitParameter(WEB_XML_C3P0_ACQUIRE_INCREMENT); System.out.println("db c3p0 acquire incr: "+c3.acquireIncrement);
-    c3.timeout          = ctx.getInitParameter(WEB_XML_C3P0_TIMEOUT);           System.out.println("db c3p0 timeout: "+c3.timeout);
-    c3.idleTestPeriod   = ctx.getInitParameter(WEB_XML_C3P0_IDLE_TEST_PERIOD);  System.out.println("db c3p0 idletest: "+c3.idleTestPeriod);
+    c3.maxSize          = ctx.getInitParameter(WEB_XML_C3P0_MAX_SIZE);          MSysOut.println("db c3p0 max: "+c3.maxSize);
+    c3.minSize          = ctx.getInitParameter(WEB_XML_C3P0_MIN_SIZE);          MSysOut.println("db c3p0 min: "+c3.minSize);
+    c3.acquireIncrement = ctx.getInitParameter(WEB_XML_C3P0_ACQUIRE_INCREMENT); MSysOut.println("db c3p0 acquire incr: "+c3.acquireIncrement);
+    c3.timeout          = ctx.getInitParameter(WEB_XML_C3P0_TIMEOUT);           MSysOut.println("db c3p0 timeout: "+c3.timeout);
+    c3.idleTestPeriod   = ctx.getInitParameter(WEB_XML_C3P0_IDLE_TEST_PERIOD);  MSysOut.println("db c3p0 idletest: "+c3.idleTestPeriod);
 //@formatter:on
     try {
       cnf = new Configuration();
@@ -222,7 +224,7 @@ public abstract class AbstractVHib// implements SessionManager
   protected void _installDataBaseListeners()//AppMaster apMas)
   {
     DatabaseListeners dlis = new DatabaseListeners(sr);
-    System.out.println("Installing db listeners");
+    MSysOut.println("Installing db listeners");
     EventListenerRegistry registry = ((SessionFactoryImpl) sf).getServiceRegistry().getService(EventListenerRegistry.class);
 
     registry.getEventListenerGroup(EventType.SAVE).appendListener(dlis.saveListener);
@@ -230,7 +232,7 @@ public abstract class AbstractVHib// implements SessionManager
     registry.getEventListenerGroup(EventType.UPDATE).appendListener(dlis.updateListener);
     //registry.getEventListenerGroup(EventType.MERGE).appendListener(dlis.mergeListener);
     registry.getEventListenerGroup(EventType.DELETE).appendListener(dlis.deleteListener);
-    System.out.println("db listeners installed");
+    MSysOut.println("db listeners installed");
     dlis.enableListeners(true); // may have to be moved later
   }
  
@@ -283,7 +285,7 @@ public abstract class AbstractVHib// implements SessionManager
           try {
             Class<?> c = Class.forName(full.substring(0, full.lastIndexOf('.')));
             cnf.addAnnotatedClass(c);
-            System.out.println(nm+" annotated Hibernate class handled");
+            MSysOut.println(nm+" annotated Hibernate class handled");
             list.add(c);
           }
           catch (Exception ex) {
