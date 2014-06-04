@@ -42,6 +42,7 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * MmowgliDialog.java Created on Feb 18, 2011
@@ -216,7 +217,7 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
       User.delete(u);
       UserPii uPii = VHibPii.getUserPii(u.getId());
       VHibPii.delete(uPii);
-      System.out.println("User deleted (didn't finish login) "+u.getId());
+      MSysOut.println("User deleted (didn't finish login) "+u.getId());
       setUser(null);
     }
 
