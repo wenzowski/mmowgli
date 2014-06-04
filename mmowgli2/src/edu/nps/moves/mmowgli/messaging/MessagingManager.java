@@ -8,6 +8,7 @@ import com.vaadin.ui.UI;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 import edu.nps.moves.mmowgli.messaging.Broadcaster.BroadcastListener;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * MessagingManager.java
@@ -83,11 +84,11 @@ public class MessagingManager implements BroadcastListener
 
     // Can be hit before any session exists
     if(ui != null && (message.getSession_id().equals(ui.getUUID())) ) {
-      System.out.println("MessagingManager"+myseq+" delivering inline");
+      MSysOut.println("MessagingManager"+myseq+" delivering inline");
       deliverInLine(message);
     }
     else {
-      System.out.println("MessagingManager"+myseq+" queing for polling or pushing");
+      MSysOut.println("MessagingManager"+myseq+" queing for polling or pushing");
       messageQueue.add(message);
    }
   }
@@ -99,7 +100,7 @@ public class MessagingManager implements BroadcastListener
         lis.receiveMessage((MMessagePacket) msg,null);
     }
     else
-      System.out.println("MessagingManager"+myseq+": no listeners");
+      MSysOut.println("MessagingManager"+myseq+": no listeners");
   }
   
   /*
@@ -141,9 +142,9 @@ public class MessagingManager implements BroadcastListener
     public void run()
     {
       boolean push = false;
-      System.out.println("MessageRunner(through UI.access())"+myseq+" got mess");
+      MSysOut.println("MessageRunner(through UI.access())"+myseq+" got mess");
       if (!listenersInThisSession.isEmpty()) {
-        System.out.println("MessageRunner(through UI.access())"+myseq+": delivering to local listeners");
+        MSysOut.println("MessageRunner(through UI.access())"+myseq+": delivering to local listeners");
         SingleSessionManager mgr = new SingleSessionManager();
 
         for (MMMessageListener lis : listenersInThisSession)
@@ -154,12 +155,12 @@ public class MessagingManager implements BroadcastListener
 
         if (push) {
           //Mmowgli2UI.getAppUI().icePush();
-          System.out.println("calling push");
+          MSysOut.println("calling push");
           try{ui.push();}catch(Throwable t){System.err.println("Yeah, I know, MessageRunner");System.err.println(t.getClass().getSimpleName()+" "+t.getLocalizedMessage());}
         }
       }
       else
-        System.out.println("MessageManager: no listeners");
+        MSysOut.println("MessageManager: no listeners");
     }
   }
 }
