@@ -325,7 +325,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
     Session sess = M.getSession(sessMgr);
     GameEvent ev = (GameEvent)sess.get(GameEvent.class, (Serializable)evId);
     if(ev == null) {
-      System.out.println("ERROR: EventMonitorPanel.gameEventLoggedOob(): GameEvent matching id "+evId+" not found in db. Possibly race condition");
+      System.err.println("ERROR: EventMonitorPanel.gameEventLoggedOob(): GameEvent matching id "+evId+" not found in db. Possibly race condition");
       return false;
     }
     addEventOob(ev,sess);
