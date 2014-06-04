@@ -7,11 +7,12 @@ import java.util.HashMap;
 
 import org.hibernate.Session;
 
-import com.vaadin.server.*;
+import com.vaadin.server.SessionInitEvent;
+import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.UI;
 
 import edu.nps.moves.mmowgli.components.AppMenuBar;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.messaging.MessagingManager;
@@ -19,6 +20,7 @@ import edu.nps.moves.mmowgli.messaging.WantsGameUpdates;
 import edu.nps.moves.mmowgli.modules.scoring.ScoreManager2;
 import edu.nps.moves.mmowgli.utility.M;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * MmowgliSessionGlobals.java
@@ -75,7 +77,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   {
     deriveBrowserBooleans(webBr);
     
-    System.out.println("Login from "+browserIDString());
+    MSysOut.println("Login from "+browserIDString());
   }
   
   private void deriveBrowserBooleans(WebBrowser webBr)
