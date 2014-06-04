@@ -126,14 +126,12 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     HorizontalLayout hl = new HorizontalLayout();
     hl.setSizeUndefined();
     hl.addStyleName("m-userprofile-linkbuttons");
-    hl.addStyleName("m-greenborder");
     hl.setMargin(false);
     hl.setSpacing(false);
     if(checkMarkRes == null)
       checkMarkRes = Mmowgli2UI.getGlobals().getMediaLocator().getCheckMark12px();
     Embedded embedded = new Embedded(null, checkMarkRes);
     embedded.setWidth("12px");
-    embedded.addStyleName("m-cyanborder");
     if(butt == buildsButt)
       embedded.setVisible(false);
     hl.addComponent(embedded);
@@ -167,8 +165,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     NativeButton b = new NativeButton(s);
     b.setStyleName(BaseTheme.BUTTON_LINK);
     b.addStyleName("m-link-button");
-   // b.addStyleName("borderless");
-    b.addStyleName("m-blueborder");
+    b.addStyleName("borderless");
     b.addClickListener(this);
     return b;
    }
@@ -215,7 +212,6 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     if(allIdeasTab == null) {
       allIdeasTab = createAllIdeasTable();
     }
-    allIdeasTab.addStyleName("m-greenborder");
     getRightLayout().setSizeUndefined();  // if layout is full size, content goes in center, we want top
     getRightLayout().addComponent(allIdeasTab);
     getRightLayout().setComponentAlignment(allIdeasTab, Alignment.TOP_CENTER);
