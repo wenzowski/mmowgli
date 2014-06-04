@@ -52,6 +52,7 @@ import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.messaging.MessagingManager;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 //import edu.nps.moves.mmowgliMobile.VMShareTest;
 
 /**
@@ -113,7 +114,7 @@ abstract public class Mmowgli2UI extends UI
   @Override
   protected void init(VaadinRequest request)
   {  
-    System.out.println("Into UI.init()");
+    MSysOut.println("Into UI.init()");
     uuid = UUID.randomUUID();
     //pusher.extend(this);
 
@@ -155,7 +156,7 @@ abstract public class Mmowgli2UI extends UI
     globs.getMessagingManager().addMessageListener((AbstractMmowgliController)globs.getController());
     setPollInterval(5000); // 5 secs. (-1 to disable)
     
-    System.out.println("Out of UI.init()");
+    MSysOut.println("Out of UI.init()");
    }
   
   @Override
@@ -327,9 +328,10 @@ abstract public class Mmowgli2UI extends UI
 // called from message receiver in controller, header might need update
   public boolean refreshUser_oob(Object uId, SingleSessionManager sessMgr)
   {
-    return outerFr.refreshUser_oob(uId, sessMgr);   
+    if(outerFr != null)
+      return outerFr.refreshUser_oob(uId, sessMgr); 
+    return false;
   }
-
 
   public void gameEvent_oob(SingleSessionManager sessMgr, char typ, String message)
   {
