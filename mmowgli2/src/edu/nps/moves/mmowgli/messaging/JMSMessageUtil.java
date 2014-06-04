@@ -40,7 +40,7 @@ import java.util.UUID;
 
 import javax.jms.*;
 
-import edu.nps.moves.mmowgli.utility.SysOut;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * JMSMessageFactory.java
@@ -108,7 +108,7 @@ public class JMSMessageUtil
   public static void dump(String s, Message mess)
   {
     try {
-      SysOut.println(s +
+      MSysOut.println(s +
                        mess.getStringProperty(JMS_MESSAGE_TYPE) + ", " +
                        mess.getStringProperty(JMS_MESSAGE_TEXT) + ", " +
                        mess.getStringProperty(JMS_MESSAGE_SOURCE_SESSION_ID) + ", " +
