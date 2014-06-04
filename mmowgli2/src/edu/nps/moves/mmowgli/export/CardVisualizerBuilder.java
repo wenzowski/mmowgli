@@ -147,7 +147,7 @@ public class CardVisualizerBuilder
       d3jsTemp.renameTo(d3jsFinal);
     }
     catch(Exception ex) {
-      System.out.println("ouch! "+ex.getLocalizedMessage());
+      System.err.println("ouch! "+ex.getLocalizedMessage());
     }
   }
   
