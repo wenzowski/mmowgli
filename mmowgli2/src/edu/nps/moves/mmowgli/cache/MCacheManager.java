@@ -33,26 +33,10 @@
 */
 package edu.nps.moves.mmowgli.cache;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.DELETED_USER;
-import static edu.nps.moves.mmowgli.MmowgliConstants.GAMEEVENT;
-import static edu.nps.moves.mmowgli.MmowgliConstants.NEW_CARD;
-import static edu.nps.moves.mmowgli.MmowgliConstants.NEW_USER;
-import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_CARD;
-import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_USER;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Vector;
+import java.util.*;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -63,25 +47,15 @@ import org.hibernate.criterion.Restrictions;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 
-import edu.nps.moves.mmowgli.db.Card;
-import edu.nps.moves.mmowgli.db.CardType;
-import edu.nps.moves.mmowgli.db.Game;
-import edu.nps.moves.mmowgli.db.GameEvent;
-import edu.nps.moves.mmowgli.db.Move;
-import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 //import edu.nps.moves.mmowgli.hibernate.HibernateContainers;
-import edu.nps.moves.mmowgli.hibernate.VHib;
-import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.hibernate.*;
 import edu.nps.moves.mmowgli.messaging.InterTomcatIO.InterTomcatReceiver;
 import edu.nps.moves.mmowgli.messaging.MMessage;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
-import edu.nps.moves.mmowgli.utility.BeanContainerWithCaseInsensitiveSorter;
-import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
-import edu.nps.moves.mmowgli.utility.M;
+import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * MCacheManager.java
@@ -131,7 +105,7 @@ public class MCacheManager implements InterTomcatReceiver
 
   private MCacheManager()
   {
-    System.out.println("Enter MCacheManager constructor");
+    MSysOut.println("Enter MCacheManager constructor");
     try {
       Session sess = VHib.getSessionFactory().openSession();
       supActMgr = new MSuperActiveCacheManager();
@@ -164,7 +138,7 @@ public class MCacheManager implements InterTomcatReceiver
       sess.close();
 
       DBGet.mCacheMgr = this;
-      System.out.println("Exit MCacheManager constructor");
+      MSysOut.println("Exit MCacheManager constructor");
     }
     catch (Throwable t) {
       System.err.println("Exception in MCacheManager: "+t.getClass().getSimpleName()+" "+t.getLocalizedMessage());
@@ -246,7 +220,7 @@ public class MCacheManager implements InterTomcatReceiver
   private void addOrUpdateUserInContainer(User u)
   {
     if(u == null) {
-      System.out.println("Null user in addOrUpdateUserInContainer()!!!!!! Exception trapped, dump:");
+      MSysOut.println("Null user in addOrUpdateUserInContainer()!!!!!! Exception trapped, dump:");
       new Exception().printStackTrace();
       return;
     }
@@ -433,7 +407,12 @@ public class MCacheManager implements InterTomcatReceiver
   @Override
   public boolean handleIncomingTomcatMessageOob(MMessagePacket packet, SessionManager sessMgr)
   {
-    System.out.println("MCacheManager.handleIncomingTomcatMessageOob()");
+    MSysOut.println("MCacheManager.handleIncomingTomcatMessageOob()");
+    
+    boolean needMgr = sessMgr==null;
+    if(needMgr)
+      sessMgr = new SingleSessionManager();
+    
     switch (packet.msgType) {
       case NEW_CARD:
       case UPDATED_CARD:
@@ -451,6 +430,9 @@ public class MCacheManager implements InterTomcatReceiver
         break;
       default:
     }
+    if(needMgr)
+      ((SingleSessionManager)sessMgr).endSession();
+    
     return false; // don't want a retry    
   }
 
@@ -504,14 +486,14 @@ public class MCacheManager implements InterTomcatReceiver
           Session sess = ssm.getSession();
           GameEvent ge = (GameEvent)sess.get(GameEvent.class, evorig.getId());
           if(ge != null) {
-            System.out.println("Delayed fetch of game event from db, got it on try "+i);
+            MSysOut.println("Delayed fetch of game event from db, got it on try "+i);
             evorig.clone(ge); // get its data
             ssm.endSession();
             return;
           }
           ssm.endSession();
         }
-        System.out.println("ERROR: Couldn't get game event "+evorig.getId()+" in 10 seconds");// give up
+        System.err.println("ERROR: Couldn't get game event "+evorig.getId()+" in 10 seconds");// give up
       }
     });
     thr.setPriority(Thread.NORM_PRIORITY);
@@ -561,9 +543,11 @@ public class MCacheManager implements InterTomcatReceiver
   {
     long id = MMessage.MMParse(messageType, message).id;
     Card c = (Card)M.getSession(sessMgr).get(Card.class, id);
-    if (c == null)
+    if (c == null) {
       c = ComeBackWhenYouveGotIt.fetchCardWhenPossible(id);
-    
+      c = (Card)M.getSession(sessMgr).merge(c);
+    }
+
     getCardCache().addToCache(id, c);
 
     CardType ct = c.getCardType();
