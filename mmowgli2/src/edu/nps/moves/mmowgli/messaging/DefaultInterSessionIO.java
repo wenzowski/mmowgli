@@ -39,7 +39,7 @@ import java.util.HashSet;
 
 import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 import edu.nps.moves.mmowgli.hibernate.VHib;
-import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.DeferredSysOut;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * DefaultInterSessionIO.java
@@ -154,6 +154,6 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
 
   protected void doSysOut(String s)
   {
-    DeferredSysOut.defPrint(s);
+    MSysOut.print(s);
   }
 }
