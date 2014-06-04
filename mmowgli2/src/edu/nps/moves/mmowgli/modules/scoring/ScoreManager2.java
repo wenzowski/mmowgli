@@ -42,7 +42,7 @@ import edu.nps.moves.mmowgli.*;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
-import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.DeferredSysOut;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 /**
  * ScoreManager2.java
  * Created on Aug 8, 2013
@@ -83,7 +83,7 @@ public class ScoreManager2
   public void cardPlayed(Card newCard)
   //----------------------------------
   {
-    DeferredSysOut.println(marker+"ScoreManager2.cardPlayed()");
+    MSysOut.println(marker+"ScoreManager2.cardPlayed()");
     refreshScoringParameters();
     
     awardCardAuthorPoints(newCard);
@@ -96,7 +96,7 @@ public class ScoreManager2
   public void cardMarkingWillBeCleared(Card card)
   //---------------------------------------------
   {
-    DeferredSysOut.println(marker+"ScoreManager2.cardMarkingWillBeCleared()");
+    MSysOut.println(marker+"ScoreManager2.cardMarkingWillBeCleared()");
     refreshScoringParameters();
     Set<CardMarking> mark = card.getMarking();
     if(mark==null || mark.size()<=0)
@@ -116,7 +116,7 @@ public class ScoreManager2
   public void cardMarkingWillBeSet(Card card, CardMarking cm)
   //---------------------------------------------------------
   {
-    DeferredSysOut.println(marker+"ScoreManager2.cardMarkingWillBeSet()");
+    MSysOut.println(marker+"ScoreManager2.cardMarkingWillBeSet()");
     refreshScoringParameters();
     Set<CardMarking> mark = card.getMarking();
     // First look as existing
@@ -147,7 +147,7 @@ public class ScoreManager2
   // A
   public void actionPlanUserJoins(ActionPlan ap, User usr)
   {
-    DeferredSysOut.println(marker+"ScoreManager2.actionPlanUserJoins()");
+    MSysOut.println(marker+"ScoreManager2.actionPlanUserJoins()");
     refreshScoringParameters();
     actionPlanNewAuthorPoints(usr,ap);
     actionPlanNewAuthorCommentPoints(usr,ap);
@@ -159,7 +159,7 @@ public class ScoreManager2
   // --------------------------------------------------------------------
   {
     // Little bump for making a comment
-    DeferredSysOut.println(marker+"ScoreManager2.actionPlanCommentEntered()");
+    MSysOut.println(marker+"ScoreManager2.actionPlanCommentEntered()");
     refreshScoringParameters();
     User writer = comment.getFromUser();
     writer = User.merge(writer);
@@ -178,7 +178,7 @@ public class ScoreManager2
   public void actionPlanMarkedSuperInteresting(ActionPlan plan)
   //-----------------------------------------------------------
   {
-    DeferredSysOut.println(marker+"ScoreManager2.actionPlanMarkedSuperInteresting()");
+    MSysOut.println(marker+"ScoreManager2.actionPlanMarkedSuperInteresting()");
     refreshScoringParameters();
     Set<User> authors =  plan.getAuthors();
     for(User author : authors) {
@@ -191,7 +191,7 @@ public class ScoreManager2
   public void actionPlanUnmarkedSuperInteresting(ActionPlan plan)
   // -------------------------------------------------------------
   {
-    DeferredSysOut.println(marker+"ScoreManager2.actionPlanUnmarkedSuperInteresting()");
+    MSysOut.println(marker+"ScoreManager2.actionPlanUnmarkedSuperInteresting()");
     refreshScoringParameters();
     Set<User> authors = plan.getAuthors();
     for (User author : authors) {
@@ -208,7 +208,7 @@ public class ScoreManager2
   public void actionPlanWasRated(User me, ActionPlan ap, int count)
   //---------------------------------------------------------------
   {
-    DeferredSysOut.println(marker+"ScoreManager2.actionPlanWasRated()");
+    MSysOut.println(marker+"ScoreManager2.actionPlanWasRated()");
     refreshScoringParameters();
     // count not used, already given to ap
     Set<User> authors = ap.getAuthors();
@@ -231,7 +231,7 @@ public class ScoreManager2
   public void userCreated(User user)
   //--------------------------------
   {
-    DeferredSysOut.println(marker+"ScoreManager2.userCreated()");
+    MSysOut.println(marker+"ScoreManager2.userCreated()");
     refreshScoringParameters();
     if(userSignupAnswerPoints == 0.0f)
       return;
