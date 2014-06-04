@@ -47,10 +47,7 @@ import edu.nps.moves.mmowgli.components.KeepAliveManager;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.SearchManager;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.*;
 import edu.nps.moves.mmowgli.messaging.Broadcaster;
 import edu.nps.moves.mmowgli.messaging.Broadcaster.BroadcastListener;
 import edu.nps.moves.mmowgli.messaging.InterTomcatIO;
@@ -61,6 +58,7 @@ import edu.nps.moves.mmowgli.messaging.MMessage;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.M;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * AppMasterMessaging.java
@@ -96,7 +94,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
         _jmsIO = new JmsIO2();
         _jmsIO.addReceiver(this);
         _jmsIO.addFirstExternalListener(this);
-        System.out.println("*****Internode IO built in AppMasterMessaging");
+        MSysOut.println("*****Internode IO built in AppMasterMessaging");
       }
       catch (Exception ex) {
         System.err.println("Can't build internode IO in ApplicationMaster: "+ex.getClass().getSimpleName()+" "+ex.getLocalizedMessage());
@@ -117,7 +115,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   @Override
   public boolean doPreviewMessage(MMessagePacket pkt)
   {
-    System.out.println("AppMasterMessaging.doPreviewMessage()...got external message");
+    MSysOut.println("AppMasterMessaging.doPreviewMessage()...got external message");
     Session sess = VHib.getSessionFactory().openSession();
     Transaction tx = sess.beginTransaction();
     tx.setTimeout(HIBERNATE_TRANSACTION_TIMEOUT_IN_SECONDS);
@@ -237,7 +235,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   @Override 
   public boolean handleIncomingTomcatMessageOob(MMessagePacket pkt, SessionManager sessMgr)
   {
-    System.out.println("AppMasterMessaging/JMSIO2.handleIncomingTomcatMessageOob()");
+    MSysOut.println("AppMasterMessaging/JMSIO2.handleIncomingTomcatMessageOob()");
     
     if(getMcache() != null)
       mcache.handleIncomingTomcatMessageOob(pkt, sessMgr);
@@ -275,13 +273,23 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   }
 
   /**
-   * This is where all messages generated from user sessions in this cluster come in, including db messages
+   * This is where all messages generated from user sessions in this cluster node come in
    */
   @Override
   public void handleIncomingSessionMessage(MMessagePacket message)
   {
-    System.out.println("AppMasterMessaging, seq "+mysequence+", incomingSessionMessageHandler(receiveBroadcast()), tomcat_id = "+message.tomcat_id);
+    MSysOut.println("AppMasterMessaging, seq "+mysequence+", incomingSessionMessageHandler(receiveBroadcast()), tomcat_id = "+message.tomcat_id);
     ((JmsIO2)getInterTomcatIO()).sendSessionMessage(message);
   }
-
+/**
+ * This is where all database messages from this cluster come in
+ */
+  public void incomingDatabaseEvent(MMessagePacket mMessagePacket)
+  {
+    MSysOut.println("AppMasterMessaging.incomingDatabaseEvent()");
+    if(getMcache() != null) {
+      mcache.handleIncomingTomcatMessageOob(mMessagePacket, null);
+    }
+    Broadcaster.broadcast(mMessagePacket);    
+  }
 }
