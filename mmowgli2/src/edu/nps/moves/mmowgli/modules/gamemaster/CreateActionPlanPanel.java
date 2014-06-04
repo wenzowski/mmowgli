@@ -340,7 +340,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
             }
           }
           catch (Exception e) {
-            System.out.println(e.getLocalizedMessage());
+            System.err.println(e.getLocalizedMessage());
             // Ignored, we'll let the Form handle the errors
           }
           
