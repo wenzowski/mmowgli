@@ -43,6 +43,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.vaadin.server.*;
 
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+
 /**
  * Mmowgli2VaadinServlet.java
  * Created on Jan 22, 2014
@@ -96,7 +98,7 @@ public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet impl
   // Both the constructor and the servletInitialized method get called first only on first browser access
   public Mmowgli2VaadinServlet()
   {
-    System.out.println("Mmowgli2VaadinServlet().....");
+    MSysOut.println("Mmowgli2VaadinServlet().....");
   }
   
   @Override
@@ -118,7 +120,7 @@ public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet impl
     vHibPii.init(context);
     */
     // end try
-    System.out.println("Mmowgli: contextPath: "+context.getContextPath());
+    MSysOut.println("Mmowgli: contextPath: "+context.getContextPath());
     appMaster = AppMaster.getInstance(context);// Initialize app master, global across on user sessions on this cluster node
    
     context.setAttribute(MmowgliConstants.APPLICATION_MASTER_ATTR_NAME, appMaster);
@@ -130,7 +132,7 @@ public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet impl
   {
     new MmowgliSessionGlobals(event,this);   // Initialize global object across all users windows, gets stored in VaadinSession object referenced in event
     event.getSession().addUIProvider(new Mmowgli2UIProvider());
-    //System.out.println("JMETERdebug: Session created, id = "+event.getSession().hashCode());
+    //MSysOut.println("JMETERdebug: Session created, id = "+event.getSession().hashCode());
     // How to include openlayers js (todo)
 /*
     event.getSession().addBootstrapListener(new BootstrapListener() {
@@ -162,7 +164,7 @@ public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet impl
   @Override
   public void sessionDestroy(SessionDestroyEvent event)
   {
-    //System.out.println("JMETERdebug: Session destroyed, id = "+event.getSession().hashCode());
+    //MSysOut.println("JMETERdebug: Session destroyed, id = "+event.getSession().hashCode());
     
     if(appMaster != null) { // might be with error on startup
       appMaster.doSessionCountUpdate(--sessionCount);
@@ -176,55 +178,55 @@ public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet impl
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
   {
     super.doGet(req, resp);
-    System.out.println("doGet..........");
+    MSysOut.println("doGet..........");
   }
 
   @Override
   protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
   {
     super.doDelete(req, resp);
-    System.out.println("doDelete.........");
+    MSysOut.println("doDelete.........");
   }
 
   @Override
   protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
   {
     super.doHead(req, resp);
-    System.out.println("doHead.......");
+    MSysOut.println("doHead.......");
   }
 
   @Override
   protected void doOptions(HttpServletRequest arg0, HttpServletResponse arg1) throws ServletException, IOException
   {
     super.doOptions(arg0, arg1);
-    System.out.println("doOptions..........");
+    MSysOut.println("doOptions..........");
   }
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
   {
     super.doPost(req, resp);
-    System.out.println("doPost..........");
+    MSysOut.println("doPost..........");
   }
 
   @Override
   protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
   {
     super.doPut(req, resp);
-    System.out.println("doPut............");
+    MSysOut.println("doPut............");
   }
 
   @Override
   protected void doTrace(HttpServletRequest arg0, HttpServletResponse arg1) throws ServletException, IOException
   {
     super.doTrace(arg0, arg1);
-    System.out.println("doTrace...............");
+    MSysOut.println("doTrace...............");
   }
 
   @Override
   protected long getLastModified(HttpServletRequest req)
   {
-    System.out.println("getLastModified...........");
+    MSysOut.println("getLastModified...........");
     return super.getLastModified(req);
   }
 
@@ -232,48 +234,48 @@ public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet impl
   public void service(ServletRequest arg0, ServletResponse arg1) throws ServletException, IOException
   {
     super.service(arg0, arg1);
-    //System.out.println("service.............");
+    //MSysOut.println("service.............");
   }
 
   @Override
   public String getInitParameter(String name)
   {
-    //System.out.println("getInitParameter..........");
+    //MSysOut.println("getInitParameter..........");
     return super.getInitParameter(name);
   }
 
   @Override
   public Enumeration<String> getInitParameterNames()
   {
-    //System.out.println("getInitParameterNames..........");
+    //MSysOut.println("getInitParameterNames..........");
     return super.getInitParameterNames();
   }
 
   @Override
   public ServletConfig getServletConfig()
   {
-    //System.out.println("getServletConfig..............");
+    //MSysOut.println("getServletConfig..............");
     return super.getServletConfig();
   }
 
   @Override
   public ServletContext getServletContext()
   {
-    //System.out.println("getServletContext............");
+    //MSysOut.println("getServletContext............");
     return super.getServletContext();
   }
 
   @Override
   public String getServletInfo()
   {
-    System.out.println("getServletInfo.............");
+    MSysOut.println("getServletInfo.............");
     return super.getServletInfo();
   }
 
   @Override
   public String getServletName()
   {
-    //System.out.println("getServletName.............");
+    //MSysOut.println("getServletName.............");
     return super.getServletName();
   }
 
@@ -281,21 +283,21 @@ public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet impl
   public void init() throws ServletException
   {
     super.init();
-    //System.out.println("init.............");
+    //MSysOut.println("init.............");
   }
 
   @Override
   public void log(String message, Throwable t)
   {
     super.log(message, t);
-    System.out.println("log............");
+    MSysOut.println("log............");
   }
 
   @Override
   public void log(String msg)
   {
     super.log(msg);
-    System.out.println("log...........");
+    MSysOut.println("log...........");
   }
 
 
