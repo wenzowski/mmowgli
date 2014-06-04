@@ -33,20 +33,8 @@
  */
 package edu.nps.moves.mmowgli.components;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.HEADER_AVATAR_H;
-import static edu.nps.moves.mmowgli.MmowgliConstants.HEADER_AVATAR_W;
-import static edu.nps.moves.mmowgli.MmowgliConstants.HEADER_H;
-import static edu.nps.moves.mmowgli.MmowgliConstants.HEADER_USERNAME_POS;
-import static edu.nps.moves.mmowgli.MmowgliConstants.HEADER_W;
-import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
-import static edu.nps.moves.mmowgli.MmowgliEvent.CALLTOACTIONCLICK;
-import static edu.nps.moves.mmowgli.MmowgliEvent.LEADERBOARDCLICK;
-import static edu.nps.moves.mmowgli.MmowgliEvent.MAPCLICK;
-import static edu.nps.moves.mmowgli.MmowgliEvent.PLAYIDEACLICK;
-import static edu.nps.moves.mmowgli.MmowgliEvent.SEARCHCLICK;
-import static edu.nps.moves.mmowgli.MmowgliEvent.SHOWUSERPROFILECLICK;
-import static edu.nps.moves.mmowgli.MmowgliEvent.SIGNOUTCLICK;
-import static edu.nps.moves.mmowgli.MmowgliEvent.TAKEACTIONCLICK;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import static edu.nps.moves.mmowgli.MmowgliEvent.*;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
@@ -61,37 +49,21 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.event.MouseEvents;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Resource;
-import com.vaadin.ui.AbsoluteLayout;
+import com.vaadin.ui.*;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Link;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliController;
 import edu.nps.moves.mmowgli.MmowgliEvent;
-import edu.nps.moves.mmowgli.db.Game;
-import edu.nps.moves.mmowgli.db.GameEvent;
-import edu.nps.moves.mmowgli.db.GameLinks;
-import edu.nps.moves.mmowgli.db.Media;
-import edu.nps.moves.mmowgli.db.MessageUrl;
-import edu.nps.moves.mmowgli.db.Move;
-import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.SessionManager;
 import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.messaging.WantsGameEventUpdates;
-import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
-import edu.nps.moves.mmowgli.utility.IDNativeButton;
-import edu.nps.moves.mmowgli.utility.M;
-import edu.nps.moves.mmowgli.utility.MediaLocator;
+import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * Header.java Created on Feb 5, 2011
@@ -722,7 +694,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   
   public boolean gameEventLoggedOob(SessionManager sessMgr, Object evId)
   {
-    System.out.println("Header.gameEventLoggedOob()");
+    MSysOut.println("Header.gameEventLoggedOob()");
     Session sess = M.getSession(sessMgr);
     
     GameEvent ev = (GameEvent)sess.get(GameEvent.class, (Serializable)evId);
@@ -730,7 +702,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
       ev = ComeBackWhenYouveGotIt.fetchGameEventWhenPossible((Long)evId);
     }
     if(ev == null) {
-      System.out.println("ERROR: Header.gameEventLoggedOob(): GameEvent matching id "+evId+" not found in db.");
+      System.err.println("ERROR: Header.gameEventLoggedOob(): GameEvent matching id "+evId+" not found in db.");
     }
     else if(ev.getEventtype() == GameEvent.EventType.BLOGHEADLINEPOST) {
       MessageUrl mu = (MessageUrl)sess.get(MessageUrl.class, (Serializable)ev.getParameter());
