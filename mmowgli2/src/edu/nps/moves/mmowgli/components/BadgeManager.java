@@ -33,11 +33,7 @@
 */
 package edu.nps.moves.mmowgli.components;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.NEW_ACTIONPLAN;
-import static edu.nps.moves.mmowgli.MmowgliConstants.NEW_CARD;
-import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_ACTIONPLAN;
-import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_CARD;
-import static edu.nps.moves.mmowgli.MmowgliConstants.UPDATED_USER;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.util.List;
 import java.util.Set;
@@ -49,18 +45,12 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import edu.nps.moves.mmowgli.AppMaster;
-import edu.nps.moves.mmowgli.db.ActionPlan;
-import edu.nps.moves.mmowgli.db.Badge;
-import edu.nps.moves.mmowgli.db.Card;
-import edu.nps.moves.mmowgli.db.CardType;
-import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.Sess;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.hibernate.*;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * BadgeManager.java
@@ -211,7 +201,7 @@ public class BadgeManager implements Runnable
     Long now = System.currentTimeMillis();
     if(now > (lastLeaderboardCheck+LEADERBOARD_CHECK_INTERVAL_MS)) {
       lastLeaderboardCheck = now;
-      System.out.println("BadgeManager: leaderboard badge check started: "+now);
+      MSysOut.println("BadgeManager: leaderboard badge check started: "+now);
 
       // Got to have at least 100 reg. users non-gm
       Long num =  (Long)sess.createCriteria(User.class)
@@ -220,7 +210,7 @@ public class BadgeManager implements Runnable
       .setProjection(Projections.rowCount()).uniqueResult();
 
       if(num < leadUserCountTrigger) {   // not enough to fool with
-        System.out.println("BadgeManager: leaderboard badge check ended (< min users): "+System.currentTimeMillis());
+        MSysOut.println("BadgeManager: leaderboard badge check ended (< min users): "+System.currentTimeMillis());
         return false;
       }
 
@@ -246,7 +236,7 @@ public class BadgeManager implements Runnable
 
       ret |= processLeaders(sess,lis);
 
-      System.out.println("BadgeManager: leaderboard badge check ended: "+System.currentTimeMillis());
+      MSysOut.println("BadgeManager: leaderboard badge check ended: "+System.currentTimeMillis());
     }
     return ret;
   }
@@ -437,7 +427,7 @@ public class BadgeManager implements Runnable
       Thread.sleep(FIRSTRUNDELAY_MS);
     } catch(InterruptedException ex) {}
 
-    System.out.println("BadgeManager: begin one-time sync of all badges.");
+    MSysOut.println("BadgeManager: begin one-time sync of all badges.");
 
     SingleSessionManager mgr = new SingleSessionManager();
     Session sess = mgr.getSession();
@@ -465,6 +455,6 @@ public class BadgeManager implements Runnable
     needsCommit |= checkLeaderBoard(sess); // top 50 of leader board
     mgr.setNeedsCommit(needsCommit);
     mgr.endSession();
-    System.out.println("BadgeManager: end one-time sync of all badges.");
+    MSysOut.println("BadgeManager: end one-time sync of all badges.");
   }
 }
