@@ -481,17 +481,16 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     listVL.setSpacing(false);
     listVL.addStyleName("m-actionPlanAddAuthorList");
     listVL.addStyleName("m-actionplan-header-container");
-    listVL.setHeight(null); //"198px");
+    listVL.setHeight(null); 
     listVL.setWidth("190px");
 
     listVL.addComponent(sp = new Label());
-    sp.setHeight("35px"); //"20px");
+    sp.setHeight("35px");
     sp.setDescription("List of current authors and (invited authors)");
 
     Label subTitle;
     listVL.addComponent(subTitle = new Label("(invited in parentheses)"));
     subTitle.setWidth(null); // keep it from being 100% wide
-    //subTitle.setHeight("20px"); //"12px");
     subTitle.setDescription("List of current authors and (invited authors)");
     subTitle.addStyleName("m-actionplan-authorlist-sublabel");
     listVL.setComponentAlignment(subTitle, Alignment.MIDDLE_CENTER);
@@ -505,10 +504,12 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     authorList = new UserList(null, ts, greyTs);
 
     listVL.addComponent(authorList);
+    authorList.addStyleName("m-greyborder");
     listVL.setComponentAlignment(authorList, Alignment.TOP_CENTER);
     authorList.setWidth("150px");
-    authorList.setHeight("100px");
-
+    authorList.setHeight("95px");
+    listVL.addComponent(sp = new Label());
+    sp.setHeight("5px");
     listVL.addComponent(addAuthButton);
     listVL.setComponentAlignment(addAuthButton, Alignment.TOP_CENTER);
     addAuthButton.setStyleName("m-actionPlanAddAuthorButt");
