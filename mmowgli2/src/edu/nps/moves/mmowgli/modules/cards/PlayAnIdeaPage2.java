@@ -356,7 +356,7 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     Card c = Card.get(cId,sess); //DBGet.getCard(cId, sess);
     User me = User.get(Mmowgli2UI.getGlobals().getUserID(), sess); //DBGet.getUser(app.globs().user(), sess);
     if (c == null)
-      System.out.println("Error, CallToActionPage.newCardMade_oob, card with id " + cId + " not found.");
+      System.err.println("Error, CallToActionPage.newCardMade_oob, card with id " + cId + " not found.");
     else {
       CardType ct = c.getCardType();
       if (Card.canSeeCard_oob(c, me, sess)) {
