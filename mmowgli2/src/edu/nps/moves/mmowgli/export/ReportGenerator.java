@@ -48,7 +48,7 @@ import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.export.BaseExporter.ExportProducts;
 import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
-import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.DeferredSysOut;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * ReportGenerator.java
@@ -122,7 +122,7 @@ public class ReportGenerator implements Runnable
       if(lastReportMS == null)  // first time
         lastReportMS = nowMS;
       
-      System.out.println("poked = "+poked+" now = "+nowMS+" lastReportMS= "+lastReportMS+" period="+reportPeriod);
+      MSysOut.println("poked = "+poked+" now = "+nowMS+" lastReportMS= "+lastReportMS+" period="+reportPeriod);
       if(poked || ( (reportPeriod >0) && (nowMS-lastReportMS) > reportPeriod) ) {
         lastReportMS = nowMS;  // also done below
         poked = false;
@@ -134,25 +134,25 @@ public class ReportGenerator implements Runnable
           reportPeriod = g.getReportIntervalMinutes() * 60 * 1000;
           ssm.endSession();
           
-          DeferredSysOut.println("Mmowgli report-generator generating card visualizer and action plan, card, user and game design reports to " + MmowgliConstants.REPORTS_FILESYSTEM_PATH + " at "
+          MSysOut.println("Mmowgli report-generator generating card visualizer and action plan, card, user and game design reports to " + MmowgliConstants.REPORTS_FILESYSTEM_PATH + " at "
                                + df.format(new Date()));
 
           // don't put in game log...too many GameEventLogger.logBeginReportGeneration(ssm);
-          DeferredSysOut.println("Mmowgli report-generator building card visualizer");
+          MSysOut.println("Mmowgli report-generator building card visualizer");
           new CardVisualizerBuilder().build();
           
-          DeferredSysOut.println("Mmowgli report-generator exporting action plans");
+          MSysOut.println("Mmowgli report-generator exporting action plans");
           exportOne(new ActionPlanExporter());
-          DeferredSysOut.println("Mmowgli report-generator exporting cards");
+          MSysOut.println("Mmowgli report-generator exporting cards");
           exportOne(new CardExporter());
-          DeferredSysOut.println("Mmowgli report-generator exporting users");
+          MSysOut.println("Mmowgli report-generator exporting users");
           exportOne(new UserExporter());  // keep this last, uses the product of the 2 before
-          DeferredSysOut.println("Mmowgli report-generator exporting game");
+          MSysOut.println("Mmowgli report-generator exporting game");
           String gXmlPath = exportOne(new GameExporter());
 
           writeIndexDotHtml(MmowgliConstants.REPORTS_FILESYSTEM_PATH + "index.html", gXmlPath);
 
-          DeferredSysOut.println("Mmowgli report-generator finished");
+          MSysOut.println("Mmowgli report-generator finished");
           GameEventLogger.logEndReportGeneration();
         } // try
 
@@ -247,12 +247,12 @@ public class ReportGenerator implements Runnable
   {
     try {
       asleep = true;
-      DeferredSysOut.println("ReportGenerator sleeping.");
+      MSysOut.println("ReportGenerator sleeping.");
       Thread.sleep(ms);
-      DeferredSysOut.println("ReportGenerator awake.");
+      MSysOut.println("ReportGenerator awake.");
     }
     catch (InterruptedException ex) {
-      DeferredSysOut.println("ReportGenerator sleep interrupted.");
+      MSysOut.println("ReportGenerator sleep interrupted.");
       try{Thread.sleep(5*1000);}catch(InterruptedException ex2){}  // give caller a chance to update db with new interval
     }
     asleep = false;
