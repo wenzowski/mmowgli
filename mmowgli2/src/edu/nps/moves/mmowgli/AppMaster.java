@@ -43,7 +43,6 @@ import java.util.regex.Pattern;
 import javax.net.ssl.*;
 import javax.servlet.ServletContext;
 
-import org.apache.activemq.broker.BrokerService;
 import org.hibernate.Session;
 
 import com.vaadin.ui.UI;
@@ -60,7 +59,7 @@ import edu.nps.moves.mmowgli.messaging.InterTomcatIO.InterTomcatReceiver;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.modules.scoring.ScoreManager2;
 import edu.nps.moves.mmowgli.utility.*;
-import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.DeferredSysOut;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * AppMaster.java Created on Jan 22, 2014
@@ -84,13 +83,13 @@ public class AppMaster
   private String appUrlString = ""; // gets setup before any logons, then
                                      // completed on first login.
   private TransactionCommitWaiter myTransactionWaiter;
-  private BrokerService xlocalJmsBrokerService;
   private KeepAliveManager keepAliveManager;
   private VHib vaadinHibernate;
   private VHibPii piiHibernate;
 
   private AppMasterMessaging appMasterMessaging;
-
+  private MmowgliEncryption encryptor;
+  
   private String gameImagesUrlString;
   private String userImagesFileSystemPath;
   private String userImagesUrlString;
@@ -237,7 +236,7 @@ public class AppMaster
 
   private void initEncryption()
   {
-    MmowgliEncryption me = new MmowgliEncryption(servletContext);
+    encryptor = new MmowgliEncryption(servletContext);
   }
 
   public void init()
@@ -254,7 +253,7 @@ public class AppMaster
     GameEventLogger.logApplicationLaunch();
     
     startThreads();
-    System.out.println("Out of AppMaster.init");
+    MSysOut.println("Out of AppMaster.init");
 
   }
   /**
@@ -272,7 +271,7 @@ public class AppMaster
     String myClusterNode = getServerName();
     if(myClusterNode.contains(masterCluster)) {    // servername may be long, db entry can be a unique portion of is, like web1
       badgeManager = new BadgeManager(this);
-      System.out.println("** Badge Manager instantiated on "+myClusterNode);
+      MSysOut.println("** Badge Manager instantiated on "+myClusterNode);
       //miscStartup(context);
     }
   }
@@ -310,17 +309,17 @@ public class AppMaster
   }
   public void handleAutomaticReportGeneration()
   {
-    System.out.println("Check for automatic report generator launch");
+    MSysOut.println("Check for automatic report generator launch");
     String masterCluster = servletContext.getInitParameter(WEB_XML_DB_CLUSTERMASTER_KEY);
     String myClusterNode = getServerName();
-    System.out.println("  master (from web.xml) is "+masterCluster);
-    System.out.println("  this one (from InetAddress.getLocalHost().getAddress() is "+myClusterNode);
+    MSysOut.println("  master (from web.xml) is "+masterCluster);
+    MSysOut.println("  this one (from InetAddress.getLocalHost().getAddress() is "+myClusterNode);
     if(myClusterNode.contains(masterCluster) || masterCluster.contains(myClusterNode)) {    // servername may be long, db entry can be a unique portion of is, like web1
       reportGenerator = new ReportGenerator(this);
-      DeferredSysOut.println("Report generator launched");
+      MSysOut.println("Report generator launched");
     }
     else
-      DeferredSysOut.println("Report generator NOT launched");
+      MSysOut.println("Report generator NOT launched");
   }
 
   private void startThreads()
@@ -377,7 +376,7 @@ public class AppMaster
     }
     catch(Exception e)
     {
-      System.out.println("Can't look up host name in ApplicationMaster");
+      System.err.println("Can't look up host name in ApplicationMaster");
     }
     return name;
 
@@ -465,7 +464,7 @@ public class AppMaster
         public boolean handleIncomingTomcatMessageOob(MMessagePacket pkt, SessionManager sessMgr)
         {
           if (pkt.msgType == INSTANCEREPORT) {
-            System.out.println("Instance report received: " + pkt.msg);
+            MSysOut.println("Instance report received: " + pkt.msg);
             AppMaster.this.logPollReport(pkt.msg);
           }
           return false;
@@ -508,7 +507,7 @@ public class AppMaster
           InterTomcatIO sessIO = getInterNodeIO();
           if (sessIO != null) {
             AppMaster me = AppMaster.getInstance();
-            System.out.println(me.getServerName() + " ApplicationMaster requesting instances to respond with \"YES-IM_AWAKE\"");
+            MSysOut.println(me.getServerName() + " ApplicationMaster requesting instances to respond with \"YES-IM_AWAKE\"");
             AppMaster.this.resetPollReports();
             //sessIO.send(INSTANCEREPORTCOMMAND, AppMaster.getServerName() + "\n","");// add EOMessage token
             Broadcaster.broadcast(new MMessagePacket(INSTANCEREPORTCOMMAND,me.getServerName() + "\n","",me.getServerName()));
@@ -634,59 +633,36 @@ public class AppMaster
     return userImagesFileSystemPath;
   }
 
-  private Map<String,Integer> serverSessionCounts = new HashMap<String,Integer>();
   /**
    * Called from the servlet listener, which keeps track of our instance count
    * @param sessCount
    */
   public void doSessionCountUpdate(int sessCount)
   {
-  /*  // We want to let everyone know we've been updated
-    InterTomcatIO sessIO = getInterNodeIO();
-    if (sessIO != null)
-      sessIO.sendDelayed(UPDATE_SESSION_COUNT, getServerName()+"\t"+sessCount); // let this thread return
-*/
-      appMasterMessaging.doSessionCountUpdate(sessCount);
-  }
-
-  // This has come in off the message bus. Keep track of server/logins.  Our own is here too.
-  private void handleSessionCountMsg(String message)
-  {
-    String[] sa = message.split("\t");
-    int count = Integer.parseInt(sa[1]);
-    serverSessionCounts.put(sa[0], count);
+    appMasterMessaging.doSessionCountUpdate(sessCount);
   }
 
   public int getSessionCount()
   {
-    Set<String> keys = serverSessionCounts.keySet();
-    int sum = 0;
-    for(String s : keys)
-      sum += serverSessionCounts.get(s);
-    return sum;
+    return appMasterMessaging.getSessionCount();
   }
 
   public Object[][] getSessionCountByServer()
   {
-    Object[][] oa = new Object[serverSessionCounts.size()][2];
-    Set<String> keys = serverSessionCounts.keySet();
-    int i = 0;
-    for(String s : keys) {
-      oa[i][0] = s;
-      oa[i][1] = serverSessionCounts.get(s);
-      i++;
-    }
-    return oa;
+    return appMasterMessaging.getSessionCountByServer();
   }
-  
+
+  /* We're in the hibernate thread here.  Have to let it complete before we can look up the object */
+  public void incomingDatabaseEvent(final MMessagePacket mMessagePacket)
+  {
+    new Thread( new Runnable(){public void run(){
+      appMasterMessaging.incomingDatabaseEvent(mMessagePacket);
+    }}).start();
+  }
+
   /* This is where database listener messages come in */
   public void sendToOtherNodes(MMessagePacket mMessagePacket)
   {
     appMasterMessaging.handleIncomingSessionMessage(mMessagePacket);   
   }
-/* this was called directly from JMS2IO...should go through AppMastermessaging  
-  public void receivedFromOtherNodes(MMessagePacket pkt)
-  {
-    Broadcaster.broadcast(pkt);
-  } */
 }
