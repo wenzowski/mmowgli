@@ -33,14 +33,19 @@
  */
 package edu.nps.moves.mmowgli.export;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.awt.Image;
-import java.io.*;
+import java.awt.Toolkit;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -59,18 +64,13 @@ import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.Window;
 
 import edu.nps.moves.mmowgli.MmowgliConstants;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * BaseExporter.java Created on Nov 28, 2011
@@ -468,19 +468,19 @@ public abstract class BaseExporter implements Runnable
       @Override
       public void error(TransformerException ex) throws TransformerException
       {
-        System.out.println("Err: " + ex.getLocalizedMessage());
+        System.err.println("Err: " + ex.getLocalizedMessage());
       }
 
       @Override
       public void fatalError(TransformerException ex) throws TransformerException
       {
-        System.out.println("Fat: " + ex.getLocalizedMessage());
+        System.err.println("Fat: " + ex.getLocalizedMessage());
       }
 
       @Override
       public void warning(TransformerException ex) throws TransformerException
       {
-        System.out.println("Warn: " + ex.getLocalizedMessage());
+        System.err.println("Warn: " + ex.getLocalizedMessage());
       }
     });
     StringWriter sw = new StringWriter();  // where resultant xml gets put
@@ -530,7 +530,7 @@ public abstract class BaseExporter implements Runnable
     }
     
     //todo this needs a push since we're off-thread and this is a new way of opening a window
-    System.out.println("todo this needs a push since we're off-thread and this is a new way of opening a window");
+    MSysOut.println("todo this needs a push since we're off-thread and this is a new way of opening a window");
   }
 
   public String toUtf8(final String inString)
