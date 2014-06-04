@@ -38,12 +38,10 @@ import java.lang.reflect.Method;
 
 import org.hibernate.Session;
 
-import edu.nps.moves.mmowgli.db.Card;
-import edu.nps.moves.mmowgli.db.GameEvent;
-import edu.nps.moves.mmowgli.db.Message;
-import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.MSessionManager;
 import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * ComeBackWhenYouveGotIt.java
@@ -97,11 +95,14 @@ public class ComeBackWhenYouveGotIt
           Session sess = ssm.getSession();
           Object dbObj = sess.get(hibernateObjectClass, (Serializable)objId);
           if(dbObj != null) { 
-            System.out.println("Delayed fetch of "+hibernateObjectClass.getSimpleName()+" "+objId.toString()+" from db, got it on retry "+(i+1));
-            
-            try {callback.invoke(methodObj, ssm,objId);}
-            catch (Exception e) { System.err.println("ERROR, ComBackWhenYouveGotIt.loopOnIt invoking callback: "+
-                                                      e.getClass().getSimpleName()+" "+e.getLocalizedMessage()); }
+            MSysOut.println("Delayed fetch of "+hibernateObjectClass.getSimpleName()+" "+objId.toString()+" from db, got it on retry "+(i+1));            
+            try {
+              callback.invoke(methodObj, ssm,objId);
+            }
+            catch (Exception e) {
+              System.err.println("ERROR, ComBackWhenYouveGotIt.loopOnIt invoking callback: "+
+                                  e.getClass().getSimpleName()+" "+e.getLocalizedMessage());
+            }
             ssm.endSession();
             return;
           }
@@ -165,14 +166,14 @@ public class ComeBackWhenYouveGotIt
           
           Object cd = thisSess.get(holder.cls, holder.id);
           if(cd != null) {
-            System.out.println("Delayed fetch of "+holder.cls.getSimpleName()+" from db, got it on try "+i);
+            MSysOut.println("Delayed fetch of "+holder.cls.getSimpleName()+" from db, got it on try "+i);
             holder.obj = cd;
             ssm.endSession();
             return;
           }
           ssm.endSession();
         }
-        System.out.println("ERROR: Couldn't get "+holder.cls.getSimpleName() +" "+holder.id+" in 10 seconds");// give up
+        System.err.println("ERROR: Couldn't get "+holder.cls.getSimpleName() +" "+holder.id+" in 10 seconds");// give up
       }
     });
     thr.setPriority(Thread.NORM_PRIORITY);
