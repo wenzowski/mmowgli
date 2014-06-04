@@ -16,10 +16,13 @@
 
 package edu.nps.moves.mmowgliMobile;
 
-import com.vaadin.annotations.*;
+import com.vaadin.annotations.Theme;
+import com.vaadin.annotations.Title;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.UI;
 
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 import edu.nps.moves.mmowgliMobile.ui.SigninPopover;
 import edu.nps.moves.mmowgliMobile.ui.SmartphoneMainView;
 
@@ -43,7 +46,7 @@ public class MmowgliMobileUI extends UI
   @Override
   protected void init(VaadinRequest request)
   {
-    System.out.println("mmowgli mobile UI init");
+    MSysOut.println("MM mmowgli mobile UI init");
     setContent(new SmartphoneMainView());
     setImmediate(true);
  /* this adds signin:    
