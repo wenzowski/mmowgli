@@ -296,7 +296,7 @@ public class GameEventLogger
     }
     catch(Exception e)
     {
-      System.out.println("Can't look up host name in GameEventLogger");
+      System.err.println("Can't look up host name in GameEventLogger");
     }
 
     Session sess = VHib.openSession();
