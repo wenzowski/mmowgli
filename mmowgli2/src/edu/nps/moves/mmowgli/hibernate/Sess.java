@@ -36,7 +36,7 @@ package edu.nps.moves.mmowgli.hibernate;
 import org.hibernate.Session;
 
 import edu.nps.moves.mmowgli.AppMaster;
-import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.DeferredSysOut;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * Sess.java
@@ -56,10 +56,10 @@ public class Sess
   public static boolean PRINT_UPDATE_CALLER = true;
   public static boolean PRINT_SAVE_CALLER = true;
   
-  private static String UPSTRINGOOB = "HB: oob session update called with ";
-  private static String SVSTRINGOOB = "HB: oob session save called with ";
-  private static String UPSTRING = "HB: session update called with ";
-  private static String SVSTRING = "HB: session save called with ";
+  private static String UPSTRINGOOB = "Hib: oob session update called with ";
+  private static String SVSTRINGOOB = "Hib: oob session save called with ";
+  private static String UPSTRING = "Hib: session update called with ";
+  private static String SVSTRING = "Hib: session save called with ";
   
   private enum sType {SAVE,UPDATE,MERGE};
   
@@ -107,7 +107,7 @@ public class Sess
       String mthName1= callingFrame1.getMethodName();
       int lnNum = callingFrame. getLineNumber();
       int lnNum1= callingFrame1.getLineNumber();
-      DeferredSysOut.defPrintln(title+objName+" from "+clsName+ "."+mthName+ "/"+lnNum+
+      MSysOut.println(title+objName+" from "+clsName+ "."+mthName+ "/"+lnNum+
                                             ","+clsName1+"."+mthName1+"/"+lnNum1+"("+AppMaster.getInstance().getServerName()+")");
     }
   }
