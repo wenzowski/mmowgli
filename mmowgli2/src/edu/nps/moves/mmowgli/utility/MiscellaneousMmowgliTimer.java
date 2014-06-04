@@ -46,7 +46,7 @@ public class MiscellaneousMmowgliTimer
     timer = new Timer("MiscMmowTimer", true); // deamon, does not prolong life
                                               // of app
     addRepeatingTask(new Tick(), Tick.PERIOD_MS);
-    addRepeatingTask(new DeferredSysOut(), DeferredSysOut.PERIOD_MS);
+    addRepeatingTask(new MSysOut(), MSysOut.PERIOD_MS);
   }
 
   /* App is being shut down, remove all timers */
@@ -73,64 +73,87 @@ public class MiscellaneousMmowgliTimer
     }
   }
 
-  public static class DeferredSysOut extends TimerTask
+  public static class MSysOut extends TimerTask
   {
     public static long PERIOD_MS = 5 * 1000;
     private static StringBuilder sb = new StringBuilder();
     private static String nl = System.getProperty("line.separator");
 
-    private DeferredSysOut() {
+    private MSysOut() {
     }
 
-    public static void defPrintln(String s)
+    public static void println(String... sa)
     {
-      addToSb(s + nl);
+      addToSb(true,false,sa);
     }
 
-    public static void defPrint(String s)
+    public static void print(String... sa)
     {
-      addToSb(s);
+      addToSb(false,false,sa);
     }
 
-    private static void addToSb(String s)
+    private static void addToSb(boolean indivNL, boolean endNL, String... sa)
     {
       if (sb != null) {
         synchronized (sb) {
-          sb.append(s);
+          for(String s : sa) {
+            sb.append(msTimeStamp());
+            sb.append(s);
+            if(indivNL)
+              sb.append(nl);
+          }
+          if(endNL)
+            sb.append(nl);
         }
       }
     }
-
-    // immediate write
-    public static void println(String s)
+    
+    private static String msTimeStamp()
     {
-      DeferredSysOut.print(s + nl);
+      Long t = System.currentTimeMillis();
+      t&=0xFFFFFF;
+      return ""+t+" ";
+    }
+    
+    // immediate write
+    public static void immPrintln(String s)
+    {
+      MSysOut.immPrint(s,nl);
     }
 
     // immediate write
-    public static void print(String s)
+    public static void immPrint(String... sa)
     {
       if (sb != null) {
         synchronized (sb) {
           if (sb.length() > 0) {
             System.out.print(sb.toString());
             sb.setLength(0);
-            System.out.print(nl + s);
+            System.out.println();
+            SysoutVarargs(sa);
           }
           else
-            System.out.print(s);
+            SysoutVarargs(sa);
         }
       }
       else
-        System.out.print(s);
+        SysoutVarargs(sa);
     }
-
+    
+    private static void SysoutVarargs(String...sa)
+    {
+      for(String s : sa) {
+        System.out.print(msTimeStamp());
+        System.out.println(s);
+      }
+    }
+    
     @Override
     public void run()
     {
       synchronized (sb) {
         if (sb.length() > 0) {
-          System.out.println(sb.toString());
+          System.out.print(sb.toString());
           sb.setLength(0);
         }
       }
