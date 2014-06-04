@@ -41,6 +41,7 @@ import javax.servlet.annotation.WebFilter;
 import org.hibernate.Session;
 import org.hibernate.StaleObjectStateException;
 
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 import edu.nps.moves.mmowgliMobile.data.MobileVHib;
 
 /**
@@ -64,7 +65,7 @@ public class MobileSessionInterceptor implements Filter
   @Override
   public void init(FilterConfig filterConfig) throws ServletException
   {
-    System.out.println("MobileSessionInterceptor: One time initializing global Hibernate helper class, MobileVHib");
+    MSysOut.println("MM MobileSessionInterceptor: One time initializing global Hibernate helper class, MobileVHib");
     ServletContext ctx = filterConfig.getServletContext();
     MobileVHib vHib = MobileVHib.instance();
     vHib.init(ctx);
@@ -76,7 +77,7 @@ public class MobileSessionInterceptor implements Filter
   {
     // logger.executionTrace();
     final Session session = MobileVHib.getSessionFactory().getCurrentSession();
-    System.out.println("MobileSessionInterceptor.destroy(), curr sess: "+session.hashCode());
+    MSysOut.println("MM MobileSessionInterceptor.destroy(), curr sess: "+session.hashCode());
 
     if (session.getTransaction().isActive())
       session.getTransaction().commit();
@@ -109,7 +110,7 @@ public class MobileSessionInterceptor implements Filter
     }
     catch (StaleObjectStateException e) {
       // logger.error(e);
-      System.out.println("MobileSessionInterceptor.doFilter(): StaleObjectStateException: "+e.getLocalizedMessage());
+      MSysOut.println("MobileSessionInterceptor.doFilter(): StaleObjectStateException: "+e.getLocalizedMessage());
       if (session.getTransaction().isActive())
         session.getTransaction().rollback();
 
@@ -117,7 +118,7 @@ public class MobileSessionInterceptor implements Filter
     }
     catch (Throwable e) {
       // logger.error(e);
-      System.out.println("MobileSessionInterceptor.doFilter(): Throwable: "+e.getLocalizedMessage());
+      System.err.println("MobileSessionInterceptor.doFilter(): Throwable: "+e.getLocalizedMessage());
       if (session.getTransaction().isActive())
         session.getTransaction().rollback();
 
