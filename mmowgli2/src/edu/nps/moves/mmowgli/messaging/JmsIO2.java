@@ -33,28 +33,17 @@
  */
 package edu.nps.moves.mmowgli.messaging;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.INSTANCEREPORT;
-import static edu.nps.moves.mmowgli.MmowgliConstants.INSTANCEREPORTCOMMAND;
-import static edu.nps.moves.mmowgli.MmowgliConstants.JMS_INTERNODE_TOPIC;
-import static edu.nps.moves.mmowgli.MmowgliConstants.JMS_INTERNODE_URL;
-import static edu.nps.moves.mmowgli.MmowgliConstants.JMS_MESSAGE_SOURCE_TOMCAT_ID;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.util.UUID;
 
-import javax.jms.Connection;
-import javax.jms.DeliveryMode;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicPublisher;
-import javax.jms.TopicSession;
+import javax.jms.*;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ActiveMQTopicPublisher;
 
 import edu.nps.moves.mmowgli.MmowgliConstants;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 import edu.nps.moves.mmowgli.utility.SysOut;
 
 /**
@@ -324,7 +313,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
   {
     try {
       //JMSMessageUtil.dump("*****Message received on appmaster (JmsIO2) from external jms: ",message);
-      System.out.println("*****Message received on appmaster (JmsIO2) from external jms");
+      MSysOut.println("*****Message received on appmaster (JmsIO2) from external jms");
       MMessagePacket pkt = JMSMessageUtil.decode(message);
       // We discard anything sent by us so we don't get into an infinite feedback loop      
       if (pkt.tomcat_id==null || !pkt.tomcat_id.equals(tomcatServerIdentifier)) {
