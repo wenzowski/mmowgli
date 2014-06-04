@@ -45,8 +45,9 @@ import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.messaging.*;
+import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 public class DatabaseListeners
 {
@@ -60,7 +61,6 @@ public class DatabaseListeners
   //private AppMaster appMaster;
   public DatabaseListeners(ServiceRegistry sRegistry) //, AppMaster appMaster)
   {
-    System.out.println("Creating db listeners");
     //this.appMaster = appMaster;
     saveListener = new MySaveListener();
     updateListener = new MyUpdateListener();
@@ -68,8 +68,6 @@ public class DatabaseListeners
     //mergeListener = new MyMergeListener();
     deleteListener = new MyDeleteListener();
     mcache = MCacheManager.instance();
-    
-    System.out.println("db listeners created");
 /*    
     EventListenerRegistry eventListenerRegistry = sRegistry.getService(EventListenerRegistry.class);
     
@@ -89,7 +87,6 @@ public class DatabaseListeners
   
   public void enableListeners(boolean tf)
   {
-    System.out.println("db listeners enabled: "+tf);
     saveListener.enabled = tf;
     updateListener.enabled = tf;
     saveOrUpdateListener.enabled = tf;
@@ -98,7 +95,8 @@ public class DatabaseListeners
   }  
   
   @SuppressWarnings("serial")
-  class MySaveListener extends DefaultSaveEventListener // implements SaveOrUpdateEventListener
+  class MySaveListener extends DefaultSaveEventListener // implements
+                                                        // SaveOrUpdateEventListener
   {
     int count = 0;
     public boolean enabled = false;
@@ -106,28 +104,27 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-      System.out.println("Save db listener");
+      MSysOut.println("Save db listener");
+
       super.onSaveOrUpdate(event); // default behavior first
-      if(!enabled)
+      if (!enabled)
         return;
 
       Object obj = event.getObject();
-      // System.out.println("SaveLis: "+count++ + " on "+obj.getClass().getSimpleName());
 
-      char msgTyp;
-      String msg;
+      Character msgTyp = null;
+      String msg = "";
+      
       if (obj instanceof Card) {
         msgTyp = NEW_CARD;
         msg = "" + ((Card) obj).getId();
-        //System.out.println("Got NEW_CARD in ApplicationMaster.Hib.SaveListener "+msg);
-        //DBGet.cacheCard((Card)obj);
-        mcache.putCard((Card)obj);
+        // DBGet.cacheCard((Card)obj);
+        mcache.putCard((Card) obj);
       }
       else if (obj instanceof User) {
         msgTyp = NEW_USER;
         msg = "" + ((User) obj).getId();
-        //System.out.println("Got NEW_USER in ApplicationMaster.Hib.SaveListener "+msg);
-        DBGet.cacheUser((User)obj);
+        DBGet.cacheUser((User) obj);
       }
       else if (obj instanceof ActionPlan) {
         msgTyp = NEW_ACTIONPLAN;
@@ -135,28 +132,31 @@ public class DatabaseListeners
       }
       else if (obj instanceof GameEvent) {
         msgTyp = GAMEEVENT;
-        GameEvent ge = (GameEvent)obj;
-        msg = "" + ge.getId() +"\t"+ge.getEventtype().toString()+"\t"+ge.getParameter();
-        //does nothingDBGet.cacheGameEvent((GameEvent)obj);
+        GameEvent ge = (GameEvent) obj;
+        msg = "" + ge.getId() + "\t" + ge.getEventtype().toString() + "\t" + ge.getParameter();
+        // does nothingDBGet.cacheGameEvent((GameEvent)obj);
       }
 
       else if (obj instanceof Message) {
-        Message m = (Message)obj;
-        if(m.getToUser() == null) // means its a comment on an Action Plan, let the AP update handle it
-          return;
-        msgTyp = NEW_MESSAGE;
-        msg = "" + m.getId();
+        Message m = (Message) obj;
+        if (m.getToUser() == null) // means its a comment on an Action Plan, let the AP update handle it
+          ;
+        else {
+          msgTyp = NEW_MESSAGE;
+          msg = "" + m.getId();
+        }
       }
       else if (obj instanceof ChatLog) {
         // only happens when making new ActionPlan
-        return;
       }
       else {
-        //System.err.println("Unprocessed db save in ApplicationMaster: " + obj.getClass().getSimpleName());
-        return;
+        // System.err.println("Unprocessed db save in ApplicationMaster: " +
+        // obj.getClass().getSimpleName());
       }
+      if(msgTyp != null)
+        messageOut(event, msgTyp, msg);
 
-      messageOut(event,msgTyp,msg);
+      MSysOut.println("Out of save db listener");
     }
   }
   
@@ -169,26 +169,24 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-      System.out.println("Update db listener");
+      MSysOut.println("Update db listener");
       super.onSaveOrUpdate(event); // default behavior first
       if(!enabled)
         return;
 
       Object obj = event.getObject();
 
-      char msgTyp;
-      String msg;
+      Character msgTyp = null;
+      String msg = "";
       if (obj instanceof Card) {
         msgTyp = UPDATED_CARD;
         msg = "" + ((Card) obj).getId();
-        //System.out.println("Got UPDATED_CARD in ApplicationMaster.Hib.UpdateListener "+msg);
         mcache.putCard((Card)obj);
         //DBGet.cacheCard((Card)obj);
      }
       else if (obj instanceof User) {
         msgTyp = UPDATED_USER;
         msg = "" + ((User) obj).getId();
-        //System.out.println("Got UPDATED_USER in ApplicationMaster.Hib.UpdateListener "+msg);
         DBGet.cacheUser((User)obj);
       }
       else if (obj instanceof ActionPlan) {
@@ -214,9 +212,11 @@ public class DatabaseListeners
       }
       else {
         //System.err.println("Unprocessed db update in ApplicationMaster: " + obj.getClass().getSimpleName());
-        return;
       }
-      messageOut(event,msgTyp,msg);
+      if(msgTyp != null)
+        messageOut(event,msgTyp,msg);
+      
+      MSysOut.println("Out of update db listener");
     }
   }
   @SuppressWarnings("serial")
@@ -227,7 +227,7 @@ public class DatabaseListeners
     @Override
     public void onDelete(DeleteEvent event) throws HibernateException
     {
-      System.out.println("Delete db listener");
+      MSysOut.println("Delete db listener");
       super.onDelete(event);
       if(!enabled)
         return;
@@ -251,7 +251,7 @@ public class DatabaseListeners
     public void onMerge(MergeEvent event) throws HibernateException
     {
       /* This is not used */
-      System.out.println("*************merge listener**********");
+      MSysOut.println("*************merge listener**********");
       super.onMerge(event);
       if(!enabled)
         return;
@@ -300,23 +300,6 @@ public class DatabaseListeners
     String session_id=null;
     if(ui != null)
       session_id = ui.getUUID();
-    Broadcaster.broadcast(new MMessagePacket(msgTyp,msg,session_id,AppMaster.getInstance().getServerName()));
-    
-    
-//    InterTomcatIO interNodeIOSess = getInterNodeIO();
-//    if (interNodeIOSess != null)
-//      interNodeIOSess.sendDelayed(msgTyp, msg, 500l);
-/*
-    // 5 Sep 2013: better way to handle database stuff.  Wait until transaction commited before sending msg.
-    InterTomcatIO interNodeIOSess = appMaster.getInterNodeIO();
-    if (interNodeIOSess != null) {
-      if(event.getSession().isClosed() || event.getSession().getTransaction().wasCommitted())
-        interNodeIOSess.send(msgTyp,msg); //sendDelayed(msgTyp, msg, 500l);
-      else
-        appMaster.getTransactionWaiter().sendInterNode(interNodeIOSess,msgTyp, msg, event.getSession());
-    }
-*/  }
-
-
-
+    AppMaster.getInstance().incomingDatabaseEvent(new MMessagePacket(msgTyp,msg,session_id,AppMaster.getInstance().getServerName()));
+  }
 }
