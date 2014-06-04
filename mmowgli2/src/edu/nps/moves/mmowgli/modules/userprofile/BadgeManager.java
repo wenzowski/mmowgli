@@ -33,19 +33,24 @@
 */
 package edu.nps.moves.mmowgli.modules.userprofile;
 
-import java.util.*;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.*;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.*;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
-
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 /**
  * BadgeManager.java
  * Created on Oct 7, 2011
@@ -195,7 +200,7 @@ public class BadgeManager implements Runnable
     Long now = System.currentTimeMillis();
     if(now > (lastLeaderboardCheck+LEADERBOARD_CHECK_INTERVAL_MS)) {
       lastLeaderboardCheck = now;
-      System.out.println("BadgeManager: leaderboard badge check started: "+now);
+      MSysOut.println("BadgeManager: leaderboard badge check started: "+now);
 
       // Got to have at least 100 reg. users non-gm
       Long num =  (Long)sess.createCriteria(User.class)
@@ -204,7 +209,7 @@ public class BadgeManager implements Runnable
       .setProjection(Projections.rowCount()).uniqueResult();
 
       if(num < leadUserCountTrigger) {   // not enough to fool with
-        System.out.println("BadgeManager: leaderboard badge check ended (< min users): "+System.currentTimeMillis());
+        MSysOut.println("BadgeManager: leaderboard badge check ended (< min users): "+System.currentTimeMillis());
         return false;
       }
 
@@ -230,7 +235,7 @@ public class BadgeManager implements Runnable
 
       ret |= processLeaders(sess,lis);
 
-      System.out.println("BadgeManager: leaderboard badge check ended: "+System.currentTimeMillis());
+      MSysOut.println("BadgeManager: leaderboard badge check ended: "+System.currentTimeMillis());
     }
     return ret;
   }
