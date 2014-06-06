@@ -7,7 +7,9 @@
 	<inherits name="org.vaadin.addon.ios7fixes.Ios7HotFixesWidgetset" />
 	<inherits name="com.vaadin.addon.touchkit.gwt.TouchKitWidgetSet" />
 	<inherits name="fi.jasoft.qrcode.QrcodeWidgetset" />
-
+    <inherits name="com.vaadin.addon.timeline.gwt.TimelineWidgetSet" />
+    <inherits name="com.vaadin.addon.charts.Widgetset" /> 
+  
 	<!-- This instructs the cache manifest linker to add also files from our 
 		theme directory. Then e.g. the styles.css is accessible faster and also during 
 		offline usage. The value is relative to compilers execution path (most commonly 
