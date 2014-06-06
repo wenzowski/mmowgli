@@ -45,7 +45,6 @@
 	  <delete dir="WebContent/VAADIN/themes/tests-tickets"/>
 	  <delete dir="WebContent/VAADIN/themes/tests-table"/>
 	  <delete dir="WebContent/VAADIN/themes/tests-responsive"/>
-	  <delete dir="WebContent/VAADIN/widgetsets/com.vaadin.DefaultWidgetSet"/>
 	</target>
 	
 	<target name="confirmClean">
