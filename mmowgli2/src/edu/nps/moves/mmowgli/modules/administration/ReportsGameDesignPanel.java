@@ -35,6 +35,7 @@ package edu.nps.moves.mmowgli.modules.administration;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.server.Page;
 import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.*;
@@ -94,7 +95,7 @@ public class ReportsGameDesignPanel extends AbstractGameBuilderPanel
           AppMaster.getInstance().pokeReportGenerator();
         }
         catch (Exception ex) {
-          Notification.show("Parameter error", "<html>Check for proper positive integer format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE);
+          new Notification("Parameter error", "<html>Check for proper positive integer format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE,true).show(Page.getCurrent());
         }
       }
     });

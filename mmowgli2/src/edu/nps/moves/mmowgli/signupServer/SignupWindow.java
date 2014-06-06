@@ -37,6 +37,7 @@ import org.hibernate.Session;
 
 import com.vaadin.event.MouseEvents;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Page;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -194,10 +195,10 @@ public class SignupWindow extends Window
       if(email == null ||
          (email.length() <= 0) ||
          !email.contains("@") ) {
-        Notification.show(
+        new Notification(
             "Invalid email.",
             "Please enter a valid email address<br/>to be notified when mmowgli is ready to play.",
-            Notification.Type.ERROR_MESSAGE);
+            Notification.Type.ERROR_MESSAGE,true).show(Page.getCurrent());
         return;
       }
       Query2Pii q = SignupHandler.getQuery2WithEmail(email);
