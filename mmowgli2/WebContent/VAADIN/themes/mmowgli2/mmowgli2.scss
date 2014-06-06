@@ -92,25 +92,11 @@ div .m-textarea-greyborder, .m-greyborder {
 	padding-right:inherit;
 }
   
-  .m-ghostBoxFoot {
+.m-ghostBoxFoot {
     background: transparent no-repeat;
     background-image:url('#{$imageRepo}/ghostBoxFoot261w20h.png');
-  }
-  .v-app {
-    background-color: transparent;
-    /*background-image:url('#{$imageRepo}/nauticalBackground.jpg'); now done programmatically */
-    background-repeat:repeat; /*no-repeat;*/
-    background-attachment:scroll;
-    background-position:top center;
-  }
-  .m-background {  /* new for V7, todo programmatically apply */
-    background-color: transparent;
-    background-image:url('#{$imageRepo}/nauticalBackground.jpg');
-    background-repeat:repeat; /*no-repeat;*/
-    background-attachment:fixed;
-    background-position:top center;
-  }
-  .m-background-red {
+}
+.m-background-red {
 	background-color:red;
 }
 .m-background-canary-yellow {
