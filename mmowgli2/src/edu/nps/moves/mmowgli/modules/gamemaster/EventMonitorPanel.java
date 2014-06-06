@@ -55,6 +55,7 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.SessionManager;
 import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.messaging.WantsGameEventUpdates;
+import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.M;
 import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
 /**
@@ -325,8 +326,13 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
     Session sess = M.getSession(sessMgr);
     GameEvent ev = (GameEvent)sess.get(GameEvent.class, (Serializable)evId);
     if(ev == null) {
-      System.err.println("ERROR: EventMonitorPanel.gameEventLoggedOob(): GameEvent matching id "+evId+" not found in db. Possibly race condition");
-      return false;
+      ev = ComeBackWhenYouveGotIt.fetchGameEventWhenPossible((Long)evId);
+      if(ev != null)
+        ev = (GameEvent)M.getSession(sessMgr).merge(ev);
+      else {
+        System.err.println("ERROR: EventMonitorPanel.gameEventLoggedOob(): GameEvent matching id "+evId+" not found in db.");
+        return false;
+      }
     }
     addEventOob(ev,sess);
     setCaptionPrivate();
