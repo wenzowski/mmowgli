@@ -275,7 +275,12 @@ abstract public class Mmowgli2UI extends UI
   }
   
   private String css1 = ".mmowgli2.v-app {background-image:url('";
-  private String css2 = "');background-position: 50% 0%;background-repeat: repeat;}";
+  private String css2 = "')"+
+  ";background-color:transparent"+
+  ";background-repeat:repeat"+
+  ";background-attachment:fixed"+
+  ";background-position:top center;}";
+
   private void setCustomBackground()
   {
     String bkgUrl = Game.get().getBackgroundImageLink();
