@@ -35,7 +35,9 @@ package edu.nps.moves.mmowgli;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
-import java.net.*;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -652,12 +654,9 @@ public class AppMaster
     return appMasterMessaging.getSessionCountByServer();
   }
 
-  /* We're in the hibernate thread here.  Have to let it complete before we can look up the object */
   public void incomingDatabaseEvent(final MMessagePacket mMessagePacket)
   {
-    new Thread( new Runnable(){public void run(){
-      appMasterMessaging.incomingDatabaseEvent(mMessagePacket);
-    }}).start();
+    appMasterMessaging.incomingDatabaseEvent(mMessagePacket);
   }
 
   /* This is where database listener messages come in */
