@@ -486,7 +486,8 @@ public class MCacheManager implements InterTomcatReceiver
           Session sess = ssm.getSession();
           GameEvent ge = (GameEvent)sess.get(GameEvent.class, evorig.getId());
           if(ge != null) {
-            MSysOut.println("Delayed fetch of game event from db, got it on try "+i);
+            if(i>0)
+              MSysOut.println("(MCacheManager)Delayed fetch of GameEvent from db, got it on try "+i);
             evorig.clone(ge); // get its data
             ssm.endSession();
             return;
