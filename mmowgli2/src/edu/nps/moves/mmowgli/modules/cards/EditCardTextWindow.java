@@ -33,6 +33,7 @@
 */
 package edu.nps.moves.mmowgli.modules.cards;
 
+import com.vaadin.server.Page;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -119,10 +120,10 @@ public class EditCardTextWindow extends Window
       if(event.getButton() == saveButt) {
         results = ta.getValue().toString();
         if(results.length()>characterLimit) {
-          Notification.show(
+          new Notification(
               "Entry too long.",
               "The limit is "+characterLimit+".<br/>You entered "+results.length()+" characters.",
-              Notification.Type.ERROR_MESSAGE);
+              Notification.Type.ERROR_MESSAGE,true).show(Page.getCurrent());
           return;
         }
       }

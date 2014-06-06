@@ -37,6 +37,7 @@ import java.util.Collection;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.server.Page;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -181,8 +182,8 @@ public class ScoringGameDesignPanel extends AbstractGameBuilderPanel
       if(validateFactors(event))
         propagate(event);
       else
-        Notification.show("Data error.&nbsp;&nbsp;", "Your entry must be a space-separated list of numbers, or be empty, signifying<br/>no ancestor points awarded."+
-                                                   "  The change you entered has not been saved.", Notification.Type.ERROR_MESSAGE);
+        new Notification("Data error.&nbsp;&nbsp;", "Your entry must be a space-separated list of numbers, or be empty, signifying<br/>no ancestor points awarded."+
+                                                   "  The change you entered has not been saved.", Notification.Type.ERROR_MESSAGE,true).show(Page.getCurrent());
     }
 
     private void propagate(ValueChangeEvent event)
@@ -235,8 +236,8 @@ public class ScoringGameDesignPanel extends AbstractGameBuilderPanel
             lis.valueChange(event);
         }
         catch(Throwable t) {
-          Notification.show("Data error.&nbsp;&nbsp;", "Your entry must be a decimal number.<br/>"+
-              "The change you entered has not been saved.", Notification.Type.ERROR_MESSAGE);
+          new Notification("Data error.&nbsp;&nbsp;", "Your entry must be a decimal number.<br/>"+
+              "The change you entered has not been saved.", Notification.Type.ERROR_MESSAGE,true).show(Page.getCurrent());
        }
       }
     }
