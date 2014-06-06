@@ -58,6 +58,7 @@ import edu.nps.moves.mmowgli.messaging.MMessage;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.M;
+import edu.nps.moves.mmowgli.utility.MThreadManager;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -196,11 +197,15 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   {
     // We want to let everyone know we've been updated
     InterTomcatIO sessIO = getInterTomcatIO();
+    String msgStr = AppMaster.getInstance().getServerName()+"\t"+sessCount;
     if (sessIO != null)
-      sessIO.sendDelayed(UPDATE_SESSION_COUNT, AppMaster.getInstance().getServerName()+"\t"+sessCount, ""); // let this thread return
+      sessIO.sendDelayed(UPDATE_SESSION_COUNT, msgStr, ""); // let this thread return
+
+    // This is because we've changed so that now we don't receive the jms messages we've sent
+    handleSessionCountMsg(msgStr);
   }
 
-  // This has come in off the message bus. Keep track of server/logins.  Our own is here too.
+  // This has come in off the message bus. Keep track of server/logins.
   private void handleSessionCountMsg(String message)
   {
     String[] sa = message.split("\t");
@@ -281,15 +286,20 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
     MSysOut.println("AppMasterMessaging, seq "+mysequence+", incomingSessionMessageHandler(receiveBroadcast()), tomcat_id = "+message.tomcat_id);
     ((JmsIO2)getInterTomcatIO()).sendSessionMessage(message);
   }
+  
 /**
  * This is where all database messages from this cluster come in
  */
-  public void incomingDatabaseEvent(MMessagePacket mMessagePacket)
+  public void incomingDatabaseEvent(final MMessagePacket mMessagePacket)
   {
     MSysOut.println("AppMasterMessaging.incomingDatabaseEvent()");
     if(getMcache() != null) {
-      mcache.handleIncomingTomcatMessageOob(mMessagePacket, null);
+      /* We're in the hibernate thread here.  Have to let it complete before we can look up the object */
+      MThreadManager.run( new Runnable(){public void run(){
+        mcache.handleIncomingTomcatMessageOob(mMessagePacket, null);
+      }});
     }
+    // This guy, however, gets run "inline" if appropriate
     Broadcaster.broadcast(mMessagePacket);    
   }
 }
