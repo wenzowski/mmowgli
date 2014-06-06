@@ -82,7 +82,7 @@ public class ComeBackWhenYouveGotIt
   
   private static void loopOnIt(final Class<?> hibernateObjectClass, final Object objId, final Method callback, final Object methodObj)
   {
-    Thread thr = new Thread(new Runnable()
+    MThreadManager.run(new Runnable()
     {
       long firstRandomDelay = (long)Math.floor(Math.random()*1000);
       @Override
@@ -111,10 +111,6 @@ public class ComeBackWhenYouveGotIt
         System.err.println("ERROR: Couldn't get "+hibernateObjectClass.getSimpleName()+ objId.toString()+" in 10 seconds");// give up
       }      
     });
-    thr.setPriority(Thread.NORM_PRIORITY);
-    thr.setDaemon(true);
-    thr.setName("ComeBackWhenYouveGotItDbGetter");
-    thr.start();
   }
   
   public static Card fetchCardWhenPossible(Long id)
@@ -153,7 +149,7 @@ public class ComeBackWhenYouveGotIt
 
   private static void fetchDbObjWhenPossible(final ObjHolder holder, boolean wait)
   {
-    Thread thr = new Thread(new Runnable()
+    MThreadManager.run(new Runnable()
     {
       @Override
       public void run()
@@ -166,7 +162,8 @@ public class ComeBackWhenYouveGotIt
           
           Object cd = thisSess.get(holder.cls, holder.id);
           if(cd != null) {
-            MSysOut.println("Delayed fetch of "+holder.cls.getSimpleName()+" from db, got it on try "+i);
+            if(i>0)
+              MSysOut.println("Delayed fetch of "+holder.cls.getSimpleName()+" from db, got it on try "+i);
             holder.obj = cd;
             ssm.endSession();
             return;
@@ -175,19 +172,6 @@ public class ComeBackWhenYouveGotIt
         }
         System.err.println("ERROR: Couldn't get "+holder.cls.getSimpleName() +" "+holder.id+" in 10 seconds");// give up
       }
-    });
-    thr.setPriority(Thread.NORM_PRIORITY);
-    thr.setDaemon(true);
-    thr.setName("GameDBObjGetter");
-    thr.start();
-    
-    if(wait){
-      try {
-        thr.join();
-      }
-      catch(InterruptedException ex) {
-
-      }
-    }
+    }, wait);
   }
 }
