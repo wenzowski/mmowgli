@@ -103,4 +103,11 @@ public class MmowgliOuterFrame extends VerticalLayout
     MMessage MSG = MMessage.MMParse(typ, message);
     header.gameEventLoggedOob(sessMgr, MSG.id) ;  
   }
+
+  public void showOrHideFouoButton(boolean show)
+  {
+    //header.showOrHideFouoButton(show);
+    footer.showHideFouoButton(show);
+    
+  }
 }
