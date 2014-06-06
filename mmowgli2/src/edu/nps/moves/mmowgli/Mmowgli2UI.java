@@ -308,8 +308,7 @@ abstract public class Mmowgli2UI extends UI
 
   public void showOrHideFouoButton(boolean show)
   {
-    // TODO Auto-generated method stub
-    
+    outerFr.showOrHideFouoButton(show);    
   }
 
   public void doAdminMenu(boolean b)

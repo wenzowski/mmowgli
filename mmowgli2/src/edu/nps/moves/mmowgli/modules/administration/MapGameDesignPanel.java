@@ -37,11 +37,9 @@ import java.io.Serializable;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.ui.Button;
+import com.vaadin.server.Page;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextArea;
 
 import edu.nps.moves.mmowgli.AppEvent;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
@@ -104,7 +102,7 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
         //System.out.println("lat valueChange");
         try {
           String val = event.getProperty().getValue().toString();
-          double lat = Integer.parseInt(val);
+          double lat = Double.parseDouble(val);
           Game g = Game.get();
           g.setMapLatitude(lat);
           Game.update();
@@ -118,7 +116,7 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
           GameEventLogger.logGameDesignChange("Map latitude", val, uid);
         }
         catch (Exception ex) {
-          Notification.show("Parameter error", "<html>Check for proper decimal format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE);
+          new Notification("Parameter error", "<html>Check for proper decimal format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE,true).show(Page.getCurrent());
         }
       }
     });
@@ -137,7 +135,7 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
         //System.out.println("lon valueChange");
         try {       	
           String val = event.getProperty().getValue().toString();                   
-          double lon = Integer.parseInt(val);
+          double lon = Double.parseDouble(val);
           Game g = Game.get();
           g.setMapLongitude(lon);
           Game.update();
@@ -151,7 +149,7 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
           GameEventLogger.logGameDesignChange("Map longitude", val, uid);
         }
         catch (Exception ex) {
-          Notification.show("Parameter error", "<html>Check for proper decimal format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE);
+          new Notification("Parameter error", "<html>Check for proper decimal format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE,true).show(Page.getCurrent());
         }
       }
     });
