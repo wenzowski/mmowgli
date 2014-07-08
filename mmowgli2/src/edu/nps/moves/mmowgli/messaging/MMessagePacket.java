@@ -20,14 +20,17 @@ public class MMessagePacket
   public char msgType;
   public String msg;
 
-  public String session_id = "no_ui";
-  public String tomcat_id;
+  public String session_id = "unset";  // user session id
+  public String ui_id      = "unset";  // ui (window) id
+  public String tomcat_id  = "unset";  // server id
   public String message_uuid = UUID.randomUUID().toString();
   
-  public MMessagePacket(char mt, String msg, String message_uuid, String session_id, String tomcat_id)
+  public MMessagePacket(char mt, String msg, String message_uuid, String ui_id, String session_id, String tomcat_id)
   {
     this.msgType = mt;
     this.msg = msg;
+    if(ui_id != null)
+      this.ui_id = ui_id;
     if(session_id != null)      
       this.session_id = session_id;
     this.tomcat_id = tomcat_id;
@@ -35,9 +38,9 @@ public class MMessagePacket
       this.message_uuid = message_uuid;
   }
   
-  public MMessagePacket(char mt, String msg, String session_id, String tomcat_id)
+  public MMessagePacket(char mt, String msg, String ui_id, String session_id, String tomcat_id)
   {
-    this(mt,msg,null,session_id,tomcat_id);
+    this(mt,msg,null,ui_id,session_id,tomcat_id);
   }
   
   public MMessagePacket(char mt, String msg, String session_id)
@@ -62,5 +65,10 @@ public class MMessagePacket
   public String getSession_id()
   {
     return session_id;
+  }
+  
+  public String getUi_id()
+  {
+    return ui_id;
   }
 }

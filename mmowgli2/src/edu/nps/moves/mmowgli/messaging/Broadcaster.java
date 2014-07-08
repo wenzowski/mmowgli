@@ -43,6 +43,16 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 /* This is straight out of the vaadin 7 book.  Simple is good */
 /* This singleton will be global across all sessions */
 
+/*
+ * There is one of these in a Tomcat deployment of mmowgli.  It is shared by all the user
+ * sessions and the AppMaster, of which there is also one per Tomcat deployment.
+ * 
+ * Currently, the registrants are
+ *  1. AppMasterMessaging, which belongs to AppMaster
+ *  2. MessagingManager, of which there is one per user session
+ * 
+ * A user session can have multiple UI's, corresponding to different windows in the same browser.
+ */
 /**
  * Broadcaster.java
  * Created on Apr 2, 2014
@@ -79,7 +89,7 @@ public class Broadcaster implements Serializable
   
   public static synchronized void broadcast(MMessagePacket message, BroadcastListener blackout)
   {
-    MSysOut.println("Broadcaster delivering message");
+    MSysOut.println("Broadcaster received message type "+message.msgType);
     // Since we know the listeners need to be quick and not block, we don't need this
     /*
     for (final BroadcastListener listener: listeners)
@@ -91,8 +101,10 @@ public class Broadcaster implements Serializable
       });
     */
     for(BroadcastListener listener: listeners)
-      if(blackout == null || !blackout.equals(listener))
-        listener.handleIncomingSessionMessage(message);    
+      if(blackout == null || !blackout.equals(listener)) {
+        MSysOut.println("Broadcaster delivering message "+message.msgType+" to "+listener.getClass().getSimpleName()+" "+listener.hashCode());
+        listener.handleIncomingSessionMessage(message); 
+      }
   }
   
   public static synchronized void broadcast(final MMessagePacket message)

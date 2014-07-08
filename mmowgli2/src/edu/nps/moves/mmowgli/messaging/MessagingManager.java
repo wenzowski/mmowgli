@@ -4,10 +4,12 @@ import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.vaadin.ui.UI;
+import com.vaadin.ui.UIDetachedException;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 import edu.nps.moves.mmowgli.messaging.Broadcaster.BroadcastListener;
+import edu.nps.moves.mmowgli.utility.MThreadManager;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -43,7 +45,7 @@ public class MessagingManager implements BroadcastListener
     this.ui = ui;
     myseq = seq++;
     messageRunnerThread = new Thread(queueReader,"UI inter-tomcat message receiver");
-    messageRunnerThread.setPriority(Thread.NORM_PRIORITY);
+    MThreadManager.priorityNormalLess1(messageRunnerThread);  // One less that database listener, which is VaadinEvent
     messageRunnerThread.start();
   }
   
@@ -69,7 +71,7 @@ public class MessagingManager implements BroadcastListener
 
   public void sendSessionMessage(MMessagePacket message)
   {
-    message.session_id = ui.getUUID();
+    message.session_id = ui.getUserSessionUUID();
     Broadcaster.broadcast(message);
   }
   /*
@@ -82,22 +84,26 @@ public class MessagingManager implements BroadcastListener
     // If this message is from this session, we know we're in the session thread
     // try to deliver the message to us directly  
 
-    // Can be hit before any session exists
-    if(ui != null && (message.getSession_id().equals(ui.getUUID())) ) {
+    // Can be hit before any ui exists
+    // Here we're checking to see if we're in the Vaadin event / DB listener thread of
+    // this UI.  If so we deliver inline.
+ /*   if(ui != null && (message.getUi_id().equals(ui.getUI_UUID())) ) {
       MSysOut.println("MessagingManager"+myseq+" delivering inline");
       deliverInLine(message);
     }
-    else {
+    else { */
       MSysOut.println("MessagingManager"+myseq+" queing for polling or pushing");
       messageQueue.add(message);
-   }
+//   }
   }
   
   private void deliverInLine(MMessagePacket msg)
   {
     if (!listenersInThisSession.isEmpty()) {
-      for (MMMessageListener lis : listenersInThisSession)
+      for (MMMessageListener lis : listenersInThisSession) {
+        MSysOut.println("MessagingManager.deliverInline to "+lis.getClass().getSimpleName()+" "+lis.hashCode());
         lis.receiveMessage((MMessagePacket) msg,null);
+      }
     }
     else
       MSysOut.println("MessagingManager"+myseq+": no listeners");
@@ -113,10 +119,13 @@ public class MessagingManager implements BroadcastListener
       while (alive) {
         try {
           Object message = messageQueue.take();
+//Darn
+Thread.sleep(5000l);
+          MSysOut.println("Calling ui.access on "+ui.getClass().getSimpleName()+" "+ui.hashCode());
           ui.access(new MessageRunner(message, ui)); // this makes sure our access of the UI does not conflict with normal Vaadin
         }
-        catch (InterruptedException ex) {
-          System.err.println("InterruptedException in MessagingManager.queueReader" + myseq);
+        catch (InterruptedException | UIDetachedException ex) {
+          System.err.println(ex.getClass().getSimpleName()+" in MessagingManager.queueReader" + myseq);
           if(!alive)
             return; // End thread
         }
@@ -141,16 +150,19 @@ public class MessagingManager implements BroadcastListener
     @Override
     public void run()
     {
+      try {
       boolean push = false;
-      MSysOut.println("MessageRunner(through UI.access())"+myseq+" got mess");
+      char typ = ((MMessagePacket)msg).msgType;
+      MSysOut.println(""+myseq+"MessageRunner(through UI.access()) got mess "+typ);
       if (!listenersInThisSession.isEmpty()) {
-        MSysOut.println("MessageRunner(through UI.access())"+myseq+": delivering to local listeners");
+        MSysOut.println(""+myseq+"MessageRunner(through UI.access()): delivering "+typ+" to local listeners");
         SingleSessionManager mgr = new SingleSessionManager();
 
-        for (MMMessageListener lis : listenersInThisSession)
+        for (MMMessageListener lis : listenersInThisSession) {
+          MSysOut.println(""+myseq+"MessagingRunner(through UI.access()).deliver "+typ+" to "+lis.getClass().getSimpleName()+" "+lis.hashCode());
           if (lis.receiveMessage((MMessagePacket) msg, mgr))
             ; // not working push = true;
-
+        }
         mgr.endSession();
 
         if (push) {
@@ -161,6 +173,13 @@ public class MessagingManager implements BroadcastListener
       }
       else
         MSysOut.println("MessageManager: no listeners");
+      
+      MSysOut.println(""+myseq+"MessageRunner(through UI.access() exit, typ "+typ+")");
+      }
+      catch(Throwable t) {
+        System.out.println("bp"); 
+        t.printStackTrace();
+      }
     }
   }
 }

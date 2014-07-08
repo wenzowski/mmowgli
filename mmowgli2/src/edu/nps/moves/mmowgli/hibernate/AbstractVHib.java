@@ -227,10 +227,12 @@ public abstract class AbstractVHib// implements SessionManager
     MSysOut.println("Installing db listeners");
     EventListenerRegistry registry = ((SessionFactoryImpl) sf).getServiceRegistry().getService(EventListenerRegistry.class);
 
+    registry.getEventListenerGroup(EventType.POST_COMMIT_INSERT).appendListener(dlis.postInsertListener);
     registry.getEventListenerGroup(EventType.SAVE).appendListener(dlis.saveListener);
-    registry.getEventListenerGroup(EventType.SAVE_UPDATE).appendListener(dlis.saveOrUpdateListener);
+    registry.getEventListenerGroup(EventType.POST_UPDATE).appendListener(dlis.postUpdateListener);
     registry.getEventListenerGroup(EventType.UPDATE).appendListener(dlis.updateListener);
     //registry.getEventListenerGroup(EventType.MERGE).appendListener(dlis.mergeListener);
+    registry.getEventListenerGroup(EventType.SAVE_UPDATE).appendListener(dlis.saveOrUpdateListener);
     registry.getEventListenerGroup(EventType.DELETE).appendListener(dlis.deleteListener);
     MSysOut.println("db listeners installed");
     dlis.enableListeners(true); // may have to be moved later

@@ -39,6 +39,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.event.internal.*;
 //import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.*;
+import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.service.ServiceRegistry;
 
 import edu.nps.moves.mmowgli.AppMaster;
@@ -52,7 +53,10 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 public class DatabaseListeners
 {
   public MySaveListener saveListener;
+  public MyPostInsertEventListener postInsertListener;
   public MyUpdateListener updateListener;
+  public MyPostUpdateEventListener postUpdateListener;
+  
   public MySaveOrUpdateListener saveOrUpdateListener;
   //public MyMergeListener mergeListener;
   public MyDeleteListener deleteListener;
@@ -63,7 +67,11 @@ public class DatabaseListeners
   {
     //this.appMaster = appMaster;
     saveListener = new MySaveListener();
+    postInsertListener = new MyPostInsertEventListener();
+    
     updateListener = new MyUpdateListener();
+    postUpdateListener = new MyPostUpdateEventListener();
+    
     saveOrUpdateListener = new MySaveOrUpdateListener();
     //mergeListener = new MyMergeListener();
     deleteListener = new MyDeleteListener();
@@ -87,8 +95,12 @@ public class DatabaseListeners
   
   public void enableListeners(boolean tf)
   {
-    saveListener.enabled = tf;
+    saveListener.enabled = tf;    
+    postInsertListener.enabled = tf;
+    
     updateListener.enabled = tf;
+    postUpdateListener.enabled = tf;
+    
     saveOrUpdateListener.enabled = tf;
     //mergeListener.enabled = tf;
     deleteListener.enabled = tf;    
@@ -98,16 +110,14 @@ public class DatabaseListeners
   class MySaveListener extends DefaultSaveEventListener // implements
                                                         // SaveOrUpdateEventListener
   {
-    int count = 0;
     public boolean enabled = false;
 
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
       MSysOut.println("Save db listener");
-
       super.onSaveOrUpdate(event); // default behavior first
-      if (!enabled)
+/*      if (!enabled)
         return;
 
       Object obj = event.getObject();
@@ -155,15 +165,86 @@ public class DatabaseListeners
       }
       if(msgTyp != null)
         messageOut(event, msgTyp, msg);
-
+*/
       MSysOut.println("Out of save db listener");
     }
   }
-  
+  @SuppressWarnings("serial")
+  class MyPostInsertEventListener implements PostInsertEventListener
+  {
+    public boolean enabled = false;
+
+    @Override
+    public void onPostInsert(PostInsertEvent event)
+    {
+      MSysOut.println("PostInsert db listener");
+
+      if (!enabled)
+        return;
+      Object obj = event.getEntity();
+      Character msgTyp = null;
+      String msg = "";
+
+      if (obj instanceof Card) {
+        MSysOut.println("postinsert card");
+        msgTyp = NEW_CARD;
+        msg = "" + ((Card) obj).getId();
+        // DBGet.cacheCard((Card)obj);
+        mcache.putCard((Card) obj);
+      }
+      else if (obj instanceof User) {
+        MSysOut.println("postinsert user");
+        msgTyp = NEW_USER;
+        msg = "" + ((User) obj).getId();
+        DBGet.cacheUser((User) obj);
+      }
+      else if (obj instanceof ActionPlan) {
+        MSysOut.println("postinsert ap");
+        msgTyp = NEW_ACTIONPLAN;
+        msg = "" + ((ActionPlan) obj).getId();
+      }
+      else if (obj instanceof GameEvent) {
+        MSysOut.println("postinsert ge");
+        msgTyp = GAMEEVENT;
+        GameEvent ge = (GameEvent) obj;
+        msg = "" + ge.getId() + "\t" + ge.getEventtype().toString() + "\t" + ge.getParameter();
+        // does nothingDBGet.cacheGameEvent((GameEvent)obj);
+      }
+
+      else if (obj instanceof Message) {
+        MSysOut.println("postinsert message");
+        Message m = (Message) obj;
+        if (m.getToUser() == null) // means its a comment on an Action Plan, let
+                                   // the AP update handle it
+          ;
+        else {
+          msgTyp = NEW_MESSAGE;
+          msg = "" + m.getId();
+        }
+      }
+      else if (obj instanceof ChatLog) {
+        // only happens when making new ActionPlan
+      }
+      else {
+        // System.err.println("Unprocessed db save in ApplicationMaster: " +
+        // obj.getClass().getSimpleName());
+      }
+      if (msgTyp != null)
+        messageOut(event, msgTyp, msg);
+
+      MSysOut.println("Out of post insert db listener");
+
+    }
+
+    @Override
+    public boolean requiresPostCommitHanding(EntityPersister persister)
+    {
+      return true;
+    }
+  } 
   @SuppressWarnings("serial")
   class MyUpdateListener extends DefaultUpdateEventListener // implements SaveOrUpdateEventListener
   {
-    int count = 0;
     boolean enabled = false;
 
     @Override
@@ -171,7 +252,7 @@ public class DatabaseListeners
     {
       MSysOut.println("Update db listener");
       super.onSaveOrUpdate(event); // default behavior first
-      if(!enabled)
+   /*   if(!enabled)
         return;
 
       Object obj = event.getObject();
@@ -210,15 +291,107 @@ public class DatabaseListeners
         msgTyp = UPDATED_CARDTYPE;
         msg = ""+((CardType)obj).getId();
       }
+      else if(obj instanceof Move) {
+        msgTyp = UPDATED_MOVE;
+        msg = "" + ((Move) obj).getId();        
+      }
+      else if(obj instanceof MovePhase) {
+        msgTyp = UPDATED_MOVEPHASE;
+        msg = "" + ((MovePhase) obj).getId();
+      }
       else {
         //System.err.println("Unprocessed db update in ApplicationMaster: " + obj.getClass().getSimpleName());
       }
       if(msgTyp != null)
         messageOut(event,msgTyp,msg);
-      
+  */    
       MSysOut.println("Out of update db listener");
     }
   }
+  
+ @SuppressWarnings("serial")
+class MyPostUpdateEventListener implements PostUpdateEventListener
+ {
+   boolean enabled = false;
+  @Override
+  public void onPostUpdate(PostUpdateEvent event)
+  {
+      MSysOut.println("Postupdate db listener");
+
+      if(!enabled)
+        return;
+
+      Object obj = event.getEntity();
+
+      Character msgTyp = null;
+      String msg = "";
+      if (obj instanceof Card) {
+        MSysOut.println("postupdate card");
+        msgTyp = UPDATED_CARD;
+        msg = "" + ((Card) obj).getId();
+        mcache.putCard((Card)obj);
+        //DBGet.cacheCard((Card)obj);
+     }
+      else if (obj instanceof User) {
+        MSysOut.println("postupdate user");
+        msgTyp = UPDATED_USER;
+        msg = "" + ((User) obj).getId();
+        DBGet.cacheUser((User)obj);
+      }
+      else if (obj instanceof ActionPlan) {
+        MSysOut.println("postupdate ap");
+        msgTyp = UPDATED_ACTIONPLAN;
+        msg = "" + ((ActionPlan) obj).getId();
+      }
+      else if (obj instanceof ChatLog) {
+        MSysOut.println("postupdate chatlog");
+        msgTyp = UPDATED_CHAT;
+        msg = "" + ((ChatLog) obj).getId();
+      }
+      else if (obj instanceof Media) {
+        MSysOut.println("postupdate media");
+        msgTyp = UPDATED_MEDIA;
+        msg = "" + ((Media) obj).getId();
+      }
+      else if (obj instanceof Game) {
+        MSysOut.println("postupdate game");
+        msgTyp = UPDATED_GAME;
+        msg = "";
+      }
+      else if(obj instanceof CardType) {
+        MSysOut.println("postupdate cardtype");
+        CardTypeManager.updateCardType((CardType)obj);
+        msgTyp = UPDATED_CARDTYPE;
+        msg = ""+((CardType)obj).getId();
+      }
+      else if(obj instanceof Move) {
+        MSysOut.println("postupdate move");
+        msgTyp = UPDATED_MOVE;
+        msg = "" + ((Move) obj).getId();        
+      }
+      else if(obj instanceof MovePhase) {
+        MSysOut.println("postupdate movephase");
+        msgTyp = UPDATED_MOVEPHASE;
+        msg = "" + ((MovePhase) obj).getId();
+      }
+      else {
+        MSysOut.println("Post update listener didn't understand "+obj.getClass().getSimpleName());
+        //System.err.println("Unprocessed db update in ApplicationMaster: " + obj.getClass().getSimpleName());
+      }
+      if(msgTyp != null)
+        messageOut(event,msgTyp,msg);
+      
+      MSysOut.println("Out of postupdate db listener");    
+  }
+
+  @Override
+  public boolean requiresPostCommitHanding(EntityPersister persister)
+  {
+    return true;
+  }
+   
+ }
+  
   @SuppressWarnings("serial")
   class MyDeleteListener extends DefaultDeleteEventListener
   {
@@ -298,8 +471,16 @@ public class DatabaseListeners
   {
     Mmowgli2UI ui = Mmowgli2UI.getAppUI();
     String session_id=null;
-    if(ui != null)
-      session_id = ui.getUUID();
-    AppMaster.getInstance().incomingDatabaseEvent(new MMessagePacket(msgTyp,msg,session_id,AppMaster.getInstance().getServerName()));
+    String ui_id = null;
+    if(ui != null) {
+      session_id = ui.getUserSessionUUID();
+      ui_id = ui.getUI_UUID();
+    }
+    AppMaster.getInstance().incomingDatabaseEvent(
+        new MMessagePacket(msgTyp,
+                           msg,
+                           ui_id,
+                           session_id,
+                           AppMaster.getInstance().getServerName()));
   }
 }

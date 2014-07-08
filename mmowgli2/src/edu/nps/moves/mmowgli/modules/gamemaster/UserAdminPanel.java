@@ -104,6 +104,8 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
   private String EMAIL_COL = QUICKUSER_EMAIL;
   private String CONFIRMED_COL = QUICKUSER_CONFIRMED;
   
+  public static final String WARNING_LABEL = "<b>WARNING</b>: Do <u>not</u> communicate player Personal Identifying Information (PII) to anyone other than another game administrator or the individual player.";
+  
   private String[] visibleColumns = {
     USER_ID_COL,
     LOCKEDOUT_COL,
@@ -176,7 +178,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
 
     tableVLayout.addComponent(lab = new Label());
     lab.setHeight("20px");
-
+    tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;color:red;'>" + WARNING_LABEL + "</span>"));
     tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberUsersLabel() + "</span>"));
     tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberOnlineLabel() + "</span>"));
     tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberGameMasters() + "</span>"));

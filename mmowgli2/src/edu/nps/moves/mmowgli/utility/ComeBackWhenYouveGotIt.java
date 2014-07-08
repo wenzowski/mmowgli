@@ -135,6 +135,23 @@ public class ComeBackWhenYouveGotIt
     return (GameEvent)oh.obj;
   }
 
+  public static Move fetchMoveWhenPossible(Long mvId)
+  {
+    ObjHolder oh = new ObjHolder(mvId,Move.class);
+    fetchDbObjWhenPossible(oh,true);
+
+    return (Move)oh.obj;
+  }
+
+  public static MovePhase fetchMovePhaseWhenPossible(Long pId)
+  {
+    ObjHolder oh = new ObjHolder(pId,MovePhase.class);
+    fetchDbObjWhenPossible(oh,true);
+
+    return (MovePhase)oh.obj;
+
+  }
+
   private static class ObjHolder
   {
     public Long id;

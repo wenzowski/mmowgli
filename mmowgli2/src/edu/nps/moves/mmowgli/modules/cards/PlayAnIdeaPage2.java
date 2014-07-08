@@ -61,6 +61,7 @@ import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.messaging.WantsCardUpdates;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
+import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.IDNativeButton;
 import edu.nps.moves.mmowgli.utility.M;
 
@@ -356,6 +357,8 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     Card c = Card.get(cId,sess); //DBGet.getCard(cId, sess);
     User me = User.get(Mmowgli2UI.getGlobals().getUserID(), sess); //DBGet.getUser(app.globs().user(), sess);
     if (c == null)
+      c = ComeBackWhenYouveGotIt.fetchCardWhenPossible((Long)cId);
+    if(c == null)
       System.err.println("Error, CallToActionPage.newCardMade_oob, card with id " + cId + " not found.");
     else {
       CardType ct = c.getCardType();

@@ -223,36 +223,38 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
   private Component buildsTable;
   public void showBuilds()
   {
-    if(lastTable != null) {
-      getRightLayout().removeComponent(lastTable);
-      lastTable = null;
-    }
+    showFavoritesOrBuilds1();    
     if(buildsTable == null)
       buildsTable = createBuildsTable();
-    //getRightLayout().setSizeUndefined();  // if layout is full size, content goes in center, we want top
-    getRightLayout().addComponent(buildsTable);
-    getRightLayout().setComponentAlignment(buildsTable, Alignment.TOP_CENTER);
-    buildsTable.setWidth("670px");
-    buildsTable.setHeight("720px");
-    lastTable = buildsTable;  
+    showFavoritesOrBuilds2(buildsTable);
   }
   
   private Component favoritesTable;
   public void showFavorites()
   {
+    showFavoritesOrBuilds1();
+    if(favoritesTable == null)
+      favoritesTable = createFavoritesTable();
+    showFavoritesOrBuilds2(favoritesTable);
+  }
+    
+  private void showFavoritesOrBuilds1()
+  {
     if(lastTable != null) {
       getRightLayout().removeComponent(lastTable);
       lastTable = null;
-    }
-    if(favoritesTable == null)
-      favoritesTable = createFavoritesTable();
-    getRightLayout().setSizeUndefined();  // if layout is full size, content goes in center, we want top
-    getRightLayout().addComponent(favoritesTable);
-    getRightLayout().setComponentAlignment(favoritesTable, Alignment.TOP_CENTER);
-    //favoritesTable.setHeight("720px");
-    //favoritesTable.setWidth("670px");
-    lastTable = favoritesTable;   
+    }    
   }
+  private void showFavoritesOrBuilds2(Component c)
+  {
+    //getRightLayout().setSizeUndefined();  // if layout is full size, content goes in center, we want top
+    getRightLayout().addComponent(c);
+    getRightLayout().setComponentAlignment(c, Alignment.TOP_CENTER);
+    c.setWidth("670px");
+    c.setHeight("720px");
+    lastTable = c;     
+  }
+  
   
   Component profile;
   public void showProfile()
@@ -291,6 +293,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
   private Component createProfile()
   {
     VerticalLayout lay = new VerticalLayout();
+    lay.setWidth("670px");
     Label lab;
     lay.addComponent(lab=new Label());
     lab.setHeight("10px");
@@ -298,7 +301,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     VerticalLayout innerVL = new VerticalLayout();
     innerVL.setSpacing(true);
     innerVL.setMargin(true);
-    innerVL.setWidth("90%");   
+    innerVL.setWidth("100%"); //"90%");   
     innerVL.addStyleName("m-myideaprofile-table");
     lay.addComponent(innerVL);
     
@@ -309,30 +312,44 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     
     CardType ct;
     int count=0;
+    int largest=-1;
     
-    List<Card> lis = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getPositiveIdeaCardType())).list();
-    row(ct.getSummaryHeader(),lis.size(),ct,gridL);
-    count+=lis.size();
+    List<Card> lisPos = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getPositiveIdeaCardType())).list();
+    count+=lisPos.size();
+    largest = Math.max(largest, lisPos.size());
     
-    lis = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getNegativeIdeaCardType())).list();
-    row(ct.getSummaryHeader(),lis.size(),ct,gridL);
-    count+=lis.size();
+    List<Card> lisNeg = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getNegativeIdeaCardType())).list();
+    count+=lisNeg.size();
+    largest=Math.max(largest, lisNeg.size());
     
-    lis = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getExpandType())).list();
-    row(ct.getSummaryHeader(),lis.size(),ct,gridL);
-    count+=lis.size();
+    List<Card> lisExpand = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getExpandType())).list();
+    count+=lisExpand.size();
+    largest=Math.max(largest,lisExpand.size());
     
-    lis = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getAdaptType())).list();
-    row(ct.getSummaryHeader(),lis.size(),ct,gridL);
-    count+=lis.size();
-    
-    lis = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getCounterType())).list();
-    row(ct.getSummaryHeader(),lis.size(),ct,gridL);
-    count+=lis.size();
-    
-    lis = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getExploreType())).list();
-    row(ct.getSummaryHeader(),lis.size(),ct,gridL);
-    count+=lis.size();
+    List<Card> lisAdapt = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getAdaptType())).list();
+    count+=lisAdapt.size();
+    largest=Math.max(largest,lisAdapt.size());
+
+    List<Card> lisCounter = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getCounterType())).list();
+    count+=lisCounter.size();
+    largest=Math.max(largest,lisCounter.size());
+
+    List<Card> lisExplore = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getExploreType())).list();
+    count+=lisExplore.size();
+    largest=Math.max(largest,lisExplore.size());
+
+    ct = CardTypeManager.getPositiveIdeaCardType();
+    row(ct.getSummaryHeader(),largest,lisPos.size(),ct,gridL);
+    ct = CardTypeManager.getNegativeIdeaCardType();
+    row(ct.getSummaryHeader(),largest,lisNeg.size(),ct,gridL);
+    ct = CardTypeManager.getExpandType();
+    row(ct.getSummaryHeader(),largest,lisExpand.size(),ct,gridL);
+    ct = CardTypeManager.getAdaptType();
+    row(ct.getSummaryHeader(),largest,lisAdapt.size(),ct,gridL);
+    ct= CardTypeManager.getCounterType();
+    row(ct.getSummaryHeader(),largest,lisCounter.size(),ct,gridL);
+    ct = CardTypeManager.getExploreType();
+    row(ct.getSummaryHeader(),largest,lisExplore.size(),ct,gridL);
     
     gridL.addComponent(new Label(""));
     gridL.addComponent(new Label(""));
@@ -346,9 +363,14 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     lay.setExpandRatio(lab, 1.0f);
     return lay;  
   }
-  private void row(String s, int sz, CardType ct, GridLayout grid)
+  
+  private final int  MAXBARWIDTH = 420;
+  private void row(String s, int largest, int sz, CardType ct, GridLayout grid)
   {
-    int factor = 5; //10;
+    float pct = (float)sz/(float)largest;
+    float wd = pct * MAXBARWIDTH;
+    int width = Math.max(Math.round(wd),1);
+    
     Label lab;
     grid.addComponent(lab=new Label(s));
     lab.setWidth("160");
@@ -360,8 +382,6 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
 
     hLay.addComponent(lab=new HtmlLabel("&nbsp;"));;
     lab.addStyleName(CardTypeManager.getColorStyle(ct));
-    int width = Math.min(360, sz*factor);
-    width = Math.max(width, 1);
     lab.setWidth(""+width+"px");    
     hLay.addComponent(lab=new Label(""+sz));
     
@@ -370,9 +390,11 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
   
   private Component buildNoIdeasYet()
   {
-    if(!userIsMe)
-      return new Label("No idea cards yet");
-    
+    if(!userIsMe) {
+      Label lab = new Label("No idea cards yet");
+      lab.addStyleName("m-userprofile-tabpanel-font");
+      return lab;
+    }
     HorizontalLayout hl = new HorizontalLayout();
     hl.setSpacing(true);
     hl.setMargin(true);
@@ -382,7 +404,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     lab.addStyleName("m-userprofile-tabpanel-font");
     lab.setSizeUndefined();
     hl.setExpandRatio(lab, 0.5f);
-    hl.setComponentAlignment(lab, Alignment.MIDDLE_RIGHT);
+    hl.setComponentAlignment(lab, Alignment.TOP_RIGHT);
     hl.addComponent(lab = new Label());
     lab.setWidth("30px");
     IDNativeButton butt = new IDNativeButton("Play a card now",MmowgliEvent.PLAYIDEACLICK);
@@ -390,7 +412,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     butt.addStyleName("m-link-button-18");
     hl.addComponent(butt);
     hl.setExpandRatio(butt,0.5f);
-    hl.setComponentAlignment(butt, Alignment.MIDDLE_LEFT);
+    hl.setComponentAlignment(butt, Alignment.TOP_LEFT);
     return hl;
   }
   
@@ -414,12 +436,14 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     if(ids.size() <= 0) {
       if(nullComponent instanceof String) { 
         VerticalLayout vl = new VerticalLayout();
-        vl.setSizeFull();
-        vl.addComponent(new Label((String)nullComponent));
+        vl.setWidth("670px");
         Label lab;
+        vl.addComponent(lab=new Label((String)nullComponent));
+        lab.addStyleName("m-userprofile-tabpanel-font");
+        lab.setSizeUndefined(); // prevents 100% w
+        vl.setComponentAlignment(lab, Alignment.TOP_CENTER);
         vl.addComponent(lab = new Label());
         vl.setExpandRatio(lab, 1.0f);
-        //return new Label((String)nullComponent);
         return vl;
       }
       return buildNoIdeasYet();

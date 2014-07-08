@@ -239,12 +239,18 @@ public class CardTypeManager
   }
   public static String getColorStyle(CardType ct)
   {
-    return ct.getCssColorStyle();
+    String sty = ct.getCssColorStyle();
+    if(sty == null)
+      sty = "m-lightgray";
+    return sty;
   }
   
   public static String getColorStyle_light(CardType ct)
   {
-    return ct.getCssLightColorStyle();
+    String sty = ct.getCssLightColorStyle();
+    if(sty == null)
+      sty = "m-lightergray";
+    return sty;
   }
   
   public static String getCardSubmitDebugId(CardType ct)
