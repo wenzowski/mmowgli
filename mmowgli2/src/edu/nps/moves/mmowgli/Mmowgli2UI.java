@@ -33,6 +33,7 @@
  */
 package edu.nps.moves.mmowgli;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -47,11 +48,15 @@ import com.vaadin.ui.*;
 import edu.nps.moves.mmowgli.components.AppMenuBar;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.Move;
+import edu.nps.moves.mmowgli.db.MovePhase;
+import edu.nps.moves.mmowgli.hibernate.SessionManager;
 import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.messaging.MessagingManager;
+import edu.nps.moves.mmowgli.messaging.WantsMovePhaseUpdates;
+import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
-import edu.nps.moves.mmowgli.utility.MediaLocator;
+import edu.nps.moves.mmowgli.utility.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 //import edu.nps.moves.mmowgliMobile.VMShareTest;
 
@@ -96,7 +101,7 @@ class.  If this is enabled, the browser just hangs.
 */
 
 @SuppressWarnings("serial")
-abstract public class Mmowgli2UI extends UI
+abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMovePhaseUpdates
 {
   private MmowgliOuterFrame outerFr;
   private MmowgliSessionGlobals globals;
@@ -184,6 +189,7 @@ abstract public class Mmowgli2UI extends UI
 
   public void setWindowTitle(Session sess)
   {
+    MSysOut.println("************ setWindowTitle(), ui = "+getClass().getSimpleName()+" "+hashCode());
     Game game = Game.get(sess);
     boolean gameReadOnly = game.isReadonly();
     boolean cardsReadOnly = game.isCardsReadonly();
@@ -192,15 +198,17 @@ abstract public class Mmowgli2UI extends UI
     
     ArrayList<UI> uis = new ArrayList<UI>(getSession().getUIs());
     uis.add(this);// Set this one, since we may not be in the list yet
+    if(gameReadOnly)
+      title = title+" (Read-only)";
+    else if(cardsReadOnly)
+      title = title+" (Cards read-only)";
+    else
+      ;      
     for(UI ui : uis) {
-      if(gameReadOnly)
-        title = title+" (Read-only)";
-      else if(cardsReadOnly)
-        title = title+" (Cards read-only)";
-      else
-        ;      
       ui.getPage().setTitle(title);
     }
+    MSysOut.println("************ setWindowTitle() to "+title);
+    
   }
   public void setLoginContent()
   {
@@ -339,18 +347,56 @@ abstract public class Mmowgli2UI extends UI
 
   public void gameEvent_oob(SingleSessionManager sessMgr, char typ, String message)
   {
-	if(outerFr != null)  // might not be ready yet
+	  if(outerFr != null)  // might not be ready yet
       outerFr.gameEvent_oob(sessMgr, typ, message);    
   }
   
-  public String getUUID()
+  @Override
+  public boolean moveUpdatedOob(SessionManager smgr, Serializable mvId)
+  {
+    if(outerFr != null)
+      return outerFr.moveUpdatedOob(smgr, mvId);
+    return false;
+  }
+  
+  @Override
+  public boolean movePhaseUpdatedOob(SessionManager sessMgr, Serializable pId)
+  {
+    MSysOut.println("Mmowgli2UI.movePhaseUpdated_oob.handle() UI = "+getClass().getSimpleName()+" "+hashCode());
+
+    if(outerFr != null)
+      outerFr.movePhaseUpdatedOob(sessMgr, pId);  // maybe a nop
+
+    Session sess = M.getSession(sessMgr);
+    MovePhase mp = (MovePhase)sess.get(MovePhase.class, (Serializable)pId);
+    if(mp == null) {
+      mp = ComeBackWhenYouveGotIt.fetchMovePhaseWhenPossible((Long)pId);
+    }
+    if(mp == null) {
+      System.err.println("ERROR: Mmowgli2UI.movePhaseUpdatedOob: MovePhase matching id "+pId+" not found in db.");
+    }
+    // Just wanted to make sure we could get it for the following
+    setWindowTitle(sess);;
+    return true; // may need update, assume so.
+  }
+
+  public String getUI_UUID()
   {
     return uuid.toString();
   }
   
-  public UUID getUUIDObj()
+  public UUID getUI_UUIDObj()
   {
     return uuid;
   }
 
+  public String getUserSessionUUID()
+  {
+    return getGlobals().getUserSessionIdentifier().toString();
+  }
+  
+  public UUID getUserSessionUUIDObj()
+  {
+    return getGlobals().getUserSessionIdentifier();
+  }
 }

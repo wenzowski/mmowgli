@@ -18,7 +18,7 @@ import com.vaadin.ui.Button.ClickEvent;
  * @version $Id$
  */
 
-@Theme("reindeer")
+@Theme("mmowgli2")
 public class Mmowgli2UIError extends UI
 {
   private static final long serialVersionUID = 9069779406128535862L;

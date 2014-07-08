@@ -457,7 +457,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     dialog.center();
   }
   
-  // MessageReceiver interface for in-lin (sessMgr == null) && oob events
+  // MessageReceiver interface for in-line (sessMgr == null) && oob events
   @Override
   public boolean receiveMessage(MMessagePacket pkt, SingleSessionManager sessMgr)
   {
@@ -485,7 +485,14 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       case UPDATED_USER:
         // probably a scoring change
         return helper.userUpdated_oob(sessMgr, Long.parseLong(pkt.msg));
-
+        
+      case UPDATED_MOVE:
+        return helper.moveUpdated_oob(sessMgr,  Long.parseLong(pkt.msg));
+      
+      case UPDATED_MOVEPHASE:
+        MSysOut.println("AbstractMmowglicontroller.receiveMessage() got UPDATED_MOVEPHASE");
+        return helper.movePhaseUpdated_oob(sessMgr, Long.parseLong(pkt.msg));
+        
       case USER_LOGON:
 //        id = Long.parseLong(message);
 //        User u = DBGet.getUser(id,sessMgr.getSession());

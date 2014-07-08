@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.hibernate.Session;
 
@@ -54,6 +55,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   private Mmowgli2UI firstUI = null;
   private URL alternateVideoUrl;
   private boolean loggedIn = false;
+  private UUID userSessionIdentifier = UUID.randomUUID();
   
   private boolean gameAdministrator = false;
   private boolean gameMaster = false;
@@ -180,7 +182,12 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   {
     return appMaster;    
   }
-
+  
+  public UUID getUserSessionIdentifier()
+  {
+    return userSessionIdentifier;
+  }
+  
   public ScoreManager2 getScoreManager()
   {
     return scoreManager;
