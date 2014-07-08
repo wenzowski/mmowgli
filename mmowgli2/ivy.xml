@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE ivy-module [
-	<!ENTITY vaadin.version "7.2.2">
+	<!ENTITY vaadin.version "7.2.4">
 ]>
 
 <ivy-module version="2.0"
@@ -49,6 +49,7 @@
 						
 		<!-- jpa container 
 		<dependency org="com.vaadin.addon" name="jpacontainer" rev="3.1.1" /> -->
+		<dependency org="xerces" name="xercesImpl" rev="2.11.0"/>
 		<dependency org="javax.mail" name="mail" rev="1.4.7"/>
 		<dependency org="javax.transaction" name="jta" rev="1.1"/>
 		<dependency org="mysql" name="mysql-connector-java" rev="5.1.28"/>
