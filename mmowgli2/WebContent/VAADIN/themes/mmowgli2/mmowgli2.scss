@@ -10,7 +10,7 @@
 /* 13 Mar 2014: images gotten from "background: transparent url('#{$imageRepo}/blah.png') no-repeat;" don't get their token replaced
    apparently have to use explicit background-image.... */
    
-@mixin mmowgli2 {
+@mixin mmowgli2 { 
   /* Include all the styles from the reindeer theme */
   @include reindeer;
 
@@ -478,7 +478,7 @@ div .m-textarea-greyborder, .m-greyborder {
   font-weight: bold;
   line-height: 100%;
   font-style: italic;
-  text-align:center:
+  text-align:center;
 }
 .m-cardsummary-movelabel-small {
   color: #6C6D6F;
@@ -486,7 +486,7 @@ div .m-textarea-greyborder, .m-greyborder {
   font-size: 8px;
   line-height: 100%;
   font-style: italic;
-  text-align:center:
+  text-align:center;
 }
 .v-nativebutton-m-continueButton {
     background: transparent no-repeat;
@@ -1826,6 +1826,18 @@ div div .m-useradmin-search-combo .v-filterselect-button {
 .m-navygold-text {
   color: #fcbb38;
 }
+.m-lightgray {
+  background-color: LightGray;
+}
+.m-lightgray-text {
+  color: LightGray;
+}
+.m-lightergray {
+  background-color: #e3e3e3;
+}
+.m-lightergray-text {
+  color: #e3e3e3;
+}
 
 /* Google web fonts (see WebFontLoaderApplicationServlet.java)*/
 .m-handwriting-font {
@@ -1954,5 +1966,4 @@ div div .m-useradmin-search-combo .v-filterselect-button {
   font-size: 28px;
   margin: 5px;
 }
-
 }
