@@ -512,7 +512,12 @@ public class AppMaster
             MSysOut.println(me.getServerName() + " ApplicationMaster requesting instances to respond with \"YES-IM_AWAKE\"");
             AppMaster.this.resetPollReports();
             //sessIO.send(INSTANCEREPORTCOMMAND, AppMaster.getServerName() + "\n","");// add EOMessage token
-            Broadcaster.broadcast(new MMessagePacket(INSTANCEREPORTCOMMAND,me.getServerName() + "\n","",me.getServerName()));
+            Broadcaster.broadcast(new MMessagePacket(
+                INSTANCEREPORTCOMMAND,
+                me.getServerName() + "\n",
+                "", //ui_id
+                "", //session_id
+                me.getServerName())); //tomcat_id
           }
         }
         catch (InterruptedException intEx) {

@@ -38,6 +38,11 @@ public class Mmowgli2UIProvider extends DefaultUIProvider
     Collection<UI> uis = vsess.getUIs();
     
     int count = uis.size();
+   
+    System.out.println("###########");
+    System.out.println("UIProvider found "+count+" uis for this vaadin session");
+    System.out.println("###########");
+
     if(count == 0)
       return Mmowgli2UILogin.class;
     

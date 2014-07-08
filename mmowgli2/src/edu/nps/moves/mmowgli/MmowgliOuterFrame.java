@@ -33,11 +33,20 @@
  */
 package edu.nps.moves.mmowgli;
 
-import com.vaadin.ui.*;
+import java.io.Serializable;
 
-import edu.nps.moves.mmowgli.components.*;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.ComponentContainer;
+import com.vaadin.ui.VerticalLayout;
+
+import edu.nps.moves.mmowgli.components.AppMenuBar;
+import edu.nps.moves.mmowgli.components.Footer;
+import edu.nps.moves.mmowgli.components.Header;
+import edu.nps.moves.mmowgli.hibernate.SessionManager;
 import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 import edu.nps.moves.mmowgli.messaging.MMessage;
+import edu.nps.moves.mmowgli.messaging.WantsMovePhaseUpdates;
+import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
 /**
  * MmowgliOuterFrame.java
  * Created on Jan 27, 2014
@@ -49,7 +58,7 @@ import edu.nps.moves.mmowgli.messaging.MMessage;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class MmowgliOuterFrame extends VerticalLayout
+public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdates, WantsMovePhaseUpdates
 {
   private static final long serialVersionUID = 6619931431041760684L;
  // private AppMenuBar menuBar;
@@ -104,10 +113,22 @@ public class MmowgliOuterFrame extends VerticalLayout
     header.gameEventLoggedOob(sessMgr, MSG.id) ;  
   }
 
+  
   public void showOrHideFouoButton(boolean show)
   {
     //header.showOrHideFouoButton(show);
     footer.showHideFouoButton(show);
     
+  }
+
+  @Override
+  public boolean moveUpdatedOob(SessionManager sessMgr, Serializable mvId)
+  {
+    return header.moveUpdatedOob(sessMgr, mvId);
+  }
+
+  public boolean movePhaseUpdatedOob(SessionManager sessMgr, Serializable pId)
+  {
+    return false; // header doesn't use it
   }
 }

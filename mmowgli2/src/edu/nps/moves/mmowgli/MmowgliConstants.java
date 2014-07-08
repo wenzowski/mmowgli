@@ -201,7 +201,8 @@ public class MmowgliConstants
   public static final char UPDATED_MEDIA = 'i';
   public static final char UPDATED_GAME = 'g';
   public static final char UPDATED_CARDTYPE = 'e'; // followed by cardtype ID
-
+  public static final char UPDATED_MOVE = 'r'; // round
+  public static final char UPDATED_MOVEPHASE = 'h'; 
   public static final char DELETED_USER = 'd'; // followed by user ID
   public static final char USER_LOGON = 'L';
   public static final char USER_LOGOUT = 'l';

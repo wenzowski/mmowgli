@@ -32,6 +32,7 @@ import edu.nps.moves.mmowgli.modules.cards.CardChainPage;
 import edu.nps.moves.mmowgli.modules.gamemaster.*;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
 import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * AbstractMmowgliControllerHelper.java
@@ -142,7 +143,7 @@ public class AbstractMmowgliControllerHelper
       }     
     });
   }
-  
+
   boolean userUpdated_oob(SingleSessionManager mgr, Object uId)
   {
     //todo
@@ -166,6 +167,51 @@ public class AbstractMmowgliControllerHelper
         return push;
       }
     });
+  }
+  boolean moveUpdated_oob(SingleSessionManager mgr, Object uId)
+  {
+    return iterateUIs(mgr,uId,new UIHandler()
+    {
+      public boolean handle(UI ui, SingleSessionManager sessMgr, Object uId)
+      {
+        boolean push=false;
+        
+        if(((Mmowgli2UI)ui).moveUpdatedOob(sessMgr,(Serializable)uId))
+          push = true;
+
+        Component c = ((Mmowgli2UI)ui).getFrameContent();
+        if (c != null && c instanceof WantsMoveUpdates)
+          if(((WantsMoveUpdates) c).moveUpdatedOob(sessMgr, (Serializable)uId))
+           push = true;
+        
+        return push;
+      }
+    });   
+  }
+
+  public boolean movePhaseUpdated_oob(SingleSessionManager mgr, long uId)
+  {
+    MSysOut.println("AbstractMmowgliControllerHelper.movePhaseUpdated_oob()");
+    return iterateUIs(mgr,uId,new UIHandler()
+    {
+      public boolean handle(UI ui, SingleSessionManager sessMgr, Object uId)
+      {
+        MSysOut.println("AbstractMmowgliControllerHelper.movePhaseUpdated_oob.handle() UI = "+ui.getClass().getSimpleName()+" "+ui.hashCode());
+        
+        boolean push=false;
+        
+        if(((Mmowgli2UI)ui).movePhaseUpdatedOob(sessMgr,(Serializable)uId))
+          push = true;
+
+        Component c = ((Mmowgli2UI)ui).getFrameContent();
+        if (c != null && c instanceof WantsMoveUpdates)
+          if(((WantsMovePhaseUpdates) c).movePhaseUpdatedOob(sessMgr, (Serializable)uId))
+           push = true;
+        
+        return push;
+      }
+    });   
+
   }
 
   boolean cardUpdated_oob(SingleSessionManager mgr, Object cardId)
