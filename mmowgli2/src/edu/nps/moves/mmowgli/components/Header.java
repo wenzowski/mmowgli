@@ -62,6 +62,7 @@ import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.SessionManager;
 import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.messaging.WantsGameEventUpdates;
+import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
 import edu.nps.moves.mmowgli.utility.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -73,7 +74,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGameEventUpdates
+public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGameEventUpdates, WantsMoveUpdates
 {
   private static final long serialVersionUID = 3247182543408578788L;
   private static String user_profile_tt = "View your player profile";
@@ -357,10 +358,8 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
         addComponent(bremb,"top:0px;left:333px");
       }
       else {
-        String title = move.getTitle();
-        title = title==null?"":title;
         brandingLab.setHeight("30px");
-        brandingLab.setValue(title);    
+        setBrandingLabelText(move,g);
         addComponent(brandingLab, "top:0px;left:333px"); //HEADER_MOVETITLE_POS);  //"top:151px;left:476px";      
       } 
     }
@@ -369,6 +368,19 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
       addComponent(moveNumLab, "top:103px;left:333px");
     }
   }
+  
+  private void setBrandingLabelText(Move m, Game g)
+  {
+    if(!g.isShowHeaderBranding())
+      return;
+    
+    if(g.getHeaderBranding()==null) {
+      String title = m.getTitle();
+      title = title==null?"":title;
+      brandingLab.setValue(title);      
+    }
+  }
+  
   private void handleSearchClick()
   {
     searchButt.focus();  // make the white go away
@@ -707,6 +719,25 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     else if(ev.getEventtype() == GameEvent.EventType.BLOGHEADLINEPOST) {
       MessageUrl mu = (MessageUrl)sess.get(MessageUrl.class, (Serializable)ev.getParameter());
       decorateBlogHeadlinesLink(mu);
+      return true;
+    }
+    return false;
+  }
+  
+  @Override
+  public boolean moveUpdatedOob(SessionManager sessMgr, Serializable mvId)
+  {
+    MSysOut.println("Header.moveUpdatedOob()");
+    Session sess = M.getSession(sessMgr);
+    Move m = (Move)sess.get(Move.class, (Serializable)mvId);
+    if(m == null) {
+      m = ComeBackWhenYouveGotIt.fetchMoveWhenPossible((Long)mvId);
+    }
+    if(m == null) {
+      System.err.println("ERROR: Header.moveUpdatedOob: Move matching id "+mvId+" not found in db.");
+    }
+    else if(Move.getCurrentMove(sess).getId() == m.getId()) {
+      setBrandingLabelText(m, Game.get(sess));
       return true;
     }
     return false;
