@@ -59,6 +59,7 @@ import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2.SaveCancelPan;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.*;
 import edu.nps.moves.mmowgli.utility.HistoryDialog.DoneListener;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * IdeaDashboardTabTheCards.java
@@ -479,10 +480,11 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
   @Override
   public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
   {
+MSysOut.println("ActionPlanPageTabThePlan2.actionPlanUpdatedOob");
     Session session = M.getSession(sessMgr);
     
     ActionPlan ap = (ActionPlan) session.get(ActionPlan.class, (Serializable) apId);
-
+MSysOut.println("*********** who is involved = "+ap.getSubTitle());
     boolean whoRO = whoGroup.isRo();
     boolean whatRO = whatGroup.isRo(); 
     boolean whatTakeRO = whatTakeGroup.isRo(); 

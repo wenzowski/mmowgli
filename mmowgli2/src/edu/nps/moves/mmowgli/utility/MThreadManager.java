@@ -78,4 +78,38 @@ public class MThreadManager
       runner.run();
     }
   }
+  
+  static private int UP_PRIORITY = 0;
+  
+  static {
+    int mx = Thread.MAX_PRIORITY;
+    int mn = Thread.MIN_PRIORITY;
+    UP_PRIORITY = (mx>mn?+1:-1);    
+  }
+  public static void priorityNormalPlus1(Thread t)
+  {
+    t.setPriority(Thread.NORM_PRIORITY);
+    priorityUp(t);
+  }
+  public static void priorityNormalLess1(Thread t)
+  {
+    t.setPriority(Thread.NORM_PRIORITY);
+    priorityDown(t);
+  }
+  public static void priorityUp()
+  {
+    priorityUp(Thread.currentThread());
+  }
+  public static void priorityUp(Thread t)
+  {
+    t.setPriority(t.getPriority()+UP_PRIORITY);
+  }
+  public static void priorityDown()
+  {
+    priorityDown(Thread.currentThread());
+  }
+  public static void priorityDown(Thread t)
+  {
+    t.setPriority(t.getPriority()-UP_PRIORITY);    
+  }
 }
