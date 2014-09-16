@@ -47,6 +47,8 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 
 /**
@@ -63,7 +65,7 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
   private static final long serialVersionUID = 5870704500956108449L;
   
   abstract Embedded getImage(); // can be null
-  protected void testButtonClicked(ClickEvent ev) {};
+  protected void testButtonClickedTL(ClickEvent ev) {};
 
   transient private List<EditLine> lines;
   private GridLayout grid;
@@ -96,6 +98,7 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
     this(showTestButton,true,globs);
   }
 
+  @HibernateSessionThreadLocalConstructor
   public AbstractGameBuilderPanel(boolean showTestButton, boolean autoSave, GameDesignGlobals globs)
   {
     this.showTestButton = showTestButton;
@@ -112,7 +115,7 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
     grid.addStyleName("m-greyborder3");
     grid.addStyleName("m-greybackground");
 
-    runningMove = Game.get().getCurrentMove();
+    runningMove = Game.getTL().getCurrentMove();
   }
 
   protected String getTitle() // can be null
@@ -160,7 +163,6 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
           eLine.objId = m.getCurrentMovePhase().getId();
           populateEditLine(eLine);
         }
-
       }
     }
   }
@@ -185,14 +187,14 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
     }
 
   }
-  public static boolean isRunningMove(Move m)
+  public static boolean isRunningMoveTL(Move m)
   {
-    return Move.getCurrentMove().getId() == m.getId();
+    return Move.getCurrentMoveTL().getId() == m.getId();
   }
 
-  public static boolean isRunningPhase(MovePhase mp)
+  public static boolean isRunningPhaseTL(MovePhase mp)
   {
-    return MovePhase.getCurrentMovePhase().getId() == mp.getId();
+    return MovePhase.getCurrentMovePhaseTL().getId() == mp.getId();
   }
 
   protected void addThirdColumnComponent(AbstractComponent c)
@@ -208,16 +210,12 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
     lines.add(new EditLine( name, info, ta, null, null, null));
     return ta;
   }
+  
   protected EditLine addEditLine(String name, String info, Object dbObj, Object dbObjId, String dbObjFieldName)
   {
     return addEditLine(name,info,dbObj,dbObjId,dbObjFieldName,null);
-//    TextArea ta = new TextArea();
-//    ta.setRows(2);
-//    ta.setValue(value);
-//    lines.add(new EditLine( name, null, ta, null, null, null, lis));
-//    return ta;
-
   }
+  
   protected EditLine addEditLine(String name, String info, Object dbObj, Object dbObjId, String dbObjFieldName, MoveListener lis)
   {
     return addEditLine(name,info,dbObj,dbObjId,dbObjFieldName,lis,null);
@@ -292,28 +290,38 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
   }
 
   /**
-   * Gets the static getter method from the Hibernate class, of the form of Blah.get() or Blah.get(long)
+   * Gets the static getter method from the Hibernate class, of the form of Blah.getTL() or Blah.get() or Blah.get(long)
    */
   public static Method getGetter(Object dbObj)
   {
     Method objGetter;
     try {
-      objGetter = dbObj.getClass().getDeclaredMethod("get", new Class<?>[]{Object.class});
+      objGetter = dbObj.getClass().getDeclaredMethod("getTL", new Class<?>[] { Object.class });
     }
-    catch(Exception ex) {
+    catch (Exception ex) {
       objGetter = null;
     }
-    if(objGetter == null) {
+    
+    if (objGetter == null) {
       try {
-        objGetter = dbObj.getClass().getDeclaredMethod("get", new Class<?>[]{Serializable.class});
+        objGetter = dbObj.getClass().getDeclaredMethod("get", new Class<?>[] { Object.class });
       }
-      catch(Exception ex) {
+      catch (Exception ex) {
+        objGetter = null;
+      }
+    }
+    
+    if (objGetter == null) {
+      try {
+        objGetter = dbObj.getClass().getDeclaredMethod("get", new Class<?>[] { Serializable.class });
+      }
+      catch (Exception ex) {
         throw new RuntimeException(ex);
       }
     }
     return objGetter;
-
   }
+  
   private EditLine getLineData(Object dbObj)
   {
     Method objGetter = getGetter(dbObj);
@@ -364,11 +372,6 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
       setComponentAlignment(e, Alignment.MIDDLE_CENTER);
     }
 
-   // addComponent(moveSelector=new MoveSelector("Choose round to edit"));
-   // moveSelector.addListener(new MoveComboListener());
-   // setComponentAlignment(moveSelector,Alignment.TOP_CENTER);
-   // showMoveSelector(showMoveSelectorCombo);
-
     if (lines.size() > 0) {
       grid.setColumns(3);
       String heading = getHeading();
@@ -411,9 +414,7 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
           ta.setDescription(edLine.tooltip);
           ta.setImmediate(true);
           ta.setWidth("100%");
-         // if(edLine.listener != null)
-         //   ta.addListener(edLine.listener);
-          //else
+
           if(edLine.fieldName != null && autoSave)
              ta.addValueChangeListener(new IndivListener(edLine,updatesOK,edLine.fieldClass==null?String.class:edLine.fieldClass));
           grid.addComponent(ta, 2, r+rowOffst);
@@ -422,16 +423,13 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
           CheckBox cb = (CheckBox) edLine.ta;
           cb.setDescription(edLine.tooltip);
           cb.setImmediate(true);
-         // if(edLine.listener != null)
-         //   ta.addListener(edLine.listener);
-          //else
+
           if(edLine.fieldName != null && autoSave)
              cb.addValueChangeListener(new IndivListener(edLine,updatesOK,boolean.class));
           grid.addComponent(cb, 2, r+rowOffst);
         }
         else if(edLine.ta instanceof Component){
           grid.addComponent(edLine.ta,2,r+rowOffst);
-
         }
       }
       if(footer != null) {
@@ -450,9 +448,14 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
           private static final long serialVersionUID = 1L;
 
           @Override
+          @MmowgliCodeEntry
+          @HibernateOpened
+          @HibernateClosed
           public void buttonClick(ClickEvent event)
           {
-            testButtonClicked(event);
+            HSess.init();
+            testButtonClickedTL(event);
+            HSess.close();           
           }
         });
         addComponent(testButt);
@@ -467,7 +470,7 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
     lab.addStyleName("m-centeralign");
     return lab;
   }
-
+  
   private void populateEditLine(EditLine eLine)
   {
     if (eLine.fieldName != null) {
@@ -501,24 +504,7 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
       }
     }
   }
- /*
-  @SuppressWarnings("serial")
-  class MoveComboListener implements Property.ValueChangeListener
-  {
-    @Override
-    public void valueChange(ValueChangeEvent event)
-    {
-      notChangingMovesFlag = false;
 
-      MWrap mw = (MWrap)moveSelector.getValue();
-      if(mw != null) {
-        runningMove = mw.m;
-        changeMove(mw.m);
-      }
-      notChangingMovesFlag = true;
-    }
-  }
-  */
   public interface DoUpdates
   {
     public boolean updatesOK();
@@ -536,7 +522,6 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
     transient EditLine edLine;
     transient DoUpdates updatesOK;
 
-    //Class valueClass;
     public IndivListener(EditLine edLine, DoUpdates updatesOK)
     {
       this(edLine,updatesOK,String.class);
@@ -546,11 +531,10 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
       this.edLine = edLine;
       this.updatesOK = updatesOK;
 
-      //this.valueClass = valueClass;
       try {
         Class<? extends Object>hiCls = edLine.getter.getDeclaringClass();
         setter = hiCls.getDeclaredMethod("set" + edLine.fieldName, new Class<?>[] { valueClass });
-        update = hiCls.getDeclaredMethod("update", new Class<?>[] { hiCls });
+        update = hiCls.getDeclaredMethod("updateTL", new Class<?>[] { hiCls });
       }
       catch (Exception ex) {
         System.err.println("exception " + ex.getClass().getSimpleName() + " in IndivListener constructor");
@@ -559,16 +543,20 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
     }
 
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void valueChange(Property.ValueChangeEvent event)
     {
       if (updatesOK.updatesOK()) {
+        HSess.init();
         try {
           Object val = event.getProperty().getValue();
           Object dbObj = edLine.getter.invoke(null, new Object[] { edLine.objId});
           setter.invoke(dbObj, new Object[] { val });
           update.invoke(null, new Object[] { dbObj });
           String field = dbObj.getClass().getSimpleName() + "." + setter.getName();
-          GameEventLogger.logGameDesignChange(field, val==null?"NULL":val.toString(), Mmowgli2UI.getGlobals().getUserID());
+          GameEventLogger.logGameDesignChangeTL(field, val==null?"NULL":val.toString(), Mmowgli2UI.getGlobals().getUserID());
         }
         catch (Exception ex) {
           System.err.println("exception " + ex.getClass().getSimpleName() + " in valueChange listener");
@@ -577,80 +565,13 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
         // See if someone else wants to do something
         if(edLine.auxListener != null)
           edLine.auxListener.valueChange(this, event);
+        HSess.close();
       }
       else
-        ; //System.out.println("No updates because of changingMovesFlag");
+        ;
     }
   }
-  /*
-  public static class MoveSelector extends NativeSelect
-  {
-    private static final long serialVersionUID = 1L;
 
-    public MoveSelector(String caption)
-    {
-      super(caption);
-      int i=1;
-      Move current = MoveManager.getCurrentMove();
-      MWrap selected=null;
-      do {
-        Move m = MoveManager.getMove(i++);
-        if(m == null)
-          break;
-        MWrap mw;
-        addItem(mw=new MWrap(m));
-        if(m.getNumber() == current.getNumber())
-          selected = mw;
-      } while (true);
-
-      setImmediate(true);
-      setNullSelectionAllowed(false);
-      setValue(selected);
-    }
-
-    class MWrap
-    {
-      Move m;
-      public MWrap(Move m)
-      {
-        this.m = m;
-      }
-      @Override
-      public String toString()
-      {
-        return m.getName();
-      }
-    }
-    public void setMove(Move m)
-    {
-      Collection<?> coll = this.getItemIds();
-      for(Object obj : coll) {
-        if(((MWrap)obj).m.getNumber() == m.getNumber()) {
-          this.setValue(obj);
-          break;
-        }
-      }
-    }
-    public void newMove(Move newMove)
-    {
-      // Just rebuild
-      MWrap sel = (MWrap)getValue();
-      removeAllItems();
-      int i=1;
-      do {
-        Move m = MoveManager.getMove(i++);
-        if(m == null)
-          break;
-        MWrap mw;
-        addItem(mw=new MWrap(m));
-        if(m.getNumber() == sel.m.getNumber())
-          sel = mw;
-      } while (true);
-
-      setValue(sel);
-    }
-  }
-  */
   public static class EditLine
   {
     String name;
@@ -663,7 +584,8 @@ abstract class AbstractGameBuilderPanel extends VerticalLayout implements Mmowgl
     Class<?> fieldClass;
     String tooltip;
     AuxiliaryChangeListener auxListener;
-
+    public String objectGetter = "get";
+    
     public EditLine()
     {
     }
