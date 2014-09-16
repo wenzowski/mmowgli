@@ -46,6 +46,10 @@ import com.vaadin.ui.themes.Reindeer;
 
 import edu.nps.moves.mmowgli.db.Move;
 import edu.nps.moves.mmowgli.db.MovePhase;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 
 /**
  * NewMovePhaseDialog.java Created on Apr 2, 2013
@@ -70,7 +74,7 @@ public class NewMovePhaseDialog extends Window
   public NewMovePhaseDialog(Move move)
   {
     super("Make a new Phase for " + move.getName());
-    this.moveBeingEdited = Move.get(move.getId());
+    this.moveBeingEdited = Move.getTL(move.getId());
     setSizeUndefined();
     setWidth("390px");
     VerticalLayout vLay;
@@ -135,6 +139,9 @@ public class NewMovePhaseDialog extends Window
   ClickListener saveCancelListener = new ClickListener()
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     { 
       if(event.getButton() == saveButt) {
@@ -143,16 +150,18 @@ public class NewMovePhaseDialog extends Window
           Notification.show("Error","You must enter a phase description", Notification.Type.ERROR_MESSAGE);
           return;         
         }
-        Move thisMove = Move.get(moveBeingEdited.getId());
+        HSess.init();
+        Move thisMove = Move.getTL(moveBeingEdited.getId());
         MovePhase existing = thisMove.getCurrentMovePhase();
         MovePhase mp = new MovePhase();
         mp.cloneFrom(existing);
         mp.setDescription(obj.toString());
-        MovePhase.save(mp);
+        MovePhase.saveTL(mp);
         
         List<MovePhase> lis = thisMove.getMovePhases();
         lis.add(mp);
-        Move.update(thisMove);
+        Move.updateTL(thisMove);
+        HSess.close();
       }
       
       UI.getCurrent().removeWindow(NewMovePhaseDialog.this);
@@ -165,9 +174,15 @@ public class NewMovePhaseDialog extends Window
     private MovePhase mp;
     private Move thisMove;
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
-      thisMove = Move.get(moveBeingEdited.getId());
+      HSess.init();
+      thisMove = Move.getTL(moveBeingEdited.getId());
+      HSess.close();
+      
       int numPhases = thisMove.getMovePhases().size();
       if (numPhases <= 1) {
         Notification.show("Error","A round must contain at least one phase", Notification.Type.ERROR_MESSAGE);
@@ -185,16 +200,21 @@ public class NewMovePhaseDialog extends Window
 
     ConfirmDialog.Listener confLis = new ConfirmDialog.Listener()
     {
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void onClose(ConfirmDialog dialog)
       {
         if (!dialog.isConfirmed())
           return;
-        thisMove = Move.merge(thisMove);
-        mp = MovePhase.merge(mp);
+        HSess.init();
+        thisMove = Move.mergeTL(thisMove);
+        mp = MovePhase.mergeTL(mp);
         thisMove.getMovePhases().remove(mp);
-        Move.update(thisMove);
-        MovePhase.delete(mp);
+        Move.updateTL(thisMove);
+        MovePhase.deleteTL(mp);
         fillExistingPhases();
+        HSess.close();
       }
     };
   };
