@@ -52,11 +52,10 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsGameEventUpdates;
 import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
-import edu.nps.moves.mmowgli.utility.M;
 import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
 /**
  * CreateActionPlanPanel.java Created on Mar 30, 2011
@@ -79,6 +78,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
   private StringBuilder sb;
   private Label newEventLabel;
   
+  @HibernateSessionThreadLocalConstructor
   public EventMonitorPanel()
   {
     sb = new StringBuilder();
@@ -117,12 +117,15 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
 
   // Want to see more
   @Override
+  @MmowgliCodeEntry
+  @HibernateOpened
+  @HibernateClosed
   public void buttonClick(ClickEvent event)
   {
     int numLines = vLay.getComponentCount();
     if(numLines <= 0)
       return;
-
+    HSess.init();
     EventLine line = (EventLine)vLay.getComponent(numLines-1);
     GameEvent[] arr = Mmowgli2UI.getGlobals().getAppMaster().getMcache().getNextGameEvents(numLines-1, line.gameEvent.getId(), MAX_RESULT_SET);
 
@@ -130,6 +133,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
       event.getButton().setEnabled(false);
 
     addEvents(arr);
+    HSess.close();
    }
 
   private void buildTopInfo(VerticalLayout vertL)
@@ -157,21 +161,13 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
     newEventLabel.setImmediate(true);
     bottomHL.addComponent(newEventLabel);
     Animator.animate(newEventLabel,new Css().opacity(0.0d));   // hide it
- /*   
-    newEventAnimator = new Animator(lab=new HtmlLabel("new event&nbsp;"));  // safari cuts off tail
-    newEventAnimator.setSizeUndefined();
-    newEventAnimator.addStyleName("m-newcardpopup");
-    newEventAnimator.setFadedOut(true);
-    newEventAnimator.setImmediate(true);
-    bottomHL.addComponent(newEventAnimator);
-*/
-    
   }
+  
   private void setTopInfo()
   {
     sb.setLength(0);
 
-    Session session = VHib.getVHSession();
+    Session session = HSess.get();
     Criteria criteria = session.createCriteria(User.class);
     criteria.setProjection(Projections.rowCount());
     int count = ((Long) criteria.list().get(0)).intValue();
@@ -187,7 +183,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
     if (count != 1) sb.append("s");
     sb.append(" online, <b>");
 
-    int mov = Game.get(session).getCurrentMove().getNumber();
+    int mov = Game.getTL().getCurrentMove().getNumber();
     criteria = session.createCriteria(Card.class)
         .createAlias("createdInMove", "MOVE")
         .add(Restrictions.eq("MOVE.number", mov))
@@ -198,7 +194,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
     if (count != 1) sb.append("s");
     sb.append(" played during this round, ");
 
-      if (Game.get().isActionPlansEnabled()) {
+      if (Game.getTL().isActionPlansEnabled()) {
           criteria = session.createCriteria(ActionPlan.class)
               .createAlias("createdInMove", "MOVE")
               .add(Restrictions.eq("MOVE.number", mov))
@@ -216,7 +212,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
       }
 
       String space = " ";
-      count = Game.get().getMaxUsersRegistered();
+      count = Game.getTL().getMaxUsersRegistered();
       sb.append("<html>");
       sb.append("<b>");
       sb.append(count);
@@ -240,7 +236,6 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
     sb.append("<b>Game Master Events Log</b> -- showing most recent ");
     sb.append(eventCount);
     sb.append(" events");
-    //setCaption(sb.toString());
     captionLabel.setValue(sb.toString());
   }
 
@@ -248,9 +243,9 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
   {
     addEventCommon(new EventLine(e),true);
   }
-  public void addEventOob(GameEvent e, Session sess)
+  public void addEventOobTL(GameEvent e)
   {
-    addEventCommon(new EventLine(e,sess),true);
+    addEventCommon(new EventLine(e,HSess.get()),true);
   }
 
   public void addEvent(GameEvent e, boolean head)
@@ -278,6 +273,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
     {
       this(e,null);
     }
+    @HibernateSessionThreadLocalConstructor
     public EventLine(GameEvent e, Session sess)
     {
       gameEvent = e;
@@ -286,7 +282,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
       String des = e.getDescription();
 
       if(sess == null)
-        sess = VHib.getVHSession();
+        sess = HSess.get();
       des = MmowgliLinkInserter.insertLinksOob(des, null, sess);
 
       long id  = e.getId();
@@ -321,20 +317,19 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
   }
 
   @Override
-  public boolean gameEventLoggedOob(SessionManager sessMgr, Object evId)
+  public boolean gameEventLoggedOobTL(Object evId)
   {
-    Session sess = M.getSession(sessMgr);
-    GameEvent ev = (GameEvent)sess.get(GameEvent.class, (Serializable)evId);
+    GameEvent ev = (GameEvent)HSess.get().get(GameEvent.class, (Serializable)evId);
     if(ev == null) {
       ev = ComeBackWhenYouveGotIt.fetchGameEventWhenPossible((Long)evId);
       if(ev != null)
-        ev = (GameEvent)M.getSession(sessMgr).merge(ev);
+        ev = (GameEvent)HSess.get().merge(ev);
       else {
         System.err.println("ERROR: EventMonitorPanel.gameEventLoggedOob(): GameEvent matching id "+evId+" not found in db.");
         return false;
       }
     }
-    addEventOob(ev,sess);
+    addEventOobTL(ev);
     setCaptionPrivate();
     showNotif();
     return true;
