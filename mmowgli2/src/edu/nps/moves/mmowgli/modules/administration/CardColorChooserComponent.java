@@ -33,9 +33,12 @@
 */
 package edu.nps.moves.mmowgli.modules.administration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Set;
 
-import com.vaadin.data.*;
+import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.Resource;
@@ -46,7 +49,8 @@ import com.vaadin.ui.themes.Reindeer;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.CardType;
-import edu.nps.moves.mmowgli.hibernate.Sess;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.utility.CardStyler;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
@@ -71,6 +75,7 @@ public class CardColorChooserComponent extends HorizontalLayout
   private Button openSamplesButt;
   
   @SuppressWarnings("serial")
+  @HibernateSessionThreadLocalConstructor
   CardColorChooserComponent(CardType ct)
   {
     this.ct = ct;
@@ -80,7 +85,7 @@ public class CardColorChooserComponent extends HorizontalLayout
 
     // temp
     if(ct == null)
-      this.ct = CardType.getPositiveIdeaCardType();
+      this.ct = CardType.getPositiveIdeaCardTypeTL();
     
     addComponent(colorCombo = new ColorSelect());
     colorCombo.addValueChangeListener(new MyColorComboListener());
@@ -116,10 +121,12 @@ public class CardColorChooserComponent extends HorizontalLayout
     public void valueChange(ValueChangeEvent event)
     {
      if(!inInit) {
+       HSess.init();
        String s = event.getProperty().toString(); 
-       ct = CardType.merge(ct);
+       ct = CardType.mergeTL(ct);
        ct.setCssColorStyle(s);
-       Sess.sessUpdate(ct);
+       CardType.updateTL(ct);
+       HSess.close();
      }
     }    
   }
