@@ -33,11 +33,17 @@
 */
 package edu.nps.moves.mmowgli.modules.actionplans;
 
+import static edu.nps.moves.mmowgli.MmowgliEvent.ACTIONPLANREQUESTCLICK;
+
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Criteria;
-import org.hibernate.criterion.*;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Restrictions;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.ui.*;
@@ -47,11 +53,10 @@ import com.vaadin.ui.themes.BaseTheme;
 
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
 import edu.nps.moves.mmowgli.utility.IDButton;
-import static edu.nps.moves.mmowgli.MmowgliEvent.ACTIONPLANREQUESTCLICK;
 
 /**
  * ActionDashboardTabPlansInPlay.java
@@ -82,6 +87,11 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
   @Override
   public void initGui()
   {
+    throw new UnsupportedOperationException("");
+  }
+
+  public void initGuiTL()
+  {
     AbsoluteLayout leftLay = getLeftLayout();
 
     flowLay = new VerticalLayout();
@@ -106,9 +116,6 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
     Button myPlansButt = new Button("My Plans");
     myPlansButt.setStyleName(BaseTheme.BUTTON_LINK);
     flowLay.addComponent(myPlansButt);
-   // Button imFollowingButt = new Button("Plans I'm Following");       unsupported
-   // imFollowingButt.setStyleName(BaseTheme.BUTTON_LINK);
-   // flowLay.addComponent(imFollowingButt);
 
     Button requestActionPlanButt = new IDButton("Request Action Plan Authorship",ACTIONPLANREQUESTCLICK);
     requestActionPlanButt.setStyleName(BaseTheme.BUTTON_LINK);
@@ -120,7 +127,6 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
 
     ClickListener firstLis;
     myPlansButt.addClickListener(firstLis = new ButtListener2(buildMyPlansFilter(),null));
-   // imFollowingButt.addListener(new ImFollowingListener(null));
 
     AbsoluteLayout rightLay = getRightLayout();
 
@@ -135,20 +141,13 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
 
   private List<Criterion> buildMyPlansFilter()
   {
+    me = DBGet.getUserFreshTL(me.getId());
     Set<ActionPlan> set = me.getActionPlansAuthored();
     if(set == null)
       return null;
     return _idInSet(set);
   }
-/*
-  private List<Criterion> buildImFollowingFilter()
-  {
-    Set<ActionPlan> set = me.getActionPlansFollowing();
-    if (set == null)
-      return null;
-    return _idInSet(set);
-  }
-*/
+
   private List<Criterion> _idInSet(Set<ActionPlan> set)
   {
     List<Criterion> lis = new ArrayList<Criterion>(1);
@@ -165,21 +164,6 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
     return lis;
   }
 
-//  private List<Criterion> buildNeedAuthorsFilter()
-//  {
-//    Criterion c0 = Restrictions.isNull("authors");
-//    Criterion c1 = Restrictions.isEmpty("authors");
-//    Criterion c2 = Restrictions.or(c0, c1);
-//    ArrayList<Criterion> lis = new ArrayList<Criterion>(1);
-//    lis.add(c2);
-//    return lis;
-//  }
-//
-//  private List<Criterion> buildReadyPlansFilter()
-//  {
-//    return null;
-//  }
-
   @SuppressWarnings("serial")
   class ButtListener2 implements Button.ClickListener
   {
@@ -191,17 +175,17 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
     {
       this.critList = lis;
       this.caption = caption;
-      hCont = new HbnContainer<ActionPlan>(ActionPlan.class,VHib.getSessionFactory())
+      hCont = new HbnContainer<ActionPlan>(ActionPlan.class,HSess.getSessionFactory())
       {
         @Override
-        protected Criteria getBaseCriteria()
+        protected Criteria getBaseCriteriaTL()
         {
-          Criteria c = super.getBaseCriteria();
+          Criteria c = super.getBaseCriteriaTL();
           if(critList != null)
             for(Criterion crit : critList)
               c.add(crit);
 
-          ActionPlan.adjustCriteriaToOmitActionPlans(c, me);
+          ActionPlan.adjustCriteriaToOmitActionPlansTL(c, me);
           return c;
         }
       };
@@ -221,47 +205,9 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
       table = newtable;
     }
   }
-/*
-  @SuppressWarnings("serial")
-  class ImFollowingListener implements Button.ClickListener
-  {
-    private String caption;
 
-    public ImFollowingListener(String caption)
-    {
-      this.caption = caption;
-    }
-
-    @Override
-    public void buttonClick(ClickEvent event)
-    {
-      User meUser = DBGet.getUserFresh(app.getUser());
-
-      Set<ActionPlan> plans = meUser.getActionPlansFollowing();
-      if (me.isAdministrator() || Game.get().isShowPriorMovesCards())
-        ;
-      else {
-        HashSet<ActionPlan> followedPlans = new HashSet<ActionPlan>();
-        Move m = Move.getCurrentMove();
-        for(ActionPlan ap : plans)
-          if(ap.getCreatedInMove().getId() == m.getId())
-            followedPlans.add(ap);
-        plans = followedPlans;
-      }
-      Table newtable = new ActionPlanTable(app,new ActionPlanTable.ImFollowingContainer2(ActionPlan.class, plans));
-      newtable.setCaption(caption);
-      newtable.setWidth("100%");
-      newtable.setHeight("650px");
-
-      if(table != null)
-        flowLay.removeComponent(table);
-      flowLay.addComponent(newtable);
-      table = newtable;
-    }
-  }
-*/
   @Override
-  public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
+  public boolean actionPlanUpdatedOobTL(Serializable apId)
   {
     return false;
   }
