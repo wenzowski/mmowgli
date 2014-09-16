@@ -37,6 +37,7 @@ import com.vaadin.ui.Embedded;
 import com.vaadin.ui.TextArea;
 
 import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * HeaderFooterGameDesignPanel.java
@@ -56,24 +57,27 @@ public class BooleansGameDesignPanel extends AbstractGameBuilderPanel
   
   private static final long dbObjId = 1L;
 
+  @HibernateSessionThreadLocalConstructor
   public BooleansGameDesignPanel(GameDesignGlobals globs)
   {
     super(false,globs);
-    Game g = Game.get(dbObjId);
+    Game g = Game.getTL(dbObjId);
     TextArea ta = (TextArea)addEditLine("Game title", "Game.title", g, dbObjId,"Title",null,String.class,"Used in game reports").ta;
     ta.setRows(1);
     addSeparator();
-    addEditBoolean("Enable action plans for this game", "Game.isActionPlansEnabled", g, dbObjId, "ActionPlansEnabled", "For specific game requirements where Action Plans are desired");
-    addEditBoolean("Show action plans from prior rounds","Game.showPriorMovesActionPlans", g, dbObjId, "ShowPriorMovesActionPlans");
-    addEditBoolean("Allow edits on action plans from prior rounds","Game.editPriorMovesActionPlans",g,dbObjId,"EditPriorMovesActionPlans");
-    addEditBoolean("Show cards from prior rounds","Game.showPriorMovesCards", g, dbObjId, "ShowPriorMovesCards");
-    addEditBoolean("Allow play on cards from prior rounds","Game.playOnPriorMovesCards",g, dbObjId, "PlayOnPriorMovesCards");
+//@formatter:off
+    addEditBoolean("Enable action plans for this game",            "Game.isActionPlansEnabled",      g, dbObjId, "ActionPlansEnabled", "For specific game requirements where Action Plans are desired");
+    addEditBoolean("Show action plans from prior rounds",          "Game.showPriorMovesActionPlans", g, dbObjId, "ShowPriorMovesActionPlans");
+    addEditBoolean("Allow edits on action plans from prior rounds","Game.editPriorMovesActionPlans", g, dbObjId, "EditPriorMovesActionPlans");
+    addEditBoolean("Show cards from prior rounds",                 "Game.showPriorMovesCards",       g, dbObjId, "ShowPriorMovesCards");
+    addEditBoolean("Allow play on cards from prior rounds",        "Game.playOnPriorMovesCards",     g, dbObjId, "PlayOnPriorMovesCards");
     addSeparator();
-    addEditBoolean("Show 2nd login permission page", "Game.secondLoginPermissionPage", g, dbObjId, "SecondLoginPermissionPage");
-    addEditBoolean("Set entire game read-only","Game.readonly",g,dbObjId,"Readonly");
-    addEditBoolean("Set all cards read-only","Game.cardsReadonly",g,dbObjId,"CardsReadonly");
-    addEditBoolean("Set top cards read-only","Game.topCardsReadonly",g,dbObjId,"TopCardsReadonly");
-    addEditBoolean("Require email confirmation","Game.emailConfirmation",g,dbObjId,"EmailConfirmation");
+    addEditBoolean("Show 2nd login permission page",               "Game.secondLoginPermissionPage", g, dbObjId, "SecondLoginPermissionPage");
+    addEditBoolean("Set entire game read-only",                    "Game.readonly",                  g, dbObjId, "Readonly");
+    addEditBoolean("Set all cards read-only",                      "Game.cardsReadonly",             g, dbObjId, "CardsReadonly");
+    addEditBoolean("Set top cards read-only",                      "Game.topCardsReadonly",          g, dbObjId, "TopCardsReadonly");
+    addEditBoolean("Require email confirmation",                   "Game.emailConfirmation",         g, dbObjId, "EmailConfirmation");
+//@formatter:on
   }
 
   @Override
