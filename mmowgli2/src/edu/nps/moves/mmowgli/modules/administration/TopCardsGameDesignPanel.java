@@ -33,7 +33,9 @@
 */
 package edu.nps.moves.mmowgli.modules.administration;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Projections;
@@ -52,8 +54,8 @@ import com.vaadin.ui.themes.Runo;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.CardType.CardClass;
-import edu.nps.moves.mmowgli.hibernate.Sess;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 
 /**
  * TopCardsGameDesignPanel.java
@@ -81,11 +83,12 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
   private Label cantEditPositiveTypeWarning = new Label("(Warning: a significant number of top cards exist; their type will be changed with a new selection here.)");
   private Label cantEditNegativeTypeWarning = new Label("(Warning: a significant number of top cards exist; their type will be changed with a new selection here.)");
   
+  @HibernateSessionThreadLocalConstructor
   public TopCardsGameDesignPanel(Move move, GameDesignGlobals globs)
   {
     super(false, globs);
     this.moveBeingEdited = move;
-    this.runningMove = Game.get().getCurrentMove();
+    this.runningMove = Game.getTL().getCurrentMove();
   }
 
   @Override
@@ -93,18 +96,18 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
   {
     super.initGui();
 
-    positiveFields = new CardTypeFields(CardType.getPositiveIdeaCardType(),globals);
+    positiveFields = new CardTypeFields(CardType.getPositiveIdeaCardTypeTL(),globals);
     positiveTypeSelect = new NativeSelect();
     addComponent(renderFields(positiveFields, positiveTypeSelect, "1 Choose POSITIVE top card type for this round", cantEditPositiveTypeWarning));
     positiveFields.initGui();
 
-    negativeFields = new CardTypeFields(CardType.getNegativeIdeaCardType(),globals);
+    negativeFields = new CardTypeFields(CardType.getNegativeIdeaCardTypeTL(),globals);
     negativeTypeSelect = new NativeSelect();
     addComponent(renderFields(negativeFields, negativeTypeSelect, "2 Choose NEGATIVE top card type for this round", cantEditNegativeTypeWarning));
     negativeFields.initGui();
 
-    fillSelectCommon(positiveTypeSelect, CardType.getDefinedPositiveTypes());
-    fillSelectCommon(negativeTypeSelect, CardType.getDefinedNegativeTypes());
+    fillSelectCommon(positiveTypeSelect, CardType.getDefinedPositiveTypesTL());
+    fillSelectCommon(negativeTypeSelect, CardType.getDefinedNegativeTypesTL());
     
     positiveTypeSelect.addValueChangeListener(myCardTypeListener);
     negativeTypeSelect.addValueChangeListener(myCardTypeListener);
@@ -123,12 +126,12 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
     childCardsWarning.setVisible(locked);
     
    // boolean warning = checkCardCountGtZero(CardType.getPositiveIdeaCardType(moveBeingEdited));  // true if > zero cards
-    boolean warning = checkCardCountGt(CardType.getPositiveIdeaCardType(moveBeingEdited),8);  // true if > 8 cards
+    boolean warning = checkCardCountGtTL(CardType.getPositiveIdeaCardType(moveBeingEdited),8);  // true if > 8 cards
     cantEditPositiveTypeWarning.setVisible(warning);
     positiveFields.setFieldsReadOnly(locked);
     
     //warning = checkCardCountGtZero(CardType.getNegativeIdeaCardType(moveBeingEdited));  
-    warning = checkCardCountGt(CardType.getNegativeIdeaCardType(moveBeingEdited), 8);  
+    warning = checkCardCountGtTL(CardType.getNegativeIdeaCardType(moveBeingEdited), 8);  
     cantEditNegativeTypeWarning.setVisible(warning);
     negativeFields.setFieldsReadOnly(locked);
   }
@@ -154,7 +157,7 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
     return true;
     // This is done elsewhere: 
     /*
-    // Here if we're editting the running move. Report if we detect a significant number of child cards played in this move so the
+    // Here if we're editing the running move. Report if we detect a significant number of child cards played in this move so the
     // designer can be warned
 
     Criteria criteria = HibernateContainers.getSession().createCriteria(Card.class).add(Restrictions.eq("createdInMove", moveBeingEdited))
@@ -168,12 +171,12 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
   @SuppressWarnings("unused")
   private boolean checkCardCountGtZero(CardType ct)
   {
-    return checkCardCountGt(ct,0);
+    return checkCardCountGtTL(ct,0);
   }
   
-  private boolean checkCardCountGt(CardType ct, int limit)
+  private boolean checkCardCountGtTL(CardType ct, int limit)
   {
-    Criteria criteria = VHib.getVHSession().createCriteria(Card.class).add(Restrictions.eq("cardType", ct))
+    Criteria criteria = HSess.get().createCriteria(Card.class).add(Restrictions.eq("cardType", ct))
         .setProjection(Projections.rowCount());
 
     int num = ((Long) criteria.list().get(0)).intValue();
@@ -201,15 +204,20 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
       Window win=new AddCardClassDialog(cls,title);     
       win.addCloseListener(new CloseListener()
       {
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         @Override
         public void windowClose(CloseEvent e)
         {
+          HSess.init();
           if(cls == CardClass.POSITIVEIDEA) {
-            fillSelectCommon(positiveTypeSelect, CardType.getDefinedPositiveTypes());            
+            fillSelectCommon(positiveTypeSelect, CardType.getDefinedPositiveTypesTL());            
           }
           else if(cls == CardClass.NEGATIVEIDEA) {
-            fillSelectCommon(negativeTypeSelect, CardType.getDefinedNegativeTypes());            
+            fillSelectCommon(negativeTypeSelect, CardType.getDefinedNegativeTypesTL());            
           }
+          HSess.close();
          }        
       });
       UI.getCurrent().addWindow(win);
@@ -270,30 +278,30 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
     return null;
   }
 
-  private void savePositiveCardType(CardType ct, ConfirmDialog.Listener backOutListener)
+  private void savePositiveCardTypeTL(CardType ct, ConfirmDialog.Listener backOutListener)
   {    
     ConfirmListener lis = new ConfirmListener(PosNegType.POSITIVE,ct,backOutListener);
-    moveBeingEdited = Move.merge(moveBeingEdited); // test
-    int count= getCardCountFromThisMove(moveBeingEdited,CardType.CardClass.POSITIVEIDEA);
+    moveBeingEdited = Move.mergeTL(moveBeingEdited); // test
+    int count= getCardCountFromThisMoveTL(moveBeingEdited,CardType.CardClass.POSITIVEIDEA);
     if(count > 0) {
       ConfirmDialog.show(UI.getCurrent(), "Card Type Change","Changing a card type's descriptive text for a round will change all "+count+" existing cards of the former type, which may not be what you intend"+
       " since the cards have been played based on different text.  "+"Is this what you want to do?", "Yes", "Cancel", lis);          
     }
     else
-      lis.confirmed();
+      lis.confirmedTL();
   }
   
-  private void saveNegativeCardType(CardType ct, ConfirmDialog.Listener backOutListener)
+  private void saveNegativeCardTypeTL(CardType ct, ConfirmDialog.Listener backOutListener)
   {
     ConfirmListener lis = new ConfirmListener(PosNegType.NEGATIVE,ct,backOutListener);
-    moveBeingEdited = Move.merge(moveBeingEdited); 
-    int count= getCardCountFromThisMove(moveBeingEdited,CardType.CardClass.NEGATIVEIDEA);
+    moveBeingEdited = Move.mergeTL(moveBeingEdited); 
+    int count= getCardCountFromThisMoveTL(moveBeingEdited,CardType.CardClass.NEGATIVEIDEA);
     if(count > 0) {
       ConfirmDialog.show(UI.getCurrent(), "Card Type Change","Changing a card type's descriptive text for a round will change all "+count+" existing cards of the former type, which may not be what you intend"+
       " since the cards have been played based on different text.  "+"Is this what you want to do?", "Yes", "Cancel", lis);      
     }
     else
-      lis.confirmed();
+      lis.confirmedTL();
   }
   
   @SuppressWarnings("serial")
@@ -310,10 +318,15 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
     }
 
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void onClose(ConfirmDialog dialog)
     {
       if (dialog.isConfirmed()) {
-        confirmed();
+        HSess.init();
+        confirmedTL();
+        HSess.close();
       }
       else {
         if (whoToCallIfTheyChangeTheirMind != null)
@@ -321,27 +334,27 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
       }
     }
     
-    public void confirmed()
+    public void confirmedTL()
     {
-      Move m = Move.merge(moveBeingEdited);
-      CardType cdTy = CardType.merge(ct);
+      Move m = Move.mergeTL(moveBeingEdited);
+      CardType cdTy = CardType.mergeTL(ct);
       if(pn == PosNegType.POSITIVE)
-         CardType.setPositiveIdeaCardTypeAllPhases(m, cdTy);
+         CardType.setPositiveIdeaCardTypeAllPhasesTL(m, cdTy);
       else
-        CardType.setNegativeIdeaCardTypeAllPhases(m, cdTy);
+        CardType.setNegativeIdeaCardTypeAllPhasesTL(m, cdTy);
       
-      changeCardTypes(m,cdTy);      
+      changeCardTypesTL(m,cdTy);      
     }
   }
 
   @Override
   protected void changeMove(Move m)
   {
-    moveChanged(m);
+    moveChangedTL(m);
   }
 
   @Override
-  public void moveChanged(Move m)  // for TopCardsGameDesignPanel
+  public void moveChangedTL(Move m)  // for TopCardsGameDesignPanel
   {   
     moveBeingEdited = m;
     okToUpdateDbFlag = false; 
@@ -351,12 +364,12 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
     
     adjustRO();
     
-    positiveFields.moveChanged(m);
+    positiveFields.moveChangedTL(m);
     CardType ct = CardType.getPositiveIdeaCardType(moveBeingEdited);
     positiveFields.cardTypeChanged(ct);
     changeTypeCombo(positiveTypeSelect, ct);
 
-    negativeFields.moveChanged(m);
+    negativeFields.moveChangedTL(m);
     ct = CardType.getNegativeIdeaCardType(moveBeingEdited);;
     changeTypeCombo(negativeTypeSelect, ct);
     negativeFields.cardTypeChanged(ct);
@@ -442,29 +455,29 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
     }
   }
   
-  private int getCardCountFromThisMove(Move m, CardClass ccls)
+  private int getCardCountFromThisMoveTL(Move m, CardClass ccls)
   {
-    m = Move.merge(m);
-    Criteria criteria = makeCardClassQuery(m,ccls);
+    m = Move.mergeTL(m);
+    Criteria criteria = makeCardClassQueryTL(m,ccls);
     criteria.setProjection(Projections.rowCount());
     return ((Long) criteria.list().get(0)).intValue();
   }
  
   @SuppressWarnings("unchecked")
-  private void changeCardTypes(Move m, CardType typ)
+  private void changeCardTypesTL(Move m, CardType typ)
   {
-    Criteria criteria = makeCardClassQuery(m,typ.getCardClass());
+    Criteria criteria = makeCardClassQueryTL(m,typ.getCardClass());
     List<Card> lis = criteria.list();    
     for(Card c : lis) {
       c.setCardType(typ);
       //Card.update(c);
-      Sess.sessUpdate(c);
+      Card.updateTL(c);
     }    
   }
   
-  private Criteria makeCardClassQuery(Move m, CardClass cclss)
+  private Criteria makeCardClassQueryTL(Move m, CardClass cclss)
   {
-    return VHib.getVHSession().createCriteria(Card.class)
+    return HSess.get().createCriteria(Card.class)
         .createAlias("createdInMove", "MOVE")
         .createAlias("cardType", "CARDTYPE")
         .add(Restrictions.eq("MOVE.number", m.getNumber()))
@@ -475,22 +488,28 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
   class CardTypeListener implements ValueChangeListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void valueChange(ValueChangeEvent event)
     {
       NativeSelect combo = (NativeSelect) event.getProperty();
       TypeLine tLine = (TypeLine) combo.getValue();
       if(tLine == null)
         return;
+      
+      HSess.init();
+
       CardTypeFields fields = null;
       if (combo == positiveTypeSelect) {
         fields = positiveFields;
         if (commitCardType)
-          savePositiveCardType(tLine.typ,new CardTypeCancelListener());
+          savePositiveCardTypeTL(tLine.typ,new CardTypeCancelListener());
       }
       else { //if(combo == negativeTypeSelect) {
         fields = negativeFields;
         if (commitCardType)
-          saveNegativeCardType(tLine.typ,new CardTypeCancelListener());
+          saveNegativeCardTypeTL(tLine.typ,new CardTypeCancelListener());
       }
       boolean changingFlag = fields.okToUpdateDbFlag;
       fields.okToUpdateDbFlag = false; //we ARE changing moves
@@ -514,7 +533,8 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
       fields.colorComp.changeCardType(tLine.typ);
       fields.colorComp.setReadOnly(ro);
       
-      fields.okToUpdateDbFlag = changingFlag;      
+      fields.okToUpdateDbFlag = changingFlag;  
+      HSess.close();
     }
   }
   
@@ -522,12 +542,17 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
   class CardTypeCancelListener implements ConfirmDialog.Listener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void onClose(ConfirmDialog arg0)
     {
+      HSess.init();
       boolean oldcommitflag = commitCardType;
       commitCardType = false;
-      moveChanged(moveBeingEdited); // this will do it 
+      moveChangedTL(moveBeingEdited); // this will do it 
       commitCardType = oldcommitflag;
+      HSess.close();
     }    
   }
   
@@ -596,7 +621,7 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
     }
 
     @Override
-    public void moveChanged(Move move)
+    public void moveChangedTL(Move move)
     {
 //      notChangingMovesFlag = false; 
 //      changeMove(move);
