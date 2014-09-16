@@ -67,8 +67,8 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 
 /**
  * ActionPlanTable.java
@@ -109,10 +109,15 @@ public class ActionPlanTable extends Table
 
   private HbnContainer<ActionPlan> hbncontainer;
   private Container container;
-  private SessionManager sessMgr;
+
   private long myUserId;
   private NumberFormat avgThumbFormatter = new DecimalFormat("0.00");
   
+  public ActionPlanTable()
+  {
+    this(null);
+  }
+  @HibernateSessionThreadLocalConstructor
   @SuppressWarnings("unchecked")
   public ActionPlanTable(Container cont)
   {
@@ -122,12 +127,12 @@ public class ActionPlanTable extends Table
       this.container = cont;
     
     setSelectable(true);
-    setImmediate(true); // to immed update view
+    setImmediate(true);
     setMultiSelect(false);
     setEditable(false);
     setNullSelectionAllowed(true); // why not
     setPageLength(100); // this helps with the thumbs bug
-    addStyleName("m-actiondashboard-table"); //"m-userprofile-table");
+    addStyleName("m-actiondashboard-table");
     myUserId = (Long) Mmowgli2UI.getGlobals().getUserID();
     
     if(hbncontainer == null && container == null) {
@@ -138,43 +143,30 @@ public class ActionPlanTable extends Table
     addItemClickListener(getItemClickListener());
   }
   
-  public ActionPlanTable()
-  {
-    this((HbnContainer<ActionPlan>)null);
-  }
-  
-  /* An entry point used by oob code */
-  public ActionPlanTable(SessionManager mgr)
-  {
-    this(ActionPlan.getContainer());
-    sessMgr=mgr;
-  }
-  
-  public ActionPlanTable(HbnContainer<ActionPlan> cntr, SessionManager mgr)
-  {
-    this(cntr);
-    sessMgr = mgr;
-  }
-  
   @SuppressWarnings("serial")
   public ItemClickListener getItemClickListener()
   {
     return new ItemClickListener()
     {
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       @SuppressWarnings("rawtypes")
       @Override
       public void itemClick(ItemClickEvent event)
       {
-       // if(event.isDoubleClick()){
-          Object item = event.getItem();
-          ActionPlan actPln;
-          if(item instanceof BeanItem<?>)
-            actPln = (ActionPlan)((BeanItem<?>)item).getBean();
-          else
-            actPln = (ActionPlan)((EntityItem)event.getItem()).getPojo();
+        HSess.init();
+     // if(event.isDoubleClick()){
+        Object item = event.getItem();
+        ActionPlan actPln;
+        if(item instanceof BeanItem<?>)
+          actPln = (ActionPlan)((BeanItem<?>)item).getBean();
+        else
+          actPln = (ActionPlan)((EntityItem)event.getItem()).getPojo();
           
-          Mmowgli2UI.getGlobals().getController().miscEvent(new AppEvent(ACTIONPLANSHOWCLICK,ActionPlanTable.this,actPln.getId()));
-       // }
+        Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(ACTIONPLANSHOWCLICK,ActionPlanTable.this,actPln.getId()));
+    // }
+       HSess.close();
       }     
     };
   }
@@ -199,7 +191,7 @@ public class ActionPlanTable extends Table
       return;
     }
     
-    boolean showRound = DBGet.getUser(myUserId).isAdministrator() || (Game.get().isShowPriorMovesActionPlans() && Move.getCurrentMove().getNumber()>1);
+    boolean showRound = DBGet.getUserTL(myUserId).isAdministrator() || (Game.getTL().isShowPriorMovesActionPlans() && Move.getCurrentMoveTL().getNumber()>1);
 
     if(!columnsInitted) {
       Table.ColumnGenerator colGen = new columnCustomizer();
@@ -229,7 +221,7 @@ public class ActionPlanTable extends Table
   
   private void finishFromHelpWantedDataSource()
   {
-    boolean showRound = DBGet.getUser(myUserId).isAdministrator() || (Game.get().isShowPriorMovesActionPlans() && Move.getCurrentMove().getNumber()>1);
+    boolean showRound = DBGet.getUserTL(myUserId).isAdministrator() || (Game.getTL().isShowPriorMovesActionPlans() && Move.getCurrentMoveTL().getNumber()>1);
 
     if(!columnsInitted) {
       Table.ColumnGenerator colGen = new columnCustomizer();
@@ -257,8 +249,6 @@ public class ActionPlanTable extends Table
   
   private void setAllColumnWidths()
   {
-    //setColumnWidth(ID_COLUMN_NAME,30); orig
-    //setColumnWidth(AUTHORS_COLUMN_NAME,266); orig total = 296
     setColumnWidth(IDFORSORTING_COLUMN_NAME,30);
     setColumnWidth(AUTHORS_COLUMN_NAME,165);
     setColumnWidth(MYTHUMBS_COLUMN_NAME,60);
@@ -266,8 +256,6 @@ public class ActionPlanTable extends Table
   }
   private void setAllColumnWidthsWithRound()
   {
-    //setColumnWidth(ID_COLUMN_NAME,30); orig
-    //setColumnWidth(AUTHORS_COLUMN_NAME,266); orig total = 296
     setColumnWidth(IDFORSORTING_COLUMN_NAME,30);
     setColumnWidth(ROUND_COLUMN_NAME,30);
     setColumnWidth(AUTHORS_COLUMN_NAME,140);
@@ -289,9 +277,7 @@ public class ActionPlanTable extends Table
  
   private User getUser(Object obj)
   {
-    if(sessMgr == null)
-      return DBGet.getUser(obj);
-    return DBGet.getUser(obj, sessMgr.getSession());
+    return DBGet.getUserTL(obj);
   }
   
   class columnCustomizer implements Table.ColumnGenerator
@@ -303,6 +289,7 @@ public class ActionPlanTable extends Table
     @Override
     public Component generateCell(Table source, Object itemId, Object columnId)
     {
+      Object sessKey = HSess.checkInit();
       ActionPlan ap;
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       Object obj = ActionPlanTable.this.getItem(itemId);
@@ -312,6 +299,7 @@ public class ActionPlanTable extends Table
         EntityItem ei = (EntityItem) obj;
         ap = (ActionPlan) ei.getPojo();
       }
+     // ap = ActionPlan.merge(ap, HSess.get());
       if (IDFORSORTING_COLUMN_NAME.equals(columnId)) {
         Label lab = new HtmlLabel(""+ap.getId());
         String hw=null;
@@ -322,34 +310,39 @@ public class ActionPlanTable extends Table
         if(ap.isHidden()) {
           lab.setValue(lab.getValue().toString()+"<span style='color:red'>(H)</span>");
           lab.setDescription("hidden");
-        }    
+        } 
+        HSess.checkClose(sessKey);
         return lab;
       }
       if (ROUND_COLUMN_NAME.equals(columnId)) {
         Label lab = new Label("" + ap.getCreatedInMove().getNumber());
         lab.setDescription("Creation round");
+        HSess.checkClose(sessKey);
         return lab;
       }
       if(TITLE_COLUMN_NAME.equals(columnId)) {
         Label lab = new Label(ap.getTitle());
         lab.setDescription(lab.getValue().toString());
         //lab.addStyleName(ACTIONPLAN_TABLE_TITLE_CELL);
+        HSess.checkClose(sessKey);
         return lab;
       }
       if(HELPWANTED_COLUMN_NAME.equals(columnId)) {
         Label lab = new Label(ap.getHelpWanted());
         lab.setDescription(lab.getValue().toString());
+        HSess.checkClose(sessKey);
         return lab;        
       }
       if (MYTHUMBS_COLUMN_NAME.equals(columnId)) {
         Map<User,Integer>map = ap.getUserThumbs();       
-        Integer myRating = map.get(DBGet.getUser(ActionPlanTable.this.myUserId));
+        Integer myRating = map.get(DBGet.getUserTL(ActionPlanTable.this.myUserId));
         Label lab;
         if(myRating == null || myRating.intValue()==0)
           lab = new Label("--");
         else
           lab = new Label(""+myRating.intValue());
         lab.setDescription("My thumb rating for this action plan");
+        HSess.checkClose(sessKey);
         return lab;
       }
       if (AVGTHUMBS_COLUMN_NAME.equals(columnId)) {
@@ -362,6 +355,7 @@ public class ActionPlanTable extends Table
         int numVoters = ap.getUserThumbs().size();
         lab.setDescription("<center>Average thumb rating for this action plan<br/>(\"--\" means no votes received)<br/>"
             +"Total voters: "+numVoters+"</center>");
+        HSess.checkClose(sessKey);
         return lab;
       }
       if (AUTHORS_COLUMN_NAME.equals(columnId)) {
@@ -377,6 +371,7 @@ public class ActionPlanTable extends Table
               b.addClickListener(new AuthorPlanListener(ap));
               b.setDescription("You've been invited to become an author of this plan");
               b.setEnabled(!globs.isGameReadOnly() && !globs.isViewOnlyUser());
+              HSess.checkClose(sessKey);
               return b;
             }
           }
@@ -400,10 +395,13 @@ public class ActionPlanTable extends Table
           b.setStyleName(BaseTheme.BUTTON_LINK);
           b.addClickListener(new AuthorPlanListener(ap));
           b.setDescription("You are free to become an author of this plan");
+          HSess.checkClose(sessKey);
           return b;
         }
+        HSess.checkClose(sessKey);
         return lab;
       }
+      HSess.checkClose(sessKey);
       return new Label("Program error in ActionPlanTable.java");
     }
   }
@@ -427,9 +425,14 @@ public class ActionPlanTable extends Table
       w.addCloseListener(new CloseListener()
       {
         @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void windowClose(CloseEvent e)
         {
-          Mmowgli2UI.getGlobals().getController().miscEvent(new AppEvent(ACTIONPLANSHOWCLICK,ActionPlanTable.this,ap.getId())); 
+          HSess.init();
+          Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(ACTIONPLANSHOWCLICK,ActionPlanTable.this,ap.getId())); 
+          HSess.close();
         }       
       });
     }   
@@ -440,22 +443,22 @@ public class ActionPlanTable extends Table
   {
     public MyActionPlanContainer()
     {
-      this(VHib.getSessionFactory());
+      this(HSess.getSessionFactory());
     }
     public MyActionPlanContainer(SessionFactory fact)
     {
       super((Class<T>)ActionPlan.class, fact );
     }
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
       Serializable uid = Mmowgli2UI.getGlobals().getUserID();
-      Criteria crit = super.getBaseCriteria();           // gets all cards
+      Criteria crit = super.getBaseCriteriaTL();           // gets all cards
       crit = crit.createCriteria("authors").             // sub criteria
       add(Restrictions.idEq(uid));// written by me
       
-      User me = DBGet.getUser(uid);
-      ActionPlan.adjustCriteriaToOmitActionPlans(crit, me);
+      User me = DBGet.getUserTL(uid);
+      ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
       
       return crit;
     }
@@ -466,21 +469,21 @@ public class ActionPlanTable extends Table
   {
     public NeedsAuthorsContainer()
     {
-      this(VHib.getSessionFactory());
+      this(HSess.getSessionFactory());
     }
     public NeedsAuthorsContainer(SessionFactory fact)
     {
       super((Class<T>)ActionPlan.class, fact);
     }
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
-      Criteria crit = super.getBaseCriteria();  // gets all plans
+      Criteria crit = super.getBaseCriteriaTL();  // gets all plans
       crit.add(Restrictions.isEmpty("authors"));// nobody there
       crit.add(Restrictions.isEmpty("invitees"));  // Any invitations have be declined
       
-      User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-      ActionPlan.adjustCriteriaToOmitActionPlans(crit, me);
+      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
 
       return crit;
     }
@@ -491,21 +494,20 @@ public class ActionPlanTable extends Table
   {
     public HelpWantedContainer()
     {
-      this(VHib.getSessionFactory());
+      this(HSess.getSessionFactory());
     }
     public HelpWantedContainer(SessionFactory fact)
     {
       super((Class<T>)ActionPlan.class, fact);
     }
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
-      Criteria crit = super.getBaseCriteria();  // gets all plans
+      Criteria crit = super.getBaseCriteriaTL();  // gets all plans
       crit.add(Restrictions.isNotNull("helpWanted"));
       
-      User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-      ActionPlan.adjustCriteriaToOmitActionPlans(crit, me);
-
+      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
       return crit;
     }
   }
@@ -518,38 +520,4 @@ public class ActionPlanTable extends Table
       super(ActionPlan.class, collection);
     }
   }
-  
-  // This one doesn't work with mysql...doesn't like the sql generated by the criteria
-  /*
-  @SuppressWarnings({ "serial", "unchecked" })
-  public static class ImFollowingContainer<T> extends HbnContainer<T>
-  {
-    private ApplicationEntryPoint app;
-    public ImFollowingContainer(ApplicationEntryPoint app)
-    {
-      this(app, HibernateContainers.getManager());
-    }
-    public ImFollowingContainer(ApplicationEntryPoint app, SessionManager mgr)
-    {
-      super((Class<T>)ActionPlan.class, mgr);
-      this.app = app;
-    }
-    
-    @Override
-    protected Criteria getBaseCriteria()
-    {
-      // Awkward: we've already got the list, but re-query the table
-      Set<ActionPlan> apset = DBGet.getUserFresh(app.getUser()).getActionPlansFollowing();
-      Object [] ids = new Object[apset.size()];
-      int i=0;
-      for(ActionPlan ap : apset)
-        ids[i++] = ap.getId();
-      
-      Criteria crit = super.getBaseCriteria();
-      crit.add(Restrictions.in("id", ids));
-      return crit;
-    }
-    
-  }
-  */
 }
