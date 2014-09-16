@@ -33,7 +33,9 @@
  */
 package edu.nps.moves.mmowgli.modules.actionplans;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
@@ -44,6 +46,8 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.MailManager;
 
 /**
@@ -60,10 +64,6 @@ public class HelpWantedDialog extends Window
   private static final long serialVersionUID = -7479926071207399556L;
   
   private String msg1 = "Action plan authors have posted this help-wanted message:";
-//  private String msg2 = "If you are interested in participating in the development " +  mikes old prose
-//                        "of this action plan, send the authors " +
-//                        "a message expressing your interest and describing your " +
-//                        "qualifications:";
   private String msg2 = "Want to help develop this action plan?  Drop the authors a note to say why.  "+
                         "We want to hear what you bring to the table!";
   
@@ -73,6 +73,7 @@ public class HelpWantedDialog extends Window
   }
   
   @SuppressWarnings("serial")
+  @HibernateSessionThreadLocalConstructor
   public HelpWantedDialog(final Object aplnId, boolean interested)
   {
     setCaption(interested?"Express Interest in Action Plan":"Offer Assistance with Action Plan");
@@ -88,7 +89,7 @@ public class HelpWantedDialog extends Window
     
     StringBuilder sb = new StringBuilder();
 
-    ActionPlan ap = ActionPlan.get(aplnId);
+    ActionPlan ap = ActionPlan.getTL(aplnId);
     String s = ap.getHelpWanted();
     
     if(s != null) {
@@ -165,8 +166,11 @@ public class HelpWantedDialog extends Window
     sendButt.addClickListener(new ClickListener()
     {  
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
-      {
+      {       
         Object tos = toTA.getValue();
         if(tos == null || tos.toString().length()<=0) {
           Notification.show("No recipients", Notification.Type.ERROR_MESSAGE);
@@ -185,33 +189,37 @@ public class HelpWantedDialog extends Window
         if(subj == null)
           subj = "";
         
-        List<User> authors = parseAuthors(tos.toString().trim());
+        HSess.init();
+        
+        List<User> authors = parseAuthorsTL(tos.toString().trim());
         MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
         MailManager mmgr = globs.getAppMaster().getMailManager();
-        User me = DBGet.getUser(globs.getUserID());
+        User me = DBGet.getUserTL(globs.getUserID());
         for(User u : authors) {
-          mmgr.mailToUser(me.getId(), u.getId(), subj.toString(), msg.toString());
+          mmgr.mailToUserTL(me.getId(), u.getId(), subj.toString(), msg.toString());
         }
 
         if(cc == null)
-          mmgr.mailToUser(me.getId(), me.getId(), "(CC:)"+subj.toString(), msg.toString());
+          mmgr.mailToUserTL(me.getId(), me.getId(), "(CC:)"+subj.toString(), msg.toString());
         else
-          mmgr.mailToUser(me.getId(), me.getId(), subj.toString(), msg.toString(), cc.toString(), MailManager.Channel.BOTH);  // the cc is an email, not a user name
+          mmgr.mailToUserTL(me.getId(), me.getId(), subj.toString(), msg.toString(), cc.toString(), MailManager.Channel.BOTH);  // the cc is an email, not a user name
         
         UI.getCurrent().removeWindow(HelpWantedDialog.this); 
         Notification.show("Message(s) sent",null);
+        
+        HSess.close();
       }
     });
   }
   
-  private List<User> parseAuthors(String s)
+  private List<User> parseAuthorsTL(String s)
   {
     ArrayList<User> lis = new ArrayList<User>();
     StringBuilder sb = new StringBuilder();
    // String[] sa = s.split("([.,!?:;'\"-]|\\s)+"); // split by white and punct
     String[] sa = s.split("([,!?:;'\"-]|\\s)+");  // allow . in name
     for(String str : sa) {
-      User u = User.getUserWithUserName(str);
+      User u = User.getUserWithUserNameTL(str);
       if(u != null)
         lis.add(u);
       else {
