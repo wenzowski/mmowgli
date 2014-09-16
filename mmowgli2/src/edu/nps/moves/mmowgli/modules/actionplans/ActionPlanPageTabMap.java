@@ -35,12 +35,10 @@ package edu.nps.moves.mmowgli.modules.actionplans;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.vaadin.addon.leaflet.LMap;
-import org.vaadin.addon.leaflet.LOpenStreetMapLayer;
 import org.vaadin.addon.leaflet.LTileLayer;
 
 import com.vaadin.server.ExternalResource;
@@ -54,7 +52,8 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.modules.maps.LeafletLayers;
 
@@ -99,6 +98,7 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
   private LTileLayer mapBoxTiles = new LTileLayer();
   private LTileLayer mapQstTiles = new LTileLayer();
 
+  @HibernateSessionThreadLocalConstructor
   public ActionPlanPageTabMap(Object apId, boolean isMockup)
   {
     super(apId, isMockup);
@@ -130,14 +130,14 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
   {
 	setSizeUndefined();
 
-    ActionPlan ap = ActionPlan.get(apId);
+    ActionPlan ap = ActionPlan.getTL(apId);
     mmowgliMap = ap.getMap();
     if(mmowgliMap == null) {
       mmowgliMap = new edu.nps.moves.mmowgli.db.GoogleMap();
-      GoogleMap.save(mmowgliMap);
+      GoogleMap.saveTL(mmowgliMap);
       
       ap.setMap(mmowgliMap);
-      ActionPlan.update(ap);
+      ActionPlan.updateTL(ap);
     }
          
     VerticalLayout leftLay = getLeftLayout();
@@ -153,7 +153,7 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
     if(!isMockup)
       missionContentLab = new HtmlLabel(ap.getMapInstructions());
     else {
-      Game g = Game.get(1L);
+      Game g = Game.getTL();
       missionContentLab = new HtmlLabel(g.getDefaultActionPlanMapText());
     }
     
@@ -307,12 +307,12 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
   
   private void toggleFlags(boolean enabled)
   {
-    // mike temp:
-    if(true)return;
-    // end mike temp
+    return;
+    /*
     Iterator<Component> itr = flagGrid.iterator();
     while(itr.hasNext())
       itr.next().setEnabled(enabled);
+    */
   }
  /* 
   @SuppressWarnings("serial")
@@ -563,34 +563,44 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
   {
     public ClickListener mapLocListener = new ClickListener()
     {
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        ActionPlan ap = ActionPlan.get(apId);
+        HSess.init();
+        ActionPlan ap = ActionPlan.getTL(apId);
         mmowgliMap = ap.getMap();
      
       //  mmowgliMap.setLatLonCenter(googleMapWidget.getCenter());
       //  mmowgliMap.setZoom(googleMapWidget.getZoom());
-        GoogleMap.update(mmowgliMap);
-        ActionPlan.update(ap);
-        User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-        GameEventLogger.logActionPlanUpdate(ap, "map changed", u.getId()); //u.getUserName());
+        GoogleMap.updateTL(mmowgliMap);
+        ActionPlan.updateTL(ap);
+        User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+        GameEventLogger.logActionPlanUpdateTL(ap, "map changed", u.getId()); //u.getUserName());
 
         savePanel.saveLocButt.setEnabled(false);
         if(!savePanel.saveMarkerButt.isEnabled())
           savePanel.canMarkerButt.setEnabled(false);
         //messageSent = false;
+        HSess.close();
       }
     };
     
     public ClickListener cancelListener = new ClickListener()
     {
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        reloadMarkers(ActionPlan.get(apId));
+        HSess.init();
+        reloadMarkers(ActionPlan.getTL(apId));
 
         savePanel.saveMarkerButt.setEnabled(false);
         savePanel.saveLocButt.setEnabled(false);
         savePanel.canMarkerButt.setEnabled(false);
+        HSess.close();
       }     
     };
   /*  
@@ -634,7 +644,7 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
     }
 
   @Override
-  public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
+  public boolean actionPlanUpdatedOobTL(Serializable apId)
   {
     // This panel does NOT do a dynamic update of someone else's changes....too problematic for losing work.
     return false;
