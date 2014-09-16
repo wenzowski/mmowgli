@@ -41,8 +41,6 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.SortedSet;
 
-import org.hibernate.Session;
-
 import com.vaadin.event.FieldEvents.FocusEvent;
 import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.server.Page;
@@ -54,10 +52,12 @@ import com.vaadin.ui.themes.BaseTheme;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2.SaveCancelPan;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
-import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.HistoryDialog;
 import edu.nps.moves.mmowgli.utility.HistoryDialog.DoneListener;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -76,7 +76,6 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
 {
   private static final long serialVersionUID = -2609460134128823467L;
 
-  //private TextField subTitleTF;
   private TextArea  whatTA;
   private TextArea  whatWillItTakeTA;
   private TextArea  howWorkTA;
@@ -89,12 +88,10 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
   public boolean whoIsFocused,whatIsFocused,whatTakeFocused,howWorkFocused,howChangeFocused;
   static Class<?>[] STRCLSARR = new Class<?>[]{String.class};  // for reflection
 
+  @HibernateSessionThreadLocalConstructor
   public ActionPlanPageTabThePlan2(ActionPlanPage2 mother, Object apId, boolean isMockup)
   {
     super(apId, isMockup);
-    //this.mother = mother;
-    //subTitleTF = new TextField();
-    //subTitleTF.add((TextChangeListener)this);
     whatTA = new TextArea();           whatTA.addStyleName(ACTIONPLAN_TAB_THEPLAN_WHAT);
     whatWillItTakeTA = new TextArea(); whatTA.addStyleName(ACTIONPLAN_TAB_THEPLAN_TAKE);
     howWorkTA = new TextArea();        whatTA.addStyleName(ACTIONPLAN_TAB_THEPLAN_WORK);
@@ -115,17 +112,17 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
     leftLay.addComponent(flowLay);
     flowLay.setSpacing(true);
     
-    Label missionLab = new Label("Authors, this is your workspace."); //"Congratulations! You're an author!");
+    Label missionLab = new Label("Authors, this is your workspace.");
     flowLay.addComponent(missionLab);
     flowLay.setComponentAlignment(missionLab, Alignment.TOP_LEFT);
     missionLab.addStyleName("m-actionplan-mission-title-text");
     
-    ActionPlan actPln = ActionPlan.get(apId);
+    ActionPlan actPln = ActionPlan.getTL(apId);
     Label missionContentLab;
     if(!isMockup)
       missionContentLab= new HtmlLabel(actPln.getPlanInstructions());
     else {
-      Game g = Game.get(1L);
+      Game g = Game.getTL();
       missionContentLab = new HtmlLabel(g.getDefaultActionPlanThePlanText());
     }
     flowLay.addComponent(missionContentLab);
@@ -146,20 +143,20 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
     lab.setHeight("20px");
     flowLay.addComponent(lab);
    
-    flowLay.addComponent(whoGroup=buildTextAreaGroup("Who is involved?", whoTA, "Who-is-involved history", "Previous values", "Text", "getSubTitleEditHistory", "getSubTitle", "setSubTitleWithHistory"));
-    whoGroup.setValue(actPln.getSubTitle()); // misnamed since we're calling it it who is involved instead of subtitle
+    flowLay.addComponent(whoGroup=buildTextAreaGroup("Who is involved?", whoTA, "Who-is-involved history", "Previous values", "Text", "getSubTitleEditHistory", "getSubTitle", "setSubTitleWithHistoryTL"));
+    whoGroup.setValueTL(actPln.getSubTitle()); // misnamed since we're calling it it who is involved instead of subtitle
    
-    flowLay.addComponent(whatGroup=buildTextAreaGroup("What is it?", whatTA, "What-is-it history", "Previous values", "Text", "getWhatIsItEditHistory", "getWhatIsItText", "setWhatIsItTextWithHistory"));
-    whatGroup.setValue(actPln.getWhatIsItText());
+    flowLay.addComponent(whatGroup=buildTextAreaGroup("What is it?", whatTA, "What-is-it history", "Previous values", "Text", "getWhatIsItEditHistory", "getWhatIsItText", "setWhatIsItTextWithHistoryTL"));
+    whatGroup.setValueTL(actPln.getWhatIsItText());
    
-    flowLay.addComponent(whatTakeGroup=buildTextAreaGroup("What will it take?", whatWillItTakeTA, "What-will-it-take history", "Previous values", "Text", "getWhatTakeEditHistory","getWhatWillItTakeText","setWhatWillItTakeTextWithHistory"));
-    whatTakeGroup.setValue(actPln.getWhatWillItTakeText());
+    flowLay.addComponent(whatTakeGroup=buildTextAreaGroup("What will it take?", whatWillItTakeTA, "What-will-it-take history", "Previous values", "Text", "getWhatTakeEditHistory","getWhatWillItTakeText","setWhatWillItTakeTextWithHistoryTL"));
+    whatTakeGroup.setValueTL(actPln.getWhatWillItTakeText());
 
-    flowLay.addComponent(howGroup=buildTextAreaGroup("How will it work?", howWorkTA,"How-will-it-work history", "Previous values", "Text", "getHowWorkEditHistory","getHowWillItWorkText","setHowWillItWorkTextWithHistory"));
-    howGroup.setValue(actPln.getHowWillItWorkText());
+    flowLay.addComponent(howGroup=buildTextAreaGroup("How will it work?", howWorkTA,"How-will-it-work history", "Previous values", "Text", "getHowWorkEditHistory","getHowWillItWorkText","setHowWillItWorkTextWithHistoryTL"));
+    howGroup.setValueTL(actPln.getHowWillItWorkText());
 
-    flowLay.addComponent(howChangeGroup=buildTextAreaGroup("How will it change the situation?", howChangeTA, "How-will-it-change-things history", "Previous values", "Text", "getHowChangeEditHistory","getHowWillItChangeText","setHowWillItChangeTextWithHistory"));
-    howChangeGroup.setValue(actPln.getHowWillItChangeText());
+    flowLay.addComponent(howChangeGroup=buildTextAreaGroup("How will it change the situation?", howChangeTA, "How-will-it-change-things history", "Previous values", "Text", "getHowChangeEditHistory","getHowWillItChangeText","setHowWillItChangeTextWithHistoryTL"));
+    howChangeGroup.setValueTL(actPln.getHowWillItChangeText());
   }
 
   class FieldListener implements /*FocusListener,*/ ClickListener
@@ -206,7 +203,7 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
      sendStartEditMessage( DBGet.getUser(app.getUser()).getUserName()+substring);     
     }
  */   
-    private boolean getSet(TextAreaGroup tag, String getMethodName, String setMethodName, ActionPlan ap, Integer whButt)
+    private boolean getSetTL(TextAreaGroup tag, String getMethodName, String setMethodName, ActionPlan ap, Integer whButt)
     {
       boolean wantUpdate = false;
       try {
@@ -228,7 +225,7 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
         /*  else */ {   // over limit does not kill anymore
             String s = nullOrString(tag.ta.getValue());
             setMethod.invoke(ap, s);//nullOrString(tag.ta.getValue()));
-            tag.union.setLabelValue(s);
+            tag.union.setLabelValueTL(s);
             wantUpdate=true;
             tag.union.labelTop();
           }
@@ -242,40 +239,45 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
     }
     
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
-      ActionPlan ap = ActionPlan.get(apId);
+      HSess.init();
+      ActionPlan ap = ActionPlan.getTL(apId);
       Button o = event.getButton();
       Integer wh = null;
       boolean wantUpdate=false;
       String eventText="action plan field";
       
       if((wh=whoGroup.isMyButton(o))!=null) {
-        wantUpdate = getSet(whoGroup,"getSubTitle","setSubTitleWithHistory",ap,wh);
+        wantUpdate = getSetTL(whoGroup,"getSubTitle","setSubTitleWithHistoryTL",ap,wh);
         eventText = "who is involved";
       }     
       else if((wh=whatGroup.isMyButton(o))!=null) {
-        wantUpdate = getSet(whatGroup,"getWhatIsItText","setWhatIsItTextWithHistory",ap,wh);
+        wantUpdate = getSetTL(whatGroup,"getWhatIsItText","setWhatIsItTextWithHistoryTL",ap,wh);
         eventText = "what is it";
       }
       else if((wh=whatTakeGroup.isMyButton(o))!=null) {
-        wantUpdate = getSet(whatTakeGroup,"getWhatWillItTakeText","setWhatWillItTakeTextWithHistory",ap,wh);
+        wantUpdate = getSetTL(whatTakeGroup,"getWhatWillItTakeText","setWhatWillItTakeTextWithHistoryTL",ap,wh);
         eventText = "what will it take";
       }
       else if((wh=howGroup.isMyButton(o))!=null) {
-        wantUpdate = getSet(howGroup,"getHowWillItWorkText","setHowWillItWorkTextWithHistory",ap,wh);
+        wantUpdate = getSetTL(howGroup,"getHowWillItWorkText","setHowWillItWorkTextWithHistoryTL",ap,wh);
         eventText = "how will it work";
       }
       else if((wh=howChangeGroup.isMyButton(o))!=null) {
-        wantUpdate = getSet(howChangeGroup,"getHowWillItChangeText","setHowWillItChangeTextWithHistory",ap,wh);
+        wantUpdate = getSetTL(howChangeGroup,"getHowWillItChangeText","setHowWillItChangeTextWithHistoryTL",ap,wh);
         eventText = "how will it change things";
       }
             
       if(wh != null && wh == SAVE_BUTTON && wantUpdate) {
-        ActionPlan.update(ap);
-        User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-        GameEventLogger.logActionPlanUpdate(ap, eventText, u.getId()); //u.getUserName());
+        ActionPlan.updateTL(ap);
+        User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+        GameEventLogger.logActionPlanUpdateTL(ap, eventText, u.getId()); //u.getUserName());
       }
+      HSess.close();
     }
   }
   
@@ -335,19 +337,6 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
       union.initGui();
       addComponent(taVL);
       
-     /* Label nuts;
-      taVL.addComponent(nuts=new Label("test<br/><br/><br/>"));
-      nuts.setContentMode(Label.CONTENT_XHTML);
-      nuts.setSizeFull();
-      nuts.addStyleName("m-actionplan-plan-answer");
-      absL.addComponent(nuts,"top:0px;left:0px;");
-      absL.addComponent(ta,"top:0px;left:0px;");
-      ComponentPosition cp = absL.getPosition(ta);
-      System.out.println("duh = "+ ++duh);
-      cp.setZIndex(duh%2==0?0:1);
-      cp = absL.getPosition(nuts);
-      cp.setZIndex(duh%2==0?1:0);
-      System.out.println(""+(duh%2)); */
       historyButt = new NativeButton();     
       historyButt.setCaption("history");
       historyButt.setStyleName(BaseTheme.BUTTON_LINK);
@@ -361,21 +350,26 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
     }
 
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void focus(FocusEvent event)
     {
+      HSess.init();
       setFocused(true);
       String substring = " is editing the "+ "<todo field names>"+" field.";
-      sendStartEditMessage( DBGet.getUser(Mmowgli2UI.getGlobals().getUserID()).getUserName()+substring);     
+      sendStartEditMessage( DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).getUserName()+substring); 
+      HSess.close();
     } 
 
-    public void setValue(String s)
+    public void setValueTL(String s)
     {
-      union.setValue(s);
+      union.setValueTL(s);
     }
     
-    public void setValueOob(String s, Session sess)
+    public void setValueOobTL(String s)
     {
-      union.setValueOob(s, sess);
+      union.setValueOobTL(s);
     }
     
     public String getValue()
@@ -432,10 +426,14 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
       
       @SuppressWarnings("unchecked")
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       { 
+        HSess.init();
         try {
-          SortedSet<Edits> set = (SortedSet<Edits>)historyListGetter.invoke(ActionPlan.get(apId), (Object[])null); 
+          SortedSet<Edits> set = (SortedSet<Edits>)historyListGetter.invoke(ActionPlan.getTL(apId), (Object[])null); 
           HistoryDialog dial = new HistoryDialog(set, windowTitle, tableTitle, columnTitle,  this);
           UI.getCurrent().addWindow(dial);
           dial.center();
@@ -443,19 +441,20 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
         catch(Exception ex) {
           System.err.println("ActionPlanPageTabThePlan2.buttonClick() "+ex.getClass().getSimpleName()+" "+ex.getLocalizedMessage());
         }
+        HSess.close();
       } 
       
-      public void done(String sel, int idx)
+      public void doneTL(String sel, int idx)
       {
         if (sel != null) {
           try {
-            ActionPlan ap = ActionPlan.get(apId);
+            ActionPlan ap = ActionPlan.getTL(apId);
             String currentTitle = (String) currentGetter.invoke(ap, (Object[]) null);
             if (!sel.equals(currentTitle)) {
              // LinkedList<String> lis = (LinkedList<String>) historyListGetter.invoke(ap, (Object[]) null);
              // lis.remove(idx);
               currentSetter.invoke(ap, new Object[] {sel} ); // will push
-              ActionPlan.update(ap);
+              ActionPlan.updateTL(ap);
             }
           }
           catch (Exception ex) {
@@ -478,13 +477,9 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
   }
 
   @Override
-  public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
-  {
-MSysOut.println("ActionPlanPageTabThePlan2.actionPlanUpdatedOob");
-    Session session = M.getSession(sessMgr);
-    
-    ActionPlan ap = (ActionPlan) session.get(ActionPlan.class, (Serializable) apId);
-MSysOut.println("*********** who is involved = "+ap.getSubTitle());
+  public boolean actionPlanUpdatedOobTL(Serializable apId)
+  {   
+    ActionPlan ap = ActionPlan.getTL(apId);
     boolean whoRO = whoGroup.isRo();
     boolean whatRO = whatGroup.isRo(); 
     boolean whatTakeRO = whatTakeGroup.isRo(); 
@@ -503,21 +498,21 @@ MSysOut.println("*********** who is involved = "+ap.getSubTitle());
     if (!whoGroup.isFocused()) {
       s = ap.getSubTitle();
       if (!whoGroup.getValue().equals(s)) {
-        whoGroup.setValueOob(s,session);
+        whoGroup.setValueOobTL(s);
         updateUI = true;
       }
     }
     if (!whatGroup.isFocused()) {
       s = ap.getWhatIsItText();
       if (!whatGroup.getValue().equals(s)) {
-        whatGroup.setValueOob(s,session);
+        whatGroup.setValueOobTL(s);
         updateUI = true;
       }
     }
     if (!whatTakeGroup.isFocused()) {
       s = ap.getWhatWillItTakeText();
       if (!whatTakeGroup.getValue().equals(s)) {
-        whatTakeGroup.setValueOob(s,session);
+        whatTakeGroup.setValueOobTL(s);
         updateUI = true;
       }
     }
@@ -525,14 +520,14 @@ MSysOut.println("*********** who is involved = "+ap.getSubTitle());
     if (!howGroup.isFocused()) {
       s = ap.getHowWillItWorkText();
       if (!howGroup.getValue().equals(s)) {
-        howGroup.setValueOob(s,session);
+        howGroup.setValueOobTL(s);
         updateUI = true;
       }
     }
     if (!howChangeGroup.isFocused()) {
       s = ap.getHowWillItChangeText();
       if (!howChangeGroup.getValue().equals(s)) {
-        howChangeGroup.setValueOob(s,session);
+        howChangeGroup.setValueOobTL(s);
         updateUI = true;
       }
     }
