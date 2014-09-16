@@ -48,6 +48,10 @@ import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanTable;
 import edu.nps.moves.mmowgli.modules.actionplans.AddAuthorDialog;
 import edu.nps.moves.mmowgli.modules.gamemaster.CreateActionPlanPanel.CreateActionPlanLayout;
@@ -111,13 +115,18 @@ public class AddAuthorEventHandler
 
     selectButton.addClickListener(new ClickListener() {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        // app.getMainWindow().removeWindow(win);
         win.close();
         Object o = apt.getValue();
-        if (o != null)
-          inviteAuthorsToActionPlan(o);
+        if (o != null) {
+          HSess.init();
+          inviteAuthorsToActionPlanTL(o);
+          HSess.close();
+        }
       }
     });
     cancelButton.addClickListener(new ClickListener() {
@@ -131,9 +140,9 @@ public class AddAuthorEventHandler
   }
 
   @SuppressWarnings("serial")
-  public static void inviteAuthorsToActionPlan(final Object apID)
+  public static void inviteAuthorsToActionPlanTL(final Object apID)
   {
-    ActionPlan ap = ActionPlan.get(apID);
+    ActionPlan ap = ActionPlan.getTL(apID);
     HashSet<User> hs = new HashSet<User>();
     hs.addAll(ap.getAuthors());
     hs.addAll(ap.getInvitees());
@@ -143,31 +152,35 @@ public class AddAuthorEventHandler
     dial.center();
     dial.addListener(new CloseListener() {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void windowClose(CloseEvent e)
       {
         Object o = dial.getSelected();
         if (o == null)
           return;
-
-        ActionPlan ap = ActionPlan.get(apID);
+        HSess.init();
+        ActionPlan ap = ActionPlan.getTL(apID);
 
         if (o instanceof Set<?>)
-          inviteMultipleUsers(ap, (Set<?>) o);
+          inviteMultipleUsersTL(ap, (Set<?>) o);
         else
-          inviteSingleUser(ap, (QuickUser) o);
+          inviteSingleUserTL(ap, (QuickUser) o);
+        HSess.close();
       }
     });
   }
 
-  private static void inviteMultipleUsers(ActionPlan ap, Set<?> users)
+  private static void inviteMultipleUsersTL(ActionPlan ap, Set<?> users)
   {
     for (Object qu : users) {
-      User u = DBGet.getUser(((QuickUser) qu).id);
-      inviteSingleUser(ap, u);
+      User u = DBGet.getUserTL(((QuickUser) qu).id);
+      inviteSingleUserTL(ap, u);
     }
   }
 
-  private static void inviteSingleUser(ActionPlan ap, User u)
+  private static void inviteSingleUserTL(ActionPlan ap, User u)
   {
     // do not invite if already an author or already invited
     Set<User> auths = ap.getAuthors();
@@ -179,12 +192,12 @@ public class AddAuthorEventHandler
       if (invU.getId() == u.getId())
         return;
 
-    CreateActionPlanLayout.notifyApInvitee(u, ap);
-    ActionPlan.update(ap);
+    CreateActionPlanLayout.notifyApInviteeTL(u, ap);
+    ActionPlan.updateTL(ap);
   }
 
-  private static void inviteSingleUser(ActionPlan ap, QuickUser qu)
+  private static void inviteSingleUserTL(ActionPlan ap, QuickUser qu)
   {
-    inviteSingleUser(ap, DBGet.getUser(((QuickUser) qu).id));
+    inviteSingleUserTL(ap, DBGet.getUserTL(((QuickUser) qu).id));
   }
 }
