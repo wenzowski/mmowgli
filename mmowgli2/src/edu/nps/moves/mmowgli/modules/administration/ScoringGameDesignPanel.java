@@ -43,6 +43,8 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 
 /**
  * HeaderFooterGameDesignPanel.java
@@ -60,10 +62,11 @@ public class ScoringGameDesignPanel extends AbstractGameBuilderPanel
 {
   private static final long serialVersionUID = 3971486176821026871L;
 
+  @HibernateSessionThreadLocalConstructor
   public ScoringGameDesignPanel(GameDesignGlobals globs)
   {
     super(false,globs);
-    Game g = Game.get(1L);
+    Game g = Game.getTL();
     TextArea ta = (TextArea)addEditLine("Card authorship points", "Game.cardAuthorPoints", g, 1L, "CardAuthorPoints",null,Float.class,
                                         "Points for the author on card creation").ta;
     ta.setValue(""+g.getCardAuthorPoints());
@@ -93,7 +96,7 @@ public class ScoringGameDesignPanel extends AbstractGameBuilderPanel
     setupFloatValueListener(ta);
     ta.setRows(1);
 
-      if (Game.get().isActionPlansEnabled()) {
+      if (Game.getTL().isActionPlansEnabled()) {
           addSeparator();
 
           ta = (TextArea) addEditLine("Action plan authorship points", "Game.actionPlanAuthorPoints", g, 1L, "ActionPlanAuthorPoints", null, Float.class,
@@ -289,9 +292,14 @@ public class ScoringGameDesignPanel extends AbstractGameBuilderPanel
   class HelpListener implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
-      ScoringHelpWindow.show(Game.get());
+      HSess.init();
+      ScoringHelpWindow.showTL(Game.getTL());
+      HSess.close();
     }
   }
 }
