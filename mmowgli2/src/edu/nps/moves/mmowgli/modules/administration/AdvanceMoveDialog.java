@@ -46,7 +46,11 @@ import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.MmowgliMessageBroadcaster;
 import edu.nps.moves.mmowgli.components.*;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.Move;
+import edu.nps.moves.mmowgli.db.MovePhase;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 
 /**
  * EntryPermissionsDialog.java Created on May 15, 2013
@@ -68,6 +72,7 @@ public class AdvanceMoveDialog extends Window
 
   public static String bottomParagraph = "<span style='font-size:150%'>You must restart the game after advancing rounds!</span>";
 
+  @HibernateSessionThreadLocalConstructor
   public AdvanceMoveDialog() {
     setSizeUndefined();
     setWidth("600px");
@@ -75,6 +80,7 @@ public class AdvanceMoveDialog extends Window
     setCaption("Advance Game Round or Phase");
   }
 
+  @HibernateSessionThreadLocalConstructor
   public static class AdvanceMovePanel extends VerticalLayoutSpaced
   {
     private static final long serialVersionUID = -352472580105616508L;
@@ -101,7 +107,7 @@ public class AdvanceMoveDialog extends Window
       vl.setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
 
       hl.addComponent(new Label("Current round: "));
-      Move runningMove = Game.get().getCurrentMove();
+      Move runningMove = Game.getTL().getCurrentMove();
       hl.addComponent(new HtmlLabel("<b>" + runningMove.getName() + "</b>"));
 
       hl = new HorizontalLayoutSpaced();
@@ -147,7 +153,7 @@ public class AdvanceMoveDialog extends Window
       nextPhase.setNullSelectionAllowed(false);
 
       int curNum = move.getNumber();
-      List<Move> lis = Move.getAll();
+      List<Move> lis = Move.getAllTL();
       MoveWrap sel = null;
       for (Move m : lis) {
         MoveWrap mw = new MoveWrap(m);
@@ -162,11 +168,15 @@ public class AdvanceMoveDialog extends Window
     @SuppressWarnings("serial")
     ValueChangeListener roundListener = new ValueChangeListener() {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void valueChange(ValueChangeEvent event)
       {
+        HSess.init();
         MoveWrap mw = (MoveWrap) event.getProperty().getValue();
         MovePhase curmp = mw.m.getCurrentMovePhase();
-        Move m = Move.get(mw.m.getId()); // freshen
+        Move m = Move.getTL(mw.m.getId()); // freshen
         List<MovePhase> lis = m.getMovePhases();
         PhaseWrap sel = null;
         nextPhase.removeAllItems();
@@ -178,12 +188,16 @@ public class AdvanceMoveDialog extends Window
         }
         if (sel != null)
           nextPhase.setValue(sel);
+        HSess.close();
       }
     };
 
     @SuppressWarnings("serial")
     ClickListener broadcastListener = new ClickListener() {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
         MmowgliMessageBroadcaster.handleMessageBroadcastAction();
@@ -207,7 +221,6 @@ public class AdvanceMoveDialog extends Window
       Label message = new Label("Restart mmowgli on cluster nodes now.");
       layout.addComponent(message);
 
-      // AdvanceMovePanel.this.getWindow().getParent().getWindow().addWindow(stopDialog);
       UI.getCurrent().addWindow(stopDialog);
     }
 
@@ -260,19 +273,23 @@ public class AdvanceMoveDialog extends Window
     {
       MovePhase newPhase;
 
-      PhaseChangeListener(MovePhase newPhase) {
+      PhaseChangeListener(MovePhase newPhase)
+      {
         this.newPhase = newPhase;
       }
 
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void onClose(ConfirmDialog dialog)
       {
         if (dialog.isConfirmed()) {
-
-          Move m = Game.get().getCurrentMove();
-          m.setCurrentMovePhase(MovePhase.merge(newPhase));
-          Move.update(m);
-
+          HSess.init();
+          Move m = Game.getTL().getCurrentMove();
+          m.setCurrentMovePhase(MovePhase.mergeTL(newPhase));
+          Move.updateTL(m);
+          HSess.close();
           deadStop();
         }
       }
@@ -284,23 +301,28 @@ public class AdvanceMoveDialog extends Window
       Move newMove;
       MovePhase newPhase;
 
-      MoveChangeListener(Move newMove, MovePhase newPhase) {
+      MoveChangeListener(Move newMove, MovePhase newPhase)
+      {
         this.newMove = newMove;
         this.newPhase = newPhase;
       }
 
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void onClose(ConfirmDialog dialog)
       {
         if (dialog.isConfirmed()) {
-          newMove = Move.merge(newMove);
-          newPhase = MovePhase.merge(newPhase);
+          HSess.init();
+          newMove = Move.mergeTL(newMove);
+          newPhase = MovePhase.mergeTL(newPhase);
           newMove.setCurrentMovePhase(newPhase);
-          Move.update(newMove);
-          Game.get().setCurrentMove(newMove);
-          Game.update();
-
-          deadStop();
+          Move.updateTL(newMove);
+          Game.getTL().setCurrentMove(newMove);
+          Game.updateTL();
+          HSess.close();
+          deadStop();         
         }
       }
     };
@@ -308,9 +330,14 @@ public class AdvanceMoveDialog extends Window
     @SuppressWarnings("serial")
     private ClickListener doItHandler = new ClickListener() {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        Move currentMove = Game.get().getCurrentMove();
+        HSess.init();
+
+        Move currentMove = Game.getTL().getCurrentMove();
         Move chosenMove = ((MoveWrap) (nextRound.getValue())).m;
         MovePhase chosenPhase = ((PhaseWrap) (nextPhase.getValue())).mp;
 
@@ -319,6 +346,7 @@ public class AdvanceMoveDialog extends Window
             Notification n = new Notification("No change", "No advancement is indicated", Notification.Type.HUMANIZED_MESSAGE);
             n.setDelayMsec(3000);
             n.show(Page.getCurrent());// getWindow().showNotification(n);
+            HSess.close();
             return;
           }
           else {
@@ -332,6 +360,7 @@ public class AdvanceMoveDialog extends Window
             Notification n = new Notification("No change", "Cannot change to previous rounds", Notification.Type.HUMANIZED_MESSAGE);
             n.setDelayMsec(3000);
             n.show(Page.getCurrent());
+            HSess.close();
             return;
           }
         }
@@ -339,6 +368,7 @@ public class AdvanceMoveDialog extends Window
           ConfirmDialog.show(UI.getCurrent(), "Change to " + chosenMove.getName() + ", phase " + chosenPhase.getDescription() + "?  (The current "
               + "game stops and a restart is required. Cancel if this is not what you want to do.)", new MoveChangeListener(chosenMove, chosenPhase));
         }
+        HSess.close();
       }
     };
 
