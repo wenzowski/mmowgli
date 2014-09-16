@@ -36,7 +36,9 @@ package edu.nps.moves.mmowgli.modules.actionplans;
 import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import org.hibernate.Session;
 
@@ -54,11 +56,12 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPageTabImages.IndexListener;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
-import edu.nps.moves.mmowgli.utility.M;
 
 /**
  * ActionPlanPageTabImages.java Created on Feb 8, 2011
@@ -78,6 +81,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
   private AddVideoDialog addDialog;
   private Label nonAuthorLabel;
   
+  @HibernateSessionThreadLocalConstructor
   public ActionPlanPageTabVideos(Object apId, boolean isMockup)
   {
     super(apId, isMockup);
@@ -95,7 +99,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
 
     VerticalLayout flowLay = new VerticalLayout();
     flowLay.setWidth("100%");
-    leftLay.addComponent(flowLay); // ,"top:0px;left:0px");
+    leftLay.addComponent(flowLay);
     flowLay.setSpacing(true);
 
     Label missionLab = new Label("Authors, add some videos!");
@@ -103,13 +107,13 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     flowLay.setComponentAlignment(missionLab, Alignment.TOP_LEFT);
     missionLab.addStyleName("m-actionplan-mission-title-text");
 
-    ActionPlan ap = ActionPlan.get(apId);
+    ActionPlan ap = ActionPlan.getTL(apId);
 
     Label missionContentLab;
     if(!isMockup)
       missionContentLab = new HtmlLabel(ap.getVideosInstructions());
     else {
-      Game g = Game.get(1L);
+      Game g = Game.getTL();
       missionContentLab = new HtmlLabel(g.getDefaultActionPlanVideosText());
     }
     flowLay.addComponent(missionContentLab);
@@ -127,11 +131,6 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     flowLay.addComponent(nonAuthorLabel = new Label("Authors may add videos when editing the plan."));
     nonAuthorLabel.setVisible(false);
     
-/*    flowLay.addComponent(searchLibButt);
-    searchLibButt.addStyleName("m-actionplan-searchlibrary-butt");
-    searchLibButt.addStyleName("borderless");
-    searchLibButt.setIcon(app.globs().mediaLocator().getActionPlanSearchVidLibButt());
-*/
     VerticalLayout rightLay = getRightLayout();
     rightLay.setSpacing(false);
     rightLay.setMargin(false);
@@ -148,7 +147,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     setUpIndexListener(rightScroller);
     
     rightLay.addComponent(rightScroller);;
-    fillWithVideos();
+    fillWithVideosTL();
   }
   
   // All this does is put the index number in the top line
@@ -157,11 +156,10 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     ((AbstractLayout)p.getContent()).addComponentAttachListener(new IndexListener());
   }
   
-  private void fillWithVideos()
+  private void fillWithVideosTL()
   {
-    fillWithVideos(VHib.getVHSession());
+    fillWithVideos(HSess.get());
   }
-  
   private void fillWithVideos(Session sess)
   {
     ((AbstractLayout)rightScroller.getContent()).removeAllComponents();
@@ -236,21 +234,21 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
   }
   
 
-  private Media findMedia(Button butt)
+  private Media findMediaTL(Button butt)
   {
-    int wh = findMediaIndex(butt);
+    int wh = findMediaIndexTL(butt);
     if (wh == -1)
       return null;
-    ActionPlan ap = ActionPlan.get(apId);
+    ActionPlan ap = ActionPlan.getTL(apId);
     List<Media> lis = ap.getMedia();
     return lis.get(wh);
   }
 
-  private int findMediaIndex(Button butt)
+  private int findMediaIndexTL(Button butt)
   {
     MediaPanel pan = findVideoPanel(butt);
     Media m = pan.getMedia();
-    return getMediaIndex(m);
+    return getMediaIndexTL(m);
   }
 
   private MediaPanel findVideoPanel(Button butt)
@@ -262,9 +260,9 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     return (MediaPanel) com;
   }
 
-  private int getMediaIndex(Media m)
+  private int getMediaIndexTL(Media m)
   {
-    ActionPlan ap = ActionPlan.get(apId);
+    ActionPlan ap = ActionPlan.getTL(apId);
     List<Media> lis = ap.getMedia();
     for (int i = 0; i < lis.size(); i++)
       if (lis.get(i).getId() == m.getId())
@@ -272,12 +270,13 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     return -1;
   }
 
-  private void replaceMedia(Media oldM, Media newM)
+  private ActionPlan replaceMediaTL(Media oldM, Media newM)
   {
-    int oldIdx = getMediaIndex(oldM);
-    ActionPlan ap = ActionPlan.get(apId);
+    int oldIdx = getMediaIndexTL(oldM);
+    ActionPlan ap = ActionPlan.getTL(apId);
     List<Media> lis = ap.getMedia();
     lis.set(oldIdx, newM);
+    return ap;
   }
 
   @SuppressWarnings("serial")
@@ -286,6 +285,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     @Override
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
       hideExistingVideos(); // if ie
       addDialog = new AddVideoDialog();
 
@@ -293,25 +293,31 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
       addDialog.addListener(new CloseListener()
       {
         @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void windowClose(CloseEvent e)
         {
           UI.getCurrent().removeWindow(addDialog);
           showExistingVideos();
           Media med = addDialog.getMedia();
           if (med != null) {
-            Media.save(med);
+            HSess.init();
+            Media.saveTL(med);
             addOneVideo(med);
-            ActionPlan ap = ActionPlan.get(apId);
+            ActionPlan ap = ActionPlan.getTL(apId);
             ap.getMedia().add(med);
-            ActionPlan.update(ap);
-            User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-            GameEventLogger.logActionPlanUpdate(ap, "video added", u.getId()); //u.getUserName());
+            ActionPlan.updateTL(ap);
+            User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+            GameEventLogger.logActionPlanUpdateTL(ap, "video added", u.getId()); //u.getUserName());
+            HSess.close();
           }
         }
       });
       UI.getCurrent().addWindow(addDialog);
       addDialog.setPositionX(0);
       addDialog.setPositionY(50); // miss videos
+      HSess.close();
     }
   }
 
@@ -348,18 +354,24 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
       this.m = m;
     }
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
       if (m != null) {
-        ActionPlan ap = ActionPlan.get(apId);
+        HSess.init();
+        
+        ActionPlan ap = ActionPlan.getTL(apId);
         List<Media> lis = ap.getMedia();
-        Media.update(m);  // get into same session
+        Media.updateTL(m);  // get into same session
         lis.remove(m);
-        ActionPlan.update(ap);
-        User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-        GameEventLogger.logActionPlanUpdate(ap, "video removed", u.getId()); //u.getUserName());
+        ActionPlan.updateTL(ap);
+        User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+        GameEventLogger.logActionPlanUpdateTL(ap, "video removed", u.getId()); //u.getUserName());
 
-        fillWithVideos();
+        fillWithVideosTL();
+        HSess.close();
       }
     }
   }
@@ -368,9 +380,13 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
   class VideoReplacer implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
-      final Media oldM = findMedia(event.getButton());
+      HSess.init();
+      final Media oldM = findMediaTL(event.getButton());
       final MediaPanel vPan = findVideoPanel(event.getButton());
       if (oldM != null) {
         //if (addDialog == null) {
@@ -381,25 +397,29 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
           addDialog.addListener(new CloseListener()
           {
             @Override
+            @MmowgliCodeEntry
+            @HibernateOpened
+            @HibernateClosed
             public void windowClose(CloseEvent e)
             {
               UI.getCurrent().removeWindow(addDialog);
               showExistingVideos();
               Media med = addDialog.getMedia();
               if (med != null) {
-                Media.save(med);
-                replaceMedia(oldM, med);
+                HSess.init();
+                Media.saveTL(med);
+                ActionPlan ap = replaceMediaTL(oldM, med);
                 vPan.setMedia(med);
-                ActionPlan ap;
-                ActionPlan.update(ap=ActionPlan.get(apId));
-                User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-                GameEventLogger.logActionPlanUpdate(ap, "video replaced", u.getId()); //u.getUserName());
-              }
+                ActionPlan.updateTL(ap);
+                User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+                GameEventLogger.logActionPlanUpdateTL(ap, "video replaced", u.getId()); //u.getUserName());
+                HSess.close();              }
             }
           });
         //}
         UI.getCurrent().addWindow(addDialog);
       }
+      HSess.close();
     }
   }
   @SuppressWarnings("serial")
@@ -419,7 +439,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
   }
   
   @Override
-  public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
+  public boolean actionPlanUpdatedOobTL(Serializable apId)
   {
     if(apId != this.apId)
       return false;
@@ -428,8 +448,8 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     // Here, we have to check for additions and subtractions
     Vector<Media> videosInAp = new Vector<Media>(); // what the plan has
     Vector<Media> videosInGui = new Vector<Media>(); // what the gui is showing
-    Session sess = M.getSession(sessMgr);
-    ActionPlan ap = (ActionPlan)sess.get(ActionPlan.class, apId);
+
+    ActionPlan ap = ActionPlan.getTL(apId);
     List<Media> mLis = ap.getMedia();
     
     for(Media m : mLis) {
@@ -451,7 +471,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     if(videosInAp.size() > videosInGui.size()) 
       addTheNewOne(ap, videosInAp, videosInGui);
     else if(videosInAp.size() < videosInGui.size())
-      deleteTheOldOne(ap, videosInAp, videosInGui, sess);
+      deleteTheOldOneOobTL(ap, videosInAp, videosInGui);
     return true;
   }
   
@@ -481,9 +501,9 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     return null;
   }
 
-  private void deleteTheOldOne(ActionPlan ap, Vector<Media> little, Vector<Media> big, Session sess)
+  private void deleteTheOldOneOobTL(ActionPlan ap, Vector<Media> little, Vector<Media> big)
   {
-    fillWithVideos(sess);
+    fillWithVideosTL();
   }
 
   @Override
@@ -500,8 +520,9 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     }    
   }
 
-  public boolean mediaUpdatedOob(SessionManager sessMgr, Serializable medId)
+  public boolean mediaUpdatedOobTL(Serializable medId)
   {
-    return mediaUpdatedOob(sessMgr,(ComponentContainer)rightScroller.getContent(),medId);
+    // calls superclass
+    return mediaUpdatedOobTL((ComponentContainer)rightScroller.getContent(),medId);
   }
 }
