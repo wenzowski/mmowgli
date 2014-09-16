@@ -35,12 +35,9 @@ package edu.nps.moves.mmowgli.modules.actionplans;
 
 import java.io.Serializable;
 
-import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.db.ActionPlan;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
 
 /**
@@ -69,6 +66,11 @@ public class ActionDashboardTabNeedAuthors extends ActionDashboardTabPanel imple
   @Override
   public void initGui()
   {
+    throw new UnsupportedOperationException("");
+  }
+
+  public void initGuiTL()
+  {
     AbsoluteLayout leftLay = getLeftLayout();
     
     flowLay = new VerticalLayout();
@@ -94,23 +96,15 @@ public class ActionDashboardTabNeedAuthors extends ActionDashboardTabPanel imple
     flowLay.setStyleName("m-actionplan-plan-rightside"); // set the style name so the css's below can use it (e.g.: .m-actionplan-plan-rightside
                                                          // .m-actionplan-plan-headling { blah:blah;} )
 
-    loadTable(null);
+    loadTableTL();
   }
   
-  private void loadTable(SessionManager sessMgr)
+  private void loadTableTL()
   {
     if(table != null)
       flowLay.removeComponent(table);
 
-    HbnContainer<ActionPlan> ctn;
-    if(sessMgr == null) {
-      ctn = new ActionPlanTable.HelpWantedContainer<ActionPlan>();
-      table = new ActionPlanTable(ctn);
-    }
-    else {
-      ctn = new ActionPlanTable.HelpWantedContainer<ActionPlan>(VHib.getSessionFactory());
-      table = new ActionPlanTable(ctn,sessMgr);
-   }
+    table = new ActionPlanTable(new ActionPlanTable.HelpWantedContainer<ActionPlan>());
 
     flowLay.addComponent(table);
     flowLay.setWidth("669px");
@@ -119,7 +113,7 @@ public class ActionDashboardTabNeedAuthors extends ActionDashboardTabPanel imple
   }
   
   @Override
-  public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
+  public boolean actionPlanUpdatedOobTL(Serializable apId)
   {
    // loadTable(sessMgr);
    // return true;
