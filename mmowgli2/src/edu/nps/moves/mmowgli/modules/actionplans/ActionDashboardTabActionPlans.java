@@ -44,7 +44,9 @@ import com.vaadin.ui.*;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
 
 /**
@@ -63,6 +65,7 @@ public class ActionDashboardTabActionPlans extends ActionDashboardTabPanel imple
   private ActionPlanTable table;
   private VerticalLayout flowLay;
   
+  @HibernateSessionThreadLocalConstructor
   public ActionDashboardTabActionPlans()
   {
     super();
@@ -70,6 +73,11 @@ public class ActionDashboardTabActionPlans extends ActionDashboardTabPanel imple
 
   @Override
   public void initGui()
+  {
+    throw new UnsupportedOperationException("");
+  }
+
+  public void initGuiTL()
   {
     AbsoluteLayout leftLay = getLeftLayout();
 
@@ -95,7 +103,7 @@ public class ActionDashboardTabActionPlans extends ActionDashboardTabPanel imple
     flowLay.setStyleName("m-actionplan-plan-rightside"); // set the style name so the css's below can use it (e.g.: .m-actionplan-plan-rightside
                                                          // .m-actionplan-plan-headling { blah:blah;} )
 
-    loadTable(null);
+    loadTableTL();
   }
 
   @SuppressWarnings({ "serial", "unchecked" })
@@ -103,7 +111,7 @@ public class ActionDashboardTabActionPlans extends ActionDashboardTabPanel imple
   {
     public AllPlansInThisMove()
     {
-      this(VHib.getSessionFactory());
+      this(HSess.getSessionFactory());
     }
 
     public AllPlansInThisMove(SessionFactory fact)
@@ -112,24 +120,21 @@ public class ActionDashboardTabActionPlans extends ActionDashboardTabPanel imple
     }
 
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
-      Criteria crit = super.getBaseCriteria();
-      User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-      ActionPlan.adjustCriteriaToOmitActionPlans(crit, me);
+      Criteria crit = super.getBaseCriteriaTL();
+      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
       return crit;
     }
   }
 
-  private void loadTable(SessionManager sessMgr)
+  private void loadTableTL()
   {
     if(table != null)
       flowLay.removeComponent(table);
     
-    if(sessMgr == null)
-      table = new ActionPlanTable(new AllPlansInThisMove<ActionPlan>());
-    else
-      table = new ActionPlanTable(new AllPlansInThisMove<ActionPlan>(),sessMgr);
+    table = new ActionPlanTable(new AllPlansInThisMove<ActionPlan>());
 
     flowLay.addComponent(table);
     flowLay.setWidth("669px");
@@ -138,7 +143,7 @@ public class ActionDashboardTabActionPlans extends ActionDashboardTabPanel imple
   }
 
   @Override
-  public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
+  public boolean actionPlanUpdatedOobTL(Serializable apId)
   {
     // don't need to refresh here...excessive
    // loadTable(sessMgr);
