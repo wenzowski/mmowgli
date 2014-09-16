@@ -42,6 +42,10 @@ import com.vaadin.ui.themes.Reindeer;
 
 import edu.nps.moves.mmowgli.db.Media;
 import edu.nps.moves.mmowgli.db.MovePhase;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 
 /**
  * VideoChangerComponent.java
@@ -135,6 +139,9 @@ public class VideoChangerComponent extends HorizontalLayout implements ClickList
     ClickListener saveCancelListener = new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
         if(event.getButton() == saveButt) {
@@ -142,6 +149,7 @@ public class VideoChangerComponent extends HorizontalLayout implements ClickList
           if(currentMedia != null && newUrl.equals(currentMedia.getUrl()))
             return;
           
+          HSess.init();
           Media m;
           if(newUrl.length()<=0 && currentMedia != null) {
             m = null;
@@ -156,24 +164,24 @@ public class VideoChangerComponent extends HorizontalLayout implements ClickList
           }
           
           if(m != null)
-            Media.save(m);         
+            Media.saveTL(m);         
           try {
             movePhaseSetter.invoke(mp, m);
           }
           catch (Exception e) {
             throw new RuntimeException(e);
           }
-          MovePhase.update(mp);
+          MovePhase.updateTL(mp);
           
           currentMedia = m;
           roTF.setReadOnly(false);
           roTF.setValue(newUrl);
           roTF.setReadOnly(true);
-        }
-        
+          
+          HSess.close();
+        }       
         UI.getCurrent().removeWindow(EditYoutubeIdDialog.this);
       }
     };
   }
-
 }
