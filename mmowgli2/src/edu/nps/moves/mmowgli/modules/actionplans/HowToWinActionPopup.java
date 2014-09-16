@@ -37,10 +37,13 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
 
 import com.vaadin.server.ExternalResource;
 import com.vaadin.shared.ui.BorderStyle;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Link;
+import com.vaadin.ui.VerticalLayout;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.Media;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.modules.cards.HowToPlayCardsPopup;
 
 /**
@@ -54,6 +57,8 @@ import edu.nps.moves.mmowgli.modules.cards.HowToPlayCardsPopup;
 public class HowToWinActionPopup extends HowToPlayCardsPopup
 {
   private static final long serialVersionUID = 9054620543272655877L;
+  
+  @HibernateSessionThreadLocalConstructor
   public HowToWinActionPopup(String title)
   {
     super();
@@ -73,6 +78,6 @@ public class HowToWinActionPopup extends HowToPlayCardsPopup
   
   protected Media getMedia()
   {
-    return Mmowgli2UI.getGlobals().getMediaLocator().getHowToWinActionMedia();    
+    return Mmowgli2UI.getGlobals().getMediaLocator().getHowToWinActionMediaTL();    
   }
 }
