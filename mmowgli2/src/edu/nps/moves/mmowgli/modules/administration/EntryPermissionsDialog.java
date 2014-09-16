@@ -35,7 +35,7 @@ package edu.nps.moves.mmowgli.modules.administration;
 
 import java.util.Iterator;
 
-import com.vaadin.data.*;
+import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.ExternalResource;
@@ -46,6 +46,8 @@ import com.vaadin.ui.Button.ClickListener;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.MovePhase;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 
 /**
  * EntryPermissionsDialog.java Created on May 15, 2013
@@ -86,6 +88,8 @@ public class EntryPermissionsDialog extends Window
     private boolean readOnly = false;
     private Button closeButt, cancelButt, saveButt;
     private Window myDialog;
+    
+    @HibernateSessionThreadLocalConstructor
     public EntryPermissionsPanel(boolean ro, Window dialog)
     {
       readOnly = ro;
@@ -187,7 +191,7 @@ public class EntryPermissionsDialog extends Window
     @SuppressWarnings({ "serial", "deprecation" })
     private void initializeButtons()
     {
-      MovePhase mp = Game.get().getCurrentMove().getCurrentMovePhase();
+      MovePhase mp = Game.getTL().getCurrentMove().getCurrentMovePhase();
 
       //boolean all = mp.isLoginAllowAll();
       boolean all = mp.isLoginAllowRegisteredUsers();
@@ -559,9 +563,13 @@ public class EntryPermissionsDialog extends Window
     private ClickListener saveHandler = new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        MovePhase mp = Game.get().getCurrentMove().getCurrentMovePhase();
+        HSess.init();
+        MovePhase mp = Game.getTL().getCurrentMove().getCurrentMovePhase();
         EntryPermissionsPanel me = EntryPermissionsPanel.this;
 
         mp.loginAllowNone();
@@ -593,9 +601,10 @@ public class EntryPermissionsDialog extends Window
         mp.setGuestButtonShow(isGuestsVisible());
         mp.setGuestButtonEnabled(isGuestsVisibleAndEnabled());
 
-        MovePhase.update(mp);
+        MovePhase.updateTL(mp);
 
         myDialog.close();
+        HSess.close();
       }
     };
 
