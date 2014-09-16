@@ -73,16 +73,13 @@ public class UploadHandler implements Upload.Receiver
     this.upload = upld;
     this.savePath = savePath;   
     this.window = panel;
+    new File(savePath).mkdirs();
     
     upload.addStartedListener(new Upload.StartedListener()
     {
       public void uploadStarted(StartedEvent event)
       {
-        // this method gets called immediately after upload is
-        // started
-//        upload.getApplication().getMainWindow().addWindow(window);
-//        window.center();
-        
+        // this method gets called immediately after upload is started
         window.pi.setValue(0f);
         window.pi.setVisible(true);
         UI.getCurrent().setPollInterval(500); // hit server frequently to get
@@ -112,7 +109,6 @@ public class UploadHandler implements Upload.Receiver
           window.result.setValue(counter + " (counting...)");
         }
       }
-
     });
 
     upload.addSucceededListener(new Upload.SucceededListener()
