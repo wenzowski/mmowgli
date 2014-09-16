@@ -35,9 +35,14 @@ package edu.nps.moves.mmowgli.modules.actionplans;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
 
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.gdata.client.youtube.YouTubeService;
+import com.google.gdata.data.youtube.VideoEntry;
+import com.google.gdata.data.youtube.YouTubeMediaGroup;
+import com.vaadin.server.ExternalResource;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -61,17 +66,16 @@ import edu.nps.moves.mmowgli.db.Media.Source;
 public class AddVideoDialog extends Window
 {
   private static final long serialVersionUID = -8933947446095329923L;
-  //private ApplicationEntryPoint app;
   
   private Button cancelButt, submitButt, testButt;
   private Media media;
   private TextField addrTf;
   private AbsoluteLayout holder;
+  
   @SuppressWarnings("serial")
   public AddVideoDialog()
   {
     super("Add a Video");
-    //this.app = appl;
     addStyleName("m-greybackground");
 
     setClosable(false); // no x in corner
@@ -154,6 +158,7 @@ public class AddVideoDialog extends Window
           closer.windowClose(null);
       }      
     });
+    
     cancelButt.addClickListener(new ClickListener()
     {
       public void buttonClick(ClickEvent event)
@@ -206,40 +211,40 @@ public class AddVideoDialog extends Window
       media = new Media(id, "YouTubeVideo", "Action Plan video", MediaType.YOUTUBE, Source.WEB_FULL_URL);
       media.setCaption("Describe this video here");
       media.setTitle("Title here");
-//      EmbeddedYouTube ePlayer = new EmbeddedYouTube(id);
-//      ePlayer.setWidth("150px");
-//      ePlayer.setHeight("150px");
-//todo
-      /*YouTubePlayer yplayer = new YouTubePlayer();
-      yplayer.setVideoId(id);
-      yplayer.setWidth("150px");
-      yplayer.setHeight("150px");
+      
+      Flash ytp = new Flash();
+      ytp.setSource(new ExternalResource("http://www.youtube.com/v/"+media.getUrl()));
+      ytp.setParameter("allowFullScreen", "false");
+      ytp.setParameter("showRelated", "false");
+      ytp.setWidth(150.0f,Unit.PIXELS);
+      ytp.setHeight(150.0f,Unit.PIXELS);
+
       holder.removeAllComponents();
       holder.addComponent(new Label("video will appear if found"),"top:0px;left:0px");
-      holder.addComponent(yplayer, "top:0px;left:0px");
-       */
+      holder.addComponent(ytp, "top:0px;left:0px");
+
       fillDefaults(media,id);
     }
     
   }
+  
   private void fillDefaults(Media med, String id)
   {
-//    String feed = "https://gdata.youtube.com/feeds/api/videos/"+id;
+    String feed = "https://gdata.youtube.com/feeds/api/videos/"+id;
     try {
-//todo
-      /*
+
       YouTubeService svc = new YouTubeService("mmowgli");
       VideoEntry videoEntry = svc.getEntry(new URL(feed), VideoEntry.class);
       media.setTitle(videoEntry.getTitle().getPlainText());
       YouTubeMediaGroup mediaGroup = videoEntry.getMediaGroup();
       media.setCaption( mediaGroup.getDescription().getPlainTextContent());
-      media.setDescription(media.getCaption());    */   
+      media.setDescription(media.getCaption());
     }
     catch (Exception ex) {
       //silently fail
     }
-
   }
+  
   private static String extractId(String url)
   {
     int lastSlashIdx;
