@@ -41,7 +41,9 @@ import java.net.URL;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
-import com.vaadin.server.*;
+import com.vaadin.server.ExternalResource;
+import com.vaadin.server.FileResource;
+import com.vaadin.server.Resource;
 import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.AppMaster;
@@ -49,7 +51,7 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
 import edu.nps.moves.mmowgli.db.Media.Source;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 
 /**
@@ -67,27 +69,20 @@ public class MediaLocator implements Serializable
 {
   private static final long serialVersionUID = -3729767364940957084L;
   
-  private        URL gameImagesUrl;
-	private static URL userImagesUrl;	
+  private    URL gameImagesUrl;
   private String gameImagesUrlStr;
-  private String userImagesUrlStr;
    
   public static int HTTP = 80;
   public static int HTTPS = 443;
   
 	public MediaLocator()
 	{		
-		gameImagesUrlStr = AppMaster.getInstance().getGameImagesUrlString();
-		userImagesUrlStr = AppMaster.getInstance().getUserImagesUrlString();
+		gameImagesUrlStr = AppMaster.instance().getGameImagesUrlString();
 		
     if(!gameImagesUrlStr.endsWith("/"))
       gameImagesUrlStr = gameImagesUrlStr+"/";
-    
-	  if(!userImagesUrlStr.endsWith("/"))
-	    userImagesUrlStr = userImagesUrlStr+"/";
 	  
-		gameImagesUrl = buildGameImagesUrl(AppMaster.getInstance().getAppUrl(), gameImagesUrlStr);
-		userImagesUrl = buildUserImagesUrl(AppMaster.getInstance().getAppUrl());  // this sets a static variable from an instance constructor, but got to have an app instance to do it
+		gameImagesUrl = buildGameImagesUrl(AppMaster.instance().getAppUrl(), gameImagesUrlStr);
 	}
 	
 //@formatter:off
@@ -106,22 +101,13 @@ public class MediaLocator implements Serializable
 			return appURL;
 		}
 	}
-  private URL buildUserImagesUrl(URL appURL)
-  {   
-    try {
-      if(userImagesUrlStr.contains(":"))
-        return new URL(userImagesUrlStr);
-
-      return new URL(appURL.getProtocol(),
-                     appURL.getHost(),
-                     "/");
-    }
-    catch (MalformedURLException ex) {
-      System.err.println("Program error in MediaLocatior");
-      return appURL;
-    }
-  }
 //@formatter:on
+
+	private URL getUserImagesUrl()
+	{
+	  return AppMaster.instance().getUserImagesUrl();
+	}	
+
 	public Resource locate(Media m)
 	{
 	  return locate(m,null);
@@ -146,9 +132,10 @@ public class MediaLocator implements Serializable
 		switch(m.getSource())
 		{
 		case USER_UPLOADS_REPOSITORY:  // used to be CLASSPATH
+		  System.out.println("in MediaLocator.locate/USER_UPLOADS_REPOSITORY");
 	     try {
 	        if(url.indexOf(':') == -1)
-	          return new ExternalResource(new URL(userImagesUrl,url));
+	          return new ExternalResource(new URL(getUserImagesUrl(),url));
 	        return new ExternalResource(new URL(url));
 	      }
 	      catch(MalformedURLException ex) {
@@ -192,26 +179,14 @@ public class MediaLocator implements Serializable
 	public Resource locateUserImage(String url)
 	{
 	  try {
-      return new ExternalResource(new URL(userImagesUrl,url));
+      return new ExternalResource(new URL(getUserImagesUrl(),url));
     }
     catch (MalformedURLException e) {
       System.err.println("Program error in MediaLocator.locateUserImage(): "+e.getLocalizedMessage());
       return null;
     }	  
 	}
-	
-	public static URL getUserImageUrl(String url)
-	{
-	  try {
-      return new URL(userImagesUrl,url);
-    }
-    catch (Throwable e) {
-      if(userImagesUrl != null)
-        System.err.println("Program error in MediaLocator.getUserImageUrl(): "+e.getLocalizedMessage());
-      return null;
-    }
-	}
-	
+
 	public ExternalResource locateAvatar(Media m)
 	{
 		Resource res = locate(m);
@@ -234,9 +209,9 @@ public class MediaLocator implements Serializable
 	  return locate(new Media(CardStyler.getCardSummaryMultipleImage(ct),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
 	}
   
-  public Resource getCardSummaryBackgroundSmall(Object cardId)
+  public Resource getCardSummaryBackgroundSmallTL(Object cardId)
   {
-    Card c = DBGet.getCard(cardId);
+    Card c = DBGet.getCardTL(cardId);
     CardType ct = c.getCardType();
     
     return locate(new Media(CardStyler.getCardParentImage(ct),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
@@ -269,9 +244,9 @@ public class MediaLocator implements Serializable
     return locate(new Media("cardDrawer.png","card summary drawer", "background of card summary drawer",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
   
-  public Resource getCardLargeBackground(Object cardId)
+  public Resource getCardLargeBackgroundTL(Object cardId)
   {
-    Card c = DBGet.getCard(cardId);
+    Card c = DBGet.getCardTL(cardId);
     return locate(new Media(CardStyler.getCardBigImage(c.getCardType()),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
   
@@ -315,33 +290,40 @@ public class MediaLocator implements Serializable
   {
     return locate(new Media("footer.png","footerbackground","footer background",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getImage(String fn)
   {
     return locate(new Media(fn,"headerbackground","header background",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getHeaderBackground()
   {
     //return locate(new Media("headerNew992w172h.png","headerbackground","header background",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
     //return locate(new Media("headerNoBanner992w172h.png","headerbackground","header background",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
     return locate(new Media("headerNoBannerNoScore992w172h.png","headerbackground","header background",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getHeaderBanner(Game g)
   {
     String bannerFileName = g.getHeaderBannerImage();
     return locate(new Media(bannerFileName,"headerbanner","header banner",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getCheckMark12px()
   {
     return locate(new Media("12px-Black_check.svg.png","black check mark","black check mark",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));   
   }
+  
   public Resource getActionPlanBackground()
   {
     return locate(new Media("actionPlanTemplate985w1093h.png","actplanbackground","action plan background",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getIdeaDashboardBackground()
   {
     return locate(new Media("ideaDashboardBackground.png","ideadashbackground","idea dashboard background",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getActionDashboardPlanBackground()
   {
     return locate(new Media("actionDashboardBackground.png","actdashbackground","action dashboard background",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
@@ -401,26 +383,32 @@ public class MediaLocator implements Serializable
   {
     return locate(new Media("addYourImageOrange.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getActionPlanAddVideoButt()
   {
     return locate(new Media("addYourVideoOrange189w50h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getActionPlanSearchLibButt()
   {
     return locate(new Media("searchImageLibraryBlack.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getActionPlanSearchVidLibButt()
   {
     return locate(new Media("searchVideoLibraryBlack188w50h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getActionPlanZoomButt()
   {
     return locate(new Media("zoomIcon.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getActionPlanReplaceImageButt()
   {
     return locate(new Media("replaceGreen.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getActionPlanDeleteImageButt()
   {
     return locate(new Media("deleteBlack.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
@@ -451,6 +439,7 @@ public class MediaLocator implements Serializable
     butt.setIcon(locate(new Media("lightboxDialogCancelButton.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY)));
     butt.addStyleName("borderless");
   }
+  
   public void decorateDialogContinueButton(Button butt)
   {
     butt.setIcon(locate(new Media("continue.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY)));
@@ -472,60 +461,60 @@ public class MediaLocator implements Serializable
   public Resource getDialogHeaderBackground()
   {
     return locate(new Media("lightboxDialogHeaderBckgrnd.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
-
   }
 
   public Resource getDialogFooterBackground()
   {
     return locate(new Media("lightboxDialogFooterBckgrnd.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
-
   }
 
-  public Media getHowToPlayCardsVideoMedia()
+  public Media getHowToPlayCardsVideoMediaTL()
   {
-    return (Media)VHib.getVHSession().createCriteria(Media.class).
+    return (Media)HSess.get().createCriteria(Media.class).
             add(Restrictions.eq("handle", "HowToPlayCardsVideo")).list().get(0);
   }
-  public Resource getHowToPlayCardsVideo()
-  {
-    return locate(getHowToPlayCardsVideoMedia());
-  }
   
-  public Media getHowToWinActionMedia()
+  public Media getHowToWinActionMediaTL()
   {
-    return (Media)VHib.getVHSession().createCriteria(Media.class).
+    return (Media)HSess.get().createCriteria(Media.class).
             add(Restrictions.eq("handle", "HowToWinActionVideo")).list().get(0);
   }
 
-  public Resource getHowToWinActionVideo()
+  public Resource getHowToWinActionVideoTL()
   {
-    return locate(getHowToWinActionMedia());
+    return locate(getHowToWinActionMediaTL());
   }
 
   public Resource getCardDot(CardType ct)
   {
     return locate(new Media(CardStyler.getCardDot(ct),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getCardDotFromStyleName(String name)
   {
     return locate(new Media(CardStyler.getCardDot(name),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getCardLargeBackgroundFromStyleName(String name)
   {
     return locate(new Media(CardStyler.getCardBigImage(name),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getCardSummaryBackgroundFromStyleName(String name)
   {
     return locate(new Media(CardStyler.getCardSummaryImage(name),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getCardSummaryBackgroundMultipleFromStyleName(String name)
   {
     return locate(new Media(CardStyler.getCardSummaryMultipleImage(name),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getCardHeaderImageFromStyleName(String name)
   {
     return locate(new Media(CardStyler.getCardHeaderImage(name),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));    
   } 
+  
   public Resource getCardParentImageFromStyleName(String name)
   {
     return locate(new Media(CardStyler.getCardParentImage(name),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
@@ -535,18 +524,22 @@ public class MediaLocator implements Serializable
   {
     return locate(new Media("userProfileActPlanTab158x46h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getUserProfileMyIdeasTab()
   {
     return locate(new Media("userProfileMyIdeasTab173w51h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getUserProfileMyIdeasTab_grey()
   {
     return locate(new Media("userProfileMyIdeasTab173w51h_grey.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getUserProfileInvestmentsTabBlue()
   {
     return locate(new Media("userProfileInvestTab139w46h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getUserProfileBuddiesTabBlue()
   {
     return locate(new Media("userProfileBuddiesTab124w46h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
@@ -563,11 +556,13 @@ public class MediaLocator implements Serializable
     butt.setIcon(locate(new Media("saveChangesButton119w24h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY)));
     butt.addStyleName("borderless");      
   }
+  
   public void decorateImageButton(Button butt, String imageName)
   {
     butt.setIcon(locate(new Media(imageName,"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY)));
     butt.addStyleName("borderless");   
   }
+  
   public void decorateImNewToMmowgliButton(Button butt)
   {
     butt.setIcon(locate(new Media("imNewButton202w22h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY)));
@@ -583,7 +578,7 @@ public class MediaLocator implements Serializable
   public Resource getIllDoThisLaterButton()
   {
     return locate(new Media("illDoThisLaterButton160w18h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
-   }
+  }
 
   public void decorateGetABriefingButton(Button butt)
   {
@@ -594,8 +589,7 @@ public class MediaLocator implements Serializable
   public void decorateChangePasswordButton(Button butt)
   {
     butt.setIcon(locate(new Media("changePassword155w25h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY)));
-    butt.addStyleName("borderless");       
-   
+    butt.addStyleName("borderless");          
   }
   
   public void decorateCancelButton(Button butt)
@@ -603,6 +597,7 @@ public class MediaLocator implements Serializable
     butt.setIcon(getCancelButtonIcon());
     butt.addStyleName("borderless");    
   }
+  
   public Resource getCancelButtonIcon()
   {
     return locate(new Media("cancel61w15h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
@@ -628,23 +623,28 @@ public class MediaLocator implements Serializable
     butt.setIcon(getSelectButtonIcon());
     butt.addStyleName("borderless");
   }
+  
   public Resource getOkButtonIcon()
   {
     return locate(new Media("okButt23w18h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public Resource getSelectButtonIcon()
   {
     return locate(new Media("save39w13h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
+  
   public void decorateOkButton(Button butt)
   {
     butt.setIcon(getOkButtonIcon());
     butt.addStyleName("borderless");    
   }
+  
   public void decorateSaveButton(Button butt)
   {
     decorateSelectButton(butt);
-  }  
+  }
+  
   public Resource getSaveButtonIcon()
   {
     return getSelectButtonIcon();
@@ -665,6 +665,7 @@ public class MediaLocator implements Serializable
     butt.setIcon(getPlayIdeaButt(g));//locate(new Media("playIdeaButt124w18h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY)));
     butt.addStyleName("borderless");
   }
+  
   public Resource getPlayIdeaButt(Game g)
   {
     String img = g.getPlayIdeaButtonImage();
@@ -679,6 +680,7 @@ public class MediaLocator implements Serializable
     butt.setIcon(locate(new Media("takeActionButt119w18h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY)));
     butt.addStyleName("borderless");
   }
+  
   public Resource getTakeActionButt()
   {
     return locate(new Media("takeActionButt119w18h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
@@ -710,6 +712,7 @@ public class MediaLocator implements Serializable
     emb.setHeight("28px");
     return emb;  
   }
+  
   public Component getActionDashboardTitle()
   {
     Embedded emb = new Embedded(null,locate(new Media("ActionPlanDashboardTitle458w28h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY)));
@@ -724,7 +727,6 @@ public class MediaLocator implements Serializable
     emb.setWidth("304px");
     emb.setHeight("28px");
     return emb;
-
   }
 
   public Embedded getGreyActionPlanThumb()
@@ -734,6 +736,7 @@ public class MediaLocator implements Serializable
     emb.setHeight("29px");
     return emb;
   }
+  
   public Embedded getBlackActionPlanThumb()
   {
     Embedded emb = new Embedded(null,locate(new Media("blackThumb21w29h.png","","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY)));
@@ -742,14 +745,14 @@ public class MediaLocator implements Serializable
     return emb;
   }
 
-  public String getBackgroundImageLink()
+  public String getBackgroundImageLinkTL()
   {
-    return imageGetCommon(Game.get().getBackgroundImageLink());
+    return imageGetCommon(Game.getTL().getBackgroundImageLink());
   }
 
-  public String getSignupHeaderImageLink()
+  public String getSignupHeaderImageLinkTL()
   {
-    return imageGetCommon(Game.get().getCurrentMove().getCurrentMovePhase().getSignupHeaderImage());
+    return imageGetCommon(Game.getTL().getCurrentMove().getCurrentMovePhase().getSignupHeaderImage());
   }
   
   public String imageGetCommon(String url)
@@ -768,5 +771,4 @@ public class MediaLocator implements Serializable
     // else
     return new Media(url,"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY).getUrl();   // not vetted 
   }
-
 }
