@@ -34,7 +34,9 @@
 package edu.nps.moves.mmowgli.modules.actionplans;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import org.hibernate.Session;
 import org.vaadin.dialogs.ConfirmDialog;
@@ -53,11 +55,12 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsMediaUpdates;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPageTabVideos.VMPanelWrapper;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
-import edu.nps.moves.mmowgli.utility.M;
 
 /**
  * ActionPlanPageTabImages.java Created on Feb 8, 2011
@@ -79,6 +82,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
   private ClickListener replaceLis;
   private Label nonAuthorLabel;
   
+  @HibernateSessionThreadLocalConstructor
   public ActionPlanPageTabImages(Object apId, boolean isMockup)
   {
     super(apId, isMockup);
@@ -105,13 +109,13 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     flowLay.setComponentAlignment(missionLab, Alignment.TOP_LEFT);
     missionLab.addStyleName("m-actionplan-mission-title-text");
 
-    ActionPlan ap = ActionPlan.get(apId);
+    ActionPlan ap = ActionPlan.getTL(apId);
 
     Label missionContentLab;
     if(!isMockup)
       missionContentLab = new HtmlLabel(ap.getImagesInstructions());
     else {
-      Game g = Game.get(1L);
+      Game g = Game.getTL();
       missionContentLab = new HtmlLabel(g.getDefaultActionPlanImagesText());
     }
     flowLay.addComponent(missionContentLab);
@@ -145,7 +149,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     setUpIndexListener(imageScroller);
 
     rightLay.addComponent(imageScroller);
-    fillWithImages();
+    fillWithImagesTL();
   }
 
   // All this does is put the index number in the top line
@@ -154,9 +158,9 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     ((AbstractLayout)p.getContent()).addComponentAttachListener(new IndexListener()); 
   }
   
-  private void fillWithImages()
+  private void fillWithImagesTL()
   {
-    fillWithImages(VHib.getVHSession());
+    fillWithImages(HSess.get());
   }
   
   private void fillWithImages(Session sess)
@@ -226,35 +230,40 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     {
       this.m = m;
     }
+    
     @Override
     public void buttonClick(ClickEvent event)
     {
       if (m != null) {
         ConfirmDialog.show(UI.getCurrent(),"Confirm:", "Delete this image from the ActionPlan?", "Yes", "No", new ConfirmDialog.Listener()
         {
+          @MmowgliCodeEntry
+          @HibernateOpened
+          @HibernateClosed
           public void onClose(ConfirmDialog dialog)
           {
             if (!dialog.isConfirmed()) {
               return;
             }
             else {
+              HSess.init();
               User u;
-              sendStartEditMessage((u=DBGet.getUser(Mmowgli2UI.getGlobals().getUserID())).getUserName()+" has deleted an image from the action plan."); 
+              sendStartEditMessage((u=DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID())).getUserName()+" has deleted an image from the action plan."); 
               
-              ActionPlan ap = ActionPlan.get(apId);
+              ActionPlan ap = ActionPlan.getTL(apId);
               List<Media> lis = ap.getMedia();
-              Media.update(m); // get into same session
+              Media.updateTL(m); // get into same session
               lis.remove(m);
-              ActionPlan.update(ap);
-              Media.delete(m); // remove from db
-              GameEventLogger.logActionPlanUpdate(ap, "image deleted", u.getId()); //u.getUserName());
+              ActionPlan.updateTL(ap);
+              Media.deleteTL(m); // remove from db
+              GameEventLogger.logActionPlanUpdateTL(ap, "image deleted", u.getId()); //u.getUserName());
 
-              fillWithImages();
+              fillWithImagesTL();
               doCaption();
+              HSess.close();
             }
           }
         });
-
       }
     }
   }
@@ -272,22 +281,22 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
   {
     MediaPanel pan = findImagePanel(butt);
     Media m = pan.getMedia();
-    return getMediaIndex(m);
+    return getMediaIndexTL(m);
   }
 
-  private Media findMedia(Button butt)
+  private Media findMediaTL(Button butt)
   {
     int wh = findMediaIndex(butt);
     if (wh == -1)
       return null;
-    ActionPlan ap = ActionPlan.get(apId);
+    ActionPlan ap = ActionPlan.getTL(apId);
     List<Media> lis = ap.getMedia();
     return lis.get(wh);
   }
 
-  private int getMediaIndex(Media m)
+  private int getMediaIndexTL(Media m)
   {
-    ActionPlan ap = ActionPlan.get(apId);
+    ActionPlan ap = ActionPlan.getTL(apId);
     List<Media> lis = ap.getMedia();
     for (int i = 0; i < lis.size(); i++)
       if (lis.get(i).getId() == m.getId())
@@ -295,21 +304,26 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     return -1;
   }
 
-  private void replaceMedia(Media oldM, Media newM)
+  private ActionPlan replaceMediaTL(Media oldM, Media newM)
   {
-    int oldIdx = getMediaIndex(oldM);
-    ActionPlan ap = ActionPlan.get(apId);
+    int oldIdx = getMediaIndexTL(oldM);
+    ActionPlan ap = ActionPlan.getTL(apId);
     List<Media> lis = ap.getMedia();
     lis.set(oldIdx, newM);
+    return ap;
   }
 
   @SuppressWarnings("serial")
   class ImageReplacer implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
-      final Media oldM = findMedia(event.getButton());
+      HSess.init();
+      final Media oldM = findMediaTL(event.getButton());
       final MediaPanel iPan = findImagePanel(event.getButton());
       if (oldM != null) {
         /* if(addDialog == null) */{ // this was an attempt to persist the dialog, retaining file path, etc., but it was screwing with the media objects in some
@@ -320,6 +334,9 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
           addDialog.addListener(new CloseListener()
           {
             @Override
+            @MmowgliCodeEntry
+            @HibernateOpened
+            @HibernateClosed
             public void windowClose(CloseEvent e)
             {
               if (addDialog.getParent() != null)
@@ -327,19 +344,21 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
 
               Media med = addDialog.getMedia();
               if (med != null) {
-                Media.save(med);
-                replaceMedia(oldM, med);
+                HSess.init();
+                Media.saveTL(med);
+                ActionPlan ap = replaceMediaTL(oldM, med);
                 iPan.setMedia(med);
-                ActionPlan ap;
-                ActionPlan.update(ap=ActionPlan.get(apId));
-                User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-                GameEventLogger.logActionPlanUpdate(ap, "image replaced", u.getId()); //u.getUserName());
+                ActionPlan.updateTL(ap);
+                User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+                GameEventLogger.logActionPlanUpdateTL(ap, "image replaced", u.getId()); //u.getUserName());
+                HSess.close();
               }
             }
           });
         }
         UI.getCurrent().addWindow(addDialog);
       }
+      HSess.close();
     }
   }
 
@@ -347,8 +366,12 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
   class ImageAdder implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
 /*
       if(true) {
       // Create a notification with default settings for a warning.
@@ -370,24 +393,30 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
       addDialog.addListener(new CloseListener()
       {
         @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void windowClose(CloseEvent e)
         {
           UI.getCurrent().removeWindow(addDialog);
 
           Media med = addDialog.getMedia();
           if (med != null) {
-            Media.save(med);
+            HSess.init();
+            Media.saveTL(med);
             addOneImage(med);
-            ActionPlan ap = ActionPlan.get(apId);
+            ActionPlan ap = ActionPlan.getTL(apId);
             ap.getMedia().add(med);
-            ActionPlan.update(ap);
-            User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-            GameEventLogger.logActionPlanUpdate(ap, "image added", u.getId()); //u.getUserName());
+            ActionPlan.updateTL(ap);
+            User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+            GameEventLogger.logActionPlanUpdateTL(ap, "image added", u.getId()); //u.getUserName());
+            HSess.close();
           }
         }
       });
 
       UI.getCurrent().addWindow(addDialog);
+      HSess.close();
     }
   }
 
@@ -395,31 +424,15 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
   {
     // not implemented: put number of images into tab text
   }
-  
-/* don't get any error reporting so don't use this in updated code 
-  private void showError(Exception ex, String url, Window w)
-  {
-    System.out.println("Exception in ActionPlanPageTabImages reading image from " + url + " " + ex.getClass().getSimpleName()+" / "+ex.getLocalizedMessage());
-    Throwable t = ex.getCause();
-    if(t != null)
-      System.out.println("....caused by "+t.getClass().getSimpleName()+" / "+t.getLocalizedMessage());
-  
-    //app.getMainWindow().showNotification(
-    w.showNotification(
-      "Sorry!",
-      "Couldn't display image detail because of error: "+ex.getClass().getSimpleName(),
-      Notification.TYPE_WARNING_MESSAGE);
-  }
-*/
-
+ 
   @Override
-  public boolean mediaUpdatedOob(SessionManager sessMgr, Serializable medId)
+  public boolean mediaUpdatedOobTL(Serializable medId)
   {
-    return mediaUpdatedOob(sessMgr,(ComponentContainer)imageScroller.getContent(),medId);
+    return mediaUpdatedOobTL((ComponentContainer)imageScroller.getContent(),medId);  //super
   }
   
   @Override
-  public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
+  public boolean actionPlanUpdatedOobTL(Serializable apId)
   {
     if(apId != this.apId)
       return false;
@@ -428,8 +441,8 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     // Here, we have to check for additions and subtractions
     Vector<Media> imagesInAp = new Vector<Media>(); // what the plan has
     Vector<Media> imagesInGui = new Vector<Media>(); // what the gui is showing
-    Session sess = M.getSession(sessMgr);
-    ActionPlan ap = (ActionPlan)sess.get(ActionPlan.class, apId);
+
+    ActionPlan ap = ActionPlan.getTL(apId);
     List<Media> mLis = ap.getMedia();
     
     for(Media m : mLis) {
@@ -452,7 +465,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     if(imagesInAp.size() > imagesInGui.size()) 
       addTheNewOne(ap, imagesInAp, imagesInGui);
     else if(imagesInAp.size() < imagesInGui.size())
-      deleteTheOldOne(ap, imagesInAp, imagesInGui, sess);
+      deleteTheOldOne_oobTL(ap, imagesInAp, imagesInGui);
     return true;
   }
 
@@ -482,9 +495,9 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     return null;
   }
   
-  private void deleteTheOldOne(ActionPlan ap, Vector<Media> little, Vector<Media> big, Session sess)
+  private void deleteTheOldOne_oobTL(ActionPlan ap, Vector<Media> little, Vector<Media> big)
   {
-    fillWithImages(sess);
+    fillWithImagesTL();
     doCaption();
   }
 
