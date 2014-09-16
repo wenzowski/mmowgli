@@ -37,6 +37,7 @@ import com.vaadin.ui.Embedded;
 import com.vaadin.ui.TextArea;
 
 import edu.nps.moves.mmowgli.db.GameLinks;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * GameLinksDesignPanel.java
@@ -54,18 +55,13 @@ public class GameLinksGameDesignPanel extends AbstractGameBuilderPanel
 {
   private static final long serialVersionUID = 3048712939632579777L;
 
+  @HibernateSessionThreadLocalConstructor
   public GameLinksGameDesignPanel(GameDesignGlobals globs)
   {
     super(false,globs);
     setWidth("100%");
 
-    GameLinks links = GameLinks.get();
-    
-    /*
-        TextArea ta = (TextArea)addEditLine("1 Game title", "Game.title", g, 1L,"Title",null,String.class,"Used in game reports").ta;
-    ta.setRows(1);
-
-    */
+    GameLinks links = GameLinks.getTL();
 //@formatter:off    
     ((TextArea)addEditLine("1 Action plan request link",  "GameLinks.actionPlanRequestLink", links, links.getId(), "ActionPlanRequestLink").ta).setRows(1);
     ((TextArea)addEditLine("2 FOUO link",                 "GameLinks.fouoLink",              links, links.getId(), "FouoLink").ta)             .setRows(1);
