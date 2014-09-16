@@ -37,6 +37,7 @@ import com.vaadin.ui.Embedded;
 
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.GameLinks;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * HeaderFooterGameDesignPanel.java
@@ -54,12 +55,13 @@ public class HeaderFooterGameDesignPanel extends AbstractGameBuilderPanel
 {
   private static final long serialVersionUID = -4772309985926200842L;
 
+  @HibernateSessionThreadLocalConstructor
   public HeaderFooterGameDesignPanel(GameDesignGlobals globs)
   {
     super(false,globs);
     setWidth("100%");
 
-    GameLinks links = GameLinks.get();
+    GameLinks links = GameLinks.getTL();
 //@formatter:off
     addEditLine("1 Game Blog Link",  "GameLinks.blogLink",     links, links.getId(), "BlogLink");
     addEditLine("2 Learn More Link", "GameLinks.learnMoreLink",links, links.getId(), "LearnMoreLink");
@@ -73,7 +75,7 @@ public class HeaderFooterGameDesignPanel extends AbstractGameBuilderPanel
     addEditLine("9 Trouble Link",    "GameLinks.troubleLink",  links, links.getId(), "TroubleLink");
 //@formatter:on
     addSeparator();
-    addEditBoolean("8 Show FOUO branding","Game.showFouo", Game.get(), 1L, "ShowFouo");
+    addEditBoolean("8 Show FOUO branding","Game.showFouo", Game.getTL(), 1L, "ShowFouo");
 }
   
   @Override
