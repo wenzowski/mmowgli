@@ -48,5 +48,5 @@ import edu.nps.moves.mmowgli.db.Move;
  */
 public interface MoveChangeListener
 {
-  public void moveChanged(Move move);
+  public void moveChangedTL(Move move);
 }
