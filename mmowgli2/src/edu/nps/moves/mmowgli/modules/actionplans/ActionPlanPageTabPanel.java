@@ -40,7 +40,6 @@ import com.vaadin.ui.*;
 import edu.nps.moves.mmowgli.components.GhostVerticalLayoutWrapper;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.Media;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
 /**
  * IdeaDashboardTabPanel.java
@@ -54,7 +53,7 @@ import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public abstract class ActionPlanPageTabPanel extends HorizontalLayout implements MmowgliComponent, WantsActionPlanUpdates
+public abstract class ActionPlanPageTabPanel extends HorizontalLayout implements MmowgliComponent,WantsActionPlanUpdates
 {
   private static final long serialVersionUID = -8385877114662231713L;
   
@@ -141,13 +140,13 @@ public abstract class ActionPlanPageTabPanel extends HorizontalLayout implements
   }
   
   /* used by images and video tabs */
-  protected boolean mediaUpdatedOob(SessionManager sessMgr, ComponentContainer cont, Object medId)
+  protected boolean mediaUpdatedOobTL(ComponentContainer cont, Object medId)
   {
     Iterator<Component> itr = cont.iterator();
     while (itr.hasNext()) {
       MediaPanel imp = findMed(itr.next());
       if (imp !=null && imp.getMedia().getId() == (Long) medId) {
-        imp.mediaUpdatedOob(sessMgr);
+        imp.mediaUpdatedOobTL();
         return true;
       }
     }
