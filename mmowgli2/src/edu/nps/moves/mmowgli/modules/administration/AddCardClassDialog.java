@@ -44,7 +44,10 @@ import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.db.CardType;
 import edu.nps.moves.mmowgli.db.CardType.CardClass;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.utility.CardStyler;
 
 /**
@@ -135,8 +138,13 @@ public class AddCardClassDialog extends Window
   class SaveListener implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
+      
       String title = titleTF.getValue().toString();
       title = (title==null || title.length()<=0)?"":title;
       String summ = summTF.getValue().toString();
@@ -148,9 +156,10 @@ public class AddCardClassDialog extends Window
       ct.setDescendantOrdinal(null);
       ct.setIdeaCard(true);
       ct.setCssColorStyle(colorCombo.getValue().toString());
-      VHib.getVHSession().save(ct);
+      HSess.get().save(ct);
       
-      UI.getCurrent().removeWindow(AddCardClassDialog.this);      
+      UI.getCurrent().removeWindow(AddCardClassDialog.this);
+      HSess.close();
     }    
   }
 }
