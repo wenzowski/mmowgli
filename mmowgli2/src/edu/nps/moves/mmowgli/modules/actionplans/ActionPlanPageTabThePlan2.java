@@ -59,7 +59,6 @@ import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2.SaveCancelPan;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.HistoryDialog;
 import edu.nps.moves.mmowgli.utility.HistoryDialog.DoneListener;
-import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * IdeaDashboardTabTheCards.java
