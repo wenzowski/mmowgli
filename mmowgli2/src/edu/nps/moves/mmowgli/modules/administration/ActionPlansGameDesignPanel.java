@@ -38,6 +38,7 @@ import com.vaadin.ui.Embedded;
 import com.vaadin.ui.TextArea;
 
 import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * HeaderFooterGameDesignPanel.java
@@ -55,10 +56,11 @@ public class ActionPlansGameDesignPanel extends AbstractGameBuilderPanel
 {
   private static final long serialVersionUID = -4769171145429094345L;
 
+  @HibernateSessionThreadLocalConstructor
   public ActionPlansGameDesignPanel(GameDesignGlobals globs)
   {
     super(false,globs);
-    Game game = Game.get(1L);
+    Game game = Game.getTL(1L);
     String thePlanTxt = game.getDefaultActionPlanThePlanText();
     String talkTxt = game.getDefaultActionPlanTalkText();
     String imagesTxt = game.getDefaultActionPlanImagesText();
