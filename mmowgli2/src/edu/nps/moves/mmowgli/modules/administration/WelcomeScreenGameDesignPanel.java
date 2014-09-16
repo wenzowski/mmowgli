@@ -91,11 +91,11 @@ public class WelcomeScreenGameDesignPanel extends AbstractGameBuilderPanel imple
   }
 
   @Override
-  protected void testButtonClicked(ClickEvent ev)
+  protected void testButtonClickedTL(ClickEvent ev)
   {
-    Game.update(Game.get(1L));  // cause page title to be redrawn
+    Game.updateTL(Game.getTL(1L));  // cause page title to be redrawn
     AppEvent evt = new AppEvent(MmowgliEvent.GAMEADMIN_SHOW_WELCOME_MOCKUP, this, null);
-    Mmowgli2UI.getGlobals().getController().miscEvent(evt);
+    Mmowgli2UI.getGlobals().getController().miscEventTL(evt);
   }
 
   @Override
