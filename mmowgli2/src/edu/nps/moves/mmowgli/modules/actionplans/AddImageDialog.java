@@ -42,10 +42,12 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Upload.FinishedEvent;
 import com.vaadin.ui.Upload.FinishedListener;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.Media;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.modules.actionplans.UploadHandler.UploadStatus;
 import edu.nps.moves.security.MalwareChecker;
 
@@ -85,10 +87,8 @@ public class AddImageDialog extends Window
   private CheckBox fromWebCheck;
   private CheckBox fromDeskCheck;
   
-//  public static String IMAGES_URL = "images/"; // in uploads
-//  public static String IMAGES_FS_PATH = "/var/www/test/uploads/images/";   // change for deploy!
-    
   @SuppressWarnings("serial")
+  @HibernateSessionThreadLocalConstructor
   public AddImageDialog(Object apId)
   {
     super("Add an Image");
@@ -96,9 +96,12 @@ public class AddImageDialog extends Window
     addStyleName("m-greybackground");
 
     setClosable(false); // no x in corner
-    MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-    uploadFSPath  = globs.getUserImageFileSystemPath();
-    uploadUrlBase = globs.getUserImagesUrl();
+
+    AppMaster apm = AppMaster.instance();
+    uploadFSPath  = apm.getUserImagesFileSystemPath();
+    if(!uploadFSPath.endsWith("/"))
+      uploadFSPath = uploadFSPath+"/";
+    uploadUrlBase = apm.getUserImagesUrlString();
     
     VerticalLayout mainVL = new VerticalLayout();
     mainVL.setSpacing(true);
@@ -170,7 +173,7 @@ public class AddImageDialog extends Window
       localHL.addComponent(uploadWidget = new Upload());
       panel = new UploadStatus(uploadWidget);
       uploadWidget.setButtonCaption("Browse");
-      handler = new UploadHandler(uploadWidget, panel, uploadFSPath+ActionPlan.get(apId).getId()+"/"); 
+      handler = new UploadHandler(uploadWidget, panel, uploadFSPath+ActionPlan.getTL(apId).getId()+"/"); 
       uploadWidget.setReceiver(handler);
       uploadWidget.setImmediate(true);      
       panel.setWidth("100%");
@@ -209,10 +212,6 @@ public class AddImageDialog extends Window
           ExternalResource extRes = new ExternalResource(webAddrs);
 
           setupEmbeddedImageThumbnail(null,extRes);
-
-//          media = new Media(extRes.getURL(),"handle","",mediaType);
-//          media.setCaption(null);
-//          media.setSource(Media.Source.WEB_RAW);
           
           String nm = buildRelativeAppAddress(fpath);
           media = new Media(nm,null,null,mediaType,Media.Source.USER_UPLOADS_REPOSITORY);
@@ -356,8 +355,6 @@ public class AddImageDialog extends Window
     comp.setHeight("150px");
     //embedded.addStyleName("m-greyborder");
   }
-
-
 
   /**
    * 
