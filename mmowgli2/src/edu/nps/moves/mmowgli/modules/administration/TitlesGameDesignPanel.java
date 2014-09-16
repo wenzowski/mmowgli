@@ -37,6 +37,7 @@ import com.vaadin.ui.Embedded;
 
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.Move;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * HeaderFooterGameDesignPanel.java
@@ -54,12 +55,11 @@ public class TitlesGameDesignPanel extends AbstractGameBuilderPanel implements M
 {
   private static final long serialVersionUID = -1513492943809745134L;
 
-  //private Move moveBeingEdited;
+  @HibernateSessionThreadLocalConstructor
   public TitlesGameDesignPanel(Move move, GameDesignGlobals globs)
   {
     super(false,globs);
-    //this.moveBeingEdited = move;
-    Game g = Game.get();
+    Game g = Game.getTL();
     addEditLine("1 Game branding (above mmowgli logo in header)", "Move.title", move, move.getId(),"Title");
     addEditLine("2 Game acronym (used to prefix \"mmowgli\")", "Game.acronym", g, g.getId(), "Acronym");
   }
@@ -71,9 +71,8 @@ public class TitlesGameDesignPanel extends AbstractGameBuilderPanel implements M
   }
 
   @Override
-  public void moveChanged(Move move)
+  public void moveChangedTL(Move move)
   {
-    //moveBeingEdited = move;
     okToUpdateDbFlag = false; 
     changeMove(move);
     okToUpdateDbFlag = true; 
