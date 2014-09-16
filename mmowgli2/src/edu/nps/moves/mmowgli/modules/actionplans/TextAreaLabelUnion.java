@@ -33,8 +33,6 @@
 */
 package edu.nps.moves.mmowgli.modules.actionplans;
 
-import org.hibernate.Session;
-
 import com.vaadin.event.FieldEvents.FocusEvent;
 import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
@@ -43,6 +41,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.themes.Reindeer;
 
 import edu.nps.moves.mmowgli.components.HtmlLabel;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
 
 /**
@@ -129,28 +128,28 @@ class TextAreaLabelUnion extends AbsoluteLayout implements LayoutClickListener
       fLis.focus(new FocusEvent(ta));  // fake out the listener //todo properly
   }
   
-  public void setLabelValue(String txt)
+  public void setLabelValueTL(String txt)
   {
     String escapedTxt = insertBRs(txt);
-    lab.setValue(MmowgliLinkInserter.insertLinks(escapedTxt,null));     
+    lab.setValue(MmowgliLinkInserter.insertLinksTL(escapedTxt,null));     
   }
   
-  public void setLabelValueOob(String txt, Session sess)
+  public void setLabelValueOobTL(String txt)
   {
     String escapedTxt = insertBRs(txt);
-    lab.setValue(MmowgliLinkInserter.insertLinksOob(escapedTxt, null, sess));
+    lab.setValue(MmowgliLinkInserter.insertLinksOob(escapedTxt, null, HSess.get()));
   }
   
-  public void setValue(String txt)
+  public void setValueTL(String txt)
   {
     ta.setValue(txt);
-    setLabelValue(txt);
+    setLabelValueTL(txt);
   }
   
-  public void setValueOob(String txt, Session sess)
+  public void setValueOobTL(String txt)
   {
     ta.setValue(txt);
-    setLabelValueOob(txt,sess);
+    setLabelValueOobTL(txt);
   }
   public String getValue()
   {
@@ -200,11 +199,4 @@ class TextAreaLabelUnion extends AbsoluteLayout implements LayoutClickListener
     ret = ret.replace("\n",NESC);
     return ret.replace("\r",RESC);
   }
-//  private String removeBRs(String s)
-//  {
-//    String ret = s.replace(RESC, "\r");
-//    ret = ret.replace(NESC, "\n");
-//    return ret.replace(RNESC, "\r\n");
-//  }
-
 }
