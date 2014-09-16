@@ -33,7 +33,9 @@
  */
 package edu.nps.moves.mmowgli.modules.administration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -47,8 +49,11 @@ import com.vaadin.ui.Window.CloseListener;
 
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
-import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.Move;
+import edu.nps.moves.mmowgli.db.MovePhase;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.administration.AbstractGameBuilderPanel.AuxiliaryChangeListener;
 import edu.nps.moves.mmowgli.modules.administration.AbstractGameBuilderPanel.IndivListener;
 import edu.nps.moves.mmowgli.modules.administration.MoveSelector.MWrap;
@@ -80,6 +85,7 @@ public class GameDesignPanel extends Panel implements MmowgliComponent, GameDesi
     this(false);
   }
 
+  @HibernateSessionThreadLocalConstructor
   public GameDesignPanel(boolean readonly)
   {
     this.allReadOnly = readonly;
@@ -87,7 +93,6 @@ public class GameDesignPanel extends Panel implements MmowgliComponent, GameDesi
     
     STATEKEY = getClass().getSimpleName();
 
-    //setWidth("995px");
     mainVL = new VerticalLayout();
     setContent(mainVL);
     mainVL.setWidth("100%");
@@ -96,7 +101,7 @@ public class GameDesignPanel extends Panel implements MmowgliComponent, GameDesi
     tabPanels = new ArrayList<Component>();
 
     tabPanels.add(globPan = new GlobalEditPanel(this));
-    Move m = Move.getCurrentMove();
+    Move m = Move.getCurrentMoveTL();
     tabPanels.add(roundsPan = new RoundsEditPanel(m, this));
     tabPanels.add(phasesPan = new PhasesEditPanel(m, this));
 
@@ -153,6 +158,7 @@ class GlobalEditPanel extends VerticalLayout implements MmowgliComponent
   ReportsGameDesignPanel reportsPan;
   ScoringGameDesignPanel scorePan;
 
+  @HibernateSessionThreadLocalConstructor
   public GlobalEditPanel(GameDesignGlobals globs)
   {
     setWidth("100%");
@@ -163,7 +169,7 @@ class GlobalEditPanel extends VerticalLayout implements MmowgliComponent
     tabPanels.add(linksPan = new GameLinksGameDesignPanel(globs));
     tabPanels.add(headerPan = new HeaderFooterGameDesignPanel(globs));
 
-    if (Game.get().isActionPlansEnabled())
+    if (Game.getTL().isActionPlansEnabled())
         tabPanels.add(aplansPan = new ActionPlansGameDesignPanel(globs));
 
     tabPanels.add(mapPan = new MapGameDesignPanel(globs));
@@ -181,7 +187,7 @@ class GlobalEditPanel extends VerticalLayout implements MmowgliComponent
     tabSh.addTab(linksPan, "Game Links");
     tabSh.addTab(headerPan, "Header & Footer Links");
 
-    if (Game.get().isActionPlansEnabled())
+    if (Game.getTL().isActionPlansEnabled())
         tabSh.addTab(aplansPan, "Action Plan User Help");
 
     tabSh.addTab(mapPan, "Map");
@@ -194,7 +200,7 @@ class GlobalEditPanel extends VerticalLayout implements MmowgliComponent
     linksPan.initGui();
     headerPan.initGui();
 
-    if (Game.get().isActionPlansEnabled())
+    if (Game.getTL().isActionPlansEnabled())
         aplansPan.initGui();
 
     mapPan.initGui();
@@ -216,12 +222,13 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
   TopCardsGameDesignPanel topCardsPan;
   SubCardsGameDesignPanel subCardsPan;
   SeedCardsGameDesignPanel seedCardsPan;
- // PhasesEditPanel phasesPan;
 
   MoveSelector moveSelector;
   private Move moveBeingEdited;
   private Label runningMoveWarningLabel;
   private MoveChangeListener externalListener;
+  
+  @HibernateSessionThreadLocalConstructor
   public RoundsEditPanel(Move editMove, GameDesignGlobals globs)
   {
     this.moveBeingEdited = editMove;
@@ -233,7 +240,6 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     tabPanels.add(topCardsPan = new TopCardsGameDesignPanel(editMove, globs));
     tabPanels.add(subCardsPan = new SubCardsGameDesignPanel(editMove, globs));
     tabPanels.add(seedCardsPan = new SeedCardsGameDesignPanel(editMove, globs));
-    //tabPanels.add(phasesPan = new PhasesEditPanel(editMove));
   }
 
   public void addMoveListener(MoveChangeListener lis)
@@ -260,7 +266,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     moveSelector.addValueChangeListener(new MoveSelectorListener());
     topHL.addComponent(runningMoveWarningLabel = new HtmlLabel("<font color='red'><i>Active game round!</i></font>"));
     runningMoveWarningLabel.setSizeUndefined();
-    runningMoveWarningLabel.setVisible(AbstractGameBuilderPanel.isRunningMove(moveBeingEdited));
+    runningMoveWarningLabel.setVisible(AbstractGameBuilderPanel.isRunningMoveTL(moveBeingEdited));
 
     topHL.addComponent(newMoveButt = new NativeButton("Add new round to game",new NewMoveListener()));
     topHL.addComponent(lab = new Label());
@@ -277,8 +283,6 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     tabSh.addTab(topCardsPan, "Top Card Types");
     tabSh.addTab(subCardsPan, "Sub Card Types");
     tabSh.addTab(seedCardsPan, "Seed Card Initialization");
-    //ClassResource cr = new ClassResource("/edu/nps/moves/mmowgli/mmowgliOne/resources/images/dot.png",getApplication());
-    //tabSh.addTab(phasesPan, "Phase-dependent Settings",cr);
 
     addComponent(tabSh);
 
@@ -286,17 +290,22 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     topCardsPan.initGui();
     subCardsPan.initGui();
     seedCardsPan.initGui();
-    //phasesPan.initGui();
-    moveSelector.setMove(Game.get().getCurrentMove());
+    moveSelector.setMove(Game.getTL().getCurrentMove());
   }
+  
   @SuppressWarnings("serial")
+  @MmowgliCodeEntry
+  @HibernateOpened
+  @HibernateClosed
   class NewMoveListener implements ClickListener
   {
     @Override
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
       @SuppressWarnings("unchecked")
-      List<Move> lis = (List<Move>)VHib.getVHSession().createCriteria(Move.class).list();
+           
+      List<Move> lis = (List<Move>)HSess.get().createCriteria(Move.class).list();
       int largestNum = -1;
       Move largestMove = null;
       MovePhase largestMovePhase = null;
@@ -313,26 +322,26 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
       largestNum++;
 
       Move m = new Move();
-      m.setTitle(Game.get().getAcronym()+largestNum);
+      m.setTitle(Game.getTL().getAcronym()+largestNum);
       m.setNumber(largestNum);
       m.setName("Round "+largestNum);
 
       List<MovePhase> arr = new ArrayList<MovePhase>();
-     // String[] descriptions = {"PREPARE","PLAY","PUBLISH"};
       String[] descriptions = MovePhase.PhaseType.stringValues();
       for(int i=0;i<descriptions.length;i++) {
         MovePhase mp = new MovePhase();
         mp.cloneFrom(largestMovePhase);
         mp.setDescription(descriptions[i]);
-        MovePhase.save(mp);
+        MovePhase.saveTL(mp);
         arr.add(mp);
       }
       m.setMovePhases(arr);
       m.setCurrentMovePhase(arr.get(0));
-      Move.save(m);
+      Move.saveTL(m);
 
-      moveSelector.newMove(m);
+      moveSelector.newMoveTL(m);
       moveSelector.setMove(m);
+      HSess.close();
     }
   }
 
@@ -340,22 +349,26 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
   class MoveSelectorListener implements Property.ValueChangeListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void valueChange(ValueChangeEvent event)
     {
       MWrap mw = (MWrap) event.getProperty().getValue();
       if (mw != null) {
-        Move mov = Move.merge(mw.m);
-        titlesPan.moveChanged(mov);
-        topCardsPan.moveChanged(mov);
-        subCardsPan.moveChanged(mov);
-        seedCardsPan.moveChanged(mov);
+        HSess.init();
+        Move mov = Move.mergeTL(mw.m);
+        titlesPan.moveChangedTL(mov);
+        topCardsPan.moveChangedTL(mov);
+        subCardsPan.moveChangedTL(mov);
+        seedCardsPan.moveChangedTL(mov);
 
-        //phasesPan.moveChanged(mov);
         if(externalListener != null)
-          externalListener.moveChanged(mov);
+          externalListener.moveChangedTL(mov);
 
-        runningMoveWarningLabel.setVisible(AbstractGameBuilderPanel.isRunningMove(mov));
+        runningMoveWarningLabel.setVisible(AbstractGameBuilderPanel.isRunningMoveTL(mov));
         moveBeingEdited = mov;
+        HSess.close();
       }
     }
   }
@@ -372,7 +385,6 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     LoginSignupGameDesignPanel loginPan;
     WelcomeScreenGameDesignPanel welcomePan;
     CallToActionGameDesignPanel call2ActionPan;
-    //RestrictionsGameDesignPanel restrictionsPan;
 
     PhaseSelector phaseSelector;
     NativeButton newPhaseButt;
@@ -384,6 +396,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     CheckBox propagateCB;
 
     @SuppressWarnings("serial")
+    @HibernateSessionThreadLocalConstructor
     public PhasesEditPanel(Move move, GameDesignGlobals globs)
     {
       this.moveBeingEdited = move;
@@ -397,7 +410,6 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
       tabPanels.add(loginPan = new LoginSignupGameDesignPanel(phaseBeingEdited, auxListener, globs));
       tabPanels.add(welcomePan = new WelcomeScreenGameDesignPanel(phaseBeingEdited, auxListener, globs));
       tabPanels.add(call2ActionPan = new CallToActionGameDesignPanel(phaseBeingEdited, auxListener, globs));
-     // tabPanels.add(restrictionsPan = new RestrictionsGameDesignPanel(activePhase, auxListener));
 
       Label lab;
       addComponent(lab = new Label());
@@ -405,7 +417,6 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
 
       HorizontalLayout topHL = new HorizontalLayout();
       topHL.setSpacing(true);
-     // topHL.setMargin(true);
 
       topHL.addComponent(lab = new Label());
       lab.setWidth("1px");
@@ -413,12 +424,12 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
       topHL.addComponent(topLevelLabel = new Label());
       setTopLabelText(moveBeingEdited);
       topLevelLabel.setSizeUndefined();
-      topHL.addComponent(phaseSelector = new PhaseSelector(null, Move.getCurrentMove()));
+      topHL.addComponent(phaseSelector = new PhaseSelector(null, Move.getCurrentMoveTL()));
       phaseSelector.addValueChangeListener(new PhaseComboListener());
 
       topHL.addComponent(runningPhaseWarningLabel = new HtmlLabel("<font color='red'><i>Active game phase!</i></font>"));
       runningPhaseWarningLabel.setSizeUndefined();
-      runningPhaseWarningLabel.setVisible(AbstractGameBuilderPanel.isRunningPhase(phaseBeingEdited));
+      runningPhaseWarningLabel.setVisible(AbstractGameBuilderPanel.isRunningPhaseTL(phaseBeingEdited));
 
       topHL.addComponent(newPhaseButt = new NativeButton("Add new phase to round"));
       newPhaseButt.setEnabled(false);
@@ -426,7 +437,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
       lab.setWidth("1px");
       topHL.setExpandRatio(lab, 0.5f);
       topHL.setWidth("100%");
-      addComponent(topHL);//, 0);
+      addComponent(topHL);
 
       propagateCB = new CheckBox("Propagate new phase-dependent edits to all other phases in this round");
       addComponent(propagateCB);
@@ -440,8 +451,12 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
       newPhaseButt.addClickListener(new ClickListener()
       {
         @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void buttonClick(ClickEvent event)
         {
+          HSess.init();
           NewMovePhaseDialog dial = new NewMovePhaseDialog(moveBeingEdited);
           dial.addCloseListener(new CloseListener()
           {
@@ -452,6 +467,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
             }
           });
           dial.showDialog();
+          HSess.close();
         }
       });
     }
@@ -472,7 +488,6 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
       tabSh.addTab(signupPan, "Signup Page");
       tabSh.addTab(welcomePan, "Welcome Page");
       tabSh.addTab(call2ActionPan, "Call To Action Screen");
-     // tabSh.addTab(restrictionsPan, "Play Restrictions");
 
       addComponent(tabSh);
 
@@ -481,11 +496,10 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
       loginPan.initGui();
       welcomePan.initGui();
       call2ActionPan.initGui();
-      //restrictionsPan.initGui();
     }
 
     @Override
-    public void moveChanged(Move newMove)
+    public void moveChangedTL(Move newMove)
     {
       moveBeingEdited = newMove;
       setTopLabelText(newMove);
@@ -497,7 +511,6 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
       loginPan.movePhaseChanged(mp);
       welcomePan.movePhaseChanged(mp);
       call2ActionPan.movePhaseChanged(mp);
-      //restrictionsPan.movePhaseChanged(mp);
     }
 
     @SuppressWarnings("serial")
@@ -513,10 +526,9 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
           loginPan.movePhaseChanged(pw.mp);
           welcomePan.movePhaseChanged(pw.mp);
           call2ActionPan.movePhaseChanged(pw.mp);
-          //restrictionsPan.movePhaseChanged(pw.mp);
           phaseBeingEdited = pw.mp;
           propagateCB.setVisible(phaseBeingEdited.isPreparePhase());
-          runningPhaseWarningLabel.setVisible(AbstractGameBuilderPanel.isRunningPhase(phaseBeingEdited));
+          runningPhaseWarningLabel.setVisible(AbstractGameBuilderPanel.isRunningPhaseTL(phaseBeingEdited));
         }
       }
     }
@@ -551,7 +563,8 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
   class PhaseSelector extends NativeSelect
   {
     private static final long serialVersionUID = 1L;
-
+    
+    @HibernateSessionThreadLocalConstructor
     public PhaseSelector(String caption, Move initialMove)
     {
       super(caption);
@@ -563,7 +576,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     public void fillCombo(Move mm)
     {
       removeAllItems();
-      Move m = Move.get(mm.getId());
+      Move m = Move.getTL(mm.getId());
       List<MovePhase> phases = m.getMovePhases();
       MovePhase current = m.getCurrentMovePhase();
       PWrap selected = null;
@@ -596,15 +609,15 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
   class MoveSelector extends NativeSelect
   {
     private static final long serialVersionUID = 1L;
-
+    @HibernateSessionThreadLocalConstructor
     public MoveSelector(String caption)
     {
       super(caption);
       int i = 1;
-      Move current = Move.getCurrentMove();
+      Move current = Move.getCurrentMoveTL();
       MWrap selected = null;
       do {
-        Move m = Move.getMoveByNumber(i++);
+        Move m = Move.getMoveByNumberTL(i++);
         if (m == null)
           break;
         MWrap mw;
@@ -647,14 +660,14 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
       }
     }
 
-    public void newMove(Move newMove)
+    public void newMoveTL(Move newMove)
     {
       // Just rebuild
       MWrap sel = (MWrap) getValue();
       removeAllItems();
       int i = 1;
       do {
-        Move m = Move.getMoveByNumber(i++);
+        Move m = Move.getMoveByNumberTL(i++);
         if (m == null)
           break;
         MWrap mw;
