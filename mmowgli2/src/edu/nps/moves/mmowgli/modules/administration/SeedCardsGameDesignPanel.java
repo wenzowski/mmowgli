@@ -42,7 +42,8 @@ import com.vaadin.server.ClassResource;
 import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * HeaderFooterGameDesignPanel.java
@@ -63,22 +64,20 @@ public class SeedCardsGameDesignPanel extends AbstractGameBuilderPanel implement
   public static int MAX_CARDS = 8;
   public static int MAX_POS = 4;
   public static int MAX_NEG = 4;
-  //Card[] seeds = new Card[MAX_CARDS];
-  //private Move moveBeingEdited;
-  
+
+  @HibernateSessionThreadLocalConstructor
   public SeedCardsGameDesignPanel(Move moveBeingEdited, GameDesignGlobals globs)
   {
     super(false,globs);
-    //this.moveBeingEdited = moveBeingEdited;
     setWidth("100%");
     
-    Move move1 = Move.getMoveByNumber(1);
+    Move move1 = Move.getMoveByNumberTL(1);
     CardType posTyp = CardType.getPositiveIdeaCardType(move1);
     CardType negTyp = CardType.getNegativeIdeaCardType(move1);    
-    User seedUser = User.getUserWithUserName("SeedCard");
+    User seedUser = User.getUserWithUserNameTL("SeedCard");
     
-    Card[] posCards = getSeedCards(posTyp,seedUser,MAX_POS,move1);
-    Card[] negCards = getSeedCards(negTyp,seedUser,MAX_NEG,move1);
+    Card[] posCards = getSeedCardsTL(posTyp,seedUser,MAX_POS,move1);
+    Card[] negCards = getSeedCardsTL(negTyp,seedUser,MAX_NEG,move1);
     
     makeEditLines(posCards);
     addSeparator();
@@ -94,13 +93,13 @@ public class SeedCardsGameDesignPanel extends AbstractGameBuilderPanel implement
       String type = cd.getCardType().getTitle();
       ta = (TextArea)addEditLine(""+(n+1)+" "+type+" Seed Card"+hidn, "Card.text", cd, cd.getId(), "Text").ta;
       ta.setValue(cd.getText());
-    }  
-    
+    }     
   }
-  private Card[] getSeedCards(CardType typ, User u, int max, Move m)
+  
+  private Card[] getSeedCardsTL(CardType typ, User u, int max, Move m)
   {
     @SuppressWarnings("unchecked")
-    List<Card> lis = VHib.getVHSession().createCriteria(Card.class).
+    List<Card> lis = HSess.get().createCriteria(Card.class).
         add(Restrictions.eq("author", u)).
         add(Restrictions.eq("cardType", typ)).
         addOrder(Order.asc("id")).list();
@@ -149,7 +148,7 @@ public class SeedCardsGameDesignPanel extends AbstractGameBuilderPanel implement
   }
 
   @Override
-  public void moveChanged(Move move)
+  public void moveChangedTL(Move move)
   {
     // We don't do anything with this
   }
