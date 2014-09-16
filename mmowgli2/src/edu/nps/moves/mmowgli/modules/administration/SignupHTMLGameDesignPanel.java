@@ -42,6 +42,10 @@ import com.vaadin.ui.themes.Reindeer;
 
 import edu.nps.moves.mmowgli.components.WebContentDisplayer;
 import edu.nps.moves.mmowgli.db.MovePhase;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 
 /**
  * HeaderFooterGameDesignPanel.java
@@ -61,12 +65,10 @@ public class SignupHTMLGameDesignPanel extends AbstractGameBuilderPanel implemen
   
   public static final String SIGNUPPAGEHEADERIMAGE_DEFAULT = "mmowgli_logo_final.png";
 
-  //private MovePhase activePhase;
   private SignupImageTextFieldWithDefaultButton imgComponent;
   public SignupHTMLGameDesignPanel(MovePhase phase, AuxiliaryChangeListener auxLis, GameDesignGlobals globs)
   {
     super(false,globs);
-    //activePhase = phase;
     addEditComponent("Signup page header image", "MovePhase.signupHeaderImage", imgComponent = new SignupImageTextFieldWithDefaultButton(phase,globs));
     
     EditLine edLine = addEditLine("Signup page HTML", "MovePhase.signupText", phase, phase.getId(), "SignupText");
@@ -111,7 +113,6 @@ public class SignupHTMLGameDesignPanel extends AbstractGameBuilderPanel implemen
   @Override
   public void movePhaseChanged(MovePhase newPhase)
   {
-    //activePhase = newPhase;
     okToUpdateDbFlag = false; 
     changeMovePhase(newPhase); 
     imgComponent.movePhaseChanged(newPhase);
@@ -189,15 +190,20 @@ public class SignupHTMLGameDesignPanel extends AbstractGameBuilderPanel implemen
     }
 
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void valueChange(ValueChangeEvent event)
     {
       if(!nocommit) {
+        HSess.init();
         String val = event.getProperty().toString();
         if(val != null && val.trim().length()<=0)
           val = null;
-        phase = MovePhase.merge(phase);
+        phase = MovePhase.mergeTL(phase);
         phase.setSignupHeaderImage(val);
-        MovePhase.update(phase);
+        MovePhase.updateTL(phase);
+        HSess.close();
       }
     }
   }
