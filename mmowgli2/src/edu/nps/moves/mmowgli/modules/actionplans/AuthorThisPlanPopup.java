@@ -45,6 +45,10 @@ import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 
 /**
  * AuthorThisPlanPopup.java
@@ -92,22 +96,27 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
     noButt.addClickListener(new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        User me = DBGet.getUserFresh(Mmowgli2UI.getGlobals().getUserID());
-        ActionPlan ap = ActionPlan.get(apId);
+        HSess.init();
+        User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());
+        ActionPlan ap = ActionPlan.getTL(apId);
         
         if(usrContainsByIds(ap.getInvitees(),me))
           ap.removeInvitee(me); //ap.getInvitees().remove(me);
         if(!usrContainsByIds(ap.getDeclinees(),me))
           ap.getDeclinees().add(me);
-        ActionPlan.update(ap);
+        ActionPlan.updateTL(ap);
         
         if(apContainsByIds(me.getActionPlansInvited(),ap))
           me.getActionPlansInvited().remove(ap);
         
         // User update here
-        User.update(me);
+        User.updateTL(me);
+        HSess.close();
         
         AuthorThisPlanPopup.this.buttonClick(event);
       }     
@@ -116,11 +125,15 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
     okButt.addClickListener(new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       { 
+        HSess.init();
         MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-        User me = DBGet.getUserFresh(globs.getUserID());
-        ActionPlan thisAp = ActionPlan.get(apId);
+        User me = DBGet.getUserFreshTL(globs.getUserID());
+        ActionPlan thisAp = ActionPlan.getTL(apId);
 
         Set<ActionPlan> myInvites = me.getActionPlansInvited();
         Set<ActionPlan> myAuthored = me.getActionPlansAuthored();
@@ -131,7 +144,7 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
           myInvites.remove(thisAp);
           // Jam it in here
           //ScoreManager.userJoinsActionPlan(me);  // replace by...
-          globs.getScoreManager().actionPlanUserJoins(thisAp,me);
+          globs.getScoreManager().actionPlanUserJoinsTL(thisAp,me);
           usrNeedsUpdate=true;          
         }
         if(!apContainsByIds(myAuthored,thisAp)) {// if already there, causes exception 
@@ -141,7 +154,7 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
         }
         if(usrNeedsUpdate) {
           // User update here
-          User.update(me);
+          User.updateTL(me);
         }
         
         boolean apNeedsUpdate = false;
@@ -156,9 +169,10 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
           apNeedsUpdate=true;
         }
         if(apNeedsUpdate)
-          ActionPlan.update(thisAp);
-          
-        AuthorThisPlanPopup.this.buttonClick(event);
+          ActionPlan.updateTL(thisAp);
+        HSess.close(); 
+        
+        AuthorThisPlanPopup.this.buttonClick(event);   // sets up its own session
         return;
       }     
     });
