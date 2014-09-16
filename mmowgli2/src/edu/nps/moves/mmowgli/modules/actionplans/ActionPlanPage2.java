@@ -33,32 +33,17 @@
  */
 package edu.nps.moves.mmowgli.modules.actionplans;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.ACTIONPLAN_TAB_IMAGES;
-import static edu.nps.moves.mmowgli.MmowgliConstants.ACTIONPLAN_TAB_MAP;
-import static edu.nps.moves.mmowgli.MmowgliConstants.ACTIONPLAN_TAB_THEPLAN;
-import static edu.nps.moves.mmowgli.MmowgliConstants.ACTIONPLAN_TAB_VIDEO;
-import static edu.nps.moves.mmowgli.MmowgliEvent.ACTIONPLANSHOWCLICK;
-import static edu.nps.moves.mmowgli.MmowgliEvent.CARDCHAINPOPUPCLICK;
-import static edu.nps.moves.mmowgli.MmowgliEvent.RFECLICK;
-import static edu.nps.moves.mmowgli.MmowgliEvent.SHOWUSERPROFILECLICK;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import static edu.nps.moves.mmowgli.MmowgliEvent.*;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.Property;
+import com.vaadin.data.*;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.IndexedContainer;
@@ -66,24 +51,14 @@ import com.vaadin.event.FieldEvents.FocusEvent;
 import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.Position;
-import com.vaadin.ui.AbsoluteLayout;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.ListSelect;
-import com.vaadin.ui.NativeButton;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.BaseTheme;
@@ -96,30 +71,15 @@ import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.components.ToggleLinkButton;
-import edu.nps.moves.mmowgli.db.ActionPlan;
-import edu.nps.moves.mmowgli.db.ChatLog;
-import edu.nps.moves.mmowgli.db.Edits;
-import edu.nps.moves.mmowgli.db.Game;
-import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.MSessionManager;
-import edu.nps.moves.mmowgli.hibernate.Sess;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
-import edu.nps.moves.mmowgli.hibernate.VHib;
-import edu.nps.moves.mmowgli.messaging.WantsActionPlanEdits;
-import edu.nps.moves.mmowgli.messaging.WantsActionPlanTimeouts;
-import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
-import edu.nps.moves.mmowgli.messaging.WantsChatLogUpdates;
-import edu.nps.moves.mmowgli.messaging.WantsMediaUpdates;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
+import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.CreateActionPlanPanel;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
-import edu.nps.moves.mmowgli.utility.HistoryDialog;
+import edu.nps.moves.mmowgli.utility.*;
 import edu.nps.moves.mmowgli.utility.HistoryDialog.DoneListener;
-import edu.nps.moves.mmowgli.utility.IDNativeButton;
-import edu.nps.moves.mmowgli.utility.M;
-import edu.nps.moves.mmowgli.utility.MediaLocator;
-import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
 
 /**
  * ActionPlanPage.java Created on Feb 8, 2011
@@ -130,7 +90,7 @@ import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
  * @version $Id$
  */
 public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent, WantsActionPlanEdits, WantsActionPlanUpdates, WantsActionPlanTimeouts,
-    WantsChatLogUpdates, WantsMediaUpdates// , TextChangeListener
+    WantsChatLogUpdates, WantsMediaUpdates, View// , TextChangeListener
 {
   static final long serialVersionUID = 688322808925939444L;
 
@@ -152,7 +112,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   private ClickListener addCommentListener;
 
   private Object apId;
-  // private TextArea titleTA;
+
   private TextAreaLabelUnion titleUnion;
   private NativeButton titleHistoryButt;
   private Object chatLogId;
@@ -169,9 +129,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
   Button currentTabButton;
   ActionPlanPageTabPanel currentTabPanel;
-  Label mapLab; // temp
-  // private boolean imAnAuthor = false;
-  // private boolean imEditor = false;
+
   private UserList authorList;
   NativeButton newChatLab;
   private ThumbPanel thumbPanel;
@@ -185,21 +143,18 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     this(actPlnId, false);
   }
 
+  @HibernateSessionThreadLocalConstructor
   public ActionPlanPage2(Object actPlnId, boolean isMockup)
   {
     this.apId = actPlnId;
-
-    ActionPlan actPln = (ActionPlan) VHib.getVHSession().get(ActionPlan.class, (Serializable) actPlnId);
+    ActionPlan actPln = ActionPlan.getTL(actPlnId);
     ChatLog cl = actPln.getChatLog();
     if (cl != null)
       chatLogId = cl.getId();
 
-    // titleTA = new TextArea();
-    // titleTA.setInputPrompt("Enter title here");
     saveCanPan = new SaveCancelPan();
     MyTitleListener scLis = new MyTitleListener(saveCanPan);
 
-    // titleTA.addListener((FocusListener)scLis);
     titleUnion = new TextAreaLabelUnion(null, null, scLis, "m-actionplan-title");
 
     commentPanel = new ActionPlanPageCommentPanel2(this, actPlnId);
@@ -224,7 +179,6 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     imagesTab = new ActionPlanPageTabImages(actPlnId, isMockup);
     videosTab = new ActionPlanPageTabVideos(actPlnId, isMockup);
     mapTab = new ActionPlanPageTabMap(actPlnId, isMockup);
-    mapLab = new Label("Hi mom");
     thePlanTabButt = new NativeButton();
     talkTabButt = new NativeButton();
     imagesTabButt = new NativeButton();
@@ -259,17 +213,21 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       pan.setVisible(true);
       titleFocused = true;
       // no, have seen event flurry start up
-      sendStartEditMessage(DBGet.getUser(Mmowgli2UI.getGlobals().getUserID()).getUserName() + " is editing action plan title");
+  //    sendStartEditMessage(DBGet.getUser(Mmowgli2UI.getGlobals().getUserID()).getUserName() + " is editing action plan title");
     }
 
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
-      ActionPlan actPln = ActionPlan.get(apId);
+      HSess.init();
+      ActionPlan actPln = ActionPlan.getTL(apId);
 
       if (event.getSource() == pan.canButt) { // cancel
         if (actPln.getTitle() != null)
-          titleUnion.setValue(actPln.getTitle());
+          titleUnion.setValueTL(actPln.getTitle());
         titleUnion.labelTop();
         // setValueIfNonNull(titleTA,actPln.getTitle());
       }
@@ -281,18 +239,20 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
               + "). <small>Click this message to continue.</small>", Notification.Type.WARNING_MESSAGE, true);
           notif.setDelayMsec(-1); // must click
           notif.show(Page.getCurrent());
+          HSess.close();
           return;
         }
         String s = nullOrString(titleUnion.getValue());
-        actPln.setTitleWithHistory(s);
-        titleUnion.setLabelValue(s);
+        actPln.setTitleWithHistoryTL(s);
+        titleUnion.setLabelValueTL(s);
         titleUnion.labelTop();
-        ActionPlan.update(actPln);
-        User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-        GameEventLogger.logActionPlanUpdate(actPln, "title edited", u.getId()); // u.getUserName());
+        ActionPlan.updateTL(actPln);
+        User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+        GameEventLogger.logActionPlanUpdateTL(actPln, "title edited", u.getId()); // u.getUserName());
       }
       pan.setVisible(false);
       titleFocused = false;
+      HSess.close();
     }
   }
 
@@ -305,13 +265,18 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       return null;
     return o.toString();
   }
-
-  @SuppressWarnings("serial")
+  
   @Override
   public void initGui()
   {
-    ActionPlan actPln = ActionPlan.get(apId);
-    User me = DBGet.getUserFresh(Mmowgli2UI.getGlobals().getUserID());
+    throw new UnsupportedOperationException("");
+  }
+
+  @SuppressWarnings("serial")
+  public void initGuiTL()
+  {
+    ActionPlan actPln = ActionPlan.getTL(apId);
+    User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());
     addStyleName("m-cssleft-45");
     
     setWidth("1089px");
@@ -321,7 +286,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     VerticalLayout mainVL = new VerticalLayout();
     addComponent(mainVL, "top:0px;left:0px");
     mainVL.addStyleName("m-overflow-visible");
-   mainVL.setWidth("1089px");
+    mainVL.setWidth("1089px");
     mainVL.setHeight(null);
     mainVL.setSpacing(false);
     mainVL.setMargin(false);
@@ -371,20 +336,12 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     titleAndThumbsHL.addComponent(vl); // titleTA);
 
     titleUnion.setWidth(ACTIONPLAN_TITLE_W);
-    titleUnion.setValue(actPln.getTitle());
+    titleUnion.setValueTL(actPln.getTitle());
 
     titleUnion.addStyleName("m-lightgrey-border");
     // titleUnion.addStyleName("m-opacity-75");
     titleUnion.setHeight("95px"); // 120 px); must make it this way for alignment of r/o vs rw
     titleUnion.initGui();
-
-    // titleTA.setWidth(ACTIONPLAN_TITLE_W);
-    // titleTA.setRows(2);
-    // titleTA.setValue(actPln.getTitle());
-    //
-    // titleTA.addStyleName("m-actionplan-title");
-    // titleTA.addStyleName("m-opacity-75");
-    // titleTA.setHeight("95px"); // 120 px); must make it this way for alignment of r/o vs rw
 
     addComponent(saveCanPan, "top:0px;left:395px");
     saveCanPan.setVisible(false);
@@ -654,30 +611,40 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     helpWantedListener = new HelpWantedListener();
     interestedListener = new InterestedListener();
 
-    handleDisablements();
+    handleDisablementsTL();
   }
 
   @SuppressWarnings("serial")
   class HelpWantedListener implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
       HelpWantedDialog dial = new HelpWantedDialog(apId);
       UI.getCurrent().addWindow(dial);
       dial.center();
+      HSess.close();
     }
   }
 
   @SuppressWarnings("serial")
+  @MmowgliCodeEntry
+  @HibernateOpened
+  @HibernateClosed
   class InterestedListener implements ClickListener
   {
     @Override
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
       HelpWantedDialog dial = new HelpWantedDialog(apId, true);
       UI.getCurrent().addWindow(dial);
       dial.center();
+      HSess.close();
     }
   }
 
@@ -686,25 +653,35 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     private static final long serialVersionUID = 1L;
 
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
-      SortedSet<Edits> titHistSet = ActionPlan.get(apId).getTitlesEditHistory();
+      HSess.init();
+      SortedSet<Edits> titHistSet = ActionPlan.getTL(apId).getTitlesEditHistory();
       HistoryDialog dial = new HistoryDialog(titHistSet, "Title history", "Previous Action Plan titles", "Title", this);
       UI.getCurrent().addWindow(dial);
       dial.center();
+      HSess.close();
     }
 
-    public void done(String sel, int idx /* not used */)
+    // Treat this as MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
+    public void doneTL(String sel, int idx /* not used */)
     {
       if (sel != null) {
-        ActionPlan ap = ActionPlan.get(apId);
+        HSess.init();
+        ActionPlan ap = ActionPlan.getTL(apId);
         String currentTitle = ap.getTitle();
         if (!sel.equals(currentTitle)) {
-          ap.setTitleWithHistory(sel); // will push and delete if needed
-          ActionPlan.update(ap);
-          User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-          GameEventLogger.logActionPlanUpdate(ap, "title edited", u.getId()); // u.getUserName());
+          ap.setTitleWithHistoryTL(sel); // will push and delete if needed
+          ActionPlan.updateTL(ap);
+          User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+          GameEventLogger.logActionPlanUpdateTL(ap, "title edited", u.getId()); // u.getUserName());
         }
+        HSess.close();
       }
     }
   }
@@ -728,14 +705,14 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     hl.addComponent(lab = new Label("ID " + ap.getId()));
     hl.setComponentAlignment(lab, Alignment.BOTTOM_LEFT);
 
-    maybeAddHiddenCheckBox(hl, ap);
+    maybeAddHiddenCheckBoxTL(hl, ap);
     return hl;
   }
 
   @SuppressWarnings("serial")
-  private void maybeAddHiddenCheckBox(HorizontalLayout hl, ActionPlan ap)
+  private void maybeAddHiddenCheckBoxTL(HorizontalLayout hl, ActionPlan ap)
   {
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
 
     if (me.isAdministrator()) {
       Label sp;
@@ -751,15 +728,20 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
       hidCb.addValueChangeListener(new ValueChangeListener() {
         @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed        
         public void valueChange(ValueChangeEvent event)
         {
-          ActionPlan acntp = ActionPlan.get(getApId());
+          HSess.init();
+          ActionPlan acntp = ActionPlan.getTL(getApId());
           boolean nowHidden = acntp.isHidden();
           boolean tobeHidden = hidCb.getValue();
           if (nowHidden != tobeHidden) {
             acntp.setHidden(tobeHidden);
-            ActionPlan.update(acntp);
+            ActionPlan.updateTL(acntp);
           }
+          HSess.close();
         }
       });
 
@@ -772,15 +754,20 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       supIntCb.addValueChangeListener(new ValueChangeListener() {
 
         @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void valueChange(ValueChangeEvent event)
         {
-          ActionPlan acntp = ActionPlan.get(getApId());
+          HSess.init();
+          ActionPlan acntp = ActionPlan.getTL(getApId());
           boolean nowSupInt = acntp.isSuperInteresting();
           boolean tobeSupInt = supIntCb.getValue();
           if (nowSupInt != tobeSupInt) {
             acntp.setSuperInteresting(tobeSupInt);
-            ActionPlan.update(acntp);
+            ActionPlan.updateTL(acntp);
           }
+          HSess.close();
         }
       });
     }
@@ -825,7 +812,6 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   {
     BrowsePanel()
     {
-      // addStyleName("m-greyborder");
       setHeight("19px");
       setWidth("90px");
       setSpacing(false);
@@ -861,6 +847,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     InnerPanel pan;
     NativeButton zeroButt;
 
+    @HibernateSessionThreadLocalConstructor
     public ThumbPanel()
     {
       addComponent(pan = new InnerPanel(this));
@@ -877,7 +864,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       hl.addComponent(sp = new Label());
       sp.setWidth("75px");
 
-      Game g = Game.get(1L);
+      Game g = Game.getTL();
 
       zeroButt = new NativeButton(null, this);
       if (!g.isReadonly())
@@ -910,11 +897,16 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     }
 
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
       if (event.getButton() == zeroButt) {
+        HSess.init();
         pan.setNumUserThumbs(0);
-        pan.updateDb(0);
+        pan.updateDbTL(0);
+        HSess.close();
       }
       else
         pan.getThumbListener().buttonClick(event);
@@ -1073,8 +1065,12 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
       class ThumbListener implements ClickListener
       {
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void buttonClick(ClickEvent event)
         {
+          HSess.init();
           int count = 0;
           for (int i = 0; i < your.length; i++)
             if (event.getButton() == your[i]) {
@@ -1082,25 +1078,26 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
               break;
             }
           setNumUserThumbs(count);
-          updateDb(count);
+          updateDbTL(count);
+          HSess.close();
         }
       }
 
-      public void updateDb(int count)
+      public void updateDbTL(int count)
       {
-        ActionPlan ap = ActionPlan.get(apId);
+        ActionPlan ap = ActionPlan.getTL(apId);
         MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-        User me = DBGet.getUserFresh(globs.getUserID());
+        User me = DBGet.getUserFreshTL(globs.getUserID());
 
         // The ap stores user votes
         ap.setUserThumbValue(me, count);
-        ActionPlan.update(ap);
+        ActionPlan.updateTL(ap);
 
         // Author scores are affected, as is the rater
-        globs.getScoreManager().actionPlanWasRated(me, ap, count);
-        User.update(me);
+        globs.getScoreManager().actionPlanWasRatedTL(me, ap, count);
+        User.updateTL(me);
 
-        GameEventLogger.logActionPlanUpdate(ap, "thumbs changed", me.getId()); // me.getUserName());
+        GameEventLogger.logActionPlanUpdateTL(ap, "thumbs changed", me.getId()); // me.getUserName());
       }
     }
   }
@@ -1156,11 +1153,16 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   class ViewCardChainHandler implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
-      ActionPlan ap = ActionPlan.get(apId);
+      HSess.init();
+      ActionPlan ap = ActionPlan.getTL(apId);
       AppEvent evt = new AppEvent(CARDCHAINPOPUPCLICK, ActionPlanPage2.this, ap.getChainRoot().getId());
-      Mmowgli2UI.getGlobals().getController().miscEvent(evt);
+      Mmowgli2UI.getGlobals().getController().miscEventTL(evt);
+      HSess.close();
       return;
     }
   }
@@ -1178,16 +1180,21 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
         dial = new AddAuthorDialog((Collection<User>) authorList.getItemIds(), true);
         dial.addListener(new CloseListener() {
           @Override
+          @MmowgliCodeEntry
+          @HibernateOpened
+          @HibernateClosed
           public void windowClose(CloseEvent e)
           {
             if (dial.addClicked) {
+              HSess.init();
               Object o = dial.getSelected();
-              ActionPlan ap = ActionPlan.get(apId);
+              ActionPlan ap = ActionPlan.getTL(apId);
 
               if (o instanceof Set<?>)
-                handleMultipleUsers(ap, (Set<?>) o);
+                handleMultipleUsersTL(ap, (Set<?>) o);
               else
-                handleSingleUser(ap, o);
+                handleSingleUserTL(ap, o);
+              HSess.close();
             }
             /*
              * if (dial.addClicked) { Object o = dial.getSelected(); if (o != null && (o instanceof Set<?>)) { Set<User> uids = (Set<User>) o; ActionPlan ap =
@@ -1207,42 +1214,42 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   } // class
 
   @SuppressWarnings("unchecked")
-  private void handleMultipleUsers(ActionPlan ap, Set<?> set)
+  private void handleMultipleUsersTL(ActionPlan ap, Set<?> set)
   {
     if (set.size() > 0) {
       Object o = set.iterator().next();
       if (o instanceof User) {
         Iterator<User> itr = (Iterator<User>) set.iterator();
         while (itr.hasNext()) {
-          handleUser(ap, itr.next());
+          handleUserTL(ap, itr.next());
         }
       }
       else if (o instanceof QuickUser) {
         Iterator<QuickUser> itr = (Iterator<QuickUser>) set.iterator();
         while (itr.hasNext()) {
           QuickUser qu = itr.next();
-          handleUser(ap, DBGet.getUserFresh(qu.id));
+          handleUserTL(ap, DBGet.getUserFreshTL(qu.id));
         }
       }
     }
-    Sess.sessUpdate(ap);
+    ActionPlan.updateTL(ap);
     // app.globs().scoreManager().actionPlanUpdated(apId); // check for scoring changes //todo put this in one place, like ActionPlan.update()
   }
 
-  private void handleSingleUser(ActionPlan ap, Object o)
+  private void handleSingleUserTL(ActionPlan ap, Object o)
   {
     if (o instanceof User) {
-      handleUser(ap, (User) o);
+      handleUserTL(ap, (User) o);
     }
     else if (o instanceof QuickUser) {
       QuickUser qu = (QuickUser) o;
-      handleUser(ap, DBGet.getUserFresh(qu.id));
+      handleUserTL(ap, DBGet.getUserFreshTL(qu.id));
     }
-    Sess.sessUpdate(ap);
+    ActionPlan.updateTL(ap);
     // app.globs().scoreManager().actionPlanUpdated(apId); // check for scoring changes //todo put this in one place, like ActionPlan.update()
   }
 
-  private void handleUser(ActionPlan ap, User u)
+  private void handleUserTL(ActionPlan ap, User u)
   {
     boolean needUpdate = false;
     Set<ActionPlan> set = u.getActionPlansInvited();
@@ -1253,18 +1260,17 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     }
     if (!CreateActionPlanPanel.apContainsByIds(set, ap)) {
       set.add(ap);
-      // User update here
       needUpdate = true;
     }
     if (needUpdate)
-      Sess.sessUpdate(u);
+      User.updateTL(u);
 
     if (!CreateActionPlanPanel.usrContainsByIds(ap.getInvitees(), u)) {
       ap.addInvitee(u);
       // done above ActionPlan.update(ap);
     }
 
-    Mmowgli2UI.getGlobals().getAppMaster().getMailManager().actionPlanInvite(ap, u);
+    Mmowgli2UI.getGlobals().getAppMaster().getMailManager().actionPlanInviteTL(ap, u);
   }
 
   @SuppressWarnings("serial")
@@ -1302,14 +1308,18 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     class clickedListener implements Property.ValueChangeListener
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void valueChange(Property.ValueChangeEvent event)
       {
+        HSess.init();
         Property<?> prop = event.getProperty();
         Object uObj = prop.getValue();
         Long uid = null;
         if (uObj instanceof GreyUser) {
           String s = ((GreyUser) uObj).getUserName();
-          User u = User.getUserWithUserName(s);
+          User u = User.getUserWithUserNameTL(s);
           if (u == null) {
             System.err.println("ActionPlanPage2.UserList.clickListener...can't get user id");
             return;
@@ -1319,7 +1329,8 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
         else if (uObj instanceof User) {
           uid = ((User) uObj).getId();
         }
-        Mmowgli2UI.getGlobals().getController().miscEvent(new AppEvent(SHOWUSERPROFILECLICK, UserList.this, uid));
+        Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(SHOWUSERPROFILECLICK, UserList.this, uid));
+        HSess.close();
       }
     }
 
@@ -1343,7 +1354,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       setContainerDataSource(c);
     }
 
-    public void updateFromActionPlan_oob(Session sess, ActionPlan ap)
+    public void updateFromActionPlan_oobTL(ActionPlan ap)
     {
       Set<User> auths = ap.getAuthors();
       Set<User> invs = ap.getInvitees();
@@ -1360,7 +1371,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       setContainerDataSource(c);
     }
 
-    public Set<User> getBlackUserSet()
+    public Set<User> getBlackUserSetTL()
     {
       Container c = getContainerDataSource();
       Collection<?> coll = c.getItemIds();
@@ -1370,79 +1381,66 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
         Object o = i.next();
         if (!(o instanceof GreyUser))
 
-          hs.add(User.merge((User) o));
+          hs.add(User.mergeTL((User) o));
       }
       return hs;
     }
-
-    // public boolean contains(User u)
-    // {
-    // Set<User> set = getBlackUserSet();
-    // for(User usr : set)
-    // if(u.getId() == usr.getId())
-    // return true;
-    // return false;
-    // }
   }
 
   @SuppressWarnings("serial")
   class MyLayoutListener implements LayoutClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void layoutClick(LayoutClickEvent event)
     {
       if (event.isDoubleClick()) {
         Object clickee = (ListSelect) event.getChildComponent();
         if (clickee instanceof UserList) {
+          HSess.init();
           User author = (User) ((UserList) clickee).getValue();
-          Mmowgli2UI.getGlobals().getController().miscEvent(new AppEvent(SHOWUSERPROFILECLICK, ActionPlanPage2.this, author.getId()));
+          Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(SHOWUSERPROFILECLICK, ActionPlanPage2.this, author.getId()));
+          HSess.close();
         }
       }
     }
   }
 
   @Override
-  public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
+  public boolean actionPlanUpdatedOobTL(Serializable apId)
   {
     if (apId.equals(this.apId)) {
-      showTimeoutWarning(false);
-      
-      Session session = M.getSession(sessMgr);
-      ActionPlan ap = (ActionPlan) session.get(ActionPlan.class, (Serializable) apId);
+      ActionPlan ap = ActionPlan.getTL(apId);
 
       if (!titleFocused) { // don't update while being edited
-        boolean taRo = titleUnion.isRo(); // titleTA.isReadOnly();
+        boolean taRo = titleUnion.isRo();
         titleUnion.setRo(false);
-        titleUnion.setValueOob(ap.getTitle(), session);
+        titleUnion.setValueOobTL(ap.getTitle());
         titleUnion.setRo(taRo);
-        // titleTA.setReadOnly(false);
-        // titleTA.setValue(ap.getTitle());
-        // titleTA.setReadOnly(taRo);
       }
-      authorList.updateFromActionPlan_oob(session, ap);
+      authorList.updateFromActionPlan_oobTL(ap);
 
-      commentPanel.actionPlanUpdatedOob(sessMgr, apId);
+      commentPanel.actionPlanUpdatedOobTL(apId);
 
-      imagesTab.actionPlanUpdatedOob(sessMgr, apId);
-      videosTab.actionPlanUpdatedOob(sessMgr, apId);
-      mapTab.actionPlanUpdatedOob(sessMgr, apId);
-      talkTab.actionPlanUpdatedOob(sessMgr, apId);
-      thePlanTab.actionPlanUpdatedOob(sessMgr, apId);
+      imagesTab.actionPlanUpdatedOobTL(apId);
+      videosTab.actionPlanUpdatedOobTL(apId);
+      mapTab.actionPlanUpdatedOobTL(apId);
+      talkTab.actionPlanUpdatedOobTL(apId);
+      thePlanTab.actionPlanUpdatedOobTL(apId);
 
-      handleDisablements_oob(session);
-      // handleEditorShip_oob(session);
-      // handleAuthorShip_oob(session);
-      // handleGameReadOnly();
+      handleDisablements_oobTL();
       return true;
     }
     return false;
   }
 
   @Override
-  public boolean mediaUpdatedOob(SessionManager sessMgr, Serializable medId)
+  public boolean mediaUpdatedOobTL(Serializable medId)
   {
-    boolean retn = imagesTab.mediaUpdatedOob(sessMgr, medId);
-    if (videosTab.mediaUpdatedOob(sessMgr, medId))
+    boolean retn = imagesTab.mediaUpdatedOobTL(medId);
+    if (videosTab.mediaUpdatedOobTL(medId))
       retn = true;
     return retn;
   }
@@ -1451,44 +1449,32 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
    * We're being informed that a timeout has occurred. If it's this ap and I've got it locked,
    */
   @Override
-  public boolean actionPlanEditTimeoutEvent(MSessionManager mgr, Serializable apId)
+  public boolean actionPlanEditTimeoutEvent(Serializable apId)
   {
-    /*
-     * todo remove if(apId.equals(this.apId)) { showTimeoutWarning(false); saveEdits_oob(mgr.getSession()); return true; }
-     */
-    return false;
+     return false;
   }
 
   @Override
-  public boolean actionPlanEditTimeoutWarningEvent(MSessionManager mgr, Serializable apId)
+  public boolean actionPlanEditTimeoutWarningEvent(Serializable apId)
   {
-    /*
-     * todo remove if(apId.equals(this.apId)) { showTimeoutWarning(true); return true; }
-     */
     return false;
   }
 
-  private void showTimeoutWarning(boolean yn)
+  private void handleDisablementsTL()
   {
-    /*
-     * todo remove if(yn) { Notification notif = new Notification("Editing timeout pending.",
-     * "<br/>Your exclusive editing session of this action plan will end in 10 seconds.<br/>"+
-     * "Press 'stop editing and save' or 'cancel editing and revert'.<br/>"+ "Otherwise, any changes you have made will be saved with 'autosaved' indicators.",
-     * Notification.TYPE_WARNING_MESSAGE); notif.setPosition(Notification.POSITION_CENTERED_TOP); notif.setDelayMsec(1000*12); // 12 secs
-     * //app.getMainWindow().showNotification(notif); this.getWindow().showNotification(notif); }
-     */
+    handleDisablements_oob(HSess.get());
   }
 
-  private void handleDisablements()
+  private void handleDisablements_oobTL()
   {
-    handleDisablements_oob(VHib.getVHSession());
+    handleDisablements_oob(HSess.get());
   }
-
+  
   private void handleDisablements_oob(Session sess)
   {
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     boolean ro = globs.isGameReadOnly() || globs.isViewOnlyUser();
-    boolean au = amIAnAuthor_oob(sess);
+    boolean au = amIAnAuthor(sess);
     imAuthor = au; // save locally
     boolean gm = DBGet.getUser(globs.getUserID(), sess).isGameMaster();
 
@@ -1538,12 +1524,15 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       }
     }
   }
-
-  private boolean amIAnAuthor_oob(Session sess) // doesn't need mgr
+  private boolean amIAnAuthor_oobTL()
+  {
+    return amIAnAuthor(HSess.get());
+  }
+  private boolean amIAnAuthor(Session sess)
   {
     // assume read only unless i'm in the list of authors (or invitees)
-    ActionPlan ap = (ActionPlan) sess.get(ActionPlan.class, (Serializable) apId);
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID(), sess);
+    ActionPlan ap = ActionPlan.get((Serializable)apId, sess);
+    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID(),sess);
     // Let admins edit
     if (me.isAdministrator())
       return true;
@@ -1560,27 +1549,26 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
   private String helpWanted(Session sess)
   {
-    ActionPlan ap = (ActionPlan) sess.get(ActionPlan.class, (Serializable) apId);
+    ActionPlan ap = ActionPlan.get((Serializable)apId,sess);
     return ap.getHelpWanted();
   }
 
   @Override
-  public boolean logUpdated_oob(SingleSessionManager mgr, Serializable chatLogId)
+  public boolean logUpdated_oobTL(Serializable chatLogId)
   {
     if (this.chatLogId.equals(chatLogId)) {
       if (this.currentTabPanel != talkTab) {
-        Session sess = M.getSession(mgr);
-        if (amIAnAuthor_oob(sess))
+        if (amIAnAuthor_oobTL())
           newChatLab.setVisible(true);
     }
       // Give it to my chat panel
-      return talkTab.logUpdated_oob(mgr, chatLogId);
+      return talkTab.logUpdated_oobTL(chatLogId);
     }
     return false;
   }
 
   @Override
-  public boolean actionPlanEditBeginEvent(MSessionManager mgr, Serializable apId, String msg)
+  public boolean actionPlanEditBeginEvent(Serializable apId, String msg)
   {
     if (apId != this.apId)
       return false;
@@ -1600,17 +1588,9 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   }
 
   @Override
-  public boolean actionPlanEditEndEvent(MSessionManager mgr, Serializable apId, String msg)
+  public boolean actionPlanEditEndEvent(Serializable apId, String msg)
   {
     return false;
-  }
-
-  public void sendStartEditMessage(String msg)
-  {
-    /*
-     * event flurries if(app.isAlive()) { ApplicationMaster master = app.globs().applicationMaster(); master.sendLocalMessage(ACTIONPLAN_EDIT_BEGIN, "" + apId +
-     * MMESSAGE_DELIM + msg); }
-     */
   }
 
   public static class SaveCancelPan extends HorizontalLayout
@@ -1657,11 +1637,15 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   {
     @SuppressWarnings("unchecked")
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
-      Criteria crit = VHib.getVHSession().createCriteria(ActionPlan.class);
+      HSess.init();
+      Criteria crit = HSess.get().createCriteria(ActionPlan.class);
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-      ActionPlan.adjustCriteriaToOmitActionPlans(crit, DBGet.getUser(globs.getUserID()));
+      ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, DBGet.getUserTL(globs.getUserID()));
       List<Long> lis = (List<Long>) crit.setProjection(Projections.id()).list();
 
       if (event.getButton() == browseBackButt)
@@ -1673,10 +1657,23 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
           int nxtIdx = i + 1;
           if (nxtIdx >= lis.size())
             nxtIdx = 0;
-          globs.getController().miscEvent(new AppEvent(ACTIONPLANSHOWCLICK, ActionPlanPage2.this, lis.get(nxtIdx)));
+          globs.getController().miscEventTL(new AppEvent(ACTIONPLANSHOWCLICK, ActionPlanPage2.this, lis.get(nxtIdx)));
         }
         i++;
       }
+      HSess.close();
     }
+  }
+
+  /* View interface */
+  @Override
+  @MmowgliCodeEntry
+  @HibernateConditionallyOpened
+  @HibernateConditionallyClosed
+  public void enter(ViewChangeEvent event)
+  {
+    Object key = HSess.checkInit();
+    initGuiTL();
+    HSess.checkClose(key);
   }
 }
