@@ -35,7 +35,9 @@ package edu.nps.moves.mmowgli.modules.actionplans;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.SortedSet;
 
 import org.hibernate.Session;
 
@@ -52,13 +54,15 @@ import com.vaadin.ui.themes.BaseTheme;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
-import edu.nps.moves.mmowgli.components.*;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
+import edu.nps.moves.mmowgli.components.ToggleLinkButton;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsChatLogUpdates;
 import edu.nps.moves.mmowgli.modules.cards.EditCardTextWindow;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
-import edu.nps.moves.mmowgli.utility.M;
 import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
 
 /**
@@ -90,6 +94,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
   private boolean isGameMasterOrAdmin = false;
   private boolean gameRO = false;
   
+  @HibernateSessionThreadLocalConstructor
   public ActionPlanPageTabTalk(Object apId, boolean isMockup)
   {
     super(apId, isMockup);
@@ -98,7 +103,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
     discardButt = new NativeButton();
     dateFormatter = new SimpleDateFormat("MM/dd HH:mm z");
     chatEntryComponent=createChatEntryField();    
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     
     isGameMasterOrAdmin = me.isAdministrator() || me.isGameMaster();
   }
@@ -126,10 +131,10 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
     leftVL.setComponentAlignment(missionLab, Alignment.TOP_LEFT);
     missionLab.addStyleName("m-actionplan-mission-title-text");
     
-    ActionPlan ap = ActionPlan.get(apId);
+    ActionPlan ap = ActionPlan.getTL(apId);
 
     Label missionContentLab;
-    Game g = Game.get(1L);
+    Game g = Game.getTL();
     if(!isMockup)
       missionContentLab = new HtmlLabel(ap.getTalkItOverInstructions());
     else {
@@ -148,8 +153,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
    
     VerticalLayout rightVL = getRightLayout();
     rightVL.setSpacing(true);
-  //  rightVL.setWidth("99%");
-  //  rightVL.setHeight("99%");
+
     Label lab;
     rightVL.addComponent(lab=new Label());
     lab.setHeight("15px");
@@ -180,7 +184,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
       sp.setWidth("8px");
     }
     Component comp=createChatScroller(rightVL);
-    comp.setWidth("99%"); //"100%");
+    comp.setWidth("99%");
     rightVL.setExpandRatio(comp, 1.0f);
     comp.setHeight("99%");
     fillChatScroller();
@@ -212,7 +216,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
   {
     ((VerticalLayout)chatScroller.getContent()).removeAllComponents();
     
-    ActionPlan ap = ActionPlan.get(apId);
+    ActionPlan ap = ActionPlan.getTL(apId);
     ChatLog log = ap.getChatLog();
     if (log != null) {// shouldn't have to do this, both log and messages should be set up to have the sets build by default
       SortedSet<Message> msgs = log.getMessages();
@@ -264,7 +268,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
     ChatMsg(Message m, Session sess)
     {
       if(sess == null)
-        sess = VHib.getVHSession();
+        sess = HSess.get();
       msg = m;
       setSpacing(true);
       setMargin(false);
@@ -309,23 +313,32 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
         tlb.addOnListener(new Button.ClickListener()
         {         
           @Override
+          @MmowgliCodeEntry
+          @HibernateOpened
+          @HibernateClosed
           public void buttonClick(ClickEvent event)
           {
+            HSess.init();
             msg.setHidden(true);
-            Message.update(msg);
+            Message.updateTL(msg);
             if(!showingHiddenMsgs)
               ChatMsg.this.setVisible(false); // hide
+            HSess.close();
           }
         });
         tlb.addOffListener(new Button.ClickListener()
         {
-          
           @Override
+          @MmowgliCodeEntry
+          @HibernateOpened
+          @HibernateClosed
           public void buttonClick(ClickEvent event)
           {
+            HSess.init();
             msg.setHidden(false);
-            Message.update(msg);
-            ChatMsg.this.setVisible(true); // show            
+            Message.updateTL(msg);
+            ChatMsg.this.setVisible(true); // show
+            HSess.close();
           }
         });
         tlb.setToolTips("Hide this message in this list", "Show this message in this list");
@@ -364,15 +377,20 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
       class SaveTextListener implements CloseListener
       {
         @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed        
         public void windowClose(CloseEvent e)
         {         
           EditCardTextWindow w = (EditCardTextWindow)e.getWindow();
-          if(w.results != null) {                   
-            textLabel.setValue(MmowgliLinkInserter.insertLinks(w.results,null));
+          if(w.results != null) { 
+            HSess.init();
+            textLabel.setValue(MmowgliLinkInserter.insertLinksTL(w.results,null));
             msg.setText(w.results);
-            Message.update(msg);
-            User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-            GameEventLogger.chatTextEditted(me.getUserName(),apId,msg);
+            Message.updateTL(msg);
+            User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+            GameEventLogger.chatTextEdittedTL(me.getUserName(),apId,msg);
+            HSess.close();
           }
         }
       }
@@ -386,13 +404,18 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
     class SuperInterestingCheckBoxListener implements ValueChangeListener
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void valueChange(ValueChangeEvent event)
       {
+        HSess.init();
         Boolean supInt = (Boolean) superInterestingCB.getValue();
         msg.setSuperInteresting(supInt);
-        Message.update(msg);
-        User me = DBGet.getUser(Mmowgli2UI.getGlobals());
-        GameEventLogger.commentMarkedSuperInteresting(me.getUserName(),apId,msg,supInt);
+        Message.updateTL(msg);
+        User me = DBGet.getUserTL(Mmowgli2UI.getGlobals());
+        GameEventLogger.commentMarkedSuperInterestingTL(me.getUserName(),apId,msg,supInt);
+        HSess.close();
       }
     }
   }
@@ -437,37 +460,42 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
     Message msg;
 
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
       String s = chatTextField.getValue().toString();
       if(s == null || s.length()<=0)
         return;
-      User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+      HSess.init();
+      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
       msg = new Message(s);
       
       if(!me.isGameMaster())
-        buttonClick2(me);
+        buttonClick2TL(me);
       else
-        getProxyAuthor(me,this,event.getButton());
+        getProxyAuthorTL(me,this,event.getButton());
+      HSess.close();
     }
     
-    private void buttonClick2(User proxAuth)
+    private void buttonClick2TL(User proxAuth)
     {
       msg.setFromUser(proxAuth);
-      Message.save(msg);  // persist
-      ActionPlan ap = ActionPlan.get(apId);
+      Message.saveTL(msg);  // persist
+      ActionPlan ap = ActionPlan.getTL(apId);
       ChatLog log = ap.getChatLog();
       log.getMessages().add(msg);
-      ChatLog.update(log); // persist
+      ChatLog.updateTL(log); // persist
       
-      addMessageToScrollerTop(msg,VHib.getVHSession());
+      addMessageToScrollerTop(msg,HSess.get());
       chatTextField.setValue("");
       chatTextField.focus();     
     }
   }
 
   @SuppressWarnings("serial")
-  private void getProxyAuthor(final User me, final ChatButtonListener cbLis, Button butt)
+  private void getProxyAuthorTL(final User me, final ChatButtonListener cbLis, Button butt)
   {
     ArrayList<User> meLis = new ArrayList<User>(1);
     meLis.add(me);
@@ -482,8 +510,12 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
     dial.addListener(new CloseListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void windowClose(CloseEvent e)
       {
+        HSess.init();
         User u = me;
         if (dial.addClicked) {
           Object o = dial.getSelected();
@@ -492,10 +524,11 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
           }
           else if (o instanceof QuickUser) {
             QuickUser qu = (QuickUser) o;
-            u = DBGet.getUserFresh(qu.id);
+            u = DBGet.getUserFreshTL(qu.id);
           }
         }
-        cbLis.buttonClick2(u);
+        cbLis.buttonClick2TL(u);
+        HSess.close();
       }
     });
 
@@ -505,11 +538,10 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
   
   /* return true if need gui update */
   @Override
-  public boolean logUpdated_oob(SingleSessionManager mgr, Serializable chatLogId)
+  public boolean logUpdated_oobTL(Serializable chatLogId)
   {
-    Session session = M.getSession(mgr);
     // This comes in on MY updates too, should do nothing since my just-entered msg is already displayed
-    ActionPlan ap = (ActionPlan)session.get(ActionPlan.class,(Serializable)apId);
+    ActionPlan ap = ActionPlan.getTL(apId); 
     ChatLog log = ap.getChatLog();
     if(chatLogId.equals(log.getId())) {
 
@@ -529,7 +561,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
         Message m = itr.next();
         if(topMsg != null && m.getId() == topMsg.getId())
           break;
-        addMessageToScrollerAtPosition(m,pos++,session);
+        addMessageToScrollerAtPosition(m,pos++,HSess.get());
       } 
       return true;
     }
@@ -537,7 +569,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
   }
 
   @Override
-  public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
+  public boolean actionPlanUpdatedOobTL(Serializable apId)
   { 
     return false;
   }
