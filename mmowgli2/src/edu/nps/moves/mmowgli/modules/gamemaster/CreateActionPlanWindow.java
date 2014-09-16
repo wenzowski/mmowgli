@@ -35,7 +35,7 @@ package edu.nps.moves.mmowgli.modules.gamemaster;
 
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Window;
 
 import edu.nps.moves.mmowgli.modules.gamemaster.CreateActionPlanPanel.CreateActionPlanLayout;
 
