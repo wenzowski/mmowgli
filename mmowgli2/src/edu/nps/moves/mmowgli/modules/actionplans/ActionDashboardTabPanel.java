@@ -83,4 +83,6 @@ public abstract class ActionDashboardTabPanel extends AbsoluteLayout implements 
   {
     return rightAbsLay;
   }
+  
+  abstract public void initGuiTL();  // temp until MmowgliComponent is changed
 }
