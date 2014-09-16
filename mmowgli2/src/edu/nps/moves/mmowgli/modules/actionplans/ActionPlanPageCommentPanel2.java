@@ -56,14 +56,22 @@ import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.Reindeer;
 
-import edu.nps.moves.mmowgli.*;
-import edu.nps.moves.mmowgli.components.*;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliEvent;
+import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
+import edu.nps.moves.mmowgli.components.MmowgliComponent;
+import edu.nps.moves.mmowgli.components.ToggleLinkButton;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
 import edu.nps.moves.mmowgli.modules.cards.EditCardTextWindow;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
-import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.IDButton;
+import edu.nps.moves.mmowgli.utility.MediaLocator;
+import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
 
 /**
  * ActionPlanPageCommentPanel.java Created on Mar 22, 2011
@@ -89,6 +97,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
   private ClickListener addCommentClicked;
   private boolean showingHiddenMsgs = false;
   
+  @HibernateSessionThreadLocalConstructor  
   public ActionPlanPageCommentPanel2(ActionPlanPage2 page, Object apId)
   {
     this.apId = apId;
@@ -118,17 +127,6 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
     content.setSpacing(true);
     content.setWidth("100%");
 
-//    Label lab = new Label("Player Comments");
-//    lab.addStyleName("m-actionplan-comment-title");
-//    content.addComponent(lab);
-//
-//    NativeButton addCommentButt = new NativeButton();
-//    addCommentButt.setStyleName(BaseTheme.BUTTON_LINK);
-//    addCommentButt.setCaption("add comment");
-//    addCommentButt.addListener(new AddCommentListener());
-//    content.addComponent(addCommentButt);
-    
-    // The button is now on mother
     addCommentClicked = new AddCommentListener();   
     content.addComponent(addCommentPanel=new AddedCommentPanel());
     addCommentPanel.initGui();
@@ -139,17 +137,20 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
     commentListVL.setSpacing(false);
     content.addComponent(commentListVL);
     
-    refillCommentList_oob(VHib.getVHSession()); // pass vaadin transaction context session
+    refillCommentList(HSess.get());
   }
+  
   public void showAllComments(boolean tf)
   {
     showingHiddenMsgs = tf;
     showMsgs();
   }
+  
   private void handleVisible(ActionPlanComment apc)
   {
     apc.setVisible(showingHiddenMsgs || !apc.getMessageObject().isHidden());
   }
+  
   private void showMsgs()
   {
     Iterator<Component> itr = commentListVL.iterator();
@@ -159,7 +160,13 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
         handleVisible((ActionPlanComment)nxt);      
     }  
   }
-  private void refillCommentList_oob(Session sess)
+  
+  private void refillCommentList_oobTL()
+  {
+    refillCommentList(HSess.get());
+  }
+  
+  private void refillCommentList(Session sess)
   {
     ActionPlan ap = (ActionPlan)sess.get(ActionPlan.class, (Serializable)apId);
     Set<Message> lis = ap.getComments();
@@ -207,6 +214,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
       addCommentPanel.ta.selectAll();
     }   
   }
+  
   @SuppressWarnings("serial")
   class MyActionPlanComment extends ActionPlanComment
   {
@@ -216,9 +224,9 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
     }
 
     @Override
-    protected void hideClicked()
+    protected void hideClickedTL()
     {
-      super.hideClicked();
+      super.hideClickedTL();
       handleVisible(this);
     }   
   }
@@ -239,9 +247,10 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
     private Game game;
     private Label textLabel;
     
+    @HibernateSessionThreadLocalConstructor
     public ActionPlanComment(Integer order, Integer total, Message msg, boolean showHideButton, ActionPlan ap)
     {
-      this(order,total,msg,showHideButton,ap,VHib.getVHSession());
+      this(order,total,msg,showHideButton,ap,HSess.get());
     }
     
     public ActionPlanComment(Integer order, Integer total, Message msg, boolean showHideButton, ActionPlan ap, Session sess)
@@ -353,7 +362,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
         tlb.setEnabled(!game.isReadonly());
         tlb.setToolTips("Hide this message in this list", "Show this message in this list");
         
-        if (DBGet.getUser(globs.getUserID(),sess).isGameMaster()) {
+        if (DBGet.getUserTL(globs.getUserID()).isGameMaster()) {
           NativeButton editButt = new NativeButton();
           editButt.setCaption("edit");
           editButt.setStyleName(BaseTheme.BUTTON_LINK);
@@ -371,10 +380,8 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
       vLay.addComponent(lab = new Label());
       lab.setHeight("5px"); // spacing
       
-      //vLay.addComponent(lab = new Label());
-      //lab.setHeight("7px"); // spacing
       if(sess == null)
-        vLay.addComponent(textLabel = new HtmlLabel(MmowgliLinkInserter.insertLinks(msg.getText(),null)));
+        vLay.addComponent(textLabel = new HtmlLabel(MmowgliLinkInserter.insertLinksTL(msg.getText(),null)));
       else
         vLay.addComponent(textLabel = new HtmlLabel(MmowgliLinkInserter.insertLinksOob(msg.getText(),null,sess)));
       textLabel.setWidth("98%");
@@ -395,15 +402,20 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
       class SaveTextListener implements CloseListener
       {
         @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void windowClose(CloseEvent e)
         {         
           EditCardTextWindow w = (EditCardTextWindow)e.getWindow();
           if(w.results != null) {                   
-            textLabel.setValue(MmowgliLinkInserter.insertLinks(w.results,null));
+            HSess.init();
+            textLabel.setValue(MmowgliLinkInserter.insertLinksTL(w.results,null));
             msg.setText(w.results);
-            Message.update(msg);
-            User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-            GameEventLogger.commentTextEditted(me.getUserName(),ap.getId(),msg);
+            Message.updateTL(msg);
+            User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+            GameEventLogger.commentTextEdittedTL(me.getUserName(),ap.getId(),msg);
+            HSess.close();
           }
         }
       }
@@ -412,29 +424,34 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
     class SuperInterestingCheckBoxListener implements ValueChangeListener
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void valueChange(ValueChangeEvent event)
       {
+        HSess.init();
         Boolean supInt = (Boolean) superInterestingCB.getValue();
         msg.setSuperInteresting(supInt);
-        Message.update(msg);
-        User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-        GameEventLogger.commentMarkedSuperInteresting(me.getUserName(),ap.getId(),msg,supInt);
+        Message.updateTL(msg);
+        User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+        GameEventLogger.commentMarkedSuperInterestingTL(me.getUserName(),ap.getId(),msg,supInt);
+        HSess.close();
      }
     }
     
-    protected void hideClicked()
+    protected void hideClickedTL()
     {
       msg.setHidden(true);
-      Message.update(msg);
+      Message.updateTL(msg);
       ActionPlanComment.this.removeStyleName(normalStyle);
       ActionPlanComment.this.addStyleName(hiddenStyle);
       ActionPlanComment.this.setVisible(false);     
     }
     
-    protected void showClicked()
+    protected void showClickedTL()
     {
       msg.setHidden(false);
-      Message.update(msg);
+      Message.updateTL(msg);
       ActionPlanComment.this.addStyleName(normalStyle);
       ActionPlanComment.this.removeStyleName(hiddenStyle);
       ActionPlanComment.this.setVisible(true);     
@@ -443,18 +460,28 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
     class HideClickedListener implements ClickListener
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        hideClicked();
+        HSess.init();
+        hideClickedTL();
+        HSess.close();
       }     
     }
     
     class ShowClickedListener implements ClickListener
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        showClicked();
+        HSess.init();
+        showClickedTL();
+        HSess.close();
       }     
     }
     
@@ -470,7 +497,6 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
         sb.append(" ");
       }      
       if (msg.getDateTime() != null) {
-          //sb.append(" | ");
           sb.append(formatter.format(msg.getDateTime()));
       }
       lab.setValue(sb.toString().trim());
@@ -541,11 +567,15 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
     }
     
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
       if (event.getButton() == cancelButt)
         ;
       else { // if(event.getButton() == submitButt
+        HSess.init();
         String s = ta.getValue().toString();
         int len = s.length();
         if (len > MAX_COMMENT_SIZE) {
@@ -558,25 +588,25 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
         }
         if (len > 0) {
           MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-          User me = DBGet.getUser(globs.getUserID());
+          User me = DBGet.getUserTL(globs.getUserID());
           Message m = new Message(s,me);
-          Message.save(m);
-          ActionPlan actPln = ActionPlan.get(apId);
+          Message.saveTL(m);
+          ActionPlan actPln = ActionPlan.getTL(apId);
           actPln.getComments().add(m);
-          ActionPlan.update(actPln);
-          globs.getScoreManager().actionPlanCommentEntered(actPln, m);
-          GameEventLogger.logActionPlanUpdate(actPln, "comment added", me.getId()); //me.getUserName());
+          ActionPlan.updateTL(actPln);
+          globs.getScoreManager().actionPlanCommentEnteredTL(actPln, m);
+          GameEventLogger.logActionPlanUpdateTL(actPln, "comment added", me.getId()); //me.getUserName());
         }
+        HSess.close();
       }
       addCommentPanel.setVisible(false);
     }
   }
 
   @Override
-  public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
-  {
-    Session sess = M.getSession(sessMgr);    
-    refillCommentList_oob(sess); 
+  public boolean actionPlanUpdatedOobTL(Serializable apId)
+  {    
+    refillCommentList_oobTL(); 
     return true;
   }
 }
