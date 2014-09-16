@@ -54,8 +54,8 @@ import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.CardType.DescendantCardType;
-import edu.nps.moves.mmowgli.hibernate.Sess;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 
 /**
  * HeaderFooterGameDesignPanel.java
@@ -82,11 +82,12 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
   private Label childCardsWarning;
   private GameDesignGlobals globs;
   
+  @HibernateSessionThreadLocalConstructor
   public SubCardsGameDesignPanel(Move move, GameDesignGlobals globs)
   {
     this.moveBeingEdited = move;
     this.globs = globs;
-    this.currentMove = Game.get().getCurrentMove();
+    this.currentMove = Game.getTL().getCurrentMove();
   }
   
   @Override
@@ -95,30 +96,30 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
     setMargin(true);
     setSpacing(true);
     
-    expandFields = new CardTypeFields(CardType.getExpandType(), globs);
+    expandFields = new CardTypeFields(CardType.getExpandTypeTL(), globs);
     expandTypeSelect = new NativeSelect();
     addComponent(renderFields(expandFields, expandTypeSelect, "1 Choose EXPAND card type for this round"));
     expandFields.initGui();
 
-    counterFields = new CardTypeFields(CardType.getCounterType(), globs);
+    counterFields = new CardTypeFields(CardType.getCounterTypeTL(), globs);
     counterTypeSelect = new NativeSelect();
     addComponent(renderFields(counterFields, counterTypeSelect, "2 Choose COUNTER card type for this round"));
     counterFields.initGui();
 
-    adaptFields = new CardTypeFields(CardType.getAdaptType(), globs);
+    adaptFields = new CardTypeFields(CardType.getAdaptTypeTL(), globs);
     adaptTypeSelect = new NativeSelect();
     addComponent(renderFields(adaptFields, adaptTypeSelect, "3 Choose ADAPT card type for this round"));
     adaptFields.initGui();
 
-    exploreFields = new CardTypeFields(CardType.getExploreType(), globs);
+    exploreFields = new CardTypeFields(CardType.getExploreTypeTL(), globs);
     exploreTypeSelect = new NativeSelect();
     addComponent(renderFields(exploreFields, exploreTypeSelect, "4 Choose EXPLORE card type for this round"));
     exploreFields.initGui();
 
-    fillSelectCommon(expandTypeSelect, CardType.getDefinedExpandTypes());
-    fillSelectCommon(counterTypeSelect, CardType.getDefinedCounterTypes());
-    fillSelectCommon(adaptTypeSelect, CardType.getDefinedAdaptTypes());
-    fillSelectCommon(exploreTypeSelect, CardType.getDefinedExploreTypes());
+    fillSelectCommon(expandTypeSelect, CardType.getDefinedExpandTypesTL());
+    fillSelectCommon(counterTypeSelect, CardType.getDefinedCounterTypesTL());
+    fillSelectCommon(adaptTypeSelect, CardType.getDefinedAdaptTypesTL());
+    fillSelectCommon(exploreTypeSelect, CardType.getDefinedExploreTypesTL());
     
     expandTypeSelect.addValueChangeListener(myCardTypeListener);
     counterTypeSelect.addValueChangeListener(myCardTypeListener);
@@ -131,7 +132,7 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
   
   private void adjustRO()
   {
-    boolean locked = !isInMoveConstruction();
+    boolean locked = !isInMoveConstructionTL();
     boolean ro = globs.readOnlyCheck(locked);
     
     expandTypeSelect.setReadOnly(ro);
@@ -156,17 +157,17 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
     return moveBeingEdited.getNumber() == currentMove.getNumber();
   }
 
-  private boolean isInMoveConstruction()
+  private boolean isInMoveConstructionTL()
   {
     if (isPriorMove())
       return false; // previous move
     if (!isThisMove())
       return true; // future move
 
-    // Here if we're editting the running move. Report if we detect a significant number of child cards played in this move so the
+    // Here if we're editing the running move. Report if we detect a significant number of child cards played in this move so the
     // designer can be warned
 
-    Criteria criteria = VHib.getVHSession().createCriteria(Card.class).add(Restrictions.eq("createdInMove", moveBeingEdited))
+    Criteria criteria = HSess.get().createCriteria(Card.class).add(Restrictions.eq("createdInMove", moveBeingEdited))
         .add(Restrictions.isNotNull("parentCard")).setProjection(Projections.rowCount());
 
     int count = ((Long) criteria.list().get(0)).intValue();
@@ -198,20 +199,25 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
       win.addCloseListener(new CloseListener()
       {
         @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void windowClose(CloseEvent e)
         {
+          HSess.init();
           if(ctyp == CardType.EXPAND_CARD_TYPE) {
-            fillSelectCommon(expandTypeSelect, CardType.getDefinedExpandTypes());            
+            fillSelectCommon(expandTypeSelect, CardType.getDefinedExpandTypesTL());            
           }
           else if(ctyp == CardType.COUNTER_CARD_TYPE) {
-            fillSelectCommon(counterTypeSelect, CardType.getDefinedCounterTypes());            
+            fillSelectCommon(counterTypeSelect, CardType.getDefinedCounterTypesTL());            
           }
           else if(ctyp == CardType.ADAPT_CARD_TYPE) {
-            fillSelectCommon(adaptTypeSelect, CardType.getDefinedAdaptTypes());            
+            fillSelectCommon(adaptTypeSelect, CardType.getDefinedAdaptTypesTL());            
           }
           else { //if(ctyp == CardType.EXPLORE_CARD_TYPE) {
-            fillSelectCommon(exploreTypeSelect, CardType.getDefinedExploreTypes());            
+            fillSelectCommon(exploreTypeSelect, CardType.getDefinedExploreTypesTL());            
           }
+          HSess.close();
         }        
       });
       UI.getCurrent().addWindow(win);
@@ -271,16 +277,16 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
     return null;
   }
 
-  private void saveCardType(CardType ct, CardType.DescendantCardType ordinal, ConfirmDialog.Listener backOutListener)
+  private void saveCardTypeTL(CardType ct, CardType.DescendantCardType ordinal, ConfirmDialog.Listener backOutListener)
   {
     ConfirmListener lis = new ConfirmListener(ordinal,ct,backOutListener);
-    int count= getCardTypeCountFromThisMove(moveBeingEdited,ct.getDescendantOrdinal());
+    int count= getCardTypeCountFromThisMoveTL(moveBeingEdited,ct.getDescendantOrdinal());
     if(count > 0) {
       ConfirmDialog.show(UI.getCurrent(), "Card Type Change","Changing a card type's descriptive text for a round will change all "+count+" existing cards of the former type, which may not be what you intend"+
       " since the cards have been played based on different text.  "+"Is this what you want to do?", "Yes", "Cancel", lis);          
     } 
     else
-      lis.confirmed();
+      lis.confirmedTL();
   }
   
   @SuppressWarnings("serial")
@@ -297,10 +303,15 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
     }
     
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void onClose(ConfirmDialog dialog)
     {
       if (dialog.isConfirmed()) {
-        confirmed();
+        HSess.init();
+        confirmedTL();
+        HSess.close();
       }
       else {
         if (whoToCallIfTheyChangeTheirMind != null)
@@ -308,51 +319,50 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
       }
     } 
     
-    public void confirmed()
+    public void confirmedTL()
     {
-      Move m = Move.merge(moveBeingEdited);
-      ct = CardType.merge(ct);
+      Move m = Move.mergeTL(moveBeingEdited);
+      ct = CardType.mergeTL(ct);
       switch(dct) {
       case EXPAND:
-        CardType.setExpandCardTypeAllPhases(m, ct);
+        CardType.setExpandCardTypeAllPhasesTL(m, ct);
         break;
       case COUNTER:
-        CardType.setCounterCardTypeAllPhases(m, ct);
+        CardType.setCounterCardTypeAllPhasesTL(m, ct);
         break;
       case ADAPT:
-        CardType.setAdaptCardTypeAllPhases(m, ct);
+        CardType.setAdaptCardTypeAllPhasesTL(m, ct);
         break;
       case EXPLORE:
-        CardType.setExploreCardTypeAllPhases(m, ct);
+        CardType.setExploreCardTypeAllPhasesTL(m, ct);
         break;
       }
-      changeCardTypes(m,ct);      
+      changeCardTypesTL(m,ct);      
     }
   }
   
-  private int getCardTypeCountFromThisMove(Move m, int ordinal)
+  private int getCardTypeCountFromThisMoveTL(Move m, int ordinal)
   {
-    m = Move.merge(m);
-    Criteria criteria = makeCardClassQuery(m,ordinal);
+    m = Move.mergeTL(m);
+    Criteria criteria = makeCardClassQueryTL(m,ordinal);
     criteria.setProjection(Projections.rowCount());
     return ((Long) criteria.list().get(0)).intValue();
   }
  
   @SuppressWarnings("unchecked")
-  private void changeCardTypes(Move m, CardType typ)
+  private void changeCardTypesTL(Move m, CardType typ)
   {
-    Criteria criteria = makeCardClassQuery(m,typ.getDescendantOrdinal());
+    Criteria criteria = makeCardClassQueryTL(m,typ.getDescendantOrdinal());
     List<Card> lis = criteria.list(); 
     for(Card c : lis) {
       c.setCardType(typ);
-      Sess.sessUpdate(c);
-      //Card.update(c);
+      Card.updateTL(c);
     }   
   }
   
-  private Criteria makeCardClassQuery(Move m, int ordinal)
+  private Criteria makeCardClassQueryTL(Move m, int ordinal)
   {
-    return VHib.getVHSession().createCriteria(Card.class)
+    return HSess.get().createCriteria(Card.class)
         .createAlias("createdInMove", "MOVE")
         .createAlias("cardType", "CARDTYPE")
         .add(Restrictions.eq("MOVE.number", m.getNumber()))
@@ -360,7 +370,7 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
   }
    
   @Override
-  public void moveChanged(Move m)
+  public void moveChangedTL(Move m)
   {
     moveBeingEdited = m;
     boolean oldFlag = commitCardType;
@@ -391,12 +401,17 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
   class CardTypeCancelListener implements ConfirmDialog.Listener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void onClose(ConfirmDialog arg0)
     {
+      HSess.init();
       boolean oldcommitflag = commitCardType;
       commitCardType = false;
-      moveChanged(moveBeingEdited); // this will do it 
+      moveChangedTL(moveBeingEdited); // this will do it 
       commitCardType = oldcommitflag;
+      HSess.close();
     }    
   }
   
@@ -404,6 +419,9 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
   class CardTypeListener implements ValueChangeListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void valueChange(ValueChangeEvent event)
     { 
       NativeSelect combo = (NativeSelect) event.getProperty();
@@ -411,7 +429,8 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
       if(tLine == null)
         return;
       
-      tLine.typ = CardType.merge(tLine.typ);
+      HSess.init();
+      tLine.typ = CardType.mergeTL(tLine.typ);
       CardTypeFields fields = null;
       CardType.DescendantCardType dct = null;
       
@@ -433,7 +452,7 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
       }
       
       if (commitCardType)
-        saveCardType(tLine.typ, dct, new CardTypeCancelListener());//saveExploreCardType(tLine.typ);
+        saveCardTypeTL(tLine.typ, dct, new CardTypeCancelListener());//saveExploreCardType(tLine.typ);
 
       fields.titleTA.setReadOnly(false);
       fields.titleTA.setValue(tLine.typ.getTitle());
@@ -450,6 +469,7 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
       fields.colorComp.changeCardType(tLine.typ);
       fields.colorComp.setReadOnly(ro);
 
+      HSess.close();
     }
   }
 
@@ -525,12 +545,11 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
     public int typeOrdinal;
     CardColorChooserComponent colorComp;
     
-   // private CardType activeType;
     public CardTypeFields(CardType typ, GameDesignGlobals globs)
     {
       super(false, false, globs);
       typeOrdinal = typ.getDescendantOrdinal();
-      //activeType = typ;
+
       String posTitle = typ.getTitle();
       String posPrompt = typ.getPrompt();
       String posSummHdr = typ.getSummaryHeader();
@@ -583,7 +602,6 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
     @Override
     public void cardTypeChanged(CardType ct)
     {
-      //activeType = ct;
       okToUpdateDbFlag = false; 
       changeCardType(ct); 
       colorComp.changeCardType(ct);
