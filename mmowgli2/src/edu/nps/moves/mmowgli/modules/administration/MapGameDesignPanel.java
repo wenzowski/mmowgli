@@ -46,6 +46,8 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliEvent;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.GameLinks;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.modules.maps.MmowgliMap;
 import edu.nps.moves.mmowgli.modules.maps.MmowgliMap.MapParms;
@@ -71,12 +73,13 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
   boolean indivUpdatesEnabled = true;
   TextArea latTA, lonTA, zoomTA;//, msidTA;
   
+  @HibernateSessionThreadLocalConstructor
   @SuppressWarnings("serial")
   public MapGameDesignPanel(GameDesignGlobals globs)
   {
     super(false,globs);
-    Game g = Game.get();
-    GameLinks gl = GameLinks.get();
+    Game g = Game.getTL();
+    GameLinks gl = GameLinks.getTL();
     TextArea titleTA;
     final Serializable uid = Mmowgli2UI.getGlobals().getUserID();
    
@@ -97,15 +100,19 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
     latTA.addValueChangeListener(new Property.ValueChangeListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void valueChange(ValueChangeEvent event)
       {
         //System.out.println("lat valueChange");
+        HSess.init();
         try {
           String val = event.getProperty().getValue().toString();
           double lat = Double.parseDouble(val);
-          Game g = Game.get();
+          Game g = Game.getTL();
           g.setMapLatitude(lat);
-          Game.update();
+          Game.updateTL();
 
 /*          latestMapParms.lat = Double.parseDouble(val);
           String url = MmowgliMap.buildGoogleMapURL(latestMapParms.lat, latestMapParms.lon, latestMapParms.zoom, latestMapParms.msid);
@@ -113,11 +120,12 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
           gl.setMmowgliMapLink(url);
           GameLinks.update(gl);
 */
-          GameEventLogger.logGameDesignChange("Map latitude", val, uid);
+          GameEventLogger.logGameDesignChangeTL("Map latitude", val, uid);
         }
         catch (Exception ex) {
           new Notification("Parameter error", "<html>Check for proper decimal format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE,true).show(Page.getCurrent());
         }
+        HSess.close();
       }
     });
 
@@ -130,15 +138,19 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
     lonTA.addValueChangeListener(new Property.ValueChangeListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void valueChange(ValueChangeEvent event)
       {
         //System.out.println("lon valueChange");
+        HSess.init();
         try {       	
           String val = event.getProperty().getValue().toString();                   
           double lon = Double.parseDouble(val);
-          Game g = Game.get();
+          Game g = Game.getTL();
           g.setMapLongitude(lon);
-          Game.update();
+          Game.updateTL();
                    
 /*          latestMapParms.lon = Double.parseDouble(val);
           String url = MmowgliMap.buildGoogleMapURL(latestMapParms.lat, latestMapParms.lon, latestMapParms.zoom, latestMapParms.msid);
@@ -146,11 +158,12 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
           gl.setMmowgliMapLink(url);
           GameLinks.update(gl);
 */          
-          GameEventLogger.logGameDesignChange("Map longitude", val, uid);
+          GameEventLogger.logGameDesignChangeTL("Map longitude", val, uid);
         }
         catch (Exception ex) {
           new Notification("Parameter error", "<html>Check for proper decimal format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE,true).show(Page.getCurrent());
         }
+        HSess.close();
       }
     });
 
@@ -163,25 +176,30 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
     zoomTA.addValueChangeListener(new Property.ValueChangeListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void valueChange(ValueChangeEvent event)
       {
         //System.out.println("zoom valueChange");
+        HSess.init();
         try {
           String val = event.getProperty().getValue().toString();
           int zoom = Integer.parseInt(val);
-          Game g = Game.get();
+          Game g = Game.getTL();
           g.setMapZoom(zoom);
-          Game.update();
+          Game.updateTL();
           //latestMapParms.zoom = Integer.parseInt(val);
          //String url = MmowgliMap.buildGoogleMapURL(latestMapParms.lat, latestMapParms.lon, latestMapParms.zoom, latestMapParms.msid);
          // GameLinks gl = GameLinks.get();
          // gl.setMmowgliMapLink(url);
          // GameLinks.update(gl);
-          GameEventLogger.logGameDesignChange("Map zoom", val, uid);
+          GameEventLogger.logGameDesignChangeTL("Map zoom", val, uid);
         }
         catch (Exception ex) {
           Notification.show("Parameter error", "<html>Check for proper integer format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE);
         }
+        HSess.close();
       }
     });
    /* 
@@ -234,10 +252,11 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
   }
 
   @Override
-  protected void testButtonClicked(ClickEvent ev)
+
+  protected void testButtonClickedTL(ClickEvent ev)
   {
     AppEvent evt = new AppEvent(MmowgliEvent.MAPCLICK, this, null);
-    Mmowgli2UI.getGlobals().getController().miscEvent(evt);   
+    Mmowgli2UI.getGlobals().getController().miscEventTL(evt);   
   }
 
   @Override
