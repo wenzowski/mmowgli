@@ -52,7 +52,8 @@ import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
 import edu.nps.moves.mmowgli.utility.IDNativeButton;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
@@ -80,15 +81,14 @@ public class ActionDashboard extends VerticalLayout implements MmowgliComponent,
   private ActionDashboardTabPanel currentTabPanel;
   private IDNativeButton howToWinActionButt;
   
-  private User me;
-  private Set<ActionPlan> invitedSet;
+  //private User me;
+  //private Set<ActionPlan> invitedSet;
   
+  @HibernateSessionThreadLocalConstructor
   public ActionDashboard()
   {
-    // these 2 used below once, retrieved here for performance
-    me = DBGet.getUserFresh(Mmowgli2UI.getGlobals().getUserID());
-    invitedSet = me.getActionPlansInvited();
-    
+    User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());
+
     actionPlansTab     = new ActionDashboardTabActionPlans();
     myPlansTab         = new ActionDashboardTabMyPlans(me);
     needAuthorsTab     = new ActionDashboardTabNeedAuthors();
@@ -102,7 +102,13 @@ public class ActionDashboard extends VerticalLayout implements MmowgliComponent,
     currentTabPanel  = actionPlansTab;    
   }
   
+  @Override
   public void initGui()
+  {
+    throw new UnsupportedOperationException("");
+  }
+
+  public void initGuiTL()
   {
     setSizeUndefined();
     setWidth(APPLICATION_SCREEN_WIDTH);
@@ -179,22 +185,19 @@ public class ActionDashboard extends VerticalLayout implements MmowgliComponent,
     absL.addComponent(tabsHL,"left:7px;top:8px");
     
     // stack the pages
-    //ComponentAdder.add(absL, actionPlansTab, ACTIONDASHBOARD_TABCONTENT_POS);
     absL.addComponent(actionPlansTab,ACTIONDASHBOARD_TABCONTENT_POS);
-    actionPlansTab.initGui();
+    actionPlansTab.initGuiTL();
     
-    //ComponentAdder.add(absL, myPlansTab, ACTIONDASHBOARD_TABCONTENT_POS);
     absL.addComponent(myPlansTab, ACTIONDASHBOARD_TABCONTENT_POS);
-    myPlansTab.initGui();
+    myPlansTab.initGuiTL();
     myPlansTab.setVisible(false);
     
-    //ComponentAdder.add(absL, needAuthorsTab, ACTIONDASHBOARD_TABCONTENT_POS);
     absL.addComponent(needAuthorsTab, ACTIONDASHBOARD_TABCONTENT_POS);
-    needAuthorsTab.initGui();
+    needAuthorsTab.initGuiTL();
     needAuthorsTab.setVisible(false);
     
-//    User u = DBGet.getUserFresh(app.getUser());
-//    Set<ActionPlan> invitedSet = u.getActionPlansInvited();
+    User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());
+    Set<ActionPlan> invitedSet = me.getActionPlansInvited();
     if(invitedSet != null && (invitedSet.size())>0) {
       Notification note = new Notification(
           "<center>You're invited to an Action Plan!</center>",
@@ -213,11 +216,16 @@ public class ActionDashboard extends VerticalLayout implements MmowgliComponent,
   class TabClickHandler implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
       Button b = event.getButton();
       if(b == currentTabButton)
         return;
+      
+      HSess.init();
       currentTabButton.addStyleName("m-transparent-background");
       currentTabPanel.setVisible(false);
       currentTabButton = b;
@@ -237,16 +245,17 @@ public class ActionDashboard extends VerticalLayout implements MmowgliComponent,
         currentTabPanel = needAuthorsTab;
         needAuthorsTab.setVisible(true);      
       }
+      HSess.close();
     }
   }
 
   @Override
-  public boolean actionPlanUpdatedOob(SessionManager sessMgr, Serializable apId)
+  public boolean actionPlanUpdatedOobTL(Serializable apId)
   {
-    boolean retn = actionPlansTab.actionPlanUpdatedOob(sessMgr, apId);
-    if(myPlansTab.actionPlanUpdatedOob(sessMgr, apId))
+    boolean retn = actionPlansTab.actionPlanUpdatedOobTL(apId);
+    if(myPlansTab.actionPlanUpdatedOobTL(apId))
       retn = true;        
-    if(needAuthorsTab.actionPlanUpdatedOob(sessMgr, apId))
+    if(needAuthorsTab.actionPlanUpdatedOobTL(apId))
       retn = true;
     return retn;
  }
@@ -255,6 +264,8 @@ public class ActionDashboard extends VerticalLayout implements MmowgliComponent,
   @Override
   public void enter(ViewChangeEvent event)
   {
-    initGui();
+    Object sessKey = HSess.checkInit();
+    initGuiTL(); 
+    HSess.checkClose(sessKey);
   }
 }
