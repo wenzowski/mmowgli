@@ -62,10 +62,13 @@ import com.vaadin.ui.Window.CloseListener;
 import edu.nps.moves.mmowgli.*;
 import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
-import edu.nps.moves.mmowgli.components.*;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
+import edu.nps.moves.mmowgli.components.MmowgliComponent;
+import edu.nps.moves.mmowgli.components.SendMessageWindow;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsUserUpdates;
 import edu.nps.moves.mmowgli.utility.BeanContainerWithCaseInsensitiveSorter;
 import edu.nps.moves.mmowgli.utility.MailManager;
@@ -150,6 +153,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     isAttached=false;
   }
 
+  @HibernateSessionThreadLocalConstructor
   public UserAdminPanel()
   {
   }
@@ -179,10 +183,10 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     tableVLayout.addComponent(lab = new Label());
     lab.setHeight("20px");
     tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;color:red;'>" + WARNING_LABEL + "</span>"));
-    tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberUsersLabel() + "</span>"));
+    tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberUsersLabelTL() + "</span>"));
     tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberOnlineLabel() + "</span>"));
-    tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberGameMasters() + "</span>"));
-    tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberCardsLabel() + "</span>"));
+    tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberGameMastersTL() + "</span>"));
+    tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberCardsLabelTL() + "</span>"));
     tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>Double click a row to edit</span>"));
 
     tableVLayout.addComponent(lab = new HtmlLabel("<center><b><span style='font-size:175%'>User Administration</span></b></center>"));
@@ -220,7 +224,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
 
       String[] srchFldsTitles = { "Game name", "ID number", "First name", "Last name", "Email"};
       String[] srchFlds = { UNAME_COL, USER_ID_COL, FIRSTNAME_COL, LASTNAME_COL, EMAIL_COL};
-      //fldCombo = new ComboBox(null,Arrays.asList(srchFldsTitles));
+
       fldCombo.addStyleName("m-useradmin-search-combo");
       fldCombo.setImmediate(true);
       fldCombo.setNewItemsAllowed(false);
@@ -263,18 +267,18 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     } 
   }
 
-  private String getNumberUsersLabel()
+  private String getNumberUsersLabelTL()
   {
-    Session session = VHib.getVHSession();
+    Session session = HSess.get();
     Criteria criteria = session.createCriteria(User.class);
     criteria.setProjection(Projections.rowCount());
     int count = ((Long) criteria.list().get(0)).intValue();
     return "Number of registered players: " + count;
   }
   
-  private String getNumberCardsLabel()
+  private String getNumberCardsLabelTL()
   {
-    Session session = VHib.getVHSession();
+    Session session = HSess.get();
     Criteria criteria = session.createCriteria(Card.class);
     criteria.setProjection(Projections.rowCount());
     int count = ((Long)criteria.list().get(0)).intValue();
@@ -287,9 +291,9 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     return "Number online: " + count;
   }
   
-  private String getNumberGameMasters()
+  private String getNumberGameMastersTL()
   {
-    Session session = VHib.getVHSession();
+    Session session = HSess.get();
     Criteria criteria = session.createCriteria(User.class);
     criteria.add(Restrictions.eq("gameMaster", true));
     criteria.setProjection(Projections.rowCount());
@@ -349,9 +353,13 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       EditPanel ep;
 
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void itemClick(ItemClickEvent event)
       {
         if (event.isDoubleClick()) {
+          HSess.init();
           Window w = new Window("Edit Player Account");
           w.setWidth("620px");
           w.setHeight("505px");
@@ -359,7 +367,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
           
           @SuppressWarnings({ "unchecked" })
           final QuickUser qu = (QuickUser)((BeanItem<QuickUser>)event.getItem()).getBean();
-          User u = DBGet.getUserFresh(qu.getId());
+          User u = DBGet.getUserFreshTL(qu.getId());
           if(u == null) {
             // This has been happening infrequently...some error on signup where (maybe) a user object gets created
             // but doesn't make it into the db.
@@ -389,6 +397,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
               }
             }
           });
+          HSess.close();
         }
       }
     });
@@ -492,6 +501,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     PasswordField pwFld;
     Window win;
 
+    @HibernateSessionThreadLocalConstructor
     public EditPanel(Window w, Object uid)
     {
       this.uid = uid;
@@ -506,7 +516,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       addComponent(formLay);
       setComponentAlignment(formLay,Alignment.TOP_CENTER);
       formLay.setWidth("98%");
-      User u = DBGet.getUserFresh(uid);
+      User u = DBGet.getUserFreshTL(uid);
       TextField f = new TextField("id");
       f.setValue(""+u.getId());
       f.setReadOnly(true);
@@ -515,7 +525,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
 
       HorizontalLayout hl;
        // A current admin can allow others to be admins
-      User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
       if(me.isAdministrator()) {
         hl = new HorizontalLayout();
         formLay.addComponent(hl);       
@@ -598,8 +608,6 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       hl.addComponent(b = new Button("resend confirmation email", new ResendListener()));
       formLay.addComponent(hl);
            
-     // formLay.addComponent(firstTf);
-
       lastTf = new TextField("real last name");
       lastTf.setValue(upii.getRealLastName()); //u.getRealLastName());
       lastTf.setWidth(COMMON_FIELD_WIDTH);
@@ -659,23 +667,34 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
 
       Button apply = new Button("Apply and close", new Button.ClickListener()
       {
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void buttonClick(ClickEvent event)
         {
-          if(loadAndSaveUser()) {
+          HSess.init();
+          if(loadAndSaveUserTL()) {
             closePopup(event);
           }
+          HSess.close();
         }
       });
       buttons.addComponent(apply);
       
       Button gotoProfileButt = new Button("Apply and go to user profile", new Button.ClickListener()
       {
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void buttonClick(ClickEvent event)
         {
-          if(loadAndSaveUser()) {
+          HSess.init();
+          
+          if(loadAndSaveUserTL()) {          
             closePopup(event);
-            Mmowgli2UI.getGlobals().getController().miscEvent(new AppEvent(MmowgliEvent.SHOWUSERPROFILECLICK,null,user.getId()));
-          }          
+            Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(MmowgliEvent.SHOWUSERPROFILECLICK,event.getButton(),user.getId()));
+          }             
+          HSess.close();
         }
       });
       buttons.addComponent(gotoProfileButt);
@@ -707,47 +726,62 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     class ResendListener implements ClickListener
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        User u = DBGet.getUserFresh(uid);
+        HSess.init();
+        User u = DBGet.getUserFreshTL(uid);
         List<String> lis = VHibPii.getUserPiiEmails(u.getId());
         String email = lis.get(0);
-        String gameUrl = AppMaster.getInstance().getAppUrlString();
+        String gameUrl = AppMaster.instance().getAppUrlString();
         
         boolean warn = false;
         if(confirmedCb.getValue() == false) {
           confirmedCb.setValue(true);
           warn = true;
         }
-        Mmowgli2UI.getGlobals().getAppMaster().getMailManager().sendConfirmedReminder(email, u.getUserName(), gameUrl);
+        Mmowgli2UI.getGlobals().getAppMaster().getMailManager().sendConfirmedReminderTL(email, u.getUserName(), gameUrl);
         if(warn)
           Notification.show("Email sent", "Be sure to \"apply\" before closing dialog.",Notification.Type.WARNING_MESSAGE);
         else
           Notification.show("Email sent",Notification.Type.WARNING_MESSAGE);
+        HSess.close();
       }         
     }
     
     class EmailListener implements ClickListener
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        User u = DBGet.getUserFresh(uid);
+        HSess.init();
+        User u = DBGet.getUserFreshTL(uid);
         if(u.isOkEmail()) {
           new SendMessageWindow(u, false, MailManager.Channel.EXTERNALEMAIL,true);
         }
+        HSess.close();
       }   
     }
     
     class InGameMailerListener implements ClickListener
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        User u = DBGet.getUserFresh(uid);
+        HSess.init();
+        User u = DBGet.getUserFreshTL(uid);
         if(u.isOkGameMessages()) {
           new SendMessageWindow(u, false, MailManager.Channel.INGAMEMESSAGE);
         }
+        HSess.close();
       }      
     }
     
@@ -774,11 +808,11 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     /**
      * @return true if the account is truely to be disabled
      */
-    private boolean handleDisabled()
+    private boolean handleDisabledTL()
     {
       boolean wantToDisable = lockedOutCb.getValue();
-      User badGuy = DBGet.getUser(uid);
-      User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+      User badGuy = DBGet.getUserTL(uid);
+      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
       String message = "";
       GameEvent.EventType lockEvent = null;
       Long lockParameter = null;
@@ -816,8 +850,8 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
         message = message + " : "+los.toString();
         
       if (lockParameter != null) {
-        GameEvent.save(new GameEvent(lockEvent, message, lockParameter));
-        GameEvent.save(new GameEvent(GameEvent.EventType.MESSAGEBROADCASTGM, message));
+        GameEvent.saveTL(new GameEvent(lockEvent, message, lockParameter));
+        GameEvent.saveTL(new GameEvent(GameEvent.EventType.MESSAGEBROADCASTGM, message));
       }
       return wantToDisable;
     }
@@ -828,7 +862,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       return false;
     }
     
-    private boolean loadAndSaveUser()
+    private boolean loadAndSaveUserTL()
     {
       String newUname = tweekString(uNameTf.getValue());
       if(newUname == null || newUname.length()<=0)
@@ -840,10 +874,10 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       if(newEmail == null || newEmail.length()<=0)
         return errorOut("Email address must be entered");
       
-      user = DBGet.getUserFresh(uid);
+      user = DBGet.getUserFreshTL(uid);
       String oldUname = user.getUserName();
       
-      user.setAccountDisabled(handleDisabled());
+      user.setAccountDisabled(handleDisabledTL());
       user.setGameMaster(gameMasterCb.getValue());
       if(gameAdminCb != null)
         user.setAdministrator(gameAdminCb.getValue());
@@ -864,27 +898,28 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
 
       VHibPii.newUserPiiEmail((Long)uid,newEmail);
 
-      User.update(user);
+      User.updateTL(user);
       VHibPii.update(upii);
       
       // if the user name has been changed, a few more things need to happen
       if(!newUname.equals(oldUname)) {
         @SuppressWarnings("unchecked")
-        List<Card> cardList = (List<Card>)VHib.getVHSession().createCriteria(Card.class)
+        List<Card> cardList = (List<Card>)HSess.get().createCriteria(Card.class)
                               .add(Restrictions.eq("author", user)).list();
         for(Card c : cardList) {
           c.setAuthorName(newUname);  // It already has my name, but holding the author name in the card is an optimization
           //Card.update(c);
-          Sess.sessUpdate(c);
+          //Sess.sessUpdate(c);
+          Card.updateTL(c);;
         }
         
         Set<ActionPlan> apAuthored = user.getActionPlansAuthored();
         for(ActionPlan ap : apAuthored) {
           ap.rebuildQuickAuthorList();  // also an optimization
-          ActionPlan.update(ap);
+          ActionPlan.updateTL(ap);
         }
         
-        GameEventLogger.logUserNameChanged(user.getId(), Mmowgli2UI.getGlobals().getUserID(), oldUname, newUname);
+        GameEventLogger.logUserNameChangedTL(user.getId(), Mmowgli2UI.getGlobals().getUserID(), oldUname, newUname);
       }
       return true;
     }
@@ -977,7 +1012,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
   }
 
   @Override
-  public boolean userUpdated_oob(SingleSessionManager mgr, Serializable uId)
+  public boolean userUpdated_oobTL(Serializable uId)
   {
     // Not used here, we update the table container directly after edits.
     return false;
