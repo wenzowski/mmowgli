@@ -33,8 +33,6 @@
 */
 package edu.nps.moves.mmowgli.modules.actionplans;
 
-import org.hibernate.Session;
-
 import com.vaadin.event.FieldEvents.FocusEvent;
 import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.server.ExternalResource;
@@ -50,8 +48,10 @@ import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.Media;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-import edu.nps.moves.mmowgli.utility.M;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
@@ -70,8 +70,6 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
 {
   private static final long serialVersionUID = -1414358432821912217L;
   
-  //private String HEIGHT = "310px";
-  //private String HEIGHTPLUS = "344px"; //with open save/cancel panel
   public static String WIDTH = "309px";
   private String PLAYER_HEIGHT = "207px"; 
   private int PLAYERINDEX_IN_LAYOUT = 1;
@@ -109,9 +107,7 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
     
     FocusHandler fHandler = new FocusHandler();
     caption.addFocusListener((FocusListener)fHandler);
-    //caption.addListener((BlurListener)fHandler);
     title.addFocusListener((FocusListener)fHandler);
-    //title.addListener((BlurListener)fHandler);
      
     captionSavePan = new HorizontalLayout();
     captionSavePan.setSpacing(true);
@@ -143,6 +139,9 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
     private static final long serialVersionUID = -5412529699678903650L;
 
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void focus(FocusEvent event)
     {
       String s = "";
@@ -160,44 +159,55 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
         s = "title ";
         titleFocused=true;
       }
+      HSess.init();
       captionSavePan.setVisible(true);
       String substring = m.getType()==MediaType.IMAGE?" is editing image "+s+"number ":" is editing video "+s+"number ";
-      sendStartEditMessage( DBGet.getUser(Mmowgli2UI.getGlobals().getUserID()).getUserName()+substring+(idx+1));
+      sendStartEditMessage( DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).getUserName()+substring+(idx+1));
+      HSess.close();
     }
    
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
       if(event.getSource()  == canButt) {
-        m = Media.get(m.getId());  // might have changed under us, and we don't update fields being edited
+        m = Media.getTL(m.getId());  // might have changed under us, and we don't update fields being edited
         setValueIfNonNull(caption,m.getDescription());
         setValueIfNonNull(title,m.getTitle());
       }
       else { // Save
         m.setDescription(nullOrString(caption.getValue()));
         m.setTitle(nullOrString(title.getValue()));
-        Media.update(m);
+        Media.updateTL(m);
       }
       captionSavePan.setVisible(false);
       titleFocused = false;
       captionFocused = false;
+      HSess.close();
     }     
   }
+  
   public void setIdx(int idx)
   {
     this.idx = idx;
   }
+  
   private String nullOrString(Object o)
   {
     if(o == null)
       return null;
     return o.toString();
   }
+  
   public void setReadOnly(boolean ro)
   {
     caption.setReadOnly(ro);
     title.setReadOnly(ro);
   }
+  
   public void setMedia(Media m)
   {
     this.m = m;
@@ -207,9 +217,9 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
       setVideoMedia(m);
   }
   
-  public void mediaUpdatedOob(SessionManager sMgr)
+  public void mediaUpdatedOobTL()
   {
-    Media oobM = getOobMedia(sMgr,null);
+    Media oobM = getOobMediaTL(null);
     if(oobM == null)  // may be null if image removed
       return;
     if(!titleFocused)
@@ -218,11 +228,11 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
       setCaptionVal(oobM);
   }
 
-  private Media getOobMedia(SessionManager sMgr, Media oobM)
+  private Media getOobMediaTL(Media oobM)
   {
     if(oobM != null)
       return oobM;
-    return (Media)M.getSession(sMgr).get(Media.class,m.getId()); // this can be null if the media was deleted
+    return (Media)HSess.get().get(Media.class,m.getId()); // this can be null if the media was deleted
   }
   
   public Media getMedia()
@@ -233,24 +243,21 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
   private Component buildPlayer(Media m)
   {
     try {
-      
-      Embedded player = new Embedded();
-      player.setType(Embedded.TYPE_OBJECT);
-      player.setMimeType("application/x-shockwave-flash");
-      player.setSource(new ExternalResource("http://www.youtube.com/v/"+m.getUrl()));
-      //todo v7 check
-/*        ytp.setVideoId(vidMedia.getUrl());
-      ytp.setAllowFullscreen(true);
-      ytp.setShowRelated(false); // newly added
-*/
-     player.setWidth(WIDTH);
-     player.setHeight(PLAYER_HEIGHT);
-     
-     placeHolder = new Label("Mmowgli Video");
-     placeHolder.setWidth(WIDTH);
-     placeHolder.setHeight(PLAYER_HEIGHT);
-     
-     return player;
+      Flash ytp = new Flash();
+      ytp.setSource(new ExternalResource("http://www.youtube.com/v/" + m.getUrl()));
+      ytp.setParameter("allowFullScreen", "true");
+      ytp.setParameter("showRelated", "false");
+      ytp.setWidth(150.0f, Unit.PIXELS);
+      ytp.setHeight(150.0f, Unit.PIXELS);
+
+      ytp.setWidth(WIDTH);
+      ytp.setHeight(PLAYER_HEIGHT);
+
+      placeHolder = new Label("Mmowgli Video");
+      placeHolder.setWidth(WIDTH);
+      placeHolder.setHeight(PLAYER_HEIGHT);
+
+      return ytp;
     }
     catch(Exception e) {
       return new Label("Wrong media type");
@@ -440,9 +447,5 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
       UI.getCurrent().addWindow(win);
       win.center();
     }
-
   }
-  
-  public void saveCaptionIfChanged(Session sess){} //todo remove
-  
 }
