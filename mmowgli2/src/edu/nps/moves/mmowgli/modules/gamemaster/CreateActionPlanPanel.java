@@ -60,7 +60,8 @@ import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2.UserList;
 import edu.nps.moves.mmowgli.modules.actionplans.AddAuthorDialog;
 import edu.nps.moves.mmowgli.modules.cards.CardChainTreeTablePopup;
@@ -116,7 +117,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
     private Game game; // for default text
     private boolean newAp;
     private TreeSet<User> invitees;
-    private UserList inviteeLis; // ListSelect inviteeLis;
+    private UserList inviteeLis;
     private Button inviteButt;
 
     private Button clearListButt;
@@ -127,6 +128,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
     private ClickListener closer;
     private Form form;
     
+    @HibernateSessionThreadLocalConstructor
     public CreateActionPlanLayout(Object apId, Object rootCardId, ClickListener closer)
     {
       this.apId = apId;
@@ -137,12 +139,12 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
         newAp = true;
         ap = new ActionPlan();
         ap.setCreationDate(new Date()); // now
-        ap.setCreatedInMove(Move.getCurrentMove());
+        ap.setCreatedInMove(Move.getCurrentMoveTL());
       }
       else
-        ap = ActionPlan.get(apId);
+        ap = ActionPlan.getTL(apId);
 
-      game = Game.get(1L);
+      game = Game.getTL();
       invitees = new TreeSet<User>(new User.AlphabeticalComparator());
     }
 
@@ -162,7 +164,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
       vLay.setMargin(true);
 
       if (!newAp) {
-        ap = ActionPlan.get(apId);
+        ap = ActionPlan.getTL(apId);
       }
       else
         fillDefaults(ap); // won't cut it, never used
@@ -257,14 +259,19 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
       includeAuthorsButt.addClickListener(new ClickListener()
       {
         @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void buttonClick(ClickEvent event)
         {
-          Set<User> set = buildCardChainAuthorList();
+          HSess.init();
+          Set<User> set = buildCardChainAuthorListTL();
           if (set == null)
             return;
 
           for (User u : set)
             handleAddUser(u);
+          HSess.close();
         }
       });
 
@@ -303,37 +310,41 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
       Button apply = new Button("Save and go to Action Dashboard");
       apply.addClickListener(new Button.ClickListener()
       {
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void buttonClick(ClickEvent event)
         {
+          HSess.init();
           try {
             if (checkInvitees() && checkChainRoot()) {
               form.commit();
-              ChatLog.save(ap.getChatLog());
+              ChatLog.saveTL(ap.getChatLog());
               
-              notifyInvitees(); // put invitees on list, but doesn't update (which was a bug)
+              notifyInviteesTL(); // put invitees on list, but doesn't update (which was a bug)
               
               if (newAp) {
                 GoogleMap gm = new GoogleMap(); // put a default map in place
-                Game game = Game.get(1L);
+                Game game = Game.getTL();
                 gm.setLatCenter(game.getDefaultActionPlanMapLat());
                 gm.setLonCenter(game.getDefaultActionPlanMapLon());
-                GoogleMap.save(gm);
+                GoogleMap.saveTL(gm);
                 ap.setMap(gm);
                 
                 // This little squirrly bit puts the appropriate fields into the history lists
-                ap.setTitleWithHistory(ap.getTitle());
-                ap.setSubTitleWithHistory(ap.getSubTitle());
-                ap.setHowWillItChangeTextWithHistory(ap.getHowWillItChangeText());
-                ap.setHowWillItWorkTextWithHistory(ap.getHowWillItWorkText());
-                ap.setWhatIsItTextWithHistory(ap.getWhatIsItText());
-                ap.setWhatWillItTakeTextWithHistory(ap.getWhatWillItTakeText());
+                ap.setTitleWithHistoryTL(ap.getTitle());
+                ap.setSubTitleWithHistoryTL(ap.getSubTitle());
+                ap.setHowWillItChangeTextWithHistoryTL(ap.getHowWillItChangeText());
+                ap.setHowWillItWorkTextWithHistoryTL(ap.getHowWillItWorkText());
+                ap.setWhatIsItTextWithHistoryTL(ap.getWhatIsItText());
+                ap.setWhatWillItTakeTextWithHistoryTL(ap.getWhatWillItTakeText());
                 
-                ActionPlan.save(ap); // saveorupdate does not get broadcast, save and update do
+                ActionPlan.saveTL(ap); // saveorupdate does not get broadcast, save and update do
               }
               else
-                ActionPlan.update(ap);
+                ActionPlan.updateTL(ap);
                        
-              Mmowgli2UI.getGlobals().getController().miscEvent(new AppEvent(MmowgliEvent.TAKEACTIONCLICK, CreateActionPlanLayout.this, null));
+              Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(MmowgliEvent.TAKEACTIONCLICK, CreateActionPlanLayout.this, null));
             }
             else {
               return;  // leave window open
@@ -343,6 +354,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
             System.err.println(e.getLocalizedMessage());
             // Ignored, we'll let the Form handle the errors
           }
+          HSess.close();
           
           if(closer != null)
             closer.buttonClick(event);
@@ -359,19 +371,19 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
       baseVLay.setComponentAlignment(buttons, Alignment.TOP_RIGHT);
 
       if (rootCardId != null) {
-        Card c = DBGet.getCard(rootCardId);
+        Card c = DBGet.getCardTL(rootCardId);
         cardIdTF.setValue("" + c.getId());
         cardText.setValue(c.getText());
         ((TextField)form.getField("title")).setValue(c.getText());  // put as title to start with
         ap.setChainRoot(c);
-        checkPreviousActionPlan(c);
+        checkPreviousActionPlanTL(c);
       }
       cardIdTF.addValueChangeListener(new CardIdChangedListener());
     }
 
-    private void checkPreviousActionPlan(Card root)
+    private void checkPreviousActionPlanTL(Card root)
     {
-      Session sess = VHib.getVHSession();
+      Session sess = HSess.get();
       Criteria criteria = sess.createCriteria(ActionPlan.class);
       criteria.add(Restrictions.eq("chainRoot", root));
       
@@ -388,6 +400,9 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
     class CardIdChangedListener implements ValueChangeListener
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void valueChange(ValueChangeEvent event)
       {
         String idStr = (String) cardIdTF.getValue();
@@ -396,16 +411,16 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
           rootCardId = null;
           return;
         }
-
+        HSess.init();
         try {
           Long id = Long.parseLong(idStr);
-          Card crd = DBGet.getCard(id);
+          Card crd = DBGet.getCardTL(id);
           /*if (!crd.getCardType().isIdeaCard()) {
             cardIdTF.getWindow()
                 .showNotification("Action Plan card chain roots must be \"Idea\" cards (Disrupt, Protect)", Notification.TYPE_HUMANIZED_MESSAGE);
             return;
           } */
-          checkPreviousActionPlan(crd);
+          checkPreviousActionPlanTL(crd);
           rootCardId = id;
           cardText.setValue(crd.getText());
           //Put the card text as the title if the title is empty
@@ -418,6 +433,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
         catch (Throwable t) {
           Notification.show("Invalid card id", Notification.Type.WARNING_MESSAGE);
         }
+        HSess.close();
       }
     }
 
@@ -435,22 +451,22 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
       return true;
     }
 
-    private Set<User> buildCardChainAuthorList()
+    private Set<User> buildCardChainAuthorListTL()
     {
       if (ap == null || ap.getChainRoot() == null)
         return null;
 
       HashSet<User> set = new HashSet<User>();
-      addAuthors(ap.getChainRoot(), set);
+      addAuthorsTL(ap.getChainRoot(), set);
       return set;
     }
 
-    private void addAuthors(Card c, HashSet<User> set)
+    private void addAuthorsTL(Card c, HashSet<User> set)
     {
-      c = Card.merge(c);
+      c = Card.mergeTL(c);
       set.add(c.getAuthor());
       for (Card ch : c.getFollowOns())
-        addAuthors(ch, set); // recurse
+        addAuthorsTL(ch, set); // recurse
     }
 
     // Called when someone has created an action plan without inviting anybody
@@ -469,17 +485,17 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
       }
     }
 
-    private void notifyInvitees()
+    private void notifyInviteesTL()
     {
       for (User u : invitees) {
-        notifyApInvitee(u, ap);
+        notifyApInviteeTL(u, ap);
       }
       // done by caller    ActionPlan.update(ap);
     }
 
-    public static void notifyApInvitee(User u, ActionPlan ap)
+    public static void notifyApInviteeTL(User u, ActionPlan ap) //todo TL
     {
-      u = DBGet.getUserFresh(u.getId()); // fresh get for this session
+      u = DBGet.getUserFreshTL(u.getId()); // fresh get for this session
       Set<ActionPlan> set = u.getActionPlansInvited();
       if (set == null)
         u.setActionPlansInvited(set = new HashSet<ActionPlan>(1));
@@ -490,17 +506,21 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
         ap.addInvitee(u); //ap.getInvitees().add(u);
         // dont: ActionPlan.update(ap); // ap may be new, not saved
       }
-      User.update(u);
+      User.updateTL(u);
 
-      Mmowgli2UI.getGlobals().getAppMaster().getMailManager().actionPlanInvite(ap, u);
+      Mmowgli2UI.getGlobals().getAppMaster().getMailManager().actionPlanInviteTL(ap, u);
     }
     
     @SuppressWarnings("serial")
     class ViewChainListener implements ClickListener
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       { 
+        HSess.init();
         final CardChainTreeTablePopup chainpopup = new CardChainTreeTablePopup(rootCardId, true, true);   //model, show save
         chainpopup.center();
         // use window where source component exists
@@ -520,6 +540,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
             }            
           }         
         });
+        HSess.close();
       }     
     }
     
@@ -536,18 +557,23 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
         dial.addListener(new CloseListener()
         {
           @Override
+          @MmowgliCodeEntry
+          @HibernateOpened
+          @HibernateClosed
           public void windowClose(CloseEvent e)
           {
+            HSess.init();
             if (dial.addClicked) {
               Object o = dial.getSelected();
 
               // no, inviteeLis.removeAllItems();
 
               if (o instanceof Set<?>)
-                handleMultipleUsers((Set<?>) o);
+                handleMultipleUsersTL((Set<?>) o);
               else
-                handleSingleUser(o);
+                handleSingleUserTL(o);
             }
+            HSess.close();
           }
         });
         UI.getCurrent().addWindow(dial);
@@ -555,7 +581,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
       }
 
       @SuppressWarnings("unchecked")
-      private void handleMultipleUsers(Set<?> set)
+      private void handleMultipleUsersTL(Set<?> set)
       {
         if (set.size() > 0) {
           Object o = set.iterator().next();
@@ -569,20 +595,20 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
             Iterator<QuickUser> itr = (Iterator<QuickUser>) set.iterator();
             while (itr.hasNext()) {
               QuickUser qu = itr.next();
-              handleAddUser(DBGet.getUser(qu.id));
+              handleAddUser(DBGet.getUserTL(qu.id));
             }
           }
         }
       }
 
-      private void handleSingleUser(Object o)
+      private void handleSingleUserTL(Object o)
       {
         if (o instanceof User) {
           handleAddUser((User) o);
         }
         else if (o instanceof QuickUser) {
           QuickUser qu = (QuickUser) o;
-          handleAddUser(DBGet.getUser(qu.id));
+          handleAddUser(DBGet.getUserTL(qu.id));
         }
       }
     }
