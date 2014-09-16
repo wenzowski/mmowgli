@@ -36,10 +36,16 @@ package edu.nps.moves.mmowgli.modules.administration;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.Page;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Embedded;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextArea;
 
-import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.AppMaster;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 
 /**
@@ -58,11 +64,12 @@ public class ReportsGameDesignPanel extends AbstractGameBuilderPanel
 {
   private static final long serialVersionUID = -5845831597615764415L;
 
+  @HibernateSessionThreadLocalConstructor
   @SuppressWarnings("serial")
   public ReportsGameDesignPanel(GameDesignGlobals globs)
   {
     super(false,globs);
-    Game g = Game.get(1L);
+    Game g = Game.getTL();
     long period = g.getReportIntervalMinutes();
     
     TextArea ta;
@@ -76,9 +83,13 @@ public class ReportsGameDesignPanel extends AbstractGameBuilderPanel
     ta.addValueChangeListener(new Property.ValueChangeListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void valueChange(ValueChangeEvent event)
       {
         //System.out.println("msid valueChange");
+        HSess.init();
         try {
           String val = event.getProperty().getValue().toString();
           long lg = Long.parseLong(val);
@@ -86,17 +97,18 @@ public class ReportsGameDesignPanel extends AbstractGameBuilderPanel
             throw new Exception();
           
           MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-          Game gm = Game.get(1L);
+          Game gm = Game.getTL(1L);
           gm.setReportIntervalMinutes(lg);
-          Game.update(gm);
-          GameEventLogger.logGameDesignChange("Report interval", ""+""+lg, globs.getUserID());
+          Game.updateTL();
+          GameEventLogger.logGameDesignChangeTL("Report interval", ""+""+lg, globs.getUserID());
          
           // Wake it up
-          AppMaster.getInstance().pokeReportGenerator();
+          AppMaster.instance().pokeReportGenerator();
         }
         catch (Exception ex) {
           new Notification("Parameter error", "<html>Check for proper positive integer format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE,true).show(Page.getCurrent());
         }
+        HSess.close();
       }
     });
     addEditBoolean("2 Indicate PDF reports available","Game.pdfAvailable",g, 1L, "PdfAvailable");
