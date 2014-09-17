@@ -35,15 +35,9 @@ package edu.nps.moves.mmowgli.db;
 
 import java.io.Serializable;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * Badges are awards that may span games. Eg, for being a good boy in the
@@ -56,6 +50,16 @@ import edu.nps.moves.mmowgli.hibernate.VHib;
 public class Badge implements Serializable
 {
    private static final long serialVersionUID = -8157473734919098126L;
+   
+   public static long BADGE_ONE_ID   = 1; // played innov and defend
+   public static long BADGE_TWO_ID   = 2; // played each kind
+   public static long BADGE_THREE_ID = 3; // played root of super-active
+   public static long BADGE_FOUR_ID  = 4; // played super-interesting
+   public static long BADGE_FIVE_ID  = 5; // played a favorite
+   public static long BADGE_SIX_ID   = 6; // accepted authorship invite
+   public static long BADGE_AP_AUTHOR = 6;
+   public static long BADGE_SEVEN_ID = 7; // ranked in top 50
+   public static long BADGE_EIGHT_ID = 8; // logged in each day
 
     /** Primary key, auto-generated */
     long badge_pk;
@@ -71,7 +75,7 @@ public class Badge implements Serializable
 
     public static Badge get(Object id)
     {
-      return (Badge)VHib.getVHSession().get(Badge.class, (Serializable)id);
+      return (Badge)HSess.get().get(Badge.class, (Serializable)id);
     }
     
     /**
@@ -138,9 +142,3 @@ public class Badge implements Serializable
       this.media = media;
     }
 }
-
-
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
