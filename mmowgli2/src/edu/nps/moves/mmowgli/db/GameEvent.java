@@ -33,6 +33,8 @@
  */
 package edu.nps.moves.mmowgli.db;
 
+import static edu.nps.moves.mmowgli.hibernate.DbUtils.len511;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -40,11 +42,7 @@ import javax.persistence.*;
 
 import org.hibernate.Session;
 
-//import com.vaadin.data.hbnutil.HbnContainer;
-
-//import edu.nps.moves.mmowgli.hibernate.VHib;
-import edu.nps.moves.mmowgli.hibernate.Sess;
-import static edu.nps.moves.mmowgli.hibernate.DbUtils.*;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * GameEvent.java Created on May 3, 2010
@@ -155,17 +153,15 @@ public class GameEvent implements Serializable
     setParameter(parameter);    
   }
   
-/*  @SuppressWarnings("unchecked")
-  public static HbnContainer<GameEvent> getContainer()
+  public static void saveTL(GameEvent m)
   {
-    return (HbnContainer<GameEvent>) HibernateContainers.getContainer(GameEvent.class);
-  }
-*/
-  public static void save(GameEvent m)
-  {
-    Sess.sessSave(m);
+    HSess.get().save(m);
   }
   
+  public static GameEvent getTL(Serializable id)
+  {
+    return get(id,HSess.get());
+  }
   public static GameEvent get(Serializable id, Session sess)
   {
     return (GameEvent)sess.get(GameEvent.class, id);
