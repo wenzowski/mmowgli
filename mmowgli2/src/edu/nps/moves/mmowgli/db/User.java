@@ -33,7 +33,7 @@
 */
 package edu.nps.moves.mmowgli.db;
 
-import static edu.nps.moves.mmowgli.hibernate.DbUtils.len255;
+import static edu.nps.moves.mmowgli.hibernate.DbUtils.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -50,8 +50,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.search.annotations.*;
 import org.jasypt.hibernate4.type.EncryptedStringType;
 
-import edu.nps.moves.mmowgli.hibernate.Sess;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /** Used for jasypt encryption of fields */
 
@@ -170,24 +169,7 @@ public class User implements Serializable
   public User(String userName, String encryptedPassword)
   {
     this.setUserName(userName);
-/*
-    HashMap<Long, Float> hmf = new HashMap<Long, Float>(3);
-    hmf.put(1L, 0.0f);
-    hmf.put(2L, 0.0f);
-    hmf.put(3L, 0.0f);
-    this.setPointsByMove(hmf);
-
-    hmf = new HashMap<Long, Float>(3);
-    hmf.put(1L, 0.0f);
-    hmf.put(2L, 0.0f);
-    hmf.put(3L, 0.0f);
-    this.setInnovationByMove(hmf);
-*/
-    }
-
-  /*
-   * Use this one to build a Hibernate db object from one that comes from the client
-   */
+  }
 
   /** No-args constructor, used by hibernate */
   public User()
@@ -195,78 +177,46 @@ public class User implements Serializable
     this(null, null);
   }
 
-  public static void update(User u)
+  public static void updateTL(User u)
   {
-    Sess.sessUpdate(u);
+    forceUpdateEvent(u);
+    HSess.get().update(u);
   }
-
+  
   public static User merge(User u, Session sess)
   {
     return (User) sess.merge(u);
   }
   
-  public static User merge(User u)
+  public static User mergeTL(User u)
   {
-    return User.merge(u,VHib.getVHSession());
+    return User.merge(u,HSess.get());
   }
 
   public static User get(Serializable id, Session sess)
   {
     return (User) sess.get(User.class, id);
   }
-  public static User get(Serializable id)
+  
+  public static User getTL(Serializable id)
   {
-    return get(id,VHib.getVHSession());
-  }
-  public static void save(User u)
-  {
-    Sess.sessSave(u);
+    return get(id,HSess.get());
   }
 
-  public static void delete(User u)
+  public static void saveTL(User u)
   {
-    VHib.getVHSession().delete(u);
+    HSess.get().save(u);
   }
-/*
-  @SuppressWarnings("unchecked")
-  public static HbnContainer<User> getContainer()
+  
+  public static void deleteTL(User u)
   {
-    return (HbnContainer<User>) HibernateContainers.getContainer(User.class);
-  }
-
-  public static HbnContainer<User> getScoreSortedContainer()
-  {
-    return new UserScoreSortedContainer<User>();
+    HSess.get().delete(u);;
   }
 
-  @SuppressWarnings({ "serial", "unchecked" })
-  public static class UserScoreSortedContainer<T> extends HbnContainer<T>
+  public static User getUserWithUserNameTL(String uName)
   {
-    public UserScoreSortedContainer()
-    {
-      this(HibernateContainers.getManager());
-    }
-
-    public UserScoreSortedContainer(SessionManager mgr)
-    {
-      super((Class<T>) User.class, mgr);
-    }
-
-    @Override
-    protected Criteria getBaseCriteria()
-    {
-      Criteria crit = super.getBaseCriteria(); // gets all cards
-      crit.addOrder(Order.desc("basicScore"));
-
-      return crit;
-    }
+    return getUserWithUserName(HSess.get(), uName);
   }
-*/
-  public static User getUserWithUserName(String uName)
-  {
-    return getUserWithUserName(VHib.getVHSession(), uName);
-  }
-
   @SuppressWarnings("unchecked")
   public static User getUserWithUserName(Session session, String pUserName)
   {
@@ -552,31 +502,7 @@ public class User implements Serializable
   {
     this.favoriteCards = favoriteCards;
   }
-/*
-  @ElementCollection
-  @CollectionTable(name = "User_PointsByMove")
-  public Map<Long, Float> getPointsByMove()
-  {
-    return pointsByMove;
-  }
 
-  public void setPointsByMove(Map<Long, Float> pointsByMove)
-  {
-    this.pointsByMove = pointsByMove;
-  }
-
-  @ElementCollection
-  @CollectionTable(name = "User_InnovationByMove")
-  public Map<Long, Float> getInnovationByMove()
-  {
-    return innovationByMove;
-  }
-
-  public void setInnovationByMove(Map<Long, Float> innovationByMove)
-  {
-    this.innovationByMove = innovationByMove;
-  }
-*/
   //@Type(type = "encryptedString")
   @Transient
   public String getTwitterId()
@@ -601,8 +527,10 @@ public class User implements Serializable
     this.facebookId = facebookId;
   }
 
+  // We'll use this as an updater, so it must be basic.
   //@Type(type = "encryptedString")
-  @Transient
+  //@Transient
+  @Basic
   public String getLinkedInId()
   {
     return linkedInId;
@@ -790,12 +718,16 @@ public class User implements Serializable
   // Used by mmowgli code
   // the regular getter won't work always since we have little control over when Hibernate calls it.  The game instance
   // has not been created.
-  public void mmowgliSetBasicScore(float f)
+//  public void mmowgliSetBasicScore(float f)
+//  {
+//    basicScore = f;
+//    setBasicScoreMoveX(f, Game.get().getCurrentMove().getNumber());    
+//  }
+  public void mmowgliSetBasicScoreTL(float f)
   {
     basicScore = f;
-    setBasicScoreMoveX(f, Game.get().getCurrentMove().getNumber());    
+    setBasicScoreMoveX(f, Game.getTL().getCurrentMove().getNumber());
   }
-  
   /* Used when switching moves */
   public void setBasicScoreOnly(float f)
   {
@@ -813,10 +745,10 @@ public class User implements Serializable
     innovationScore = f;
   }
 
-  public void mmowgliSetInnovationScore(float f)
+  public void mmowgliSetInnovationScoreTL(float f)
   {
     innovationScore = f;
-    setInnovationScoreMoveX(f, Game.get().getCurrentMove().getNumber());    
+    setInnovationScoreMoveX(f, Game.getTL().getCurrentMove().getNumber());    
   }
   
   /* Used when switching moves */
