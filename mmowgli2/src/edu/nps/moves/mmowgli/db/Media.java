@@ -42,7 +42,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * Media.java
@@ -114,46 +114,40 @@ public class Media implements Serializable
     setSource(source);
   }
 
-  public static void save(Media med)
+  public static void saveTL(Media med)
   {
-    VHib.getVHSession().save(med);   
+    HSess.get().save(med);
   }
 
-  public static void update(Media med)
+  public static void updateTL(Media med)
   {
-    VHib.getVHSession().update(med);
-  }
-  
-  public static void delete(Media med)
-  {
-    VHib.getVHSession().delete(med);
-  }
-  
-  public static Media merge(Media med)
-  {
-    return (Media)VHib.getVHSession().merge(med);
+    HSess.get().update(med);
   }
 
+  public static void deleteTL(Media med)
+  {
+    HSess.get().delete(med);
+  }
 
-  public static Media get(Object o)
+  public static Media getTL(Object o)
   {
-    return (Media)VHib.getVHSession().get(Media.class, (Serializable)o);
+    return (Media)HSess.get().get(Media.class, (Serializable)o);
   }
   
-  public static Media getDefaultCallToActionVideo()
+  public static Media getDefaultCallToActionVideoTL()
   {
-    return getDefaultVideo(DEFAULT_CALLTOACTION_VIDEO_HANDLE);
+    return getDefaultVideoTL(DEFAULT_CALLTOACTION_VIDEO_HANDLE);
   }
   
-  public static Media getDefaultOrientationVideo()
+  public static Media getDefaultOrientationVideoTL()
   {
-    return getDefaultVideo(DEFAULT_ORIENTATION_VIDEO_HANDLE);
+    return getDefaultVideoTL(DEFAULT_ORIENTATION_VIDEO_HANDLE);
   }
   
   @SuppressWarnings("unchecked")
-  private static Media getDefaultVideo(String handle) 
+  private static Media getDefaultVideoTL(String handle) 
   {
-    Session sess = VHib.getVHSession();
+    Session sess = HSess.get();;
     Criteria crit = sess.createCriteria(Media.class)
                         .add(Restrictions.eq("handle", handle));
     List<Media> lis = (List<Media>)crit.list();
