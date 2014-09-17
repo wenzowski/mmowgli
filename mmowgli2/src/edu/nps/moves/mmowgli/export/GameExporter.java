@@ -33,13 +33,12 @@
  */
 package edu.nps.moves.mmowgli.export;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.hibernate.Session;
 import org.w3c.dom.Comment;
@@ -51,16 +50,8 @@ import com.vaadin.shared.Position;
 import com.vaadin.ui.Notification;
 
 import edu.nps.moves.mmowgli.AppMaster;
-import edu.nps.moves.mmowgli.db.Card;
-import edu.nps.moves.mmowgli.db.CardType;
-import edu.nps.moves.mmowgli.db.Game;
-import edu.nps.moves.mmowgli.db.GameLinks;
-import edu.nps.moves.mmowgli.db.Media;
-import edu.nps.moves.mmowgli.db.Move;
-import edu.nps.moves.mmowgli.db.MovePhase;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
-import edu.nps.moves.mmowgli.modules.maps.MmowgliMap;
-import edu.nps.moves.mmowgli.modules.maps.MmowgliMap.MapParms;
+import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
 
 /**
@@ -111,26 +102,24 @@ public class GameExporter extends BaseExporter
   @Override
   public void exportToBrowser(String title)
   {
-    AppMaster.getInstance().pokeReportGenerator();
+    AppMaster.instance().pokeReportGenerator();
     //Doesn't show for very long
     Notification notification = new Notification("", "Report publication initiated", Notification.Type.WARNING_MESSAGE);
     notification.setPosition(Position.TOP_CENTER);
     notification.setDelayMsec(5000);
-    //pre v7app.getMainWindow().showNotification(notification);// Show it in the main window.
     notification.show(Page.getCurrent());
     
-    String url = AppMaster.getInstance().getAppUrlString(); //.toExternalForm();
+    String url = AppMaster.instance().getAppUrlString(); //.toExternalForm();
     if(!url.endsWith("/"))
       url = url+"/";
     BrowserWindowOpener.open(url+"reports","_blank");
   }
 
   @Override
-  public Document buildXmlDocument() throws Throwable
+  public Document buildXmlDocumentTL() throws Throwable
   {
     Document doc;
-    SingleSessionManager ssm = null;
-    Session sess = null;
+
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       DocumentBuilder parser = factory.newDocumentBuilder();
@@ -153,10 +142,8 @@ public class GameExporter extends BaseExporter
       root.setAttribute("exported", dateFmt.format(new Date()));
       root.setAttribute("description", metaString);
       
-      ssm = new SingleSessionManager();
-      sess = ssm.getSession();
-      
-      Game g = (Game)sess.get(Game.class, 1L);
+      Game g = Game.getTL();
+      Session sess = HSess.get();
       addMetaData(root,sess,g);
       addHeaderFooter(root,sess,g);
       addWelcome(root,sess,g);
@@ -167,14 +154,9 @@ public class GameExporter extends BaseExporter
       addActionPlans(root,sess,g);
       addMap(root,sess,g);
       addOther(root,sess,g);
-      
-      ssm.endSession();
-      ssm = null;
     }
     catch (Throwable t) {
       t.printStackTrace();
-      if(ssm != null)
-        ssm.endSession();
       throw t; // rethrow
     }
     return doc;  
@@ -184,7 +166,7 @@ public class GameExporter extends BaseExporter
   {
     Element metaElem = createAppend(root,"ApplicationURLs");
     
-    String url = AppMaster.getInstance().getAppUrlString();
+    String url = AppMaster.instance().getAppUrlString();
     url = url==null?"":url;
     
     addElementWithText(metaElem,"Game",url);
@@ -395,27 +377,17 @@ public class GameExporter extends BaseExporter
     String s = g.getMapTitle();
     addElementWithText(mapElem,"Title",s==null?"":s);    
 
-    s = GameLinks.get(sess).getMmowgliMapLink();
-    MapParms parms = new MapParms(0.0, 0.0, 0, "");
-    if(s != null ) {
-      MapParms parmsx = MmowgliMap.getMapParmetersFromUrlString(s);
-      if (parmsx != null)
-        parms = parmsx;
-    } 
-    Double d = parms.lat;
+    Double d = g.getMapLatitude();
     s = d==null?"0.0":d.toString();    
     addElementWithText(mapElem,"InitialLatitude",s);    
 
-    d = parms.lon;
+    d = g.getMapLongitude();
     s = d==null?"0.0":d.toString();    
     addElementWithText(mapElem,"InitialLongitude",s);    
 
-    Integer i = parms.zoom;
+    Integer i = g.getMapZoom();
     s = i==null?"0":i.toString();    
-    addElementWithText(mapElem,"InitialZoom",s);    
-
-    s = parms.msid;   
-    addElementWithText(mapElem,"Msid",s==null?"":s);    
+    addElementWithText(mapElem,"InitialZoom",s);      
   }
   
   private void addOther(Element root, Session sess, Game g)
@@ -442,6 +414,19 @@ public class GameExporter extends BaseExporter
   {
     return CDATA_ELEMENTS;
   }
+  
+  @Override
+  protected void showFile(String ignore, Document doc, String name, String styleSheetNameInThisPackage, boolean showXml) throws TransformerConfigurationException, TransformerException
+  {
+    super.showFile("Game", doc, name, styleSheetNameInThisPackage, showXml);
+  }
+
+  @Override
+  protected void showFile(String ignore, Document doc, String name, String styleSheetNameInThisPackage, String cdataElementList, boolean showXml) throws TransformerConfigurationException, TransformerException
+  {
+    super.showFile("Game", doc, name, styleSheetNameInThisPackage, cdataElementList, showXml);
+  }
+
   @Override
   public String getStyleSheetName()
   {
