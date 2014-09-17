@@ -39,8 +39,7 @@ import javax.persistence.*;
 
 import org.hibernate.Session;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
-import edu.nps.moves.mmowgli.hibernate.Sess;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * One game represents an interaction that may have several "turns". For example, a game about piracy in Somalia.
@@ -95,35 +94,20 @@ public class GameLinks implements Serializable
   {
     return (GameLinks) sess.get(GameLinks.class, id);
   }
-
-  public static GameLinks get()
+ 
+  public static GameLinks getTL()
   {
-    return get(1L); // only one entry in current design
+    return getTL(1L);
+  }
+  
+  public static GameLinks getTL(Object id)
+  {
+    return (GameLinks)HSess.get().get(GameLinks.class, (Serializable) id);
   }
 
-  public static GameLinks get(Serializable id)
+  public static void updateTL(GameLinks gl)
   {
-    return get(VHib.getVHSession(), id);
-  }
-
-  public static void save(GameLinks gl)
-  {
-    VHib.getVHSession().save(gl);
-  }
-
-  public static void update(GameLinks gl)
-  {
-    Sess.sessUpdate(gl);
-  }
-
-  public static void update()
-  {
-    update(GameLinks.get());
-  }
-
-  public static GameLinks merge(GameLinks gl)
-  {
-    return (GameLinks) Sess.sessMerge(gl);
+    HSess.get().update(gl);
   }
 
   /**
