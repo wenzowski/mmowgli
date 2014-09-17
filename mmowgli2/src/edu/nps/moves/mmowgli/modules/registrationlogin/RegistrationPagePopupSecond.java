@@ -43,6 +43,7 @@ import edu.nps.moves.mmowgli.components.BoundAffiliationCombo;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.Affiliation;
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * RegistrationPagePopupFirst.java
@@ -61,7 +62,6 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
   
   private FormLayout formLay;
   private TextField locTf;
-  //private TextField twitterTf, facebookTf, linkedInTf;
   private BoundAffiliationCombo affilCombo;
   private User user;
   
@@ -84,13 +84,7 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
     header.addStyleName("m-dialog-label-noindent");
     contentVLayout.addComponent(header);
     contentVLayout.setComponentAlignment(header, Alignment.TOP_CENTER);
-    /*
-    header = new Label("<center>connect with other players.</center>");
-    header.setContentMode(Label.CONTENT_XHTML);
-    header.addStyleName("m-dialog-label-noindent");
-    contentVLayout.addComponent(header);
-    contentVLayout.setComponentAlignment(header, Alignment.TOP_CENTER);
-    */
+
     HorizontalLayout horL = new HorizontalLayout();
     horL.setSpacing(false);
     horL.setWidth("100%");
@@ -103,12 +97,10 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
     formLay = new FormLayout();
     formLay.addStyleName("m-login-form");  // to allow styling contents (v-textfield)
     formLay.setSizeUndefined();
-    //contentVLayout.addComponent(formLay);
+
     horL.addComponent(formLay);
     horL.setExpandRatio(formLay, 1.0f);
     
-    //formLay.setWidth("95%");
-
     formLay.addComponent(affilCombo = new BoundAffiliationCombo("Affiliation:"));
     affilCombo.setValue(affilCombo.getItemIds().toArray()[0]);  // Tried to get this to be editable....needs more work
   
@@ -121,22 +113,6 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
     lab.setContentMode(ContentMode.HTML);
     lab.addStyleName(labelStyle);
     
-/*
-    formLay.addComponent(sp=new Label()); //spacer
-    sp.setHeight("15px");
-    
-    formLay.addComponent(twitterTf = new TextField("Twitter ID:"));
-    twitterTf.setColumns(31);
-    //formLay.setExpandRatio(twitterTf, 1.0f);
-    
-    formLay.addComponent(facebookTf = new TextField("Facebook ID:"));
-    facebookTf.setColumns(31);
-    //formLay.setExpandRatio(facebookTf, 1.0f);
-    
-    formLay.addComponent(linkedInTf = new TextField("LinkedIn ID:"));
-    linkedInTf.setColumns(31);
-    //formLay.setExpandRatio(linkedInTf, 1.0f);
-*/    
     HorizontalLayout hl = new HorizontalLayout();
     hl.setWidth("100%");
     contentVLayout.addComponent(hl);
@@ -149,8 +125,6 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
     hl.addComponent(continueButt);
     continueButt.addClickListener(new JoinListener());   
     continueButt.setClickShortcut(KeyCode.ENTER);
-    
-//    affilCombo.focus();  
   }
   
   @SuppressWarnings("serial")
@@ -159,6 +133,7 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
     @Override
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
       //String location = checkValue(locTf);
       // Don't want a notification anymore; also, the checkValue method will now return "unspecified" if null
 //      if(location == null || location.length()<=0) {
@@ -171,10 +146,9 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
       if(aflStr.equalsIgnoreCase("optional") || aflStr.equalsIgnoreCase("required"))
         aflStr = "";
       user.setAffiliation(aflStr);
-      //user.setTwitterId(checkValue(twitterTf));
-      //user.setFacebookId(checkValue(facebookTf));
-      //user.setLinkedInId(checkValue(linkedInTf));
-      User.update(user);
+      User.updateTL(user);
+      HSess.close();
+      
       listener.buttonClick(event); // up the chain
     }
   }
