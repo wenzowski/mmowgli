@@ -44,6 +44,7 @@ import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.GameQuestion;
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 
 /**
@@ -85,22 +86,6 @@ public class RoleSelectionPage extends MmowgliDialog
     lab.setContentMode(ContentMode.HTML);
     contentVLayout.addComponent(lab=new Label());
     lab.setHeight("10px");
-    
-    /*
-    rolesCb = new BoundRolesCombo("Choose a role");
-    if(MoveManager.getCurrentMove().getNumber()>2) {   // no role in move one or two
-      contentVLayout.addComponent(rolesCb);
-      rolesCb.setNullSelectionAllowed(false);    
-      @SuppressWarnings("rawtypes")
-      Collection coll = rolesCb.getItemIds();
-      rolesCb.select(coll.iterator().next());  // select the first
-    }
-    */
-    
-//    expertiseCb = new UnBoundExpertiseCombo(user);
-//    expertiseCb.setNullSelectionAllowed(false);
-//    expertiseCb.setWidth("300px");
-//    contentVLayout.addComponent(expertiseCb);
 
     expertiseTf = new TextField();
     expertiseTf.addStyleName("m-nopaddingormargin");
@@ -108,9 +93,8 @@ public class RoleSelectionPage extends MmowgliDialog
     expertiseTf.setColumns(38);
     expertiseTf.setInputPrompt("optional");
     contentVLayout.addComponent(expertiseTf);
-      
     
-    Game game = Game.get();
+    Game game = Game.getTL();
     ques = game.getQuestion();
 
     ansTf = new TextArea(ques.getQuestion());
@@ -136,7 +120,6 @@ public class RoleSelectionPage extends MmowgliDialog
     buttPan.setSpacing(true);
     
     buttPan.addComponent(lab = new Label("OK great, thanks for registering!  Let's play."));
-    //lab.setContentMode(Label.CONTENT_XHTML);
     lab.addStyleName(labelStyle);
     lab.addStyleName("m-nopaddingormargin");
     lab.setSizeUndefined();
@@ -145,20 +128,8 @@ public class RoleSelectionPage extends MmowgliDialog
     buttPan.addComponent(spacer = new Label());
     spacer.setWidth("1px");
     buttPan.setExpandRatio(spacer, 1.0f);
-/*
-    buttPan.addComponent(laterButt = new NativeButton()); //, listener)); called below
-    app.globa().mediaLocator().decorateIllDoThisLaterButton(laterButt);
-//    laterButt.setIcon(app.globs().mediaLocator().getIllDoThisLaterButton());
-//    laterButt.setWidth("160px");
-//    laterButt.setHeight("18px");
-//    laterButt.addStyleName("borderless");
-    laterButt.addListener(new LaterListener()); 
-    Label sp;
-    buttPan.addComponent(sp = new Label());
-    sp.setWidth("50px");
- */    
     
-    buttPan.addComponent(continueButt = new NativeButton(null)); //, listener));  called below
+    buttPan.addComponent(continueButt = new NativeButton(null));
     Mmowgli2UI.getGlobals().mediaLocator().decorateGetABriefingButton(continueButt);
 
     Label sp;   
@@ -178,8 +149,10 @@ public class RoleSelectionPage extends MmowgliDialog
     @Override
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
       user.setQuestion(ques);  // This is what was asked
-      User.update(user);
+      User.updateTL(user);
+      HSess.close();
       listener.buttonClick(event);  // up the chain
     }   
   }
@@ -190,6 +163,7 @@ public class RoleSelectionPage extends MmowgliDialog
     @Override
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
 //      user.setRole((Role)rolesCb.getValue());
 //      o = expertiseCb.getValue();
 //      if(o != null)
@@ -203,9 +177,11 @@ public class RoleSelectionPage extends MmowgliDialog
       
       user.setAnswer(checkValue(ansTf));
       user.setQuestion(ques);
-      User.update(user);
+      User.updateTL(user);
       
-      GameEventLogger.logNewUser(user);
+      GameEventLogger.logNewUserTL(user);
+      HSess.close();
+      
       listener.buttonClick(event); // up the chain
     }    
   }
