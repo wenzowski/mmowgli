@@ -47,9 +47,7 @@ import org.hibernate.search.annotations.*;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
-//import com.vaadin.data.hbnutil.HbnContainer;
-import edu.nps.moves.mmowgli.hibernate.Sess;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  *  This is a database table, listing action plans
@@ -152,45 +150,38 @@ public class ActionPlan implements Serializable
   @SuppressWarnings("unchecked")
   public static HbnContainer<ActionPlan> getContainer()
   {
-    return (HbnContainer<ActionPlan>) VHib.getContainer(ActionPlan.class);
+    return (HbnContainer<ActionPlan>) HSess.getContainer(ActionPlan.class);
   }
 
-  public static ActionPlan get(Object id)
+//  public static ActionPlan get(Object id)
+//  {
+//    return (ActionPlan)VHib.getVHSession().get(ActionPlan.class,(Serializable)id);
+//  }
+  public static ActionPlan getTL(Object id)
   {
-    return (ActionPlan)VHib.getVHSession().get(ActionPlan.class,(Serializable)id);
+    return (ActionPlan)HSess.get().get(ActionPlan.class, (Serializable)id);
   }
-  
   public static ActionPlan get(Serializable id, Session sess)
   {
     return (ActionPlan)sess.get(ActionPlan.class, id);
-  }
-  
-  public static ActionPlan merge(ActionPlan ap)
+  }  
+  public static ActionPlan mergeTL(ActionPlan ap)
   {
-    return (ActionPlan)merge(ap,VHib.getVHSession());
+    return (ActionPlan)merge(ap,HSess.get());
   }
   
   public static ActionPlan merge(ActionPlan ap, Session sess)
   {
     return (ActionPlan)sess.merge(ap);
   }
-  
-  public static void update(ActionPlan ap)
+  public static void updateTL(ActionPlan ap)
   {
-    Sess.sessUpdate(ap);     
-  }
-
-  public static void save(ActionPlan ap)
-  {
-    Sess.sessSave(ap);     
+    HSess.get().update(ap);   
   }
   
-  /**
-   * @param ap
-   */
-  public static void saveOrUpdate(ActionPlan ap)
+  public static void saveTL(ActionPlan ap)
   {
-    VHib.getVHSession().saveOrUpdate(ap);       
+    HSess.get().save(ap);
   }
 
   /**
@@ -273,10 +264,10 @@ public class ActionPlan implements Serializable
     this.title = title;
   }
   
-  public void setTitleWithHistory(String s)
+  public void setTitleWithHistoryTL(String s)
   {
     setTitle(s);
-    pushHistory(getTitlesEditHistory(),s);//pushHistory(titles,s);
+    pushHistoryTL(getTitlesEditHistory(),s);//pushHistory(titles,s);
   }
   
   /**
@@ -297,10 +288,10 @@ public class ActionPlan implements Serializable
     this.subTitle = subTitle;
   }
   
-  public void setSubTitleWithHistory(String s)
+  public void setSubTitleWithHistoryTL(String s)
   {
     setSubTitle(s);
-    pushHistory(getSubTitleEditHistory(),s); //pushHistory(subTitleHistory,s);
+    pushHistoryTL(getSubTitleEditHistory(),s); //pushHistory(subTitleHistory,s);
   }
   
   /**
@@ -667,10 +658,10 @@ public class ActionPlan implements Serializable
     this.whatIsItText = whatIsItText;
   }
   
-  public void setWhatIsItTextWithHistory(String s)
+  public void setWhatIsItTextWithHistoryTL(String s)
   {
     setWhatIsItText(s);
-    pushHistory(getWhatIsItEditHistory(),s);//pushHistory(whatIsItHistory, s);
+    pushHistoryTL(getWhatIsItEditHistory(),s);//pushHistory(whatIsItHistory, s);
   }
   
   @Lob
@@ -685,10 +676,10 @@ public class ActionPlan implements Serializable
     this.whatWillItTakeText = whatWillItTakeText;
   }
   
-  public void setWhatWillItTakeTextWithHistory(String s)
+  public void setWhatWillItTakeTextWithHistoryTL(String s)
   {
     setWhatWillItTakeText(s);
-    pushHistory(getWhatTakeEditHistory(),s); //pushHistory(whatTakeHistory,s);
+    pushHistoryTL(getWhatTakeEditHistory(),s); //pushHistory(whatTakeHistory,s);
   }
   
   @Lob
@@ -703,17 +694,17 @@ public class ActionPlan implements Serializable
     this.howWillItWorkText = howWillItWorkText;
   }
 
-  public void setHowWillItWorkTextWithHistory(String s)
+  public void setHowWillItWorkTextWithHistoryTL(String s)
   {
     setHowWillItWorkText(s);
-    pushHistory(getHowWorkEditHistory(),s); //pushHistory(howWorkHistory, s);
+    pushHistoryTL(getHowWorkEditHistory(),s); //pushHistory(howWorkHistory, s);
   }
  
-  private void pushHistory(SortedSet<Edits>set, String s) //LinkedList<String>lis, String s)
+  private void pushHistoryTL(SortedSet<Edits>set, String s) //LinkedList<String>lis, String s)
   {
     if(set != null) {
       Edits e = new Edits(s);
-      Edits.save(e);
+      Edits.saveTL(e);
       set.add(e);
    /* Don't need to remove   while(set.size() > HISTORY_SIZE) {
         Edits junk = set.first();
@@ -735,10 +726,10 @@ public class ActionPlan implements Serializable
     this.howWillItChangeText = howWillItChangeText;
   }
   
-  public void setHowWillItChangeTextWithHistory(String s)
+  public void setHowWillItChangeTextWithHistoryTL(String s)
   {
     setHowWillItChangeText(s);
-    pushHistory(getHowChangeEditHistory(),s); // pushHistory(howChangeHistory,s);
+    pushHistoryTL(getHowChangeEditHistory(),s); // pushHistory(howChangeHistory,s);
   }
   
   @ManyToOne
@@ -1145,10 +1136,24 @@ public class ActionPlan implements Serializable
     this.superInteresting = superInteresting;
   }
 
-  public static Criteria adjustCriteriaToOmitActionPlans(Criteria crit, User me)
+//  public static Criteria adjustCriteriaToOmitActionPlans(Criteria crit, User me)
+//  {
+//    Move thisMove = Move.getCurrentMove();
+//    if(me.isAdministrator() || Game.get().isShowPriorMovesActionPlans())
+//      ;
+//    else {
+//     crit.createAlias("createdInMove", "MOVE")
+//         .add(Restrictions.eq("MOVE.number", thisMove.getNumber()));
+//    }
+//    if(!me.isAdministrator())
+//      crit.add(Restrictions.ne("hidden", true));
+//    return crit;
+//  }
+
+  public static Criteria adjustCriteriaToOmitActionPlansTL(Criteria crit, User me)
   {
-    Move thisMove = Move.getCurrentMove();
-    if(me.isAdministrator() || Game.get().isShowPriorMovesActionPlans())
+    Move thisMove = Move.getCurrentMoveTL();
+    if(me.isAdministrator() || Game.getTL().isShowPriorMovesActionPlans())
       ;
     else {
      crit.createAlias("createdInMove", "MOVE")
