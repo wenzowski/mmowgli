@@ -47,11 +47,14 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.*;
 
-import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.AppEvent;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliEvent;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.CardStyler;
 
 /**
@@ -84,6 +87,7 @@ public class CardChainTree extends TreeTable implements ItemClickListener
     this(cardId,startEmpty,true);
   }
   
+  @HibernateSessionThreadLocalConstructor
   @SuppressWarnings("serial")
   public CardChainTree(Object cardId, boolean startEmpty, boolean goOnSelect)
   {
@@ -92,7 +96,7 @@ public class CardChainTree extends TreeTable implements ItemClickListener
     this.loadCardOnSelect = goOnSelect;
     
     dateForm = new SimpleDateFormat("MM/dd HH:mm z");
-    isGameMaster = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID()).isGameMaster();
+    isGameMaster = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).isGameMaster();
     
     setSizeFull();
     setEditable(false);
@@ -123,7 +127,7 @@ public class CardChainTree extends TreeTable implements ItemClickListener
     if(rootId != null)
       loadTree();
     else if(!startEmpty)
-      loadAllCards();  // this is the case when creating an actionPlan fromscratch
+      loadAllCardsTL();  // this is the case when creating an actionPlan fromscratch
 
     // won't work, adds ExternalResource.toString()
   //  treeT.setRowHeaderMode(TreeTable.ROW_HEADER_MODE_ICON_ONLY);
@@ -219,24 +223,24 @@ public class CardChainTree extends TreeTable implements ItemClickListener
   
   private void loadTree()
   {
-    loadRoot(DBGet.getCardFresh(rootId));  // Need to access children, so need a refresh
+    loadRootTL(DBGet.getCardFreshTL(rootId));  // Need to access children, so need a refresh
   }
-  private void loadRoot(Card c)
+  private void loadRootTL(Card c)
   {
     if(!isGameMaster && CardMarkingManager.isHidden(c))
       return;
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-    if(!Card.canSeeCard(c, me))
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    if(!Card.canSeeCardTL(c, me))
       return;
     
     CardWrapper selected = new CardWrapper(c);   
-    addRoot(selected);
+    addRootTL(selected);
   }
 
   @SuppressWarnings("unchecked")
-  private void loadAllCards()
+  private void loadAllCardsTL()
   {
-    Session sess = VHib.getVHSession();  // gets current vaadin transaction session
+    Session sess = HSess.get();
     Criteria crit = sess.createCriteria(Card.class)
       .add(Restrictions.eq("factCard", false))
       .add(Restrictions.eq("hidden", false))
@@ -244,16 +248,16 @@ public class CardChainTree extends TreeTable implements ItemClickListener
      crit = crit.createCriteria("cardType")
        .add(Restrictions.eq("cardClass",CardType.CardClass.POSITIVEIDEA));
 
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     
-    Card.adjustCriteriaToOmitCards(crit, me);
+    Card.adjustCriteriaToOmitCardsTL(crit, me);
        
     List<Card> resourceCards = (List<Card>)crit.list();
     for (Card c : resourceCards)
-      loadRoot(c);
+      loadRootTL(c);
 
     // Second root card type
-    CardType riskTyp = CardType.getNegativeIdeaCardType();
+    CardType riskTyp = CardType.getNegativeIdeaCardTypeTL();
     crit = sess.createCriteria(Card.class)
       .add(Restrictions.eq("cardType", riskTyp))
       .add(Restrictions.eq("factCard", false))
@@ -262,11 +266,11 @@ public class CardChainTree extends TreeTable implements ItemClickListener
     crit = crit.createCriteria("cardType")
       .add(Restrictions.eq("cardClass",CardType.CardClass.NEGATIVEIDEA));
 
-    Card.adjustCriteriaToOmitCards(crit, me);
+    Card.adjustCriteriaToOmitCardsTL(crit, me);
         
     List<Card> riskCards = (List<Card>) crit.list();
     for (Card c : riskCards)
-      loadRoot(c);
+      loadRootTL(c);
   }
   public void addChains(List<Card> lis)
   {
@@ -303,10 +307,10 @@ public class CardChainTree extends TreeTable implements ItemClickListener
     expandChildren(first);
   }
   
-  private void addRoot(CardWrapper cw)
+  private void addRootTL(CardWrapper cw)
   {
-    CardWrapper realRoot = addParents(cw);
-    addChildren(cw);
+    CardWrapper realRoot = addParentsTL(cw);
+    addChildrenTL(cw);
     
     // Expand whole tree
     expandChildren(realRoot);
@@ -315,13 +319,13 @@ public class CardChainTree extends TreeTable implements ItemClickListener
   }
 
   
-  private CardWrapper addParents(CardWrapper cw)
+  private CardWrapper addParentsTL(CardWrapper cw)
   {
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     ArrayList<CardWrapper> arLis = new ArrayList<CardWrapper>();
     do {
       arLis.add(0, cw); // master root will end up at 0
-    } while((cw=cw.getParentWrapper()) != null && Card.canSeeCard(cw.card, me));
+    } while((cw=cw.getParentWrapper()) != null && Card.canSeeCardTL(cw.card, me));
     
     // Now from top
     CardWrapper lastCard=null;
@@ -335,20 +339,20 @@ public class CardChainTree extends TreeTable implements ItemClickListener
     return arLis.get(0);
   }
   
-  private void addChildren(CardWrapper parent)
+  private void addChildrenTL(CardWrapper parent)
   {
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     Set<Card> lis = parent.card.getFollowOns();
     if(lis != null && lis.size()>0) {
       CardWrapper cw=null;
       for(Card child : lis) {
         if(!isGameMaster && CardMarkingManager.isHidden(child))
           continue;
-        if(!Card.canSeeCard(child, me))
+        if(!Card.canSeeCardTL(child, me))
           continue;
         addItem(cw=new CardWrapper(child));
         setParent(cw, parent);       
-        addChildren(cw);  // recurse
+        addChildrenTL(cw);  // recurse
       }
       if(cw != null)
         setChildrenAllowed(cw, false);  // leaf
@@ -368,16 +372,21 @@ public class CardChainTree extends TreeTable implements ItemClickListener
   }
 
   @Override
+  @MmowgliCodeEntry
+  @HibernateOpened
+  @HibernateClosed
   public void itemClick(ItemClickEvent event)
   {
     if(loadCardOnSelect) {
+      HSess.init();
       Card c;
       if(event.getItemId() instanceof Card)
         c = (Card)event.getItemId();
       else
         c = ((CardWrapper)event.getItemId()).card;
 
-     Mmowgli2UI.getGlobals().getController().miscEvent(new AppEvent(MmowgliEvent.CARDCLICK, this, c.getId()));
+     Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(MmowgliEvent.CARDCLICK, this, c.getId()));
+     HSess.close();
     }
   }
   
