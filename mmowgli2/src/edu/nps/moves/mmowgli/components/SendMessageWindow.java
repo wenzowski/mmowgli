@@ -41,8 +41,12 @@ import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.GameLinks;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.MailManager;
 /**
  * EditCardTextWindow.java
@@ -85,6 +89,7 @@ public class SendMessageWindow extends Window
   }
   
   // For signup emailing...no user accounts
+  @HibernateSessionThreadLocalConstructor
   public SendMessageWindow(List<String> emails)
   {
     super("A message to mmowgli followers");
@@ -110,7 +115,7 @@ public class SendMessageWindow extends Window
     subjTf.setCaption("Subject:");
     subjTf.setWidth("100%");
     
-    Game game = Game.get(1L);
+    Game game = Game.getTL();
     String acronym = game.getAcronym();
     acronym = acronym==null?"":acronym+" ";
     subjTf.setValue("Message from "+acronym+"Mmowgli");
@@ -173,8 +178,8 @@ public class SendMessageWindow extends Window
     subjTf.setCaption("Subject");
     subjTf.setWidth("100%");
     
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
-    Game game = Game.get(1L);
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    Game game = Game.getTL();
     String acronym = game.getAcronym();
     acronym = acronym==null?"":acronym+" ";
     subjTf.setValue(acronym+"Mmowgli message to "+usr.getUserName()+" from "+me.getUserName());
@@ -217,27 +222,33 @@ public class SendMessageWindow extends Window
     {
       this.w = w;
     }
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {     
       if(event.getButton() == sendButt) {
+        HSess.init();
+        
         String msg = ta.getValue().toString();
         if(msg.length()>0) { 
           MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
           MailManager mmgr = globs.getAppMaster().getMailManager();
-          User me = DBGet.getUser(globs.getUserID());
+          User me = DBGet.getUserTL(globs.getUserID());
           String subj = subjTf.getValue().toString().trim();
           String troubleList = null;
           if(ccTroubleListCB != null) {
             if(ccTroubleListCB.getValue())
-              troubleList = GameLinks.get().getTroubleMailto();
+              troubleList = GameLinks.getTL().getTroubleMailto();
             else
               troubleList = null;
           }
-          mmgr.mailToUser(me.getId(), usr.getId(), subj, msg, troubleList, channel);
+          mmgr.mailToUserTL(me.getId(), usr.getId(), subj, msg, troubleList, channel);
           
           if(ccSelf)
-            mmgr.mailToUser(me.getId(), me.getId(), "(CC:)"+subj, msg, null, channel); // why not use MailManager's cc capability?
+            mmgr.mailToUserTL(me.getId(), me.getId(), "(CC:)"+subj, msg, null, channel); // why not use MailManager's cc capability?
         }
+        HSess.close();
       }
       UI.getCurrent().removeWindow(w);
     }
@@ -253,17 +264,22 @@ public class SendMessageWindow extends Window
     }
 
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
       if(event.getButton() == sendButt) {
         String msg = ta.getValue().toString();
         if(msg.length()>0) { 
+          HSess.init();
           String subj = subjTf.getValue().toString().trim();
           for(String recpt : emails) {
             MailManager mgr = Mmowgli2UI.getGlobals().getAppMaster().getMailManager();
-            String retAddr = mgr.buildMmowgliReturnAddress();
+            String retAddr = mgr.buildMmowgliReturnAddressTL();
             mgr.getMailer().send(recpt, retAddr, subj, msg, true);
           }
+          HSess.close();
         }
       }
       UI.getCurrent().removeWindow(w);    
