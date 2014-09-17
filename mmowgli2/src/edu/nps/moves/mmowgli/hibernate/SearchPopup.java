@@ -33,18 +33,21 @@
 */
 package edu.nps.moves.mmowgli.hibernate;
 
-import static edu.nps.moves.mmowgli.MmowgliEvent.*;
+import static edu.nps.moves.mmowgli.MmowgliEvent.ACTIONPLANSHOWCLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.CARDCLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.SHOWUSERPROFILECLICK;
 
 import java.io.Serializable;
 import java.util.*;
 
 import org.getopt.luke.TermInfo;
 
-import com.vaadin.data.*;
+import com.vaadin.data.Container;
+import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.*;
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -53,25 +56,25 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.ColumnGenerator;
 
-import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.AppEvent;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliController;
 import edu.nps.moves.mmowgli.components.*;
 import edu.nps.moves.mmowgli.components.WordCloudPanel.Word;
 import edu.nps.moves.mmowgli.components.WordCloudPanel.WordButton;
 import edu.nps.moves.mmowgli.components.WordCloudPanel.WordOrder;
-import edu.nps.moves.mmowgli.db.*;
-
-//import edu.nps.moves.mmowgli.ApplicationWindow;
-//import edu.nps.moves.mmowgli.hibernate.HibernateContainers;
+import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.markers.*;
 
 /**
- * <pre>
  * SearchPopup.java
  * Created on May 30, 2011
  *
  * MOVES Institute
  * Naval Postgraduate School, Monterey, CA, USA
  * www.nps.edu
- * </pre>
  *
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id: SearchPopup.java 3056 2013-11-07 20:26:25Z jmbailey $
@@ -122,7 +125,6 @@ public class SearchPopup extends Window implements ClickListener
     center();
 
     VerticalLayout vLay = new VerticalLayout();
-    //vLay.setSpacing(true);
     vLay.setSizeFull();
     vLay.setMargin(true);
     vLay.setSpacing(true);
@@ -209,19 +211,24 @@ public class SearchPopup extends Window implements ClickListener
     resultsTable.addItemClickListener(new ItemClickListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void itemClick(ItemClickEvent event)
       {
+        HSess.init();
         @SuppressWarnings("unchecked")
         BeanItem<SearchResult> bi = (BeanItem<SearchResult>)event.getItem();
         SearchResult sr = bi.getBean();
         MmowgliController controller = Mmowgli2UI.getGlobals().getController();
         if(sr.getType().equals(USERTYPEKEY))
-          controller.miscEvent(new AppEvent(SHOWUSERPROFILECLICK, SearchPopup.this, sr.getHibId()));
+          controller.miscEventTL(new AppEvent(SHOWUSERPROFILECLICK, SearchPopup.this, sr.getHibId()));
         else if(sr.getType().equals(ACTIONPLANTYPEKEY))
-          controller.miscEvent(new AppEvent(ACTIONPLANSHOWCLICK, SearchPopup.this, sr.getHibId()));
+          controller.miscEventTL(new AppEvent(ACTIONPLANSHOWCLICK, SearchPopup.this, sr.getHibId()));
         else
-          controller.miscEvent(new AppEvent(CARDCLICK, SearchPopup.this, sr.getHibId()));
-
+          controller.miscEventTL(new AppEvent(CARDCLICK, SearchPopup.this, sr.getHibId()));
+        HSess.close();
+        
         closeListener.buttonClick(null);
       }
     });
@@ -291,7 +298,6 @@ public class SearchPopup extends Window implements ClickListener
   {
     resultsTable.setContainerDataSource(cont);
     resultsTable.setVisibleColumns((Object[])new String[]{"typeAndId","text"});
-    //resultsTable.setColumnHeaders(new String[]{"",""});
     resultsTable.setColumnHeaders(new String[]{"Item","Content"});
     resultsTable.setColumnWidth("typeAndId", 100);
     resultsTable.setColumnExpandRatio("text", 1.0f);
@@ -384,6 +390,9 @@ public class SearchPopup extends Window implements ClickListener
 
   // Search clicked
   @Override
+  @MmowgliCodeEntry
+  @HibernateConditionallyOpened
+  @HibernateConditionallyClosed
   public void buttonClick(ClickEvent event)
   {
     String terms = tf.getValue().toString();
@@ -394,11 +403,11 @@ public class SearchPopup extends Window implements ClickListener
     tf.focus();
 
     String [] tokenArray = terms.trim().split("\\s+");
-
-    // Do it in another thread
+    Object sessKey = HSess.checkInit();
     Serializable meId = Mmowgli2UI.getGlobals().getUserID();
-    User me = DBGet.getUserFresh(meId, VHib.getVHSession());
-    //temp to test 
+    User me = DBGet.getUserFreshTL(meId);
+    
+    // test Do it in another thread
     /*
     searchThread = new Thread(searcherObj=new searcher(me,tokenArray),"Searcher");
     searchThread.setPriority(Thread.NORM_PRIORITY);
@@ -406,6 +415,7 @@ public class SearchPopup extends Window implements ClickListener
     */
     searcherObj = new searcher(me,tokenArray);
     searcherObj.run();
+    HSess.checkClose(sessKey);
   }
 
   private class searcher implements Runnable
@@ -469,11 +479,7 @@ public class SearchPopup extends Window implements ClickListener
       }
       if(!killed) {
         resetTable(bCont);
- //todo V7
-/*
-        ((ApplicationWindow) SearchPopup.this.getParent()).getApplicationFramework().needToPushChanges();
-        ((ApplicationWindow) SearchPopup.this.getParent()).getApplicationFramework().pushPendingChangesIfNeeded();
-*/
+        Mmowgli2UI.getAppUI().access(new Runnable(){public void run(){Mmowgli2UI.getAppUI().push();}});
       }
       searchThread = null;
     }
