@@ -33,17 +33,11 @@
 */
 package edu.nps.moves.mmowgli.hibernate;
 
-import java.util.List;
-
 import org.hibernate.Session;
-import org.jasypt.digest.StandardStringDigester;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 
-import edu.nps.moves.mmowgli.MmowgliConstants;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.db.pii.EmailPii;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
-//import org.jasypt.salt.ZeroSaltGenerator;
 
 /**
  * AdHocDBInits.java
@@ -62,15 +56,13 @@ public class AdHocDBInits
    * This is a way to jam passwords into the PII 
    * @param uname
    */
-  private static void setUserPii(SingleSessionManager smgr, String uname, boolean admin, boolean gm, boolean designer, boolean guest)
+  private static void setUserPii(Session sess, String uname, boolean admin, boolean gm, boolean designer, boolean guest)
   {
-    Session sess = smgr.getSession();
     User u = DBGet.getUserFresh(uname,sess);
     if(u == null) {
       u = new User();
       u.setUserName(uname);
       sess.save(u);
-      smgr.setNeedsCommit(true);
     }
 
     u.setAdministrator(admin);
@@ -80,7 +72,7 @@ public class AdHocDBInits
     u.setViewOnly(guest);
     u.setAccountDisabled(false);
     u.setEmailConfirmed(true);
-    u.setRegisteredInMove(Move.getCurrentMove());
+    u.setRegisteredInMove(Move.getCurrentMove(sess));
     sess.update(u);
     
     Long uid = u.getId();   
@@ -95,28 +87,27 @@ public class AdHocDBInits
     VHibPii.update(upii);   
   }
   
-  public static void databaseCheckUpdate()
+  public static void databaseCheckUpdate(Session sess)
   {   
-    SingleSessionManager smgr = new SingleSessionManager();
-    Game game = (Game)smgr.getSession().get(Game.class, 1L);
+    Game game = Game.get(sess);
     
     if(game.isBootStrapping()) {
-      setUserPii(smgr,"Administrator",true,  true,  true,  false);
-      setUserPii(smgr,"SeedCard",     false, true,  false, false);
-      setUserPii(smgr,"Guest",        false, false, false, true);
-      setUserPii(smgr,"GameMaster",   false, true,  false, false);
+      setUserPii(sess,"Administrator",true,  true,  true,  false);
+      setUserPii(sess,"SeedCard",     false, true,  false, false);
+      setUserPii(sess,"Guest",        false, false, false, true);
+      setUserPii(sess,"GameMaster",   false, true,  false, false);
          
       MovePhase mp = game.getCurrentMove().getCurrentMovePhase();
       mp.setNewButtonEnabled(false);
-      smgr.getSession().update(mp);
+      sess.update(mp);
       
       game.setBootStrapping(false);
-      smgr.getSession().update(game);
-      smgr.setNeedsCommit(true);
+      sess.update(game);
     }
     
    // need to redo for Pii checkRequiredUsers(smgr);
-    
+ 
+/* This stuff is not needed anymore 
     long databaseVersion = game.getVersion();
     if(databaseVersion == MmowgliConstants.DATABASE_VERSION) {
       System.out.println("Database "+MmowgliConstants.DATABASE_VERSION+" matches this codebase");
@@ -168,8 +159,9 @@ public class AdHocDBInits
     game.setVersion(MmowgliConstants.DATABASE_VERSION);  // mark that we are up-to-date
     smgr.setNeedsCommit(true);
     smgr.endSession();
+    */
   }
-  
+ /* 
   @SuppressWarnings("unchecked")
   private static void handleEmailDigests()
   {
@@ -189,6 +181,7 @@ public class AdHocDBInits
     sess.getTransaction().commit();
     sess.close();
   }
+  */
 /*  old scoring logic
   @SuppressWarnings("unchecked")
   private static void fixScoresByMove(SingleSessionManager smgr)
@@ -235,7 +228,7 @@ public class AdHocDBInits
     } 
   }
 */  
-    
+/*    
   @SuppressWarnings("unchecked")
   private static void checkSetQuickAuthorField(SingleSessionManager smgr)
   {
@@ -260,7 +253,7 @@ public class AdHocDBInits
       smgr.setNeedsCommit(true);
     }
   }
-  
+*/  
   /* 
   private static String[] vipLst =
   {
