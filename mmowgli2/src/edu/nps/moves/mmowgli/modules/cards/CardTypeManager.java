@@ -34,14 +34,13 @@
 package edu.nps.moves.mmowgli.modules.cards;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
-
 import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import edu.nps.moves.mmowgli.db.CardType;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * CardTypeManager.java
@@ -61,19 +60,17 @@ public class CardTypeManager
   public static boolean isIdeaCard(CardType ct)
   {
     return ct.isIdeaCard();
-    //return isInnovateType(ct) || isDefendType(ct);
   }
   
-  public static CardType getPositiveIdeaCardType()
+  public static CardType getPositiveIdeaCardTypeTL()
   {
-    return getPositiveIdeaCardType(VHib.getVHSession());
+    return getPositiveIdeaCardType(HSess.get());
   }
   
   public static CardType getPositiveIdeaCardType(Session sess)
   {
     if(resource == null)
-      resource = CardType.getPositiveIdeaCardType(sess); //getResourceCardType();
-      //resource=getType("Best Strategy");
+      resource = CardType.getPositiveIdeaCardType(sess);
     return resource;
   }
   
@@ -82,11 +79,11 @@ public class CardTypeManager
     resource = ct;
   }
      
-  public static CardType getNegativeIdeaCardType()
+  public static CardType getNegativeIdeaCardTypeTL()
   {
-    return getNegativeIdeaCardType(VHib.getVHSession());
+    return getNegativeIdeaCardType(HSess.get());
   }
-
+  
   public static CardType getNegativeIdeaCardType(Session sess)
   {
     if(risk == null)
@@ -103,13 +100,20 @@ public class CardTypeManager
   public static boolean isDefendType(CardType ct)
   {
     return ct.isNegativeIdeaCard();
-    //return ct.getId() == getDefendType().getId();
   }
+  
   @Deprecated 
   public static CardType getExpandType()
   {
     if(expand == null)
-      expand=getDescendantOrdinal(1); //getType("Expand");
+      expand=getDescendantOrdinal(1);
+    return expand;
+  }
+  @Deprecated 
+  public static CardType getExpandTypeTL()
+  {
+    if(expand == null)
+      expand=getDescendantOrdinalTL(1);
     return expand;
   }
   @Deprecated
@@ -117,6 +121,7 @@ public class CardTypeManager
   {
     return ct.getId() == getExpandType().getId();
   }
+    
   @Deprecated  
   public static CardType getCounterType()
   {
@@ -124,16 +129,31 @@ public class CardTypeManager
       counter=getDescendantOrdinal(2); //getType("Counter");
     return counter;
   }
+  @Deprecated
+  public static CardType getCounterTypeTL()
+  {
+    if(counter == null)
+      counter=getDescendantOrdinalTL(2); //getType("Counter");
+    return counter;
+  }   
   @Deprecated 
   public static boolean isCounterType(CardType ct)
   {
     return ct.getId() == getCounterType().getId();
   }
+  
   @Deprecated  
   public static CardType getAdaptType()
   {
     if(adapt == null)
-      adapt=getDescendantOrdinal(3); //getType("Adapt");
+      adapt=getDescendantOrdinal(3);
+    return adapt;
+  }
+  @Deprecated  
+  public static CardType getAdaptTypeTL()
+  {
+    if(adapt == null)
+      adapt=getDescendantOrdinalTL(3);
     return adapt;
   }
   @Deprecated
@@ -141,11 +161,21 @@ public class CardTypeManager
   {
     return ct.getId() == getAdaptType().getId();
   }  
+  
+  
+  
   @Deprecated  
   public static CardType getExploreType()
   {
     if(explore == null)
-      explore=getDescendantOrdinal(4); //getType("Explore");
+      explore=getDescendantOrdinal(4);
+    return explore;
+  }
+  @Deprecated  
+  public static CardType getExploreTypeTL()
+  {
+    if(explore == null)
+      explore=getDescendantOrdinalTL(4);
     return explore;
   }
   @Deprecated
@@ -153,6 +183,8 @@ public class CardTypeManager
   {
     return ct.getId() == getExploreType().getId();
   }
+  
+  
   
   public static boolean isDescendantType(CardType ct, int i)
   {
@@ -181,7 +213,7 @@ public class CardTypeManager
   @SuppressWarnings("unchecked")
   public static CardType getDescendantOrdinal(int i)
   {
-    Session sess = VHib.getSessionFactory().openSession();      // no leaked sessions
+    Session sess = HSess.getSessionFactory().openSession();      // no leaked sessions
     List<CardType> types = (List<CardType>)
                                   sess.createCriteria(CardType.class).
                                   add(Restrictions.eq("descendantOrdinal",i)).
@@ -191,52 +223,38 @@ public class CardTypeManager
     sess.close();
     return types.get(0);
   }
+  @SuppressWarnings("unchecked")
+  public static CardType getDescendantOrdinalTL(int i)
+  {
+    List<CardType> types = (List<CardType>)
+                                  HSess.get().createCriteria(CardType.class).
+                                  add(Restrictions.eq("descendantOrdinal",i)).
+                                  list();
+    assert types.size()==1 : "CardType table error, descendantOrdinal: "+i;
+    return types.get(0);
+  }
 
   @SuppressWarnings("unchecked")
-  public static List<CardType> getDefinedPositiveIdeaCards()
+  public static List<CardType> getDefinedPositiveIdeaCardsTL()
   {
-    Session sess = VHib.getVHSession();
-    return (List<CardType>) sess.createCriteria(CardType.class)
+    return (List<CardType>) HSess.get().createCriteria(CardType.class)
                                 .add(Restrictions.eq("cardClass", CardType.CardClass.POSITIVEIDEA))
                                 .list();
   }
   
   @SuppressWarnings("unchecked")
-  public static List<CardType> getDefinedNegativeIdeaCards()
+  public static List<CardType> getDefinedNegativeIdeaCardsTL()
   {
-    Session sess = VHib.getVHSession();
-    return (List<CardType>) sess.createCriteria(CardType.class)
+    return (List<CardType>) HSess.get().createCriteria(CardType.class)
                                 .add(Restrictions.eq("cardClass", CardType.CardClass.NEGATIVEIDEA))
                                 .list();
   }
 
- public static String getCardChainPopupNodeStyle(CardType ct)
- {
-   long cid = ct.getId();
-   if(cid == getPositiveIdeaCardType().getId())
-     return "m-card-chain-resource-node";
-   else if(cid == getNegativeIdeaCardType().getId())
-     return "m-card-chain-risk-node";
-   else if (cid == getExpandType().getId())
-     return "m-card-chain-expand-node";
-   else if (cid == getCounterType().getId())
-     return "m-card-chain-counter-node";
-   else if(cid == getAdaptType().getId())
-     return "m-card-chain-adapt-node";
-   else if(cid == getExploreType().getId())
-     return "m-card-chain-explore-node";
-   else {
-     System.err.println("bogus card type pased to CardTypeManager.getCardChainPopupNodeStyle()");
-     return "m-red";
-   }
-   
- }
   public static String getBackgroundColorStyle(CardType ct)
   {
-    //return getColorStyle_light(ct);  not good color selection
-    //return getColorStyle(ct);
     return CardStyler.getCardBaseColor(ct);// new way
   }
+  
   public static String getColorStyle(CardType ct)
   {
     String sty = ct.getCssColorStyle();
@@ -252,21 +270,21 @@ public class CardTypeManager
       sty = "m-lightergray";
     return sty;
   }
-  
+   
   public static String getCardSubmitDebugId(CardType ct)
   {
     long cid = ct.getId();
-    if(cid == getPositiveIdeaCardType().getId())
+    if(cid == getPositiveIdeaCardTypeTL().getId())
       return GOOD_IDEA_CARD_SUBMIT;
-    else if(cid == getNegativeIdeaCardType().getId())
+    else if(cid == getNegativeIdeaCardTypeTL().getId())
       return BAD_IDEA_CARD_SUBMIT;
-    else if (cid == getDescendantOrdinal(1).getId()) //getExpandType().getId())
+    else if (cid == getDescendantOrdinal(1).getId())
       return EXPAND_CARD_SUBMIT;
-    else if (cid == getDescendantOrdinal(2).getId()) //getCounterType().getId())
+    else if (cid == getDescendantOrdinal(2).getId())
       return COUNTER_CARD_SUBMIT;
-    else if(cid == getDescendantOrdinal(3).getId()) //getAdaptType().getId())
+    else if(cid == getDescendantOrdinal(3).getId())
       return ADAPT_CARD_SUBMIT;
-    else if(cid == getDescendantOrdinal(4).getId()) //getExploreType().getId())
+    else if(cid == getDescendantOrdinal(4).getId())
       return EXPLORE_CARD_SUBMIT;
     else {
       System.err.println("bogus card type pased to CardTypeManager.getCardSubmitDebugId()");
@@ -277,15 +295,15 @@ public class CardTypeManager
   public static String getCardContentDebugId(CardType ct)
   {
     long cid = ct.getId();
-    if(cid == getPositiveIdeaCardType().getId())
+    if(cid == getPositiveIdeaCardTypeTL().getId())
       return GOOD_IDEA_CARD_TEXTBOX;
-    else if(cid == getNegativeIdeaCardType().getId())
+    else if(cid == getNegativeIdeaCardTypeTL().getId())
       return BAD_IDEA_CARD_TEXTBOX;
-    else if (cid == getDescendantOrdinal(1).getId()) //getExpandType().getId())
+    else if (cid == getDescendantOrdinal(1).getId())
       return EXPAND_CARD_TEXTBOX;
-    else if (cid == getDescendantOrdinal(2).getId()) //getCounterType().getId())
+    else if (cid == getDescendantOrdinal(2).getId())
       return COUNTER_CARD_TEXTBOX;
-    else if(cid == getDescendantOrdinal(3).getId()) //getAdaptType().getId())
+    else if(cid == getDescendantOrdinal(3).getId())
       return ADAPT_CARD_TEXTBOX;
     else if(cid == getDescendantOrdinal(4).getId()) //getExploreType().getId())
       return EXPLORE_CARD_TEXTBOX;
@@ -295,13 +313,12 @@ public class CardTypeManager
     }
   }
 
-  
   public static String getCardCreateClickDebugId(CardType ct)
   {
     long cid = ct.getId();
-    if(cid == getPositiveIdeaCardType().getId())
+    if(cid == getPositiveIdeaCardTypeTL().getId())
       return GOOD_IDEA_CARD_OPEN_TEXT;
-    else if(cid == getNegativeIdeaCardType().getId())
+    else if(cid == getNegativeIdeaCardTypeTL().getId())
       return BAD_IDEA_CARD_OPEN_TEXT;
     else if (cid == getDescendantOrdinal(1).getId()) //getExpandType().getId())
       return EXPAND_CARD_OPEN_TEXT;
