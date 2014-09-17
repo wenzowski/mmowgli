@@ -39,7 +39,7 @@ import java.util.Date;
 
 import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * Edits.java Created on June 12, 2012
@@ -70,11 +70,10 @@ public class Edits implements Serializable, Comparable<Object>
     setValue(value);;   
   }
   
-  public static void save(Edits e)
+  public static void saveTL(Edits e)
   {
-    VHib.getVHSession().save(e);     
+    HSess.get().save(e);
   }
-
   @Id
   @Basic
   @GeneratedValue(strategy = GenerationType.AUTO)
