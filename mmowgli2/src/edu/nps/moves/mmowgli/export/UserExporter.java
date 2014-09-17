@@ -37,14 +37,19 @@ import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.w3c.dom.*;
+import org.w3c.dom.Comment;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * UserExporter.java Created on Dec 3, 2013
@@ -66,6 +71,7 @@ public class UserExporter extends BaseExporter
   
   private static Map<String,String> parameters = null;
   
+  @HibernateSessionThreadLocalConstructor
   public UserExporter()
   { 
   }
@@ -95,11 +101,9 @@ public class UserExporter extends BaseExporter
     exportToBrowser(title);      
   }
   
-  public Document buildXmlDocument() throws Throwable
+  public Document buildXmlDocumentTL() throws Throwable
   {
     Document doc;
-    SingleSessionManager ssm = new SingleSessionManager();
-    Session sess = ssm.getSession();
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       DocumentBuilder parser = factory.newDocumentBuilder();
@@ -121,10 +125,9 @@ public class UserExporter extends BaseExporter
 
       root.setAttribute("exported", dateFmt.format(new Date()));
       
-      ssm = new SingleSessionManager();
-      sess = ssm.getSession();
+      Session sess = HSess.get();
       
-      Game g = (Game) sess.get(Game.class, 1L);
+      Game g = Game.getTL();
       String s = g.getTitle();
       addElementWithText(root, "GameTitle", s.replace(' ','_'));  // better file name handling
       addElementWithText(root, "GameSecurity", g.isShowFouo()?"FOUO":"open");
@@ -136,8 +139,6 @@ public class UserExporter extends BaseExporter
       
       @SuppressWarnings("unchecked")
       List<User> lis = sess.createCriteria(User.class).addOrder(Order.asc("id")).list();
-      ssm.endSession();
-      ssm = null;
       
       int highestMove = g.getCurrentMove().getNumber();  //1-based  
       // Build a work array
@@ -238,17 +239,11 @@ public class UserExporter extends BaseExporter
       // Used the combined order (last sort above) when writing out Users
            
       for (RankedUser ru : ruLis) {
-        ssm = new SingleSessionManager();
-        sess = ssm.getSession();
-        addUserToDocument(root, ru.u, ru, sess);
-        ssm.endSession();
-        ssm = null;
+        addUserToDocument(root, ru.u, ru, HSess.get());
       }
     }
     catch (Throwable t) {
       t.printStackTrace();
-      if(ssm != null)
-        ssm.endSession();
       throw t; // rethrow
     }
 
@@ -257,7 +252,6 @@ public class UserExporter extends BaseExporter
   
   private void addUserToDocument(Element root, User u, RankedUser ru, Session sess)
   {    
-    //System.out.println("exporting action plan "+ap.getId());
     u = User.merge(u,sess);
     Element uElem = createAppend(root,"User");
     uElem.setAttribute("id", ""+u.getId());
@@ -403,6 +397,18 @@ public class UserExporter extends BaseExporter
     }  
   }
   
+  @Override
+  protected void showFile(String ignore, Document doc, String name, String styleSheetNameInThisPackage, boolean showXml) throws TransformerConfigurationException, TransformerException
+  {
+    super.showFile("Players", doc, name, styleSheetNameInThisPackage, showXml);
+  }
+
+  @Override
+  protected void showFile(String ignore, Document doc, String name, String styleSheetNameInThisPackage, String cdataElementList, boolean showXml) throws TransformerConfigurationException, TransformerException
+  {
+    super.showFile("Players", doc, name, styleSheetNameInThisPackage, cdataElementList, showXml);
+  }
+
   @Override
   public String getCdataSections()
   {
