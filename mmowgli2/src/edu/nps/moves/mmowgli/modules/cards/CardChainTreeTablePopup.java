@@ -43,6 +43,7 @@ import com.vaadin.ui.Button.ClickListener;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.MmowgliDialog2;
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * CardChainTreeTablePopup.java Created on Feb 26, 2011
@@ -67,6 +68,7 @@ public class CardChainTreeTablePopup extends MmowgliDialog2 implements ClickList
     this(rootId,false,false);
   }
   
+  @HibernateSessionThreadLocalConstructor
   public CardChainTreeTablePopup(Object rootId, boolean modal, boolean wantSaveButton)
   {
     super(null);
