@@ -59,11 +59,12 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
   private static final long serialVersionUID = -4640299065423452498L;
   
   public static final String CALLTOACTION_VIDEO_W = "538px";
+  public static final float VID_W_PX = 538.0f;
   public static final String CALLTOACTION_VIDEO_H = "382px";
+  public static final float VID_H_PX = 382.0f;
+  
   private Component player;
   private Label headingLab, summaryLab, textLab;
-
-//  private String youTubeId = "IcqZKBJMNhI"; // dutch interdiction //"Yj5f6ApIjUE"; afghan desert // temp
 
   private String heading;
   private Embedded headerImg;
@@ -116,60 +117,44 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
 
     horLay.addComponent(lab = new Label());
     lab.setWidth("38px");
-//https://vaadin.com/forum#!/thread/339247
+
     if (vidMedia != null && vidMedia.getUrl() != null && vidMedia.getUrl().trim().length() > 0) {
       if (vidMedia.getType() == MediaType.YOUTUBE) {
         try {
-          //YouTubePlayer ytp = new YouTubePlayer();
-          Embedded ytp = new Embedded();
-          ytp.setType(Embedded.TYPE_OBJECT);
-          ytp.setMimeType("application/x-shockwave-flash");
+          Flash ytp = new Flash();
           ytp.setSource(new ExternalResource("http://www.youtube.com/v/"+vidMedia.getUrl()));
-          //todo v7 check
-  /*        ytp.setVideoId(vidMedia.getUrl());
-          ytp.setAllowFullscreen(true);
-          ytp.setShowRelated(false); // newly added
- */
-          ytp.setWidth(CALLTOACTION_VIDEO_W);
-          ytp.setHeight(CALLTOACTION_VIDEO_H);
+          ytp.setParameter("allowFullScreen", "true");
+          ytp.setParameter("showRelated", "false");
+          ytp.setWidth(539.0f,Unit.PIXELS); //VID_W_PX,Unit.PIXELS);
+          ytp.setHeight(342.0f, Unit.PIXELS); //VID_H_PX,Unit.PIXELS);
           player = ytp;
         }
         catch (Exception ex) {
-          System.err.println("Exception instantiating YouTubPlayer: " + ex.getClass().getSimpleName() + ": " + ex.getLocalizedMessage());
+          System.err.println("Exception instantiating YouTubePlayer: " + ex.getClass().getSimpleName() + ": " + ex.getLocalizedMessage());
         }
       }
-    /*  else if (vidMedia.getType() == MediaType.VIDEO) {
-        Quicktime qt = new Quicktime();
-        qt.setSource(Mmowgli2UI.getGlobals().mediaLocator().locate(vidMedia));
-        qt.setWidth(CALLTOACTION_VIDEO_W);
-        qt.setHeight(CALLTOACTION_VIDEO_H);
-        player = qt;
-      } */
       else {
         System.err.println("Bad media file in VideoWithRightTextPanel");
         player = new Label("missing video");
       }
-      /*
-       * } else { //old way YouTubePlayer yplayer = new YouTubePlayer(); yplayer.setVideoId(youTubeId); yplayer.setWidth(CALLTOACTION_VIDEO_W);
-       * yplayer.setHeight(CALLTOACTION_VIDEO_H); player = yplayer; }
-       */
-      // VerticalLayout playerVL = new VerticalLayout();
-      AbsoluteLayout playerVL = new AbsoluteLayout();
-     // playerVL.setMargin(false);
-      // playerVL.setSpacing(false);
-      playerVL.setWidth("549px");
-      playerVL.setHeight("350px"); // "339px");
-      // playerVL.setWidth(CALLTOACTION_VIDEO_W);
-      playerVL.addStyleName("m-videoplayer");
-      playerVL.addComponent(player, "top:4px;left:5px");
+      VerticalLayout plyrLinkWrap = new VerticalLayout();
+      plyrLinkWrap.setMargin(false);
+      plyrLinkWrap.setSpacing(true);
+      plyrLinkWrap.setSizeUndefined();
+
+      VerticalLayout playerVL = new VerticalLayout(); //AbsoluteLayout();
+      playerVL.setWidth("539px");
+      playerVL.setHeight("342px");
+      playerVL.addStyleName("m-boxshadow-5");
+      playerVL.addComponent(player);
+      plyrLinkWrap.addComponent(playerVL);
 
       Link link = getAlternateVideoLink(vidMedia);
       if (link != null) {
-        playerVL.addComponent(link, "top:337px;left:210px");
-        // playerVL.setComponentAlignment(link,Alignment.TOP_CENTER);
+         plyrLinkWrap.addComponent(link);
+         plyrLinkWrap.setComponentAlignment(link, Alignment.BOTTOM_CENTER);
       }
-
-      horLay.addComponent(playerVL);
+      horLay.addComponent(plyrLinkWrap);
       horLay.addComponent(lab = new Label());
       lab.setWidth("22px");
     }
@@ -222,27 +207,9 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
     addComponent(lab = new Label());
     lab.setHeight("25px");
   }
-/*  
-  private Link getLink_hack_old(Media vidMedia)
-  {
-    if(vidMedia != null) {
-      if(vidMedia.getType() == MediaType.YOUTUBE) {
-     //   String url = vidMedia.getUrl();
-     //   url = findAlternateUrl(url);
-     //   if(url == null)
-        String url = "http://portal.mmowgli.nps.edu/em2-videos";
-        Link link = new Link("Can't see the video?",new ExternalResource(url));
-        link.setTargetName(PORTALTARGETWINDOWNAME);
-        link.setTargetBorder(Link.TARGET_BORDER_DEFAULT);
-        return link;
-      }
-    }
-    return null;
-  }
-  */
 
   private Link getAlternateVideoLink(Media vidMedia)
-  {
+  { try {
     Link link;
     String alternateUrl = vidMedia.getAlternateUrl();
     if(alternateUrl != null)
@@ -255,25 +222,8 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
     }
     link.setTargetName(PORTALTARGETWINDOWNAME);
     link.setTargetBorder(BorderStyle.DEFAULT);
-    return link;   
+    return link; 
   }
-  
-/*  
-  String[][] map = new String[][] {
-      {"VDCzSX04RaM","https://web.mmowgli.nps.edu/mmowMedia/mov/e18dc.mp4"},
-      {"OkgmCPpRrro","https://web.mmowgli.nps.edu/mmowMedia/mov/df4d6.mp4"},
-      {"lcqf66mEmNc","https://web.mmowgli.nps.edu/mmowMedia/mov/2352a.mp4"},
-      {"ikhDfztLoqc","https://web.mmowgli.nps.edu/mmowMedia/mov/0f8e5.mp4"},
-      {"BtTGOxCHcD0","https://web.mmowgli.nps.edu/mmowMedia/mov/MMOWGLIWelcome.mp4"}
-  };
-  
-  private String findAlternateUrl(String url)
-  {
-    for (int i=0;i<map.length;i++) {
-      if(url.contains(map[i][0]))
-        return map[i][1];
-    }
-    return null;
+  catch(Exception ex) {return null;}
   }
-*/      
 }
