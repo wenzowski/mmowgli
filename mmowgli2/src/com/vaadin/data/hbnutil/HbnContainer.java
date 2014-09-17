@@ -40,6 +40,8 @@ import com.vaadin.data.util.MethodProperty;
 import com.vaadin.data.util.converter.Converter.ConversionException;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.data.util.filter.UnsupportedFilterException;
+
+import edu.nps.moves.mmowgli.hibernate.HSess;
 // 11 Feb 2014 added here because of error with getContainerFilter in sources
 public class HbnContainer<T> implements Container, Container.Indexed, Container.Sortable,
     Container.Filterable, Container.Hierarchical, Container.ItemSetChangeNotifier, Container.Ordered
@@ -95,13 +97,15 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
     public EntityItem(Serializable id)
     {
       logger.executionTrace();
+      Object key = HSess.checkInit();
 
-      pojo = (T) sessionFactory.getCurrentSession().get(entityType, id);
+      pojo = (T) HSess.get().get(entityType, id);
       // add non-hibernate mapped container properties
       for (String propertyId : addedProperties.keySet())
       {
         addItemProperty(propertyId, new MethodProperty<Object>(pojo, propertyId));
       }
+      HSess.checkClose(key);
     }
 
     /**
@@ -193,12 +197,13 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
       public Object getValue()
       {
         logger.executionTrace();
-
-        final Session session = sessionFactory.getCurrentSession();
+        Object key = HSess.checkInit();
+        
+        final Session session = HSess.get(); //sessionFactory.getCurrentSession();
         final SessionImplementor sessionImplementor = (SessionImplementor) session;
 
-        if (!sessionFactory.getCurrentSession().contains(pojo))
-          pojo = (T) session.get(entityType, (Serializable) getIdForPojo(pojo));
+        if (!session.contains(pojo))
+          pojo = (T) session.get(entityType, (Serializable) getIdForPojoTL(pojo));
 
         if (propertyInEmbeddedKey(propertyName))
         {
@@ -212,6 +217,7 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
             if (name.equals(propertyName))
             {
               final Object id = classMetadata.getIdentifier(pojo, sessionImplementor);
+              HSess.checkClose(key);
               return identifierType.getPropertyValue(id, i, EntityMode.POJO);
             }
           }
@@ -220,14 +226,16 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
         final Type propertyType = getPropertyType();
         final Object propertyValue = classMetadata.getPropertyValue(pojo, propertyName);
 
-        if (!propertyType.isAssociationType())
+        if (!propertyType.isAssociationType()) {
+          HSess.checkClose(key);
           return propertyValue;
-
+        }
         if (propertyType.isCollectionType())
         {
-          if (propertyValue == null)
+          if (propertyValue == null) {
+            HSess.checkClose(key);
             return null;
-
+          }
           final HashSet<Serializable> identifiers = new HashSet<Serializable>();
           final Collection<?> pojos = (Collection<?>) propertyValue;
 
@@ -238,13 +246,14 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
 
             identifiers.add(session.getIdentifier(object));
           }
-
+          HSess.checkClose(key);
           return identifiers;
         }
 
-        if (propertyValue == null)
+        if (propertyValue == null) {
+          HSess.checkClose(key);
           return null;
-
+        }
         final Class<?> propertyTypeClass = propertyType.getReturnedClass();
         final ClassMetadata metadata = sessionFactory.getClassMetadata(propertyTypeClass);
         final Serializable identifier = metadata.getIdentifier(propertyValue, sessionImplementor);
@@ -292,9 +301,9 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
 
         try
         {
-          final Session session = sessionFactory.getCurrentSession();
-          final SessionImplementor sessionImplementor = (SessionImplementor) sessionFactory
-              .getCurrentSession();
+          HSess.init();
+          final Session session = HSess.get(); //sessionFactory.getCurrentSession();
+          final SessionImplementor sessionImplementor = (SessionImplementor) session; //sessionFactory.getCurrentSession();
 
           Object value;
 
@@ -380,14 +389,16 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
                     .getPropertyType(propertyName)
                     .getReturnedClass();
 
-                final Object object = sessionFactory
-                    .getCurrentSession()
+                final Object object = HSess.get() //sessionFactory
+                    //.getCurrentSession()
                     .get(referencedType, (Serializable) value);
 
                 classMetadata.setPropertyValue(pojo, propertyName, object);
-                sessionFactory.getCurrentSession().merge(object);
-                sessionFactory.getCurrentSession().saveOrUpdate(pojo);
-              }
+                //sessionFactory.getCurrentSession().merge(object);
+                //sessionFactory.getCurrentSession().saveOrUpdate(pojo);
+                HSess.get().merge(object);
+                HSess.get().saveOrUpdate(pojo);
+             }
               else
               {
                 classMetadata.setPropertyValue(pojo, propertyName, value);
@@ -403,6 +414,7 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
           catch (Exception e)
           {
             logger.error(e);
+            HSess.close();
             throw new ConversionException(e);
           }
         }
@@ -410,6 +422,7 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
         {
           logger.error(e);
         }
+        HSess.close();
       }
 
       /**
@@ -656,13 +669,13 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   public Serializable saveEntity(T entity)
   {
     logger.executionTrace();
-
-    final Session session = sessionFactory.getCurrentSession();
+    HSess.init();
+    final Session session = HSess.get(); //sessionFactory.getCurrentSession();
     final Object entityId = session.save(entity);
 
     clearInternalCache();
     fireItemSetChange();
-
+    HSess.close();
     return (Serializable) entityId;
   }
 
@@ -673,11 +686,11 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   public Serializable updateEntity(T entity)
   {
     logger.executionTrace();
-
-    final Session session = sessionFactory.getCurrentSession();
+    Object key = HSess.checkInit();
+    final Session session = HSess.get(); //sessionFactory.getCurrentSession();
     session.update(entity);
 
-    final Object entityId = getIdForPojo(entity);
+    final Object entityId = getIdForPojoTL(entity);
     final EntityItem<T> cachedEntity = cache.getIfPresent(entityId);
 
     cache.refresh(entityId);
@@ -695,7 +708,7 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
         }
       }
     }
-
+    HSess.checkClose(key);
     return (Serializable) entityId;
   }
 
@@ -879,11 +892,15 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   public Collection<?> getItemIds()
   {
     logger.executionTrace();
+    Object key = HSess.checkInit(); 
 
     // TODO: BUG: does not preserve sort order!
-    final Criteria criteria = getCriteria();
+    final Criteria criteria = getCriteriaTL();
     criteria.setProjection(Projections.id());
-    return criteria.list();
+    Collection<?> reto = criteria.list();
+    
+    HSess.checkClose(key);
+    return reto;
   }
 
   /**
@@ -899,9 +916,13 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   public List<?> getItemIds(int startIndex, int count)
   {
     logger.executionTrace();
+    Object key = HSess.checkInit();
 
     final List<?> entityIds = (List<?>) getItemIds();
-    return entityIds.subList(startIndex, startIndex + count);
+    List<?> retObj = entityIds.subList(startIndex, startIndex + count);
+    
+    HSess.checkClose(key);
+    return retObj;
   }
 
   /**
@@ -956,10 +977,10 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   public boolean removeAllItems() throws UnsupportedOperationException
   {
     logger.executionTrace();
-
+    HSess.init();
     try
     {
-      final Session session = sessionFactory.getCurrentSession();
+      final Session session = HSess.get(); //sessionFactory.getCurrentSession();
       final Query query = session.createQuery("DELETE FROM " + entityType.getSimpleName());
 
       final int deleted = query.executeUpdate();
@@ -970,12 +991,13 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
         clearInternalCache();
         fireItemSetChange();
       }
-
+      HSess.close();
       return (size() == 0);
     }
     catch (Exception e)
     {
       logger.error(e);
+      HSess.close();
       return false;
     }
   }
@@ -999,15 +1021,19 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
    * 
    * Note that this method recursively removes all children of this entity before removing this entity.
    */
+  private static int recursed = 0;
   @Override
   public boolean removeItem(Object entityId) throws UnsupportedOperationException
   {
     logger.executionTrace();
-
+    if(recursed==0) {
+      HSess.init();
+      recursed++;
+    }
     for (Object id : getChildren(entityId))
       removeItem(id);
 
-    final Session session = sessionFactory.getCurrentSession();
+    final Session session = HSess.get(); //sessionFactory.getCurrentSession();
     final Object entity = session.load(entityType, (Serializable) entityId);
 
     session.delete(entity);
@@ -1015,7 +1041,9 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
 
     clearInternalCache();
     fireItemSetChange();
-
+    
+    if(recursed-- == 0)
+      HSess.close();
     return true;
   }
 
@@ -1027,12 +1055,14 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   public int size()
   {
     logger.executionTrace();
-
-    size = ((Number) getBaseCriteria()
+    Object key = HSess.checkInit();
+    
+    size = ((Number) getBaseCriteriaTL()
         .setProjection(Projections.rowCount())
         .uniqueResult())
         .intValue();
 
+    HSess.checkClose(key);
     return size.intValue();
   }
 
@@ -1067,15 +1097,17 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   public Object firstItemId()
   {
     logger.executionTrace();
-
-    final Object firstPojo = getCriteria()
+    Object key = HSess.checkInit();
+    
+    final Object firstPojo = getCriteriaTL()
         .setMaxResults(1)
         .setCacheable(true)
         .uniqueResult();
 
-    firstId = getIdForPojo(firstPojo);
+    firstId = getIdForPojoTL(firstPojo);
     idToIndex.put(firstId, normalOrder ? 0 : size() - 1);
-
+    
+    HSess.checkClose(key);
     return firstId;
   }
 
@@ -1131,7 +1163,8 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   public Object nextItemId(Object entityId)
   {
     logger.executionTrace();
-
+    Object key = HSess.checkInit();
+    
     EntityItem<T> entity = null;
     List<T> rowBuffer = null;
 
@@ -1143,6 +1176,7 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
     catch (Exception e)
     {
       logger.error(e);
+      HSess.checkClose(key);
       return null;
     }
 
@@ -1152,7 +1186,9 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
       if ((index = rowBuffer.indexOf(entity.getPojo())) != -1)
       {
         final T nextEntity = rowBuffer.get(index + 1);
-        return getIdForPojo(nextEntity);
+        Object reto = getIdForPojoTL(nextEntity);
+        HSess.checkClose(key);
+        return reto;
       }
     }
     catch (Exception e) // entityId is not in rowBuffer, suppress the exception
@@ -1166,10 +1202,11 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
         ? currentIndex + 1
         : size - currentIndex;
 
-    if (firstIndex < 0 || firstIndex >= size)
+    if (firstIndex < 0 || firstIndex >= size) {
+      HSess.checkClose(key);
       return null;
-
-    final Criteria criteria = getCriteria()
+    }
+    final Criteria criteria = getCriteriaTL()
         .setFirstResult(firstIndex)
         .setMaxResults(ROW_BUF_SIZE);
 
@@ -1180,9 +1217,11 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
     {
       setRowBuffer(newRowBuffer, firstIndex);
       final T nextPojo = newRowBuffer.get(0);
-      return getIdForPojo(nextPojo);
+      Object reto = getIdForPojoTL(nextPojo);
+      HSess.checkClose(key);
+      return reto;
     }
-
+    HSess.checkClose(key);
     return null;
   }
 
@@ -1226,26 +1265,26 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   public Object getIdByIndex(int index)
   {
     logger.executionTrace();
-
+    Object key = HSess.checkInit();
     if (indexRowBuffer == null)
-      resetIndexRowBuffer(index);
+      resetIndexRowBufferTL(index);
 
     int indexInCache = index - indexRowBufferFirstIndex;
 
     if (!(indexInCache >= 0 && indexInCache < indexRowBuffer.size()))
     {
-      resetIndexRowBuffer(index);
+      resetIndexRowBufferTL(index);
       indexInCache = 0;
     }
 
     final T pojo = indexRowBuffer.get(indexInCache);
-    final Object id = getIdForPojo(pojo);
+    final Object id = getIdForPojoTL(pojo);
 
     idToIndex.put(id, new Integer(index));
 
     if (idToIndex.size() > ID_TO_INDEX_MAX_SIZE)
       idToIndex.remove(idToIndex.keySet().iterator().next());
-
+    HSess.checkClose(key);
     return id;
   }
 
@@ -1260,12 +1299,19 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   public int indexOfId(Object entityId)
   {
     logger.executionTrace();
+    Object key = HSess.checkInit();
+    
+    Integer index = idToIndex.get(entityId);
 
-    final Integer index = idToIndex.get(entityId);
-
-    return (index == null)
-        ? slowIndexOfId(entityId)
-        : index;
+//    return (index == null)
+//        ? slowIndexOfId(entityId)
+//        : index;
+    
+    if(index==null)
+      index = slowIndexOfIdTL(entityId);
+    
+    HSess.checkClose(key);     
+    return index;    
   }
 
   /**
@@ -1725,11 +1771,11 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   /**
    * This is an internal HbnContainer utility method. Gets a base listing using current ordering criteria.
    */
-  private Criteria getCriteria()
+  private Criteria getCriteriaTL()
   {
     logger.executionTrace();
 
-    final Criteria criteria = getBaseCriteria();
+    final Criteria criteria = getBaseCriteriaTL();
     final List<Order> orders = getOrder(!normalOrder);
 
     for (Order order : orders)
@@ -1793,12 +1839,11 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
    * This is an internal HbnContainer utility method. Creates the base criteria for entity class and add possible
    * restrictions to query. This method is protected so developers can add their own custom criteria.
    */
-  protected Criteria getBaseCriteria()
+  protected Criteria getBaseCriteriaTL()
   {
+    // This is assumed to be called with an active Thread Local session   
     logger.executionTrace();
-    //System.out.println("HbnContainer curr sessfact: "+sessionFactory.hashCode());
-    final Session session = sessionFactory.getCurrentSession();
-    //System.out.println("HbnContainer curr sess: "+session.hashCode());
+    final Session session = HSess.get();
     Criteria criteria = session.createCriteria(entityType);
 
     if (filters != null)
@@ -1813,7 +1858,6 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
         criteria = criteria.add(filter.getCriterion(idName));
       }
     }
-
     return criteria;
   }
 
@@ -1836,12 +1880,14 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   /**
    * This is an internal HbnContainer utility method to detect identifier of given entity object.
    */
-  private Object getIdForPojo(Object pojo)
+  private Object getIdForPojoTL(Object pojo)
   {
     logger.executionTrace();
 
-    final Session session = sessionFactory.getCurrentSession();
-    return classMetadata.getIdentifier(pojo, (SessionImplementor) session);
+    final Session session = HSess.get(); //sessionFactory.getCurrentSession();
+    Object retObj = classMetadata.getIdentifier(pojo, (SessionImplementor) session);
+
+    return retObj;
   }
 
   /**
@@ -1862,6 +1908,7 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
   private void setRowBuffer(List<T> list, int firstIndex)
   {
     logger.executionTrace();
+    Object key = HSess.checkInit();
 
     if (normalOrder)
     {
@@ -1869,7 +1916,7 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
 
       for (int i = 0; i < list.size(); ++i)
       {
-        idToIndex.put(getIdForPojo(list.get(i)), firstIndex + i);
+        idToIndex.put(getIdForPojoTL(list.get(i)), firstIndex + i);
       }
     }
     else
@@ -1879,9 +1926,11 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
 
       for (int i = 0; i < list.size(); ++i)
       {
-        idToIndex.put(getIdForPojo(list.get(i)), lastIndex - firstIndex - i);
+        idToIndex.put(getIdForPojoTL(list.get(i)), lastIndex - firstIndex - i);
       }
     }
+    HSess.checkClose(key);
+
   }
 
   /**
@@ -1898,22 +1947,22 @@ public class HbnContainer<T> implements Container, Container.Indexed, Container.
    * This is an internal HbnContainer utility method to query new set of entity items to cache from given index.
    */
   @SuppressWarnings("unchecked")
-  private void resetIndexRowBuffer(int index)
+  private void resetIndexRowBufferTL(int index)
   {
     logger.executionTrace();
 
     indexRowBufferFirstIndex = index;
-    indexRowBuffer = getCriteria().setFirstResult(index).setMaxResults(ROW_BUF_SIZE).list();
+    indexRowBuffer = getCriteriaTL().setFirstResult(index).setMaxResults(ROW_BUF_SIZE).list();
   }
 
   /**
    * This is an internal HbnContainer utility method that gets the index of the given identifier.
    */
-  private int slowIndexOfId(Object entityId)
+  private int slowIndexOfIdTL(Object entityId)
   {
     logger.executionTrace();
 
-    final Criteria criteria = getCriteria().setProjection(Projections.id());
+    final Criteria criteria = getCriteriaTL().setProjection(Projections.id());
     final List<?> list = criteria.list();
     return list.indexOf(entityId);
   }
