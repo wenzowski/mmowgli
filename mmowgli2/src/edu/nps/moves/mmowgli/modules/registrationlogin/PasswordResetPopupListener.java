@@ -61,92 +61,87 @@ import edu.nps.moves.mmowgli.db.User;
 
 /**
  * Allow a registered user to reset their forgotten password
- * @author <a href="mailto:tdnorbra@nps.edu?subject=edu.nps.moves.mmowgli.modules.registrationLogin.PasswordResetPopupListener">Terry Norbraten, NPS MOVES</a>
- * @version $Id: PasswordResetPopupListener.java 3305 2014-02-01 00:02:34Z tdnorbra $
+ * 
+ * @author <a href=
+ *         "mailto:tdnorbra@nps.edu?subject=edu.nps.moves.mmowgli.modules.registrationLogin.PasswordResetPopupListener"
+ *         >Terry Norbraten, NPS MOVES</a>
+ * @version $Id: PasswordResetPopupListener.java 3305 2014-02-01 00:02:34Z
+ *          tdnorbra $
  */
 
-/*
- * 
- * 
- * 
- * 
- * Placeholder to get through compile
- * 
- * 
- * 
- */
 public class PasswordResetPopupListener extends MmowgliDialog implements Button.ClickListener
 {
-    private static final long serialVersionUID = 8282736664554448888L;
+  private static final long serialVersionUID = 8282736664554448888L;
 
-    private User user; // what gets returned
-  //  private TextField userIDTf, emailTf;
+  private User user; // what gets returned
+  private boolean error = false;
 
-  //  private String email;
-    private boolean error = false;
+  /**
+   * Default Constructor
+   * 
+   * @param app the main Vaadin application currently running
+   * @param listener the end listener to listen for cancel events
+   * @param user the User who wishes to reset their password
+   */
 
-    /**
-     * Default Constructor
-     * @param app the main Vaadin application currently running
-     * @param listener the end listener to listen for cancel events
-     * @param user the User who wishes to reset their password
-     */
-    public PasswordResetPopupListener(Button.ClickListener listener, User user) {
-        super(listener);
-      
+  public PasswordResetPopupListener(Button.ClickListener listener, User user)
+  {
+    super(listener);
+  }
+
+  @Override
+  protected void cancelClickedTL(Button.ClickEvent event)
+  {
+    getUI().setScrollTop(0);// app.getMainWindow().setScrollTop(0);
+    getUI().removeWindow(this);// app.getMainWindow().removeWindow(this);
+
+    // We don't want to call super.cancelClicked(event); here b/c the
+    // RegistraionPageBase (end listener) has no idea who we are
+    // and will think we are an instance of the LoginPopup
+  }
+
+  /**
+   * @return the user or null if canceled
+   */
+  @Override
+  public User getUser()
+  {
+    return user;
+  }
+
+  /**
+   * Used by the parent class when cancel is hit
+   * 
+   * @param u the User to set
+   */
+  @Override
+  public void setUser(User u)
+  {
+    user = u;
+  }
+
+  // Lots of stuff borrowed from RegistrationPagePopupFirst
+  @Override
+  public void buttonClick(Button.ClickEvent event)
+  {
+
+    performChecks(event);
+
+    if (!error) {
+      makeResetAnnounceDialog();
     }
 
-    @Override
-    protected void cancelClicked(Button.ClickEvent event) {
-        getUI().setScrollTop(0);//app.getMainWindow().setScrollTop(0);
-        getUI().removeWindow(this);//app.getMainWindow().removeWindow(this);
+    // reset for next attempt
+    error = false;
+  }
 
-        // We don't want to call super.cancelClicked(event); here b/c the
-        // RegistraionPageBase (end listener) has no idea who we are
-        // and will think we are an instance of the LoginPopup
-    }
+  private void performChecks(Button.ClickEvent event)
+  {
 
-    /**
-     * @return the user or null if canceled
-     */
-    @Override
-    public User getUser() {
-        return user;
-    }
+  }
 
-    /**
-     * Used by the parent class when cancel is hit
-     * @param u the User to set
-     */
-    @Override
-    public void setUser(User u) {
-        user = u;
-    }
+  private void makeResetAnnounceDialog()
+  {
 
-    // Lots of stuff borrowed from RegistrationPagePopupFirst
-    @Override
-    public void buttonClick(Button.ClickEvent event) {
-
-        performChecks(event);
-
-        if (!error) {
-            makeResetAnnounceDialog();
-        }
-
-        // reset for next attempt
-        error = false;
-    }
-
-    private void performChecks(Button.ClickEvent event) {
-
-      
-    }
-
-    private void makeResetAnnounceDialog() {
-
-        
-    }
-
-  
-
-} // end class file PasswordResetListener.java
+  }
+}
