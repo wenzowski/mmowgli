@@ -33,12 +33,11 @@
 */
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import static edu.nps.moves.mmowgli.MmowgliConstants.NO_LOGGEDIN_USER_ID;
+import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
 
 import java.io.Serializable;
 import java.util.List;
-
-import org.hibernate.Session;
 
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.VaadinServletService;
@@ -54,33 +53,13 @@ import edu.nps.moves.mmowgli.*;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.components.VideoWithRightTextPanel;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
-import edu.nps.moves.mmowgli.signupServer.SignupServer;
 import edu.nps.moves.mmowgli.utility.MailManager;
-/*
-import com.vaadin.terminal.ExternalResource;
-import com.vaadin.ui.*;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Window.CloseEvent;
-import com.vaadin.ui.Window.CloseListener;
-import com.vaadin.ui.Window.Notification;
 
-import edu.nps.moves.mmowgli.ApplicationController;
-import edu.nps.moves.mmowgli.ApplicationEntryPoint;
-import edu.nps.moves.mmowgli.ApplicationSessionGlobals;
-import edu.nps.moves.mmowgli.DBGet;
-import edu.nps.moves.mmowgli.components.ComponentAdder;
-import edu.nps.moves.mmowgli.components.MmowgliComponent;
-import edu.nps.moves.mmowgli.components.VideoWithRightTextPanel;
-import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.db.pii.PiiHibernate;
-import edu.nps.moves.mmowgli.hibernate.HibernateContainers;
-import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
-import edu.nps.moves.mmowgli.signupServer.SignupServer;
-import edu.nps.moves.mmowgli.utility.MailManager;
-*/
 /**
  * RegistrationPageBase.java
  * Created on Nov 29, 2010
@@ -116,7 +95,8 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
     "40px", // 3 button
     "30px", // 4 button
   };
-
+  
+  @HibernateSessionThreadLocalConstructor
   public RegistrationPageBase()
   {
     this(false);
@@ -135,10 +115,8 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
     setWidth("988px");  // same width as included panel
     setHeight(BIGGESTWINDOW_HEIGHT_S);  // try to handle making the popup miss the video
 
-    Session sess = VHib.openSession();
-    Game game = (Game)sess.get(Game.class, 1L);
+    Game game = Game.getTL();
     MovePhase phase = game.getCurrentMove().getCurrentMovePhase();
-    sess.close();
 
     HorizontalLayout outerLayout = new HorizontalLayout();
     outerLayout.setSpacing(true);
@@ -183,7 +161,6 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         signupVL.addComponent(signupButt = new NativeButton(null,this));
       signupButt.addStyleName("signupbutton");
       signupButt.setEnabled(phase.isSignupButtonEnabled());
-      //app.globs().mediaLocator().decorateImNewToMmowgliButton(signupButt);
       Mmowgli2UI.getGlobals().mediaLocator().decorateImageButton(signupButt, phase.getSignupButtonIcon());
       signupVL.setComponentAlignment(signupButt, Alignment.MIDDLE_CENTER);
 
@@ -218,7 +195,6 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         newButtVL.addComponent(imNewButt = new NativeButton(null, this));
       imNewButt.setEnabled(phase.isNewButtonEnabled());
       imNewButt.addStyleName("newuserbutton");
-      //app.globs().mediaLocator().decorateImNewToMmowgliButton(imNewButt);
       Mmowgli2UI.getGlobals().mediaLocator().decorateImageButton(imNewButt, phase.getNewButtonIcon());
       newButtVL.setComponentAlignment(imNewButt, Alignment.MIDDLE_CENTER);
 
@@ -275,7 +251,6 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       imRegisteredButt.addStyleName("loginbutton");
       imRegisteredButt.setEnabled(phase.isLoginButtonEnabled());
 
-      //app.globs().mediaLocator().decorateImRegisteredButton(imRegisteredButt);
       Mmowgli2UI.getGlobals().mediaLocator().decorateImageButton(imRegisteredButt, phase.getLoginButtonIcon());
       rightButtVL.setComponentAlignment(imRegisteredButt, Alignment.MIDDLE_CENTER);
 
@@ -340,7 +315,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
     baseVLayout.addComponent(bottomHLayout);
     baseVLayout.setComponentAlignment(bottomHLayout, Alignment.TOP_CENTER);
 
-    String troubleUrl = GameLinks.get().getTroubleLink();
+    String troubleUrl = GameLinks.getTL().getTroubleLink();
     Link lnk = new Link("Trouble signing in?",new ExternalResource(troubleUrl));
     baseVLayout.addComponent(lnk);
     lnk.setTargetName(PORTALTARGETWINDOWNAME);
@@ -389,41 +364,40 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
   
   private boolean okSurvey = false;
   @Override
+  @MmowgliCodeEntry
+  @HibernateConditionallyOpened
+  @HibernateConditionallyClosed
   public void buttonClick(ClickEvent event)
   {
     if(lockedOut)
       return;
 
     if(event.getButton() == signupButt) {
-      //String url = app.getURL().toExternalForm();
       String url = VaadinServletService.getCurrentServletRequest().getRequestURI();
+      if(url.endsWith("PUSH/"))         //todo figure this out
+        url = url.substring(0, url.length()-5);
       if(url.endsWith("/"))
         url = url+"signup";
       else
         url = url+"/signup";
 
-      // Give the signup servlet/app the location of our images
-      // Not a clean way to do this.
-      SignupServer.setGameImagesUrl(Mmowgli2UI.getGlobals().getGameImagesUrl());
-
       Mmowgli2UI.getAppUI().getSession().close(); //app.close();
       Mmowgli2UI.getAppUI().getPage().setLocation(url);
       return;
     }
-
+    Object key = HSess.checkInit();
     if (event.getButton() == imNewButt) {
       RegistrationPageAgreementCombo comboPg = new RegistrationPageAgreementCombo(this);
       openPopup(comboPg, comboPg.getUsualWidth());
+      HSess.checkClose(key);
       return;
-//      RegistrationPageConsent consentPg = new RegistrationPageConsent(app,this);
-//      openPopup(consentPg,consentPg.getUsualWidth());
-//      return;
     }
 
     if (event.getButton() == guestButt) {
       LoginPopup lp = new LoginPopup(this,true);
       if(lp.user != null) {
-        handleLoginReturn(lp.user);
+        handleLoginReturnTL(lp.user);
+        HSess.checkClose(key);
         return;
       }
       // Here is we clicked guest button, but no guest user in db or guest has been deemed locked out ("accountDisabled");
@@ -431,46 +405,48 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
 
       // Continue to allow login with other name
       openPopup(lp,lp.getUsualWidth());
+      HSess.checkClose(key);
       return;
     }
 
     if (currentPopup instanceof RegistrationPageAgreementCombo) {
       closePopup(currentPopup);
       boolean rejected = ((RegistrationPageAgreementCombo)currentPopup).getRejected();
-      Game g = Game.get();
-      GameLinks gl = GameLinks.get();
+      Game g = Game.getTL();
+      GameLinks gl = GameLinks.getTL();
       if(rejected) {
         // Either let them try again or close and say thankyou
    //     app.getMainWindow().setScrollTop(0);
         Mmowgli2UI.getAppUI().quitAndGoTo(gl.getThanksForInterestLink());
+        HSess.checkClose(key);
         return;
       }
       if(g.isSecondLoginPermissionPage()) {
         RegistrationPageSecondPermissionPopup p2 = new RegistrationPageSecondPermissionPopup(this);
         openPopup(p2,p2.getUsualWidth());
+        HSess.checkClose(key);
         return;
       }
-      //RegistrationPagePopupFirst p1 = new RegistrationPagePopupFirst(app,this);
-      //openPopup(p1,p1.getUsualWidth());
       RegistrationPageSurvey surv = new RegistrationPageSurvey(this);
       openPopup(surv,surv.getUsualWidth());
+      HSess.checkClose(key);
       return;
     }
     if (currentPopup instanceof RegistrationPageSecondPermissionPopup) {
       closePopup(currentPopup);
-      GameLinks gl = GameLinks.get();
+      GameLinks gl = GameLinks.getTL();
       boolean rejected = ((RegistrationPageSecondPermissionPopup)currentPopup).getRejected();
       if(rejected) {
         // Either let them try again or close and say thankyou
    //     app.getMainWindow().setScrollTop(0);
         Mmowgli2UI.getAppUI().quitAndGoTo(gl.getThanksForInterestLink());
+        HSess.checkClose(key);
         return;
       }
 
-      //RegistrationPagePopupFirst p1 = new RegistrationPagePopupFirst(app,this);
-      //openPopup(p1,p1.getUsualWidth());
       RegistrationPageSurvey surv = new RegistrationPageSurvey(this);
       openPopup(surv,surv.getUsualWidth());
+      HSess.checkClose(key);
       return;
     }
 /*    if (currentPopup instanceof RegistrationPageConsent) {
@@ -507,12 +483,14 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
 
       RegistrationPagePopupFirst p1 = new RegistrationPagePopupFirst(this);
       openPopup(p1,p1.getUsualWidth());
+      HSess.checkClose(key);
       return;
     }
 
     if (event.getButton() == imRegisteredButt) {
       LoginPopup lp = new LoginPopup(this);
       openPopup(lp,lp.getUsualWidth());
+      HSess.checkClose(key);
       return;
     }
     if (currentPopup instanceof RegistrationPagePopupFirst) {
@@ -520,11 +498,13 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       user = ((RegistrationPagePopupFirst)currentPopup).getUser();
       if(user == null) {  // cancelled
         UI.getCurrent().setScrollTop(0);
+        HSess.checkClose(key);
         return;
       }
       // That user is a transient instance, wrong..it is
       RegistrationPagePopupSecond p2 = new RegistrationPagePopupSecond(this,user);
       openPopup(p2,p2.getUsualWidth());
+      HSess.checkClose(key);
       return;
     }
     if (currentPopup instanceof RegistrationPagePopupSecond) {
@@ -532,10 +512,12 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       user = ((RegistrationPagePopupSecond)currentPopup).getUser();
       if(user == null) {
         UI.getCurrent().setScrollTop(0);
+        HSess.checkClose(key);
         return;
       }
       RoleSelectionPage rsp = new RoleSelectionPage(this, user);
       openPopup(rsp,rsp.getUsualWidth());
+      HSess.checkClose(key);
       return;
     }
     if (currentPopup instanceof RoleSelectionPage) {
@@ -545,36 +527,32 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       user = ((RoleSelectionPage)currentPopup).getUser();
       if(user == null) {
         UI.getCurrent().setScrollTop(0);
+        HSess.checkClose(key);
         return;
       }
       doOtherUserInit(user);
       user.setOkSurvey(okSurvey);  // saved above
-      Game g = Game.get(1L);
+      Game g = Game.getTL();
       user.setRegisteredInMove(g.getCurrentMove());
-      User.update(user);
+      User.updateTL(user);
 
-      Mmowgli2UI.getGlobals().getScoreManager().userCreated(user);  // give him his points if appropriate
+      Mmowgli2UI.getGlobals().getScoreManager().userCreatedTL(user);  // give him his points if appropriate
 
       UI.getCurrent().setScrollTop(0);
-      wereIn(user);
+      wereInTL(user);
+      HSess.checkClose(key);
       return;
     }
    if(currentPopup instanceof LoginPopup) {
-     handleLoginReturn(((LoginPopup)currentPopup).getUser());
+     handleLoginReturnTL(((LoginPopup)currentPopup).getUser());
+     HSess.checkClose(key);
      return;
-//     app.getMainWindow().setScrollTop(0);
-//     user = ((LoginPopup)currentPopup).getUser();
-//     if(user == null) { // cancelled
-//       app.getMainWindow().removeWindow(currentPopup);
-//       return;
-//     }
-//     wereInReally();
-//     return;
    }
+   HSess.checkClose(key);
 
    System.err.println("Program logic error in RegistrationPageBase.buttonClick()");
   }
-  private void handleLoginReturn(User u)
+  private void handleLoginReturnTL(User u)
   {
     UI.getCurrent().setScrollTop(0);
     if(u == null) { // cancelled
@@ -582,23 +560,22 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       return;
     }
     user = u;
-    wereInReally();
+    wereInReallyTL();
   }
 
  // Check for email confirmation
   @SuppressWarnings("serial")
-  private void wereIn(User u)
+  private void wereInTL(User u)
   {
-    Game g = Game.get(1L);
+    Game g = Game.getTL();
     if(!g.isEmailConfirmation()) {
       user.setEmailConfirmed(true); // confirmation didn't happen, but they want to login
-      User.update(user);
-      wereInReally();
+      User.updateTL(user);
+      wereInReallyTL();
     }
     else {
       List<String>sLis = VHibPii.getUserPiiEmails(u.getId());
       String email = sLis.get(0);
-      //String email = u.getEmailAddresses().get(0).getAddress();
       final Window emailDialog = new Window("Email Confirmation");
       emailDialog.setModal(true);
       emailDialog.setClosable(false);
@@ -631,9 +608,6 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
 
       GridLayout grid = new GridLayout();
       vLay.addComponent(grid);
-      //HorizontalLayout buttHLay = new HorizontalLayout();
-     // buttHLay.setSpacing(true);
-      //emailDialog.addComponent(buttHLay);
 
       final Button contButt = new Button("Am I confirmed yet?",new ClickListener()
       {
@@ -641,12 +615,13 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         @Override
         public void buttonClick(ClickEvent event)
         {
+          HSess.init();
           if(confirmed) {
             closePopup(emailDialog);
-            wereInReally();
+            wereInReallyTL();
           }
           else {
-            VHib.getVHSession().refresh(user);  // get the change made by the email-confirm-servlet
+            HSess.get().refresh(user);
             if(user.isEmailConfirmed()) {
               confirmed=true;
               event.getButton().setCaption("I'm ready to play mmowgli!");
@@ -657,7 +632,6 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
           }
         }
       });
-      //buttHLay.addComponent(contButt);
       grid.addComponent(contButt);
       contButt.setImmediate(true);
 
@@ -666,34 +640,40 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         @Override
         public void buttonClick(ClickEvent event)
         {
-          Mmowgli2UI.getAppUI().quitAndGoTo(GameLinks.get().getThanksForInterestLink());
+          HSess.init();
+          Mmowgli2UI.getAppUI().quitAndGoTo(GameLinks.getTL().getThanksForInterestLink());
+          HSess.close();
         }
       });
-      //buttHLay.addComponent(laterButt);
       grid.addComponent(laterButt);
 
       Button troubleButt = new Button("Send trouble report", new ClickListener()
       {
         @Override
-        public void buttonClick(ClickEvent event)
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
+        public void buttonClick(ClickEvent event)  // no need for HSess
         {
-          Mmowgli2UI.getAppUI().quitAndGoTo(GameLinks.get().getTroubleLink());
+          HSess.init();
+          Mmowgli2UI.getAppUI().quitAndGoTo(GameLinks.getTL().getTroubleLink());
+          HSess.close();
         }
       });
-      //buttHLay.addComponent(troubleButt);
       grid.addComponent(troubleButt);
 
       openPopupWindowInMainWindow(emailDialog,500);
 
       EmailConfirmation ec = new EmailConfirmation(user);
-      EmailConfirmation.save(ec);
+      EmailConfirmation.saveTL(ec);
 
       String confirmUrl = buildConfirmUrl(ec);
-      Mmowgli2UI.getGlobals().getAppMaster().getMailManager().sendEmailConfirmation(email, u.getUserName(), confirmUrl);
+      Mmowgli2UI.getGlobals().getAppMaster().getMailManager().sendEmailConfirmationTL(email, u.getUserName(), confirmUrl);
+      HSess.close();
     } // else weren't confirmed
   }
 
-  private void wereInReally()
+  private void wereInReallyTL()
   {
     if (currentPopup != null)
       UI.getCurrent().removeWindow(currentPopup); // app.getMainWindow().removeWindow(currentPopup);
@@ -701,29 +681,26 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
     Mmowgli2UI.getGlobals().setLoggedIn(true);
 
     if (user != null) {
-      user = DBGet.getUserFresh(user.getId());
+      user = DBGet.getUserFreshTL(user.getId());
       if (!user.isWelcomeEmailSent()) {
         MailManager mmgr = Mmowgli2UI.getGlobals().getAppMaster().getMailManager();
-        mmgr.onNewUserSignup(user);
+        mmgr.onNewUserSignupTL(user);
         user.setWelcomeEmailSent(true);
-        User.update(user);
+        User.updateTL(user);
       }
-      // Got several null ptrs here, so unwrap it
-      // ((ApplicationEntryPoint) getApplication()).globs().controller().loggedIn(user.getId()); // and we're off
 
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       if (globs != null) {
         MmowgliController cntlr = globs.getController();
         if (cntlr != null)
-          cntlr.handleEvent(MmowgliEvent.HANDLE_LOGIN_STARTUP, user.getId(), null);
-        // cntlr.loggedIn(user.getId());
+          cntlr.handleEventTL(MmowgliEvent.HANDLE_LOGIN_STARTUP, user.getId(), null);
         else
           System.err.println("No controller in RegistrationPageBase.wereIn()");
       }
       else
         System.err.println("No globals in RegistrationPageBase.wereIn()");
 
-      GameEventLogger.logUserLogin(user.getId());
+      GameEventLogger.logUserLoginTL(user.getId());
     }
   }
 
@@ -744,23 +721,18 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
   }
 
   @SuppressWarnings("serial")
-  public void checkUserLimits()
+  public void checkUserLimitsTL()
   {
-    /* is this required?
-    String param = Mmowgli2UI.getGlobals().getGameMasterParam();
-    if(param != null)   // don't care what the ?fuzzywalrus=blah was, just want to see fuzzywalrus defined
-      return;
-    */
     Serializable uid = Mmowgli2UI.getGlobals().getUserID();
     if(uid != NO_LOGGEDIN_USER_ID) {  // can't do this check if we don't have a user yet
-      User u = DBGet.getUser(uid); //app.getUser());
+      User u = DBGet.getUserTL(uid); //app.getUser());
       if(u != null) // why should it be?
         if(u.getUserName() != null) // why should it be?
           if(u.getUserName().toLowerCase().startsWith("gm_"))
         		return;
     }
 
-    int maxIn = Game.get(1L).getMaxUsersOnline();
+    int maxIn = Game.getTL().getMaxUsersOnline();
    // List<User> lis = (List<User>)HibernateContainers.getSession().createCriteria(User.class).add(Restrictions.eq("online", true)).list();
    // if(lis.size()>=maxIn) {
     if(Mmowgli2UI.getGlobals().getSessionCount() >= maxIn) { // new improved
@@ -793,9 +765,14 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       win.addCloseListener(new CloseListener()
       {
         @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void windowClose(CloseEvent e)
         {
-          Mmowgli2UI.getAppUI().quitAndGoTo(GameLinks.get().getGameFullLink());
+          HSess.init();
+          Mmowgli2UI.getAppUI().quitAndGoTo(GameLinks.getTL().getGameFullLink());
+          HSess.close();
         }
       });
     }
