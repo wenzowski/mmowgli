@@ -33,8 +33,8 @@
 */
 package edu.nps.moves.mmowgli.modules.userprofile;
 
-import static edu.nps.moves.mmowgli.modules.userprofile.BadgeManager.BADGE_EIGHT_ID;
-
+import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
+import static edu.nps.moves.mmowgli.db.Badge.*;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -59,12 +59,15 @@ import edu.nps.moves.mmowgli.components.*;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.EmailPii;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsUserUpdates;
 import edu.nps.moves.mmowgli.modules.gamemaster.CreateActionPlanPanel;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
-import edu.nps.moves.mmowgli.utility.*;
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
+import edu.nps.moves.mmowgli.utility.MediaLocator;
 /**
  * UserProfile3Top.java
  * Created on Oct 7, 2011
@@ -198,18 +201,19 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
   private ChangePasswordDialog.PasswordPacket packet;
   private ChangeEmailDialog.EmailPacket emailPacket;
 
+  @HibernateSessionThreadLocalConstructor
   public UserProfile3Top(Object uid)
   {
     this.uid = uid;
 
-    User u = DBGet.getUser(uid);
-    User me = DBGet.getUserFresh(Mmowgli2UI.getGlobals().getUserID());  // must get internal tables
+    User u = DBGet.getUserTL(uid);
+    User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());  // must get internal tables
     itsSomebodyElse = (u.getId() != me.getId());
     imGuestAccount = me.isViewOnly();
     imAdmin = me.isAdministrator();
     imAdminOrGameMaster = me.isAdministrator() || me.isGameMaster();
 
-    Game game = Game.get(1L);
+    Game game = Game.getTL();
     gameReadOnly = game.isReadonly();
 
     scoresLab = new Label();
@@ -251,7 +255,6 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
 
     nameLab = new Label();
     nameLab.setValue(u.getUserName());
-    //nameLab.setDescription(description)
 
     learnLab = new Label();
 
@@ -272,7 +275,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
     levelLab = new Label();
     Level lev = u.getLevel();
     if(u.isGameMaster()) {
-      Level l = Level.getLevelByOrdinal(Level.GAME_MASTER_ORDINAL);
+      Level l = Level.getLevelByOrdinalTL(Level.GAME_MASTER_ORDINAL);
       if(l != null)
         lev = l;
     }
@@ -367,10 +370,10 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
   @Override
   public void initGui()
   {
-    User u = DBGet.getUserFresh(uid);  // Needs to load badges
-    Game g = Game.get();
+    User u = DBGet.getUserFreshTL(uid);  // Needs to load badges
+    Game g = Game.getTL();
 
-    setWidth("945px"); // image width
+    setWidth("945px");
     setHeight("579px");
 
     addStyleName("m-userprofile3top");
@@ -516,65 +519,28 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
     addComponent(externMailCB,buildLocString(EXTERN_MAIL_TOP, EXTERN_MAIL_LEFT));
     addComponent(ingameMailCB,buildLocString(INGAME_MAIL_TOP, INGAME_MAIL_LEFT));
 
-/*    ClickListener lis = new BadgeListener();
+    displayBadgesAndAwardsTL(uid);
 
-    MediaLocator loc = app.globs().mediaLocator();
-    Set<Badge> badges = u.getBadges();
-
-    Session sess = HibernateContainers.getSession();
-    @SuppressWarnings("unchecked")
-    List<Badge> list = (List<Badge>)sess.createCriteria(Badge.class).addOrder(Order.asc("badge_pk")).list();
-    int nDefinedBadges = list.size();
-
-    for(int b=0;b<nDefinedBadges;b++)  {
-      Badge bd = getBadgeById(badges,b+1);
-      badgeButts[b] = new NativeButton();
-      badgeButts[b].addStyleName("m-badgeButton");
-      badgeLayout.addComponent(badgeButts[b]);
-
-      if(bd != null) {
-        badgeButts[b].setIcon(loc.locate(bd.getMedia()));
-        badgeButts[b].setDescription(getBadgeDescription(g,bd));   // check for undesired action plan mention
-        badgeButts[b].addListener(lis);
-      }
-      else {
-        badgeButts[b].setIcon(loc.getEmptyBadgeImage());
-        if(!((b+1) == BADGE_EIGHT_ID))
-          badgeButts[b].setDescription(getBadgeDescription(g,list.get(b)));   // check for undesired action plan mention
-      }
-    }
-*/
-    displayBadgesAndAwards(uid);
-/*    List<AwardButton> ablis = getAwardButtons(u);
-    Iterator<AwardButton> bItr = ablis.iterator();
-
-    for(int i=0;i<4;i++) {
-      NativeButton awb = bItr.hasNext()?bItr.next():null;
-      if(awb == null) {
-
-        awb = new NativeButton();
-        awb.addStyleName("m-badgeButton");
-        awb.setDescription("Game-specific awards");
-        awb.setIcon(loc.getEmptyBadgeImage());
-      }
-      badgeLayout.addComponent(awb);
-    }
-*/
     if (!itsSomebodyElse)
       avatarButt.addClickListener(new ClickListener()
       {
         private static final long serialVersionUID = 1L;
 
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         @Override
         public void buttonClick(ClickEvent event)
         {
-          User u = DBGet.getUser(uid);
+          HSess.init();
+          User u = DBGet.getUserTL(uid);
           Avatar av = u.getAvatar();
           AvatarChooser chooser = new AvatarChooser(av==null?null:av.getId());
           chooser.initGui();
           chooser.addCloseListener(new ChooserClosed());
           UI.getCurrent().addWindow(chooser);
           chooser.center();
+          HSess.close();
         }
       });
 
@@ -582,15 +548,20 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
     {
       private static final long serialVersionUID = 1L;
 
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateUpdate
+      @HibernateClosed
       @Override
       public void valueChange(ValueChangeEvent event)
       {
+        HSess.init();
         String s = learnTA.getValue().toString().trim();
-        User u = DBGet.getUser(uid);
+        User u = DBGet.getUserTL(uid);
         u.setAnswer(clampToVarchar255(s));  // Db field is 255 varchar
-        // User update here
-        User.update(u);
+        User.updateTL(u);
         Notification.show("Answer changed", Notification.Type.HUMANIZED_MESSAGE);
+        HSess.close();
       }
     });
 
@@ -598,15 +569,20 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
     {
       private static final long serialVersionUID = 1L;
 
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateUpdate
+      @HibernateClosed
       @Override
       public void valueChange(ValueChangeEvent event)
       {
+        HSess.init();
         String s = expertiseTA.getValue().toString().trim();
-        User u = DBGet.getUser(uid);
+        User u = DBGet.getUserTL(uid);
         u.setExpertise(clampToVarchar255(s));
-        // User update here
-        User.update(u);
+        User.updateTL(u);
         Notification.show("Expertised changed", Notification.Type.HUMANIZED_MESSAGE);
+        HSess.close();
       }
     });
 
@@ -614,16 +590,20 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
     {
       private static final long serialVersionUID = 1L;
 
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateUpdate
+      @HibernateClosed
       @Override
       public void valueChange(ValueChangeEvent event)
       {
-        //String s = affiliationTA.getValue().toString().trim();
+        HSess.init();
         String s = buildAffiliation();
-        User u = DBGet.getUser(uid);
+        User u = DBGet.getUserTL(uid);
         u.setAffiliation(clampToVarchar255(s));
-        // User update here
-        User.update(u);
+        User.updateTL(u);
         Notification.show("Affiliation changed", Notification.Type.HUMANIZED_MESSAGE);
+        HSess.close();
       }
     };
     affiliationTA.addValueChangeListener(affiliationListener);
@@ -633,15 +613,20 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
     {
       private static final long serialVersionUID = 1L;
 
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateUpdate
+      @HibernateClosed
       @Override
       public void valueChange(ValueChangeEvent event)
       {
+        HSess.init();
         String s = locationTF.getValue().toString().trim();
-        User u = DBGet.getUser(uid);
+        User u = DBGet.getUserTL(uid);
         u.setLocation(clampToVarchar255(s));
-        // User update here
-        User.update(u);
+        User.updateTL(u);
         Notification.show("Location changed",Notification.Type.HUMANIZED_MESSAGE);
+        HSess.close();
       }
     });
 
@@ -654,6 +639,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
         private static final long serialVersionUID = 1L;
 
         @Override
+        @MmowgliCodeEntry
         public void buttonClick(ClickEvent event)
         {
           emailPacket = new ChangeEmailDialog.EmailPacket();
@@ -721,7 +707,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
       {
         packet = new ChangePasswordDialog.PasswordPacket();
         final UserPii uPii = VHibPii.getUserPii((Long)uid);
-        packet.original = uPii.getPassword(); //DBGet.getUser(uid).getPassword();
+        packet.original = uPii.getPassword();
 
         ChangePasswordDialog dial = new ChangePasswordDialog(packet);
         UI.getCurrent().addWindow(dial);
@@ -731,17 +717,22 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
         {
           private static final long serialVersionUID = 1L;
           @Override
+          @MmowgliCodeEntry
+          @HibernateOpened
+          @HibernateClosed
           public void buttonClick(ClickEvent event)
           {
+            HSess.init();
             uPii.setPassword(new StrongPasswordEncryptor().encryptPassword(packet.updated));
             VHibPii.update(uPii);
             Notification.show("Password Changed",Notification.Type.HUMANIZED_MESSAGE);
 
-            GameEventLogger.logUserPasswordChanged(DBGet.getUser(uid));
+            GameEventLogger.logUserPasswordChangedTL(DBGet.getUserTL(uid));
 
             // Clean up for security
             packet.original = null;
             packet.updated = null;
+            HSess.close();
           }
         });
       }
@@ -773,17 +764,17 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
   }
   private String getBadgeDescription(Game g, Badge b)
   {
-    if(!g.isActionPlansEnabled() && (b.getBadge_pk() == BadgeManager.BADGE_AP_AUTHOR))
+    if(!g.isActionPlansEnabled() && (b.getBadge_pk() == BADGE_AP_AUTHOR))
       return "";
     else
       return b.getDescription();
   }
 
-  private void displayBadgesAndAwards(Object uid)
+  private void displayBadgesAndAwardsTL(Object uid)
   {
-    displayBadgesAndAwards(uid,VHib.getVHSession());
+    displayBadgesAndAwards(uid,HSess.get());
   }
-
+  
   private void displayBadgesAndAwards(Object uid, Session sess)
   {
     MediaLocator loc = Mmowgli2UI.getGlobals().getMediaLocator();
@@ -942,11 +933,15 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
   private class FollowListener implements ValueChangeListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void valueChange(ValueChangeEvent event)
     {
+      HSess.init();
       Boolean b = (Boolean) followCB.getValue();
-      User me = DBGet.getUserFresh(Mmowgli2UI.getGlobals().getUserID());
-      User him = DBGet.getUserFresh(uid);
+      User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());
+      User him = DBGet.getUserFreshTL(uid);
       Set<User> buds = me.getImFollowing();
       if (b)
         if(!CreateActionPlanPanel.usrContainsByIds(buds, him))
@@ -955,25 +950,31 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
         if(CreateActionPlanPanel.usrContainsByIds(buds, him))
           buds.remove(him);
 
-      // User update here
-      User.update(me);   //NonUniqueObjectException: a different object with the same identifier value was already associated with this session
+      User.updateTL(me);   //NonUniqueObjectException: a different object with the same identifier value was already associated with this session
                                                     // this might work, I can't really figure it out, though
+      HSess.close();
     }
   }
 
   @SuppressWarnings("serial")
   private class SendEmailListener implements Button.ClickListener
   {
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     @Override
     public void buttonClick(ClickEvent event)
     {
-      User user = DBGet.getUser(uid);
+      HSess.init();
+      User user = DBGet.getUserTL(uid);
 
       // Already checked above, and this button is not shown if no email, so this handler is a no-op
       if(user.isOkEmail() || user.isOkGameMessages())
         new SendMessageWindow(user,imAdminOrGameMaster);
       else
         Notification.show("Sorry", "Player "+user.getUserName()+" does not receive mail.", Notification.Type.WARNING_MESSAGE);
+      
+      HSess.close();
     }
   }
 
@@ -987,10 +988,15 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
     {
       source = cb;
     }
+    
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     @Override
     public void valueChange(final ValueChangeEvent event)
     {
-      User u = DBGet.getUser(uid);
+      HSess.init();
+      User u = DBGet.getUserTL(uid);
 
       boolean wh = source.getValue();
       if(source == externMailCB) {
@@ -999,8 +1005,9 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
       /*else if (event.getSource() == ingameMailCB)*/ {
         u.setOkGameMessages(wh);
       }
-      // User update here
-      User.update(u);
+
+      User.updateTL(u);
+      HSess.close();
     }
   }
 
@@ -1008,18 +1015,23 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
   class ChooserClosed implements CloseListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateRead
+    @HibernateUpdate
+    @HibernateCommitted
     public void windowClose(CloseEvent e)
     {
+      HSess.init();
       AvatarChooser chooser = (AvatarChooser)e.getWindow();
       currentAvatarId = chooser.getSelectedAvatarId();
       if(currentAvatarId != null) {
-        Avatar newA = Avatar.get(currentAvatarId);
+        Avatar newA = Avatar.getTL(currentAvatarId);
         setAvatarIcon(newA);
-        User u = DBGet.getUser(uid);
+        User u = DBGet.getUserTL(uid);
         u.setAvatar(newA);
-        // User update here
-        User.update(u);
+        User.updateTL(u);
       }
+      HSess.close();
     }
   }
 
@@ -1027,11 +1039,16 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
   class ManageAwardsListener implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
       ManageAwardsDialog dial = new ManageAwardsDialog(uid);
       UI.getCurrent().addWindow(dial);
       dial.center();
+      HSess.close();
     }
   }
 
@@ -1047,7 +1064,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
 
   private void setAvatarIconFromDb()
   {
-    User u = DBGet.getUser(uid);
+    User u = DBGet.getUserTL(uid);
     setAvatarIcon(u.getAvatar());
   }
 
@@ -1057,24 +1074,23 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
       avatarButt.setIcon(Mmowgli2UI.getGlobals().getMediaLocator().locate(av.getMedia()));
   }
 
-
   class BadgeListener implements ClickListener
   {
     private static final long serialVersionUID = 1L;
 
     @Override
+    @MmowgliCodeEntry
     public void buttonClick(ClickEvent event)
     {
       Notification.show(((Button)event.getSource()).getDescription());
     }
   }
   @Override
-  public boolean userUpdated_oob(SingleSessionManager mgr, Serializable uId)
+  public boolean userUpdated_oobTL(Serializable uId)
   {
     if(uId != this.uid)
       return false;
-    Session sess = M.getSession(mgr);
-    displayBadgesAndAwards(uId,sess);
+    displayBadgesAndAwardsTL(uId);
     return true;
   }
 }
