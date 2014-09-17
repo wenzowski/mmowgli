@@ -41,7 +41,11 @@ import com.vaadin.ui.Button.ClickListener;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -68,7 +72,6 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
   protected String titleStyleSmall = "m-dialog-title-smaller";
   protected String labelStyle = "m-dialog-label";
   protected String topLabelStyle = "m-dialog-toplabel";
-  //protected String fieldStyle = "m-dialog-textfield";
   private Label titleLab = null;
 
   public abstract User getUser();
@@ -83,58 +86,23 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
     setStyleName("m-mmowglidialog");
     addStyleName("m-transparent");   // don't know why I need this, .mmowglidialog sets it too
     // The following makes the scroll bars go away on vaadin 7
-    setWidth("625px");
-    setHeight("400px");
+    setWidth("700px");
+    setHeight("550px");
   }
-
+ 
   @Override
   public void initGui()
   {
-    outerLayout = new VerticalLayout(); //new AbsoluteLayout();
+    outerLayout = new VerticalLayout();
     outerLayout.setSpacing(false);
     outerLayout.setSizeUndefined();
     outerLayout.addStyleName("m-transparent");
     setContent(outerLayout);
 
     Label sp;
-/*
-    HorizontalLayout headerWrapper = new HorizontalLayout();
-    headerWrapper.addStyleName("m-blueborder");
-    outerLayout.addComponent(headerWrapper); // at the top
-    headerWrapper.addStyleName("m-dialog-header");
-    headerWrapper.setHeight("75px");
-    headerWrapper.setWidth("592px");
-
-      VerticalLayout titleWrapper = new VerticalLayout();
-      titleWrapper.setSpacing(false);
-      titleWrapper.setMargin(false);
-      titleWrapper.setHeight("75px");
-      titleWrapper.setWidth("460px");
-    headerWrapper.addComponent(titleWrapper);
-      titleWrapper.addStyleName("m-redborder");
-     // titleWrapper.addComponent(sp=new Label());
-     // sp.setHeight("25px");
-
-        headerHL = new HorizontalLayout();  // Where the title gets written
-        headerHL.setSpacing(false);
-        headerHL.setMargin(false);
-        headerHL.setHeight("75px"); //"55px");
-        headerHL.addStyleName("m-transparent");
-        headerHL.addStyleName("m-cyanborder");
-      titleWrapper.addComponent(headerHL);
-
-        headerHL.addComponent(sp = new Label());  // indent from left
-        sp.setWidth("50px");
-        sp.addStyleName("m-blueborder");
-
-      cancelButt = makeCancelButton();
-      cancelButt.addStyleName("m-greenborder");
-      cancelButt.addClickListener(new MyCancelListener());
-      cancelButt.setClickShortcut(KeyCode.ESCAPE);
-
-    headerWrapper.addComponent(cancelButt);
-    headerWrapper.setComponentAlignment(cancelButt, Alignment.MIDDLE_CENTER);
-*/
+    sp = new Label();
+    sp.setHeight("100px");
+    outerLayout.addComponent(sp);
     
     HorizontalLayout headerWrapper2 = new HorizontalLayout();
     outerLayout.addComponent(headerWrapper2); // at the top
@@ -150,7 +118,7 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
     headerHL2 = new HorizontalLayout();  // Where the title gets written
     headerHL2.setSpacing(false);
     headerHL2.setMargin(false);
-    headerHL2.setHeight("75px"); //"55px");
+    headerHL2.setHeight("75px");
     headerWrapper2.addComponent(headerHL2);
     headerWrapper2.setExpandRatio(headerHL2, 1.0f);
     
@@ -176,16 +144,14 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
     outerLayout.addComponent(footer);
 
   }
+  
   protected Button makeCancelButton()
   {
     NativeButton butt = new NativeButton(null);
     butt.setStyleName("m-cancelButton");
     return butt;
   }
-//    Button butt = new NativeButton();
-//    app.globs().mediaLocator().decorateDialogCancelButton(butt);
-//    return butt;
-//  }
+
   protected void setListener(ClickListener lis)
   {
     this.listener = lis;
@@ -195,13 +161,13 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
   {
     setTitleString(s,false);
   }
+  
   protected void setTitleString(String s, boolean small)
   {
     if (titleLab != null)
       headerHL2.removeComponent(titleLab);
     titleLab = new Label(s);
     titleLab.addStyleName(small?titleStyleSmall:titleStyle);
-   // titleLab.setWidth("450px"); // can't overlay cancel butt
     headerHL2.addComponent(titleLab); //, "top:25px;left:50px");
     headerHL2.setComponentAlignment(titleLab, Alignment.MIDDLE_LEFT);
   }
@@ -210,11 +176,11 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
    * Override by subclass, which normally calls super.cancelClicked(event) when done
    * @param event
    */
-  protected void cancelClicked(ClickEvent event)
+  protected void cancelClickedTL(ClickEvent event)
   {
     User u = getUser();
     if(u != null) {
-      User.delete(u);
+      User.deleteTL(u);
       UserPii uPii = VHibPii.getUserPii(u.getId());
       VHibPii.delete(uPii);
       MSysOut.println("User deleted (didn't finish login) "+u.getId());
@@ -226,12 +192,17 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
   }
 
   @SuppressWarnings("serial")
+  @MmowgliCodeEntry
+  @HibernateOpened
+  @HibernateClosed
   class MyCancelListener implements Button.ClickListener
   {
     @Override
     public void buttonClick(ClickEvent event)
     {
-      cancelClicked(event);   // allow subclass to override
+      HSess.init();
+      cancelClickedTL(event);   // allow subclass to override
+      HSess.close();
     }
   }
 }
