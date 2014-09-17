@@ -37,14 +37,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
-import javax.persistence.Basic;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * EmailConfirmation.java Created on Sep 7, 2012
@@ -78,9 +73,9 @@ public class EmailConfirmation implements Serializable
     setUser(u);
   }
    
-  public static void save(EmailConfirmation e)
+  public static void saveTL(EmailConfirmation e)
   {
-    VHib.getVHSession().save(e);     
+    HSess.get().save(e);     
   }
 
   @Id
