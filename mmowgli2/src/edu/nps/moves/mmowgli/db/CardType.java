@@ -38,19 +38,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
-import edu.nps.moves.mmowgli.hibernate.Sess;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * @author Mike Bailey, jmbailey@nps.edu
@@ -128,14 +121,9 @@ public class CardType implements Serializable
     this(title,titleAlternate,isIdeaCard,prompt,"");
   }
   
-  public static CardType get(Object id)
+  public static CardType getTL(Object id)
   {
-    return (CardType)VHib.getVHSession().get(CardType.class, (Serializable)id);
-  }
-  
-  public static List<CardType> getIdeaCards()
-  {
-    return getIdeaCards(VHib.getVHSession());
+    return (CardType)HSess.get().get(CardType.class, (Serializable)id);
   }
   
   @SuppressWarnings("unchecked")
@@ -158,11 +146,10 @@ public class CardType implements Serializable
     return lis;
   }
   
-  public static CardType getPositiveIdeaCardType()
+  public static CardType getPositiveIdeaCardTypeTL()
   {
-    return getPositiveIdeaCardType(VHib.getVHSession());    
+    return getPositiveIdeaCardType(HSess.get());
   }
-  
   public static CardType getPositiveIdeaCardType(Session sess)
   {
 //    Disjunction disj = Restrictions.disjunction();
@@ -186,36 +173,51 @@ public class CardType implements Serializable
     return getPositiveIdeaCardType(Game.get(sess).getCurrentMove());
   }
   
-  public static CardType getExpandType()
+  // Following used by MmowgliMobile
+  public static CardType getExpandType(Session sess)
   {
-    return getExpandType(Game.get(VHib.getVHSession()).getCurrentMove());
+    return getExpandType(Game.get(sess).getCurrentMove());
+  }
+  public static CardType getCounterType(Session sess)
+  {
+    return getCounterType(Game.get(sess).getCurrentMove());
+  }
+  public static CardType getAdaptType(Session sess)
+  {
+    return getAdaptType(Game.get(sess).getCurrentMove());
+  }
+  public static CardType getExploreType(Session sess)
+  {
+    return getExploreType(Game.get(sess).getCurrentMove());
+  }
+    
+  public static CardType getExpandTypeTL()
+  {
+    return getExpandType(Game.getTL().getCurrentMove());
   }
   public static CardType getExpandType(Move m)
   {
     return _getChildType(m,EXPAND_CARD_TYPE);    
-  }
-  
-  public static CardType getCounterType()
+  } 
+  public static CardType getCounterTypeTL()
   {
-    return getCounterType(Game.get(VHib.getVHSession()).getCurrentMove());
+    return getCounterType(Game.getTL().getCurrentMove());
   }
   public static CardType getCounterType(Move m)
   {
     return _getChildType(m,COUNTER_CARD_TYPE);    
-  }
-  
-  public static CardType getAdaptType()
+  } 
+  public static CardType getAdaptTypeTL()
   {
-    return getAdaptType(Game.get(VHib.getVHSession()).getCurrentMove());
+    return getAdaptType(Game.getTL().getCurrentMove());
   }
   public static CardType getAdaptType(Move m)
   {
     return _getChildType(m,ADAPT_CARD_TYPE);    
-  }
-  
-  public static CardType getExploreType()
+  } 
+  public static CardType getExploreTypeTL()
   {
-    return getExploreType(Game.get(VHib.getVHSession()).getCurrentMove());
+    return getExploreType(Game.getTL().getCurrentMove());
   }
   public static CardType getExploreType(Move m)
   {
@@ -231,22 +233,22 @@ public class CardType implements Serializable
     return null;    
     
   }
-  public static void setNegativeIdeaCardType(Move currentMove, CardType newNegativeCt)
+  public static void setNegativeIdeaCardTypeTL(Move currentMove, CardType newNegativeCt)
   {
     MovePhase phase = currentMove.getCurrentMovePhase();
-    setNegativeIdeaCardType(phase,newNegativeCt);
+    setNegativeIdeaCardTypeTL(phase,newNegativeCt);
   }
   
-  public static void setNegativeIdeaCardTypeAllPhases(Move mov, CardType ct)
+  public static void setNegativeIdeaCardTypeAllPhasesTL(Move mov, CardType ct)
   {
     List<MovePhase> lis = mov.getMovePhases();
     for(MovePhase mp : lis) {
-      mp = MovePhase.merge(mp);
-      setNegativeIdeaCardType(mp,ct);
+      mp = MovePhase.mergeTL(mp);
+      setNegativeIdeaCardTypeTL(mp,ct);
     }
   }
   
-  public static void setNegativeIdeaCardType(MovePhase phase, CardType newNegativeCt)
+  public static void setNegativeIdeaCardTypeTL(MovePhase phase, CardType newNegativeCt)
   {
     HashSet<CardType> typs = new HashSet<CardType>(phase.getAllowedCards());
     HashSet<CardType> set = new HashSet<CardType>();
@@ -257,24 +259,24 @@ public class CardType implements Serializable
     }
     set.add(newNegativeCt);
     phase.setAllowedCards(set);
-    Sess.sessUpdate(phase);   
+    MovePhase.updateTL(phase);
   }
   
-  public static void setPositiveIdeaCardType(Move currentMove, CardType newPositiveCt)
+  public static void setPositiveIdeaCardTypeTL(Move currentMove, CardType newPositiveCt)
   {
-    setPositiveIdeaCardType(currentMove.getCurrentMovePhase(), newPositiveCt);
+    setPositiveIdeaCardTypeTL(currentMove.getCurrentMovePhase(), newPositiveCt);
   }
   
-  public static void setPositiveIdeaCardTypeAllPhases(Move mov, CardType newPositiveCt)
+  public static void setPositiveIdeaCardTypeAllPhasesTL(Move mov, CardType newPositiveCt)
   {
     List<MovePhase> lis = mov.getMovePhases();
     for(MovePhase mp : lis) {
-      mp = MovePhase.merge(mp);
-      setPositiveIdeaCardType(mp,newPositiveCt);
+      mp = MovePhase.mergeTL(mp);
+      setPositiveIdeaCardTypeTL(mp,newPositiveCt);
     }
   }
   
-  public static void setPositiveIdeaCardType(MovePhase phase, CardType newPositiveCt)
+  public static void setPositiveIdeaCardTypeTL(MovePhase phase, CardType newPositiveCt)
   {
     HashSet<CardType> typs = new HashSet<CardType>(phase.getAllowedCards());
     HashSet<CardType> set = new HashSet<CardType>();
@@ -285,7 +287,7 @@ public class CardType implements Serializable
     }
     set.add(newPositiveCt);
     phase.setAllowedCards(set);
-    Sess.sessUpdate(phase);   
+    MovePhase.updateTL(phase);
   }
   
   public static CardType getPositiveIdeaCardType(Move m)
@@ -297,12 +299,13 @@ public class CardType implements Serializable
     return null;
     
   }
-  public static CardType getNegativeIdeaCardType()
+
+  public static CardType getNegativeIdeaCardTypeTL()
   {
-    return getNegativeIdeaCardType(VHib.getVHSession());
+    return getNegativeIdeaCardType(HSess.get());
   }
   
-  public static CardType getNegativeIdeaCardType(Session sess)
+ public static CardType getNegativeIdeaCardType(Session sess)
   {
 //    Disjunction disj = Restrictions.disjunction();
 //    disj.add(Restrictions.eq("title", "Worst Strategy"));
@@ -339,14 +342,14 @@ public class CardType implements Serializable
     return obj instanceof CardType && ((CardType)obj).getTitle().equals(getTitle());
   }
 
-  public static CardType merge(CardType ct)
+  public static CardType mergeTL(CardType ct)
   {
-    return (CardType)VHib.getVHSession().merge(ct);
+    return (CardType)HSess.get().merge(ct);
   }
-  
-  public static void update(CardType ct)
+
+  public static void updateTL(CardType ct)
   {
-    VHib.getVHSession().update(ct);
+    HSess.get().update(ct);
   }
   
   @Id
@@ -502,91 +505,92 @@ public class CardType implements Serializable
         add(Restrictions.eq("cardClass", cls)).
         list();
   }
-  public static List<CardType> getDefinedPositiveTypes()
+  public static List<CardType> getDefinedPositiveTypesTL()
   {
-    return getDefinedIdeaCardsByClass(VHib.getVHSession(),CardClass.POSITIVEIDEA);
+    return getDefinedIdeaCardsByClass(HSess.get(),CardClass.POSITIVEIDEA);
   }
-  public static List<CardType> getDefinedNegativeTypes()
+  public static List<CardType> getDefinedNegativeTypesTL()
   {
-    return getDefinedIdeaCardsByClass(VHib.getVHSession(),CardClass.NEGATIVEIDEA);
+    return getDefinedIdeaCardsByClass(HSess.get(),CardClass.NEGATIVEIDEA);
   }
-  public static List<CardType> getDefinedExpandTypes()
+  
+  public static List<CardType> getDefinedExpandTypesTL()
   {
-    return getDefinedDescendantsByType(VHib.getVHSession(),EXPAND_CARD_TYPE);
+    return getDefinedDescendantsByType(HSess.get(),EXPAND_CARD_TYPE);
   }
   public static List<CardType> getDefinedExpandTypes(Session sess)
   {
     return getDefinedDescendantsByType(sess,EXPAND_CARD_TYPE);
   }
-  public static List<CardType> getDefinedCounterTypes()
+  public static List<CardType> getDefinedCounterTypesTL()
   {
-    return getDefinedDescendantsByType(VHib.getVHSession(),COUNTER_CARD_TYPE);
+    return getDefinedDescendantsByType(HSess.get(),COUNTER_CARD_TYPE);
   }
   public static List<CardType> getDefinedCounterTypes(Session sess)
   {
     return getDefinedDescendantsByType(sess,COUNTER_CARD_TYPE);
   }
-  public static List<CardType> getDefinedAdaptTypes()
+  public static List<CardType> getDefinedAdaptTypesTL()
   {
-    return getDefinedDescendantsByType(VHib.getVHSession(),ADAPT_CARD_TYPE);
+    return getDefinedDescendantsByType(HSess.get(),ADAPT_CARD_TYPE);
   }
   public static List<CardType> getDefinedAdaptTypes(Session sess)
   {
     return getDefinedDescendantsByType(sess,ADAPT_CARD_TYPE);
   }
-  public static List<CardType> getDefinedExploreTypes()
+  public static List<CardType> getDefinedExploreTypesTL()
   {
-    return getDefinedDescendantsByType(VHib.getVHSession(),EXPLORE_CARD_TYPE);
+    return getDefinedDescendantsByType(HSess.get(),EXPLORE_CARD_TYPE);
   }
   public static List<CardType> getDefinedExploreTypes(Session sess)
   {
     return getDefinedDescendantsByType(sess,EXPLORE_CARD_TYPE);
   }
 
-  public static void setExpandCardType(Move m, CardType ct)
+  public static void setExpandCardTypeTL(Move m, CardType ct)
   {
-    setChildCardType(m,ct,EXPAND_CARD_TYPE);
+    setChildCardTypeTL(m,ct,EXPAND_CARD_TYPE);
   }
-  public static void setExpandCardTypeAllPhases(Move m, CardType ct)
+  public static void setExpandCardTypeAllPhasesTL(Move m, CardType ct)
   {
-    setChildCardTypeAllPhases(m,ct,EXPAND_CARD_TYPE);
+    setChildCardTypeAllPhasesTL(m,ct,EXPAND_CARD_TYPE);
   }
-  public static void setCounterCardType(Move m, CardType ct)
+  public static void setCounterTLCardType(Move m, CardType ct)
   {
-    setChildCardType(m,ct,COUNTER_CARD_TYPE);
+    setChildCardTypeTL(m,ct,COUNTER_CARD_TYPE);
   }
-  public static void setCounterCardTypeAllPhases(Move m, CardType ct)
+  public static void setCounterCardTypeAllPhasesTL(Move m, CardType ct)
   {
-    setChildCardTypeAllPhases(m,ct,COUNTER_CARD_TYPE);
+    setChildCardTypeAllPhasesTL(m,ct,COUNTER_CARD_TYPE);
   }
-  public static void setAdaptCardType(Move m, CardType ct)
+  public static void setAdaptCardTypeTL(Move m, CardType ct)
   {
-    setChildCardType(m,ct,ADAPT_CARD_TYPE);
+    setChildCardTypeTL(m,ct,ADAPT_CARD_TYPE);
   }
-  public static void setAdaptCardTypeAllPhases(Move m, CardType ct)
+  public static void setAdaptCardTypeAllPhasesTL(Move m, CardType ct)
   {
-    setChildCardTypeAllPhases(m,ct,ADAPT_CARD_TYPE);
+    setChildCardTypeAllPhasesTL(m,ct,ADAPT_CARD_TYPE);
   }
-  public static void setExploreCardType(Move m, CardType ct)
+  public static void setExploreCardTypeTL(Move m, CardType ct)
   {
-    setChildCardType(m,ct,EXPLORE_CARD_TYPE);
+    setChildCardTypeTL(m,ct,EXPLORE_CARD_TYPE);
   }
-  public static void setExploreCardTypeAllPhases(Move m, CardType ct)
+  public static void setExploreCardTypeAllPhasesTL(Move m, CardType ct)
   {
-    setChildCardTypeAllPhases(m,ct,EXPLORE_CARD_TYPE);    
+    setChildCardTypeAllPhasesTL(m,ct,EXPLORE_CARD_TYPE);    
   }
-  private static void setChildCardType(Move m, CardType newCt, int ordinal)
+  private static void setChildCardTypeTL(Move m, CardType newCt, int ordinal)
   {
     MovePhase phase = m.getCurrentMovePhase();
-    setChildCardType(phase, newCt, ordinal);
+    setChildCardTypeTL(phase, newCt, ordinal);
   }
-  private static void setChildCardTypeAllPhases(Move m, CardType newCt, int ordinal)
+  private static void setChildCardTypeAllPhasesTL(Move m, CardType newCt, int ordinal)
   {
     List<MovePhase> lis = m.getMovePhases();
     for(MovePhase mp : lis)
-      setChildCardType(mp,newCt,ordinal);
+      setChildCardTypeTL(mp,newCt,ordinal);
   }
-  private static void setChildCardType(MovePhase phase, CardType newCt, int ordinal)
+  private static void setChildCardTypeTL(MovePhase phase, CardType newCt, int ordinal)
   {
     Set<CardType> typs = phase.getAllowedCards();
     // Build a list of existing type(s) to be replaced
@@ -601,6 +605,6 @@ public class CardType implements Serializable
     // Insert new one
     typs.add(newCt);
     phase.setAllowedCards(typs);
-    MovePhase.update(phase);   
+    MovePhase.updateTL(phase);   
   }
 }
