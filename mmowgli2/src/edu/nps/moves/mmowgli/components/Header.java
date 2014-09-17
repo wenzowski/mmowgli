@@ -59,8 +59,8 @@ import edu.nps.moves.mmowgli.MmowgliController;
 import edu.nps.moves.mmowgli.MmowgliEvent;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsGameEventUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
 import edu.nps.moves.mmowgli.utility.*;
@@ -89,9 +89,6 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   private IDNativeButton takeActionButt;
   private IDNativeButton userNameButt;
   private IDNativeButton searchButt;
-//private IDNativeButton blogHeadlinesButt;
-//private IDNativeButton liveBlogButt;
-//private IDNativeButton learnMoreButt;
   
   private Link learnMoreButt;
   private Link liveBlogButt;
@@ -100,15 +97,9 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   private Embedded avatar;
   
   private Label implPtsLab;
-  //private Label explScoreLabLab;
   private Label explorPtsLab;
   private Label moveNumLab;
   private Label brandingLab;
-//private Label groupInnoLab;
-//private Label groupInnoLabLab;
-//private Label targetInnoLab;
-//private Label targetInnoLabLab;
-//private Label targetInnoLabLab2;
 
   private TextField searchField;
   private static String leaderboard_tt = "Players with highest scores";
@@ -118,12 +109,8 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   
   private static String w_implPoints = "50px";
   private static String h_implPoints = "14px"; 
-  //private static String w_implLabelLabel = "128px";
-  //private static String h_implLabelLabel = "14px";
   private static String w_explPoints = "65px";
   private static String h_explPoints = "22px";
-  //private static String w_explLabelLabel = "128px";
-  //private static String h_explLabelLabel = "14px";
   private static String w_movenum = "300px";
   private static String h_movenum = "20px";
   private static String w_movetitle = "300px";
@@ -131,10 +118,11 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   private int buttonChars = 0;
   
   private MediaLocator mediaLoc;
+  @HibernateSessionThreadLocalConstructor
   public Header()
   {
-    Game game = Game.get();
-    GameLinks gl = GameLinks.get();
+    Game game = Game.getTL();
+    GameLinks gl = GameLinks.getTL();
     mediaLoc = Mmowgli2UI.getGlobals().getMediaLocator();
     
     leaderBoardButt = makeSmallButt("Leaderboard", LEADERBOARDCLICK, leaderboard_tt);
@@ -169,14 +157,8 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     brandingLab.setWidth(w_movetitle);
     brandingLab.setHeight(h_movetitle);
     brandingLab.addStyleName("m-header-branding-text"); //m-header-movetitle-text");
-
-    /*
-    explScoreLabLab = makeLabelLab("Exploration Points:",w_explLabelLabel, h_explLabelLabel);
-    explScoreLabLab.addStyleName("m-text-align-right");
-    
-    makeLabelLab("Implementation Points:", w_implLabelLabel,h_implLabelLabel);
-    */
   }
+  
   private void addDivider(HorizontalLayout hl, int buttonChars)
   {
     int sp;
@@ -206,8 +188,8 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   {
     setWidth(HEADER_W);
     setHeight(HEADER_H);
-    Game g = Game.get();
-    GameLinks gl = GameLinks.get();
+    Game g = Game.getTL();
+    GameLinks gl = GameLinks.getTL();
     
     Embedded embedded = new Embedded(null, mediaLoc.getHeaderBackground());
     addComponent(embedded, "top:0px;left:0px");
@@ -280,7 +262,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     }
 
     Serializable uid = Mmowgli2UI.getGlobals().getUserID();
-    refreshUser(uid, VHib.getVHSession());   // assume in vaadin transaction here
+    refreshUser(uid, HSess.get());   // assume in vaadin transaction here
     
     avatar.setWidth(HEADER_AVATAR_W);
     avatar.setHeight(HEADER_AVATAR_H);
@@ -307,9 +289,14 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     {
       private static final long serialVersionUID = 1L;
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void valueChange(ValueChangeEvent event)
       {
-        handleSearchClick();
+        HSess.init();
+        handleSearchClickTL();
+        HSess.close();
         /*
         searchButt.focus();  // make the white go away
         String s = event.getProperty().getValue().toString();
@@ -323,28 +310,25 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     searchButt.addClickListener(new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        handleSearchClick();       
+        HSess.init();
+        handleSearchClickTL();  
+        HSess.close();
       }      
     });
     addComponent(searchField,"top:107px;left:74px"); //"top:110px;left:74px");       
     addComponent(signOutButt, "top:25px;left:250px"); //"top:18px;left:250px");    
     addComponent(searchButt, "top:105px;left:30px"); //"top:100px;left:180px");
     
-    MessageUrl mu = MessageUrl.getLast();
+    MessageUrl mu = MessageUrl.getLastTL();
     if(mu != null)
-      //decorateBlogHeadlinesButt(mu);
       decorateBlogHeadlinesLink(mu);
-   // addBlogHeadlinesButt("top:147px;left:20px"); //addComponent(blogHeadlinesButt, "top:147px;left:20px"); //"top:150px;left:20px");
     addBlogHeadlinesLink("top:147px;left:20px");
      
-//    addComponent(scoreLabLab,       "top:98px;left:134px");//HEADER_SCORE_LABEL_POS);
-//    addComponent(innoPtsLabLab,     "top:68px;left:140px");//HEADER_INNOPOINTS_LABEL_POS);//"top:63px;left:140px";
-    //addComponent(groupInnoLabLab,   HEADER_GROUPINNO_LABEL_POS);
-    //addComponent(targetInnoLabLab,  HEADER_TARGET_LABEL_POS);
-    //addComponent(targetInnoLabLab2, HEADER_TARGET_LABEL2_POS);
-
     addComponent(callToActionButt, "top:0px;left:333px");
     /* The css has a height, width and even a background, but stupid IE will only properly size the button if an image is
      * used.  Therefore we use an a transparent png of the proper size */
@@ -381,26 +365,16 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     }
   }
   
-  private void handleSearchClick()
+  private void handleSearchClickTL()
   {
     searchButt.focus();  // make the white go away
     String s = searchField.getValue().toString();
     //if (s.length() > 0) {
       MmowgliController controller = Mmowgli2UI.getGlobals().getController();
-      controller.handleEvent(SEARCHCLICK, s, searchField);
+      controller.handleEventTL(SEARCHCLICK, s, searchField);
     //}   
   }
-/*  
-  private void addBlogHeadlinesButt(String pos)
-  {
-    //addComponent(blogHeadlinesButt, "top:147px;left:20px");
-    VerticalLayout vl = new VerticalLayout();
-    vl.setWidth("955px");
-    vl.addComponent(blogHeadlinesButt);
-    vl.setComponentAlignment(blogHeadlinesButt, Alignment.TOP_CENTER);
-    addComponent(vl,pos);
-  }
-*/  
+
   private void addBlogHeadlinesLink(String pos)
   {
     VerticalLayout vl = new VerticalLayout();
@@ -410,6 +384,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     addComponent(vl,pos);
     
   }
+  
   private Link makeBlogHeadlineLink()
   {
     Link link = new Link("",null);
@@ -418,19 +393,10 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
 
     return link;
   }
- /* 
-  private IDNativeButton makeBlogHeadlineButt()
+
+  public boolean refreshUserTL(Object uid)
   {
-    IDNativeButton butt = makeButt("", BLOGFEEDCLICK);
-    butt.setHeight("25px");
-    butt.addStyleName("m-header-blogheadline-text");
-    return butt;
-  }
- */ 
-  public boolean refreshUser(Object uid, SessionManager mgr)
-  {
-    Session sess = M.getSession(mgr);
-    return refreshUser(uid,sess);
+    return refreshUser(uid,HSess.get());
   }
   
   public boolean refreshUser(Object uid, Session sess)  // also called oob
@@ -514,7 +480,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     mediaLoc.decoratePlayIdeaButton(butt,g);
     butt.addStyleName("m-playIdeaButton");
     butt.setDescription("Review and play idea cards");
-    //butt.setDebugId(PLAY_AN_IDEA_BLUE_BUTTON);
+    butt.setId(PLAY_AN_IDEA_BLUE_BUTTON);
     return butt; 
   }
     
@@ -534,24 +500,6 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     butt.setDescription("Call to action");
     return butt;
   }
-  /*
-  private IDNativeButton makeSignOutButt()
-  {
-    IDNativeButton butt = new IDNativeButton(null,SIGNOUTCLICK);
-    butt.setStyleName("m-signOutButton");
-    return butt;
-  }
-  
-  private IDNativeButton makeSignOutButtold()
-  {
-    Resource res = app.globs().mediaLocator().getSignOutButt();
-    if(res == null)
-      return makeButt("sign out", SIGNOUTCLICK);
-    IDNativeButton butt = makeButt(null,SIGNOUTCLICK);
-    app.globs().mediaLocator().decorateSignOutButton(butt);
-    return butt;       
-  }
-  */
   
   private void toggleTakeActionButt(boolean enable)
   {
@@ -559,18 +507,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     takeActionButt.setDescription(enable?"Review and update Action Plans":"Action Plans not enabled in this move");
     takeActionButt.enableAction(enable);
   }
-  
-//  private IDNativeButton makeTakeActionButt()
-//  {
-//    Resource res = app.globs().mediaLocator().getTakeActionButt();
-//    if(res == null)
-//      return makeButt("TAKE ACTION", TAKEACTIONCLICK);
-//    IDNativeButton butt = makeButt(null,TAKEACTIONCLICK);
-//    app.globs().mediaLocator().decorateTakeActionButton(butt);
-//    butt.addStyleName("m-cyanborder");
-//    return butt;    
-//  }
-  
+    
   private IDNativeButton makeBigButt(String text, MmowgliEvent mEv)
   {
     IDNativeButton butt = makeButt(text, mEv);
@@ -604,99 +541,10 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     butt.setImmediate(true);
     butt.setWidth("25px");
     butt.setHeight("25px");
-  /*  
-    butt.addVIPListener(new ClickListener()
-    {
-      @Override
-      public void buttonClick(ClickEvent event)
-      {
-        ((IDNativeButton)event.getButton()).setParam(searchField.getValue());        
-      }      
-    }); */
     butt.setDescription(tooltip);
     return butt;
   }
- /*
-  * All this crap was before I figured out that setting a small height caused Vaadin to substitute a TextArea
-  * for the TextField; now we just use property change.
-  * 
-  *  // This works....the point is to have the tf respond to returns!  Supposed to, but won't.
 
-  @SuppressWarnings("serial")  
-  class SearchFieldListener2 implements TextChangeListener
-  {
-    boolean nested = false;
-    @Override
-    public void textChange(TextChangeEvent event)
-    {
-      System.out.println("SearchFieldListener2.textChange()");
-      if(nested)
-        return;
-      nested = true;
-      String s = event.getText();
-      if (s.endsWith("\n")) {
-        s = s.substring(0, s.length() - 1);
-        if (s.length() > 0) {
-          ((ApplicationEntryPoint) getApplication()).globs().controller().handleEvent(SEARCHCLICK, s, searchField);
-        }
-       searchField.setValue(s); // remove the Return key
-      }
-      nested=false;
-    }
-  }
-*/
-/*
-  @SuppressWarnings("serial")
-  class SearchFieldListener extends ShortcutListener implements ValueChangeListener
-  {
-    String lastValue="";
-    long lastCallMade = 0;
-    public SearchFieldListener()
-    {
-      super(null, KeyCode.ENTER,null);
-    }
-    @Override
-    public void valueChange(ValueChangeEvent event)
-    {
-      String value = (String)searchField.getValue();
-      String txt = value;
-      if(txt == null)
-        return;
-      
-      txt = lastValue.trim();
-      if(txt == null)
-        return;
-      lastValue = value;
-      lastCallMade = System.nanoTime();
-      ((ApplicationEntryPoint)getApplication()).globs().controller().handleEvent(SEARCHCLICK, txt, searchField);
-    }
-    
-    // This is used solely to bring up the popup when the user hits return, but the value hasn't changed,
-    //  in which case valueChange doesn't get entered.  Else they both get entered and the popup would be loaded twice.
-    //
-    @Override
-    public void handleAction(Object sender, Object target)
-    {
-      if (target == searchField) {
-        Object obj = searchField.getValue();
-        if (obj != null) {
-          if (lastValue.equals(obj.toString())) {
-            if ((System.nanoTime() - lastCallMade) > 1000000000) // 1 sec
-              valueChange(null); // if the value doesn't change, valueChange doesn't get entered, but we want it to on every CR
-          }
-        }
-      }
-    }
-  }
-*/
-/*
-  private void decorateBlogHeadlinesButt(MessageUrl mu)
-  {
-    blogHeadlinesButt.setCaption(mu.getText());
-    blogHeadlinesButt.setParam(mu.getUrl());
-    blogHeadlinesButt.setDescription(mu.getTooltip());
-  }
-  */
   private void decorateBlogHeadlinesLink(MessageUrl mu)
   {
     blogHeadlinesLink.setCaption(mu.getText());
@@ -704,12 +552,11 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     blogHeadlinesLink.setDescription(mu.getTooltip());    
   }
   
-  public boolean gameEventLoggedOob(SessionManager sessMgr, Object evId)
+  public boolean gameEventLoggedOobTL(Object evId)
   {
-    MSysOut.println("Header.gameEventLoggedOob()");
-    Session sess = M.getSession(sessMgr);
+    MSysOut.println("Header.gameEventLoggedOobTL()");
     
-    GameEvent ev = (GameEvent)sess.get(GameEvent.class, (Serializable)evId);
+    GameEvent ev = (GameEvent)HSess.get().get(GameEvent.class, (Serializable)evId);
     if(ev == null) {
       ev = ComeBackWhenYouveGotIt.fetchGameEventWhenPossible((Long)evId);
     }
@@ -717,7 +564,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
       System.err.println("ERROR: Header.gameEventLoggedOob(): GameEvent matching id "+evId+" not found in db.");
     }
     else if(ev.getEventtype() == GameEvent.EventType.BLOGHEADLINEPOST) {
-      MessageUrl mu = (MessageUrl)sess.get(MessageUrl.class, (Serializable)ev.getParameter());
+      MessageUrl mu = (MessageUrl)HSess.get().get(MessageUrl.class, (Serializable)ev.getParameter());
       decorateBlogHeadlinesLink(mu);
       return true;
     }
@@ -725,19 +572,18 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   }
   
   @Override
-  public boolean moveUpdatedOob(SessionManager sessMgr, Serializable mvId)
+  public boolean moveUpdatedOobTL(Serializable mvId)
   {
-    MSysOut.println("Header.moveUpdatedOob()");
-    Session sess = M.getSession(sessMgr);
-    Move m = (Move)sess.get(Move.class, (Serializable)mvId);
+    MSysOut.println("Header.moveUpdatedOobTL()");
+    Move m = (Move)HSess.get().get(Move.class, (Serializable)mvId);
     if(m == null) {
       m = ComeBackWhenYouveGotIt.fetchMoveWhenPossible((Long)mvId);
     }
     if(m == null) {
       System.err.println("ERROR: Header.moveUpdatedOob: Move matching id "+mvId+" not found in db.");
     }
-    else if(Move.getCurrentMove(sess).getId() == m.getId()) {
-      setBrandingLabelText(m, Game.get(sess));
+    else if(Move.getCurrentMoveTL().getId() == m.getId()) {
+      setBrandingLabelText(m, Game.getTL());
       return true;
     }
     return false;
