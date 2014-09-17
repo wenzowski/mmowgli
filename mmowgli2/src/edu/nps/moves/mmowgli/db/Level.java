@@ -41,7 +41,7 @@ import javax.persistence.*;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * Level.java Created on Dec 16, 2010
@@ -77,11 +77,6 @@ public class Level implements Serializable
     setDescription(description);
   }
 
-  
-  public static Level get(Object id)
-  {
-    return (Level)VHib.getVHSession().get(Level.class, (Serializable)id);
-  }
   /**
    * Primary key, auto-increment, unique
    * 
@@ -145,14 +140,14 @@ public class Level implements Serializable
     this.description = desc;
   }
   
-  public static Level getFirstLevel()
+  public static Level getFirstLevelTL()
   {
-    return getLevelByOrdinal(1);
+    return getLevelByOrdinalTL(1);
   }
   
-  public static Level getLevelByOrdinal(int ord)
+  public static Level getLevelByOrdinalTL(int ord)
   {
-     Criteria crit = VHib.getVHSession().createCriteria(Level.class)
+     Criteria crit = HSess.get().createCriteria(Level.class)
      .add(Restrictions.eq("ordinal", ord));    
      @SuppressWarnings("rawtypes")
      List lis = crit.list();
@@ -160,6 +155,7 @@ public class Level implements Serializable
        return (Level)lis.get(0);
      return null;
   }
+  
   public String toString()
   {
     return ""+getOrdinal()+" "+getDescription();
