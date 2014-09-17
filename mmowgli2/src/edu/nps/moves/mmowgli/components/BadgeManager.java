@@ -34,6 +34,7 @@
 package edu.nps.moves.mmowgli.components;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import static edu.nps.moves.mmowgli.db.Badge.*;
 
 import java.util.List;
 import java.util.Set;
@@ -46,7 +47,8 @@ import org.hibernate.criterion.Restrictions;
 
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
@@ -76,16 +78,6 @@ public class BadgeManager implements Runnable
   private final int leadGroupLen = 50; // top 50
   private final long leadUserCountTrigger =  100;  // have to have at least this many users before we start thinking of leaders
 
-  public static long BADGE_ONE_ID   = 1; // played innov and defend
-  public static long BADGE_TWO_ID   = 2; // played each kind
-  public static long BADGE_THREE_ID = 3; // played root of super-active
-  public static long BADGE_FOUR_ID  = 4; // played super-interesting
-  public static long BADGE_FIVE_ID  = 5; // played a favorite
-  public static long BADGE_SIX_ID   = 6; // accepted authorship invite
-  public static long BADGE_AP_AUTHOR = 6;
-  public static long BADGE_SEVEN_ID = 7; // ranked in top 50
-  public static long BADGE_EIGHT_ID = 8; // logged in each day
-
   private boolean firstRunComplete = false;
 
   public BadgeManager(AppMaster master)
@@ -98,7 +90,7 @@ public class BadgeManager implements Runnable
     thread.start();
   }
   
-  public void messageReceivedOob(MMessagePacket pkt, SessionManager sessMgr)
+  public void messageReceivedTL(MMessagePacket pkt)
   {
     switch (pkt.msgType) {
     case NEW_CARD :
@@ -147,41 +139,40 @@ public class BadgeManager implements Runnable
   public void run()
   {
     if(!firstRunComplete) {   // not used, since run is not reentered
-      updateAllBadges();
+      updateAllBadges();  // does its own hibtlsession
       firstRunComplete = true;
     }
 
     while(true) {
       try {
         Pkt pkt = queue.take();       // block here
-        SingleSessionManager mgr = new SingleSessionManager();
-        Session sess = mgr.getSession();
-        boolean needsCommit = false;
-        needsCommit |= checkBadgeThree(sess); // get checked every time
+        HSess.init();
+        
+        checkBadgeThreeTL(); // get checked every time
 
         switch(pkt.msgType) {
         case NEW_CARD:
         case UPDATED_CARD:
-          Card c = DBGet.getCardFresh(pkt.id, sess);
-          needsCommit |= checkBadgeOne(c,sess);  // one of each root card type
-          needsCommit |= checkBadgeFour(c,sess); // marked superinteresting
-          needsCommit |= checkBadgeTwo(c.getAuthor(), sess); // one of everytype
+          Card c = DBGet.getCardFreshTL(pkt.id);
+          checkBadgeOneTL(c);  // one of each root card type
+          checkBadgeFourTL(c); // marked superinteresting
+          checkBadgeTwoTL(c.getAuthor()); // one of everytype
           break;
         case NEW_ACTIONPLAN:
         case UPDATED_ACTIONPLAN:
-          ActionPlan ap = (ActionPlan) sess.get(ActionPlan.class, pkt.id);
-          needsCommit |= checkBadgeSix(ap,sess);  // ap author
+          ActionPlan ap = ActionPlan.getTL(pkt.id);
+          checkBadgeSixTL(ap);  // ap author
           break;
         case UPDATED_USER:
-          User u =DBGet.getUserFresh(pkt.id, sess);
-          needsCommit |= checkBadgeFive(u,sess); // user fav list
+          User u =DBGet.getUserFreshTL(pkt.id);
+          checkBadgeFiveTL(u); // user fav list
 
           //todo: badge 8, logged in each day
           break;
         }
-        needsCommit |= checkLeaderBoard(sess);          //top 50 of leader board
-        mgr.setNeedsCommit(needsCommit);
-        mgr.endSession();
+        checkLeaderBoardTL();          //top 50 of leader board
+        
+        HSess.close();
 
         Thread.sleep(SLEEPPERIOD_MS);
       }
@@ -195,14 +186,15 @@ public class BadgeManager implements Runnable
   /* Give the user Badge #7 if they've been in the top 50 */
   /* but only check every so often, to keep db accesses down */
   @SuppressWarnings("unchecked")
-  private boolean checkLeaderBoard(Session sess)
+  private boolean checkLeaderBoardTL()
   {
     boolean ret = false;
     Long now = System.currentTimeMillis();
     if(now > (lastLeaderboardCheck+LEADERBOARD_CHECK_INTERVAL_MS)) {
       lastLeaderboardCheck = now;
       MSysOut.println("BadgeManager: leaderboard badge check started: "+now);
-
+      
+      Session sess = HSess.get();
       // Got to have at least 100 reg. users non-gm
       Long num =  (Long)sess.createCriteria(User.class)
       .add(Restrictions.eq("gameMaster", false))
@@ -223,7 +215,7 @@ public class BadgeManager implements Runnable
       .addOrder( Order.desc("basicScore"))
       .list();
 
-      ret |= processLeaders(sess,lis);
+      ret |= processLeadersTL(lis);
 
       // do the same for innovation score
 
@@ -234,19 +226,19 @@ public class BadgeManager implements Runnable
       .addOrder( Order.desc("innovationScore"))
       .list();
 
-      ret |= processLeaders(sess,lis);
+      ret |= processLeadersTL(lis);
 
       MSysOut.println("BadgeManager: leaderboard badge check ended: "+System.currentTimeMillis());
     }
     return ret;
   }
 
-  private boolean processLeaders(Session sess, List<User> lis)
+  private boolean processLeadersTL(List<User> lis)
   {
     boolean ret = false;
     for(User u: lis) {
       if(!hasBadge(u,BADGE_SEVEN_ID)) {
-        addBadge(u,BADGE_SEVEN_ID,sess);
+        addBadgeTL(u,BADGE_SEVEN_ID);
         ret = true;
       }
     }
@@ -263,13 +255,13 @@ public class BadgeManager implements Runnable
     return false;
   }
 
-  private void addBadge(User u, long badgeID, Session sess)
+  private void addBadgeTL(User u, long badgeID)
   {
     Set<Badge> bSet = u.getBadges();
-    Badge bdg = (Badge)sess.get(Badge.class, badgeID);
+    Badge bdg = Badge.get(badgeID);
     bSet.add(bdg);
     // User update here
-    Sess.sessOobUpdate(sess,u);    // needs SingleSessionManager.setNeedsCommit(true)
+    User.updateTL(u);
   }
 
   /* Give the user Badge #5 if they've played a card which somebody else thinks is a favorite */
@@ -281,14 +273,14 @@ public class BadgeManager implements Runnable
     return checkBadgeFive(marker, sess);
   }
   */
-  private boolean checkBadgeFive(User marker, Session sess)
+  private boolean checkBadgeFiveTL(User marker)
   {
     boolean ret = false;
     Set<Card> favs = marker.getFavoriteCards();
     for(Card c : favs) {
       User author = c.getAuthor();
       if(!hasBadge(author,BADGE_FIVE_ID)) {  // First see if he's already got this one
-        addBadge(author,BADGE_FIVE_ID,sess);
+        addBadgeTL(author,BADGE_FIVE_ID);
         ret = true;
       }
     }
@@ -296,13 +288,13 @@ public class BadgeManager implements Runnable
   }
 
   /* Give the user Badge #6 if they've accepted an action plan invite*/
-  private boolean checkBadgeSix(ActionPlan ap, Session sess)
+  private boolean checkBadgeSixTL(ActionPlan ap)
   {
     boolean ret = false;
     Set<User> authors = ap.getAuthors();
     for(User u : authors) {
       if(!hasBadge(u,BADGE_SIX_ID)) {
-        addBadge(u,BADGE_SIX_ID,sess);
+        addBadgeTL(u,BADGE_SIX_ID);
         ret = true;
       }
     }
@@ -310,48 +302,50 @@ public class BadgeManager implements Runnable
   }
 
   /* Give the user Badge #1 if they've played each of 2 root types */
-  private boolean checkBadgeOne(Card c, Session sess)
+  private boolean checkBadgeOneTL(Card c)
   {
     User author = c.getAuthor();
 
     if(hasBadge(author,BADGE_ONE_ID))    // First see if he's already got this one
       return false;
 
-    return checkBadgeOne(author,sess);
+    return checkBadgeOneTL(author);
   }
 
-  private boolean checkBadgeOne(User author, Session sess)
+  private boolean checkBadgeOneTL(User author)
   {
+    Session sess = HSess.get();
+    
     Long numInnos =  (Long)sess.createCriteria(Card.class)
     .add(Restrictions.eq("author", author))
     .add(Restrictions.eq("cardType", CardTypeManager.getPositiveIdeaCardType(sess)))
     .setProjection(Projections.rowCount()).uniqueResult();
-    if(numInnos <= 0)
+    if(numInnos <= 0) {
       return false;
-
+    }
     Long numDefs =  (Long)sess.createCriteria(Card.class)
     .add(Restrictions.eq("author", author))
     .add(Restrictions.eq("cardType", CardTypeManager.getNegativeIdeaCardType(sess)))
     .setProjection(Projections.rowCount()).uniqueResult();
-    if(numDefs <= 0)
+    if(numDefs <= 0) {
       return false;
-
+    }
     // Got one of each
     if(!hasBadge(author,BADGE_ONE_ID)) {
-      addBadge(author,BADGE_ONE_ID,sess);
+      addBadgeTL(author,BADGE_ONE_ID);
       return true;
     }
     return false;
   }
 
   /* Give the user Badge #4 if they've played a super-interesting card */
-  private boolean checkBadgeFour(Card c, Session sess)
+  private boolean checkBadgeFourTL(Card c)
   {
     if(CardMarkingManager.isSuperInteresting(c)) {
       User author = c.getAuthor();
       // Should check against user, don't let user get a badge for his own card
       if(!hasBadge(author,BADGE_FOUR_ID)) {    // First see if he's already got this one
-        addBadge(author,BADGE_FOUR_ID,sess);
+        addBadgeTL(author,BADGE_FOUR_ID);
         return true;
       }
     }
@@ -359,7 +353,7 @@ public class BadgeManager implements Runnable
   }
 
   /* Give the user Badge #3 if they've played the root of a super-active chain */
-  private boolean checkBadgeThree(Session sess)
+  private boolean checkBadgeThreeTL()
   {
 //    Card c = DBGet.getCard(pkt.id,sess);
 //    User author = c.getAuthor();
@@ -368,6 +362,7 @@ public class BadgeManager implements Runnable
     boolean ret = false;
     // This checks everybody
     List<Card> roots = master.getMcache().getSuperActiveChainRoots();
+    Session sess = HSess.get();
     for(Card crd : roots) {
       User author = crd.getAuthor();  // Hb classes not current in this sess
       author = DBGet.getUserFresh(author.getId(),sess);
@@ -375,7 +370,7 @@ public class BadgeManager implements Runnable
         Badge third = (Badge)sess.get(Badge.class, BADGE_THREE_ID);
         author.getBadges().add(third);
         // User update here
-        Sess.sessOobUpdate(sess,author);
+        User.updateTL(author);
         ret = true;
       }
     }
@@ -395,19 +390,19 @@ public class BadgeManager implements Runnable
   }
   */
 
-  private boolean checkBadgeTwo(User author, Session sess)
+  private boolean checkBadgeTwoTL(User author)
   {
     CardType[] allTypes = new CardType[] {
-        CardTypeManager.getNegativeIdeaCardType(sess),
-        CardTypeManager.getPositiveIdeaCardType(sess),
-        CardTypeManager.getAdaptType(),
-        CardTypeManager.getCounterType(),
-        CardTypeManager.getExpandType(),
-        CardTypeManager.getExploreType()
+        CardTypeManager.getNegativeIdeaCardTypeTL(),
+        CardTypeManager.getPositiveIdeaCardTypeTL(),
+        CardTypeManager.getAdaptTypeTL(),
+        CardTypeManager.getCounterTypeTL(),
+        CardTypeManager.getExpandTypeTL(),
+        CardTypeManager.getExploreTypeTL()
     };
 
     for(CardType ct : allTypes) {
-      Long num =  (Long)sess.createCriteria(Card.class)
+      Long num =  (Long)HSess.get().createCriteria(Card.class)
       .add(Restrictions.eq("author", author))
       .add(Restrictions.eq("cardType", ct))
       .setProjection(Projections.rowCount()).uniqueResult();
@@ -415,7 +410,7 @@ public class BadgeManager implements Runnable
       if(num <= 0)  // If any fail, no go
         return false;
     }
-    addBadge(author,BADGE_TWO_ID,sess);
+    addBadgeTL(author,BADGE_TWO_ID);
     return true;
   }
 
@@ -429,32 +424,32 @@ public class BadgeManager implements Runnable
 
     MSysOut.println("BadgeManager: begin one-time sync of all badges.");
 
-    SingleSessionManager mgr = new SingleSessionManager();
-    Session sess = mgr.getSession();
-    boolean needsCommit = false;
+    HSess.init();
 
-    needsCommit |= checkBadgeThree(sess); // get checked every time
-
+    checkBadgeThreeTL(); // get checked every time
+    
+    Session sess = HSess.get();
+    
     List<User> uLis = (List<User>)sess.createCriteria(User.class).list();
     for(User u: uLis) {
-      needsCommit |= checkBadgeOne (u, sess); // one of each root card type
-      needsCommit |= checkBadgeTwo (u, sess); // one of everytype
-      needsCommit |= checkBadgeFive(u, sess); // user fav list
+      checkBadgeOneTL (u); // one of each root card type
+      checkBadgeTwoTL (u); // one of everytype
+      checkBadgeFiveTL(u); // user fav list
     }
 
     List<Card> cLis = (List<Card>)sess.createCriteria(Card.class).list();
     for(Card c: cLis)
-      needsCommit |= checkBadgeFour(c, sess); // marked superinteresting
+      checkBadgeFourTL(c); // marked superinteresting
 
     List<ActionPlan> apLis = (List<ActionPlan>)sess.createCriteria(ActionPlan.class).list();
     for(ActionPlan ap: apLis)
-      needsCommit |= checkBadgeSix(ap, sess); // ap author
+      checkBadgeSixTL(ap); // ap author
 
     // todo: badge 8, logged in each day
 
-    needsCommit |= checkLeaderBoard(sess); // top 50 of leader board
-    mgr.setNeedsCommit(needsCommit);
-    mgr.endSession();
+    checkLeaderBoardTL(); // top 50 of leader board
+    
+    HSess.close();
     MSysOut.println("BadgeManager: end one-time sync of all badges.");
   }
 }
