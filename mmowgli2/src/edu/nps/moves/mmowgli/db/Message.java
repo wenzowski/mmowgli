@@ -38,8 +38,9 @@ import java.util.Date;
 
 import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
-import edu.nps.moves.mmowgli.hibernate.Sess;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+//import edu.nps.moves.mmowgli.hibernate.VHib;
+//import edu.nps.moves.mmowgli.hibernate.Sess;
 
 /**
  * Message.java Created on Dec 16, 2010
@@ -78,7 +79,7 @@ public class Message implements Serializable, Comparable<Object>
   {
     this();
     setText(text);
-    setCreatedInMove(Move.getCurrentMove());   
+    setCreatedInMove(Move.getCurrentMoveTL());   
   }
   
   public Message(String text, User fromUser)
@@ -93,16 +94,16 @@ public class Message implements Serializable, Comparable<Object>
     setToUser(toUser);
   }
     
-  public static void save(Message m)
+  public static void saveTL(Message m)
   {
-    Sess.sessSave(m);
+    HSess.get().save(m);
   }
-
-  public static void update(Message m)
+  
+  public static void updateTL(Message m)
   {
-    VHib.getVHSession().update(m);
+    HSess.get().update(m);;
   }
-
+  
  @Override
   public int compareTo(Object arg0)
   {
