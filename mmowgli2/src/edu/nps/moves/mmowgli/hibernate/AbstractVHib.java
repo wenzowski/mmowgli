@@ -48,6 +48,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.event.service.internal.EventListenerRegistryImpl;
+import org.hibernate.event.service.spi.DuplicationStrategy;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
 import org.hibernate.internal.SessionFactoryImpl;
@@ -109,9 +110,6 @@ public abstract class AbstractVHib// implements SessionManager
   
   protected SessionFactory _getSessionFactory()
   {
-     if (!sf.getCurrentSession().getTransaction().isActive())
-      sf.getCurrentSession().beginTransaction();
-    
     return sf;
   }
   
@@ -220,19 +218,36 @@ public abstract class AbstractVHib// implements SessionManager
     t.printStackTrace(System.err);
     throw new ExceptionInInitializerError(t);
   }
+
   DatabaseListeners dbLis;
-  protected void _installDataBaseListeners()//AppMaster apMas)
+
+  protected void _installDataBaseListeners()// AppMaster apMas)
   {
     DatabaseListeners dlis = new DatabaseListeners(sr);
     MSysOut.println("Installing db listeners");
     EventListenerRegistry registry = ((SessionFactoryImpl) sf).getServiceRegistry().getService(EventListenerRegistry.class);
+    registry.addDuplicationStrategy(new DuplicationStrategy()
+    {
 
+      @Override
+      public boolean areMatch(Object listener, Object original)
+      {
+        return false;
+      }
+
+      @Override
+      public Action getAction()
+      {
+        return null;
+      }
+
+    });
     registry.getEventListenerGroup(EventType.POST_COMMIT_INSERT).appendListener(dlis.postInsertListener);
     registry.getEventListenerGroup(EventType.SAVE).appendListener(dlis.saveListener);
     registry.getEventListenerGroup(EventType.POST_UPDATE).appendListener(dlis.postUpdateListener);
-    registry.getEventListenerGroup(EventType.UPDATE).appendListener(dlis.updateListener);
+    //registry.getEventListenerGroup(EventType.UPDATE).appendListener(dlis.updateListener);
     //registry.getEventListenerGroup(EventType.MERGE).appendListener(dlis.mergeListener);
-    registry.getEventListenerGroup(EventType.SAVE_UPDATE).appendListener(dlis.saveOrUpdateListener);
+    //registry.getEventListenerGroup(EventType.SAVE_UPDATE).appendListener(dlis.saveOrUpdateListener);
     registry.getEventListenerGroup(EventType.DELETE).appendListener(dlis.deleteListener);
     MSysOut.println("db listeners installed");
     dlis.enableListeners(true); // may have to be moved later
@@ -257,18 +272,6 @@ public abstract class AbstractVHib// implements SessionManager
     return sf.openSession();
   }
   
-  //Not used here, only in SingleSessionManager
- // @Override
-  public boolean needsCommit()
-  {
-    return true;
-  }
-  
- // @Override
-  public void setNeedsCommit(boolean yn)
-  {
-  }
-
   private static List<Class<?>> addAnnotatedClasses(Class<?> exampleClass, Configuration cnf)
   {
     // Any class in the db package will be added to Hibernate config
@@ -308,12 +311,6 @@ public abstract class AbstractVHib// implements SessionManager
     public String idleTestPeriod;
   }
   
-  public static void setOobThread(Thread currentThread)
-  {
-    // TODO Auto-generated method stub
-
-  }
-
   public static String getHib_fs_local_path()
   {
     return hib_fs_local_path;
