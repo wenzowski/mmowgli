@@ -33,8 +33,8 @@
  */
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS;
-import static edu.nps.moves.mmowgli.MmowgliConstants.USER_SESSION_TIMEOUT_IN_SECONDS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import static edu.nps.moves.mmowgli.MmowgliConstants.WEB_XML_GAMEMASTER_TMO_KEY;
 
 import java.util.List;
 
@@ -48,10 +48,13 @@ import com.vaadin.ui.Button.ClickEvent;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.MovePhase;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 /**
  * LoginPopup.java Created on Dec 15, 2010
@@ -75,7 +78,8 @@ public class LoginPopup extends MmowgliDialog
   private NativeButton continueButt, pwResetButt;
 
   User user; // what gets returned
-
+  
+  @HibernateSessionThreadLocalConstructor
   public LoginPopup(Button.ClickListener listener)
   {
     this(listener,false);
@@ -85,10 +89,9 @@ public class LoginPopup extends MmowgliDialog
   {
     super(listener);
     super.initGui();
-
     if(guest) {
       @SuppressWarnings("unchecked")
-      List<User> lis = (List<User>)VHib.getVHSession().createCriteria(User.class).
+      List<User> lis = (List<User>)HSess.get().createCriteria(User.class).
                        add(Restrictions.eq("viewOnly", true)).
                        add(Restrictions.eq("accountDisabled", false)).list();
       if(lis.size()>0) {
@@ -114,8 +117,7 @@ public class LoginPopup extends MmowgliDialog
     userIDTf.addStyleName("m-dialog-textfield");
     userIDTf.setWidth("85%");
     userIDTf.setTabIndex(100);
-    //userIDTf.setDebugId(USER_NAME_TEXTBOX);
-    //mainVLayout.addComponent(spacer());
+    userIDTf.setId(USER_NAME_TEXTBOX);
 
     lab = new Label("Password:");
     lab.addStyleName(labelStyle);
@@ -124,7 +126,7 @@ public class LoginPopup extends MmowgliDialog
     contentVLayout.addComponent(passwordTf = new PasswordField());
     passwordTf.setWidth("85%");
     passwordTf.setTabIndex(101);
-    //passwordTf.setDebugId(USER_PASSWORD_TEXTBOX);
+    passwordTf.setId(USER_PASSWORD_TEXTBOX);
     contentVLayout.addComponent(lab=new Label());
     lab.setHeight("15px");
 
@@ -136,7 +138,7 @@ public class LoginPopup extends MmowgliDialog
     hl.setExpandRatio(lab, 1.0f);
 
     continueButt = new NativeButton();
-    //continueButt.setDebugId(LOGIN_CONTINUE_BUTTON);
+    continueButt.setId(LOGIN_CONTINUE_BUTTON);
     hl.addComponent(continueButt);
     Mmowgli2UI.getGlobals().mediaLocator().decorateDialogContinueButton(continueButt);
 
@@ -175,13 +177,19 @@ public class LoginPopup extends MmowgliDialog
   @SuppressWarnings("serial")
   class MyContinueListener implements Button.ClickListener
   {
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     @Override
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
+      
       String uname = userIDTf.getValue().toString();
-      user = User.getUserWithUserName(VHib.getVHSession(), uname);
+      user = User.getUserWithUserName(HSess.get(), uname);
       if(user == null) {
         errorOut("No registered user with that name/ID");
+        HSess.close();
         return;
       }
 
@@ -196,30 +204,34 @@ public class LoginPopup extends MmowgliDialog
           errorOut("Password does not match.  Try again.");
           passwordTf.focus();
           passwordTf.selectAll();
+          HSess.close();
           return;
         }
       }
       catch(Throwable t) {
         errorOut("Error encrypting password.  Submit trouble report.");
+        HSess.close();
         return;
       }
 
       if(user.isAccountDisabled()) {
         errorOut("This account has been disabled.");
+        HSess.close();
         return;
       }
 
-      Game g = Game.get(1L);
+      Game g = Game.getTL();
       MovePhase mp = g.getCurrentMove().getCurrentMovePhase();
 
       if(g.isEmailConfirmation() && !user.isEmailConfirmed()) {
         errorOut("This email address has not been confirmed.");
+        HSess.close();
         return;
       }
       else {
         // did not fail confirm check; if confirmation off, make sure they can get in in the future or questions will arise
         user.setEmailConfirmed(true);
-        User.update(user);
+        User.updateTL(user);
       }
       /* replaced with clause below it
       if(!g.isLoginAllowAll()) {
@@ -245,21 +257,28 @@ public class LoginPopup extends MmowgliDialog
 
           // ok, not allowing everybody in and didn't match any special cases
           errorOut("Sorry.  Logins are currently restricted.");
+          HSess.close();
           return;
         }
       }
-      WrappedSession wSess = Mmowgli2UI.getCurrent().getSession().getSession();
-    
-      MSysOut.println("Web.xml session timeout = "+wSess.getMaxInactiveInterval()+" seconds");
-      // Set session timeout to two hours if gamemaster or admin
-      int tmo = USER_SESSION_TIMEOUT_IN_SECONDS;
-
-      if(user.isGameMaster() || user.isAdministrator())
-        tmo = GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS;
       
-      wSess.setMaxInactiveInterval(tmo);// units = seconds
-      MSysOut.println("Session timeout now "+tmo+" seconds");
+      WrappedSession wSess = Mmowgli2UI.getCurrent().getSession().getSession();    
+      int oldtmo = wSess.getMaxInactiveInterval();
+      int tmo = oldtmo;
+      if(user.isGameMaster() || user.isAdministrator()) {
+        if(GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS != null) {
+          try {
+            tmo = Integer.parseInt(GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS);
+          } catch(Throwable t) {
+            MSysOut.println("Error parsing "+WEB_XML_GAMEMASTER_TMO_KEY + "from web.xml");
+          }
+        }
+      }
+      if(tmo != oldtmo)
+        wSess.setMaxInactiveInterval(tmo);// units = seconds
+      MSysOut.println("Session timeout: "+tmo+" seconds");
       
+      HSess.close();
       listener.buttonClick(event); // back up the chain
     }
 
@@ -286,21 +305,25 @@ public class LoginPopup extends MmowgliDialog
   @SuppressWarnings("serial")
   class MyForgotPasswordListener implements Button.ClickListener
   {
-
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateRead
+    @HibernateClosed
     @Override
     public void buttonClick(ClickEvent event)
     {
-
+      HSess.init();
       String uname = userIDTf.getValue().toString();
-      user = User.getUserWithUserName(VHib.getVHSession(), uname);
+      user = User.getUserWithUserName(HSess.get(), uname);
 
       if (user == null) {
         errorOut("No registered user with that User ID");
+        HSess.close();
         return;
       }
 
       // This is necessary to receive an email to activate your registration
-      Mmowgli2UI.getGlobals().setUserID(user.getId());
+      Mmowgli2UI.getGlobals().setUserIDTL(user.getId());
 
       // Lots of stuff borrowed from RegistrationPageBase
       if (event.getButton() == pwResetButt) {
@@ -309,6 +332,7 @@ public class LoginPopup extends MmowgliDialog
         PasswordResetPopupListener pwpl = new PasswordResetPopupListener(listener, user);
         RegistrationPageBase.openPopupWindow(Mmowgli2UI.getGlobals().getFirstUI(), pwpl, TOP_OFFSET_TO_MISS_VIDEO);
       }
+      HSess.close();
     }
 
     private void errorOut(String s)
@@ -318,10 +342,10 @@ public class LoginPopup extends MmowgliDialog
   }
 
   @Override
-  protected void cancelClicked(ClickEvent event)
+  protected void cancelClickedTL(ClickEvent event)
   {
     user = null;
-    super.cancelClicked(event);
+    super.cancelClickedTL(event);
   }
 
   /**
