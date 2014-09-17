@@ -5,7 +5,11 @@ import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /*
@@ -106,11 +110,11 @@ public abstract class MmowgliDialog2 extends Window implements MmowgliComponent
    * Override by subclass, which normally calls super.cancelClicked(event) when done
    * @param event
    */
-  protected void cancelClicked(ClickEvent event)
+  protected void cancelClickedTL(ClickEvent event)
   {
     User u = getUser();
     if(u != null) {
-      User.delete(u);
+      User.deleteTL(u);
       UserPii uPii = VHibPii.getUserPii(u.getId());
       VHibPii.delete(uPii);
       MSysOut.println("User deleted (didn't finish login) "+u.getId());
@@ -122,12 +126,17 @@ public abstract class MmowgliDialog2 extends Window implements MmowgliComponent
   }
 
   @SuppressWarnings("serial")
+  @MmowgliCodeEntry
+  @HibernateOpened
+  @HibernateClosed
   class ThisCancelListener implements Button.ClickListener
   {
     @Override
     public void buttonClick(ClickEvent event)
     {
-      cancelClicked(event);   // allow subclass to override
+      HSess.init();
+      cancelClickedTL(event);   // allow subclass to override
+      HSess.close();
     }
   }
 
