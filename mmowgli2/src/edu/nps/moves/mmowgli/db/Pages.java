@@ -44,7 +44,9 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import org.hibernate.Session;
 
 import edu.nps.moves.mmowgli.*;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+//import edu.nps.moves.mmowgli.hibernate.VHib;
+
 @Entity
 public class Pages implements Serializable
 {
@@ -116,20 +118,10 @@ public class Pages implements Serializable
   {
     return (Pages)sess.get(Pages.class, id);
   }
-  
-  public static Pages get()
+    
+  public static Pages getTL()
   {
-    return get(1L);  //only one entry in current design
-  }
-  
-  private static Pages get(Serializable id)
-  {
-    return get(VHib.getVHSession(),id);
-  }
- 
-  public static void save(Pages g)
-  {
-    VHib.getVHSession().save(g);
+    return (Pages)HSess.get().get(Pages.class, 1L);
   }
   
   /**********************************************************************/
@@ -199,14 +191,14 @@ public class Pages implements Serializable
     
     public PagesData()
     {
-      this(VHib.getVHSession());
+      this(HSess.get());
     }
 
     public PagesData(Session sess)
     {
       map = new HashMap<String,String> (15);
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-      map.put(gmurlT, AppMaster.getInstance().getAppUrlString());//.toExternalForm());
+      map.put(gmurlT, AppMaster.instance().getAppUrlString());//.toExternalForm());
       map.put(unameT, User.get(globs.getUserID(), sess).getUserName());
       map.put(dtimeT, new SimpleDateFormat("MM/dd HH:mm z").format(new Date()));
       map.put(portlT, MmowgliConstants.PORTALWIKI_URL);      
