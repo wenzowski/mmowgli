@@ -42,6 +42,8 @@ import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.Avatar;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
@@ -76,6 +78,7 @@ public class AvatarChooser extends Window implements MmowgliComponent
     this(selectedId, defaultCaption);
   }
   
+  @HibernateSessionThreadLocalConstructor
   public AvatarChooser(Object selectedId, String caption)
   {
     super(caption);
@@ -118,28 +121,17 @@ public class AvatarChooser extends Window implements MmowgliComponent
     
     NativeButton cancelButt = new NativeButton();
     medLoc.decorateCancelButton(cancelButt);
-//    cancelButt.addStyleName("borderless");
-//    cancelButt.setIcon(app.globs().mediaLocator().getCancelButtonIcon());
-//    cancelButt.setHeight("15px");
-//    cancelButt.setWidth("61px");
     butts.addComponent(cancelButt);
     butts.setComponentAlignment(cancelButt,Alignment.MIDDLE_CENTER);
     
     NativeButton selectButt = new NativeButton();
     medLoc.decorateSelectButton(selectButt);
-//    selectButt.addStyleName("borderless");
-//    selectButt.setIcon(app.globs().mediaLocator().getSelectButtonIcon());
-//    selectButt.setHeight("13px");
-//    selectButt.setWidth("45px"); // bump it because of the margin or padding that I cant control "39px");
     butts.addComponent(selectButt);
     butts.setComponentAlignment(selectButt,Alignment.MIDDLE_CENTER);
 
-    //butts.addComponent(sp = new Label());
-    //sp.setWidth("30px");
-    
     imgLay = new HorizontalLayout();
     p.setContent(imgLay);
-    imgLay.setHeight("105px"); //"85px");
+    imgLay.setHeight("105px");
     imgLay.setSpacing(true);
     
     Collection<?> lis = Avatar.getContainer().getItemIds();
@@ -151,7 +143,7 @@ public class AvatarChooser extends Window implements MmowgliComponent
       avIdArr[idx++] = id;
       if(initSelectedID == null)
         initSelectedID = id; // sets first one
-      Avatar a = Avatar.get(id);
+      Avatar a = Avatar.getTL(id);
       Embedded em = new Embedded(null, medLoc.locate(a.getMedia()));
       em.setWidth("95px");
       em.setHeight("95px");
@@ -172,6 +164,7 @@ public class AvatarChooser extends Window implements MmowgliComponent
     cancelButt.addClickListener(new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
       public void buttonClick(ClickEvent event)
       {
         cancelClick();
@@ -180,6 +173,7 @@ public class AvatarChooser extends Window implements MmowgliComponent
     selectButt.addClickListener(new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
       public void buttonClick(ClickEvent event)
       {
         selectClick();
@@ -193,6 +187,7 @@ public class AvatarChooser extends Window implements MmowgliComponent
   class ImageClicked implements MouseEvents.ClickListener
   {
     @Override
+    @MmowgliCodeEntry
     public void click(com.vaadin.event.MouseEvents.ClickEvent event)
     {
       Embedded emb = (Embedded)event.getSource();
