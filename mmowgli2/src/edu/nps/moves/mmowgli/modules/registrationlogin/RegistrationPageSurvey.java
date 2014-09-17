@@ -64,8 +64,8 @@ public class RegistrationPageSurvey extends RegistrationPageAgreement
   @Override
   protected String getLabelText()
   {
-    Game g = Game.get();
-    GameLinks gl = GameLinks.get();
+    Game g = Game.getTL();
+    GameLinks gl = GameLinks.getTL();
     // Hack
     if(gl.getFixesLink().toLowerCase().contains("armyscitech") || gl.getGlossaryLink().toLowerCase().contains("armyscitech"))
       return "<p>Thanks for playing the exercise!</p><p>We are interested in your opinions.  This is optional.</p>";
@@ -80,9 +80,9 @@ public class RegistrationPageSurvey extends RegistrationPageAgreement
   }
 
   @Override
-  protected String getReadUrl()
+  protected String getReadUrlTL()
   {
-    return GameLinks.get().getSurveyConsentLink();
+    return GameLinks.getTL().getSurveyConsentLink();
   }
 
   @Override
