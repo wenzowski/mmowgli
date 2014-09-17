@@ -47,11 +47,16 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
-import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.AppEvent;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
 import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * CardLarge.java
@@ -109,11 +114,11 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
 
   Res resources;
   
-  public static CardLarge newCardLarge(Object cardId)
+  public static CardLarge newCardLargeTL(Object cardId)
   {
     CardLarge cardL = new CardLarge(cardId);
     MediaLocator mloc = Mmowgli2UI.getGlobals().getMediaLocator();
-    cardL.bckgrndResource = mloc.getCardLargeBackground(cardId);
+    cardL.bckgrndResource = mloc.getCardLargeBackgroundTL(cardId);
     cardL.starGreyResource = mloc.getCardLargeGreyStar(cardId);
     cardL.starRedResource = mloc.getCardLargeGoldStar(cardId);
     
@@ -134,8 +139,13 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     dateFormatter = new SimpleDateFormat("MM/dd HH:mm z");
   }
   
-  @SuppressWarnings("serial")
   public void initGui()
+  {
+    throw new UnsupportedOperationException();
+  }
+  @SuppressWarnings("serial")
+  @HibernateRead
+  public void initGuiTL()
   {
     setWidth(CARDBIG_W);
     setHeight(CARDBIG_H);
@@ -144,18 +154,16 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
       bckgrndImg = new Embedded(null,bckgrndResource);
       addComponent(bckgrndImg,"top:0px;left:0px");
     }
-    Card card = DBGet.getCardFresh(cardId);
+    Card card = DBGet.getCardFreshTL(cardId);
     title.setValue(card.getCardType().getTitle().toUpperCase());
     title.setWidth(CARDBIG_TITLE_W);
     title.setHeight(CARDBIG_TITLE_H);
     title.setDescription(title_tt);
     addComponent(title,CARDBIG_TITLE_POS);
-    //header.addStyleName(StyleManager.getCardSummaryHeaderStyle(card));
     title.addStyleName("m-cardlarge-title");
-    //title.addStyleName(StyleManager.getCardLargeTitleStyle(card));
     title.addStyleName(CardStyler.getCardTextColorStyle(card.getCardType()));
     
-    User userMe = DBGet.getUserFresh(globs.getUserID());  // need favorite cards
+    User userMe = DBGet.getUserFreshTL(globs.getUserID());  // need favorite cards
     if(starGreyResource!=null && starRedResource!=null ) {
       if(userMe.getFavoriteCards().contains(card))
         starButton.setIcon(starRedResource);
@@ -171,7 +179,8 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     content.setWidth(CARDBIG_CONTENT_W);
     content.setHeight("115px");// 130 CARDBIG_CONTENT_H);
     addComponent(content, CARDBIG_CONTENT_POS);
-    content.setValue(formatText(card.getText(),Game.get(1l),VHib.getVHSession()));
+    Game g = Game.getTL();
+    content.setValue(formatText(card.getText(),g,HSess.get()));
     content.addStyleName("m-cardlarge-content");
     if(card.isHidden())
       content.addStyleName("m-cardsummary-hidden");     // red "HIDDEN" text background
@@ -218,7 +227,6 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     // component as a whole kill the ability to follow url links which are in the card text.
     VerticalLayout wrapper = new VerticalLayout();
     wrapper.addComponent(uname);
-    //addComponent(uname,CARDBIG_UNAME_POS);
     addComponent(wrapper,CARDBIG_UNAME_POS);
     
     dateLab.setValue(dateFormatter.format(card.getCreationDate()));
@@ -229,7 +237,8 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     dateLab.setDescription(date_tt);
     addComponent(dateLab,CARDBIG_DATE_POS);
     
-    if(card.getCreatedInMove().getId() != Move.getCurrentMove().getId()) {
+    long currentMoveId = Move.getCurrentMoveTL().getId();
+    if(card.getCreatedInMove().getId() != currentMoveId) {
       moveLab.setValue(card.getCreatedInMove().getName());
       moveLab.setWidth("198px");
       moveLab.setHeight("20px");
@@ -240,16 +249,22 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     }
      
     // Listen for layout click events
-    wrapper.addLayoutClickListener(new LayoutClickListener()
+     wrapper.addLayoutClickListener(new LayoutClickListener()
     {
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateRead
+      @HibernateClosed
       public void layoutClick(LayoutClickEvent event)
       {
+        HSess.init();
         Component c = event.getChildComponent();
-        Card card = DBGet.getCard(cardId);    // bring up-to-date in this session
+        Card card = DBGet.getCardTL(cardId);    // bring up-to-date in this session
         if (c == uname) {
           AppEvent evt = new AppEvent(CARDAUTHORCLICK, CardLarge.this, card.getAuthor().getId());
-          Mmowgli2UI.getGlobals().getController().miscEvent(evt);
+          Mmowgli2UI.getGlobals().getController().miscEventTL(evt);
         }
+        HSess.close();
       }
     });
   }
@@ -299,39 +314,82 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
   class StarClick implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateRead
+    @HibernateUpdate
+    @HibernateCommitted
     public void buttonClick(ClickEvent event)
     {
-      User userMe = DBGet.getUserFresh(Mmowgli2UI.getGlobals().getUserID());
-      Card card = DBGet.getCardFresh(cardId);
-      
-      if (userMe.getFavoriteCards().contains(card)) {
+      HSess.init();
+      User userMe = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());
+      Card card = DBGet.getCardFreshTL(cardId);
+      Set<Card> set = userMe.getFavoriteCards();
+      if (set.contains(card)) {
         // remove it
-        userMe.getFavoriteCards().remove(card);
+        set.remove(card);
         starButton.setIcon(starGreyResource);
       }
       else {
-        userMe.getFavoriteCards().add(card);
+        set.add(card);
         starButton.setIcon(starRedResource);
       }
-      User.update(userMe);
+      userMe.setFavoriteCards(set);
+      User.updateTL(userMe);
+      
+      HSess.close(); // will commit
     }  
   }
 
+  private boolean checkStar(Card c, Object uid)
+  {
+    User u = DBGet.getUserTL(uid);
+    Set<Card> set = u.getFavoriteCards();
+    if (set.contains(c)) {
+      starButton.setIcon(starRedResource);
+      return true;
+    }
+    else {
+      starButton.setIcon(starGreyResource);
+      return true;
+    }
+  }
+  
   // OOB update
-  public void update_oob(SingleSessionManager mgr, Object id)
+  @HibernateOpened
+  @HibernateRead
+  @HibernateClosed
+  public void update_oobTL(Object id)
   {
     if(!id.equals(cardId))  //; the card should be for us, but just to make sure
       return;
-    Session sess = M.getSession(mgr);
 
-    Card c = DBGet.getCardFresh(id,sess);
+    System.out.println("**** in CardLarge.update_oobTL(), "+id.toString()+" "+cardId.toString());
+    Session sess = HSess.get();
+    
+    Card c = DBGet.getCardFreshTL(id);
     // Only 2 things to update...text and marking
-    Game g = (Game)sess.get(Game.class,1L);
+    Game g = Game.getTL();
     content.setValue(formatText(c.getText(),g,sess));
     if(c.isHidden())
       content.addStyleName("m-cardsummary-hidden");     // red "HIDDEN" text background
     else
       content.removeStyleName("m-cardsummary-hidden");
     showMarking_oob(c);
+  }
+  
+  public boolean updateUser_oobTL(Object uid)
+  {
+    MSysOut.println("CardLarge.userUpdated_oobTL("+uid.toString()+")"); 
+    if(uid.equals(Mmowgli2UI.getGlobals().getUserID())) {
+      Card c = DBGet.getCardFreshTL(cardId);
+      boolean retb = checkStar(c,uid);
+      MSysOut.println("CardLarge.userUpdated_oobTL() checkStar() returned "+retb);
+      return retb;
+    }
+    else
+      MSysOut.println("CardLarge.userUpdated_oobTL() not me");
+
+    return false;
   }
 }
