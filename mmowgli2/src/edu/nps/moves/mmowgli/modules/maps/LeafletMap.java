@@ -45,6 +45,7 @@ import com.vaadin.ui.VerticalLayout;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * LeafletMap.java
@@ -68,11 +69,13 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
   public static String DEF_TITLE_LAST_PART  = "</b>";
  
   // Find providers at http://leaflet-extras.github.io/leaflet-providers/preview/index.html
-  
+  @HibernateSessionThreadLocalConstructor
   public LeafletMap()
   {
-    this(DEF_TITLE_FIRST_PART +Game.get().getMapTitle()+DEF_TITLE_LAST_PART);
+    this(DEF_TITLE_FIRST_PART +Game.getTL().getMapTitle()+DEF_TITLE_LAST_PART);
   }
+  
+  @HibernateSessionThreadLocalConstructor
   public LeafletMap(String title)
   {
     this.title = title;
@@ -97,7 +100,7 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
     map.addControl(new LScale());
     installAllLayers(map);
     
-    Game g = Game.get();    
+    Game g = Game.getTL();    
     map.setCenter(g.getMapLatitude(),g.getMapLongitude());
     map.setZoomLevel(g.getMapZoom());
     
