@@ -39,7 +39,7 @@ import javax.persistence.*;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * @author Mike Bailey, jmbailey@nps.edu
@@ -77,18 +77,17 @@ public class CardMarking implements Serializable
   
   public static HbnContainer<CardMarking> getContainer()
   {
-    return new HbnContainer<CardMarking>(CardMarking.class, VHib.getSessionFactory());
+    return new HbnContainer<CardMarking>(CardMarking.class, HSess.getSessionFactory());
   }
 
-  public static CardMarking get(Object id)
+  public static CardMarking getTL(Object id)
   {
-    return (CardMarking)VHib.getVHSession().get(CardMarking.class, (Serializable)id);   
+    return (CardMarking)HSess.get().get(CardMarking.class,  (Serializable)id);
   }
-
-  /* Wouldn't think this should be required since these are basically immutable rows */
-  public static CardMarking merge(CardMarking cm)
+  
+  public static CardMarking mergeTL(CardMarking cm)
   {
-    return (CardMarking)VHib.getVHSession().merge(cm);
+    return (CardMarking)HSess.get().merge(cm);
   }
   
   @Id
