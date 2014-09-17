@@ -1,5 +1,4 @@
 /*
-* Copyright (c) 1995-2014 held by the author(s).  All rights reserved.
 *  
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions
@@ -34,16 +33,10 @@
 package edu.nps.moves.mmowgli.db;
 
 import java.util.Calendar;
-import javax.persistence.Basic;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import javax.persistence.*;
+
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * @author DMcG
@@ -72,14 +65,14 @@ public class Award
   String    storyUrl;    // Blog post describing the award */
 //@formatter:on
 
-  public static void delete(Award aw)
+  public static void deleteTL(Award aw)
   {
-    VHib.getVHSession().delete(aw);
+    HSess.get().delete(aw);
   }
-  
-  public static void save(Award aw)
+
+  public static void saveTL(Award aw)
   {
-    VHib.getVHSession().save(aw);
+    HSess.get().save(aw);
   }
   
   @Id
@@ -160,5 +153,4 @@ public class Award
   {
     this.storyUrl = storyUrl;
   }
-
 }
