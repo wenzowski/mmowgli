@@ -44,9 +44,8 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 
 import com.vaadin.data.hbnutil.HbnContainer;
-//import org.hibernate.Criteria;
-//import org.hibernate.criterion.Order;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * MessageUrl.java
@@ -87,34 +86,33 @@ public class MessageUrl implements Serializable
   @SuppressWarnings({ "serial"})
   public static HbnContainer<MessageUrl> getContainer()
   {
-    return new HbnContainer<MessageUrl>(MessageUrl.class,VHib.getSessionFactory())
+    return new HbnContainer<MessageUrl>(MessageUrl.class,HSess.getSessionFactory())
     {
       @Override
-      protected Criteria getBaseCriteria()
+      protected Criteria getBaseCriteriaTL()
       {
-        return super.getBaseCriteria().addOrder(Order.desc("date")); // newest first
+        return super.getBaseCriteriaTL().addOrder(Order.desc("date")); // newest first
       }      
     };
   }
   
-  public static void save(MessageUrl mu)
+  public static void saveTL(MessageUrl mu)
   {
-    VHib.getVHSession().save(mu);    
+    HSess.get().save(mu);
   }
   
-  public static MessageUrl get(Object id)
+  public static MessageUrl getTL(Object id)
   {
-    return (MessageUrl)VHib.getVHSession().get(MessageUrl.class,(Serializable)id);
+    return (MessageUrl)HSess.get().get(MessageUrl.class,(Serializable)id);
   }
-  
-
-  public static MessageUrl getLast()
+ 
+  public static MessageUrl getLastTL()
   {
-    org.hibernate.Query q = VHib.getVHSession().createQuery("select max(id) from MessageUrl");
+    org.hibernate.Query q = HSess.get().createQuery("select max(id) from MessageUrl");
     Object o = q.uniqueResult();
     if(o == null)
       return null;
-    return MessageUrl.get(o);
+    return MessageUrl.getTL(o);
   }
   
   @Id
