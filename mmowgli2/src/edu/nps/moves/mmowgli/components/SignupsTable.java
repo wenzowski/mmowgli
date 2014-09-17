@@ -33,7 +33,9 @@
 */
 package edu.nps.moves.mmowgli.components;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -50,11 +52,13 @@ import com.vaadin.ui.themes.Reindeer;
 
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.pii.Query2Pii;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPagePopupFirst;
 import edu.nps.moves.mmowgli.modules.registrationlogin.Vips;
 import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
+import edu.nps.moves.mmowgli.utility.BulkMailHandler;
 
 
 /**
@@ -87,6 +91,7 @@ public class SignupsTable extends Table
   private ClickListener changeListener;
   private ValueChangeListener selectListener;
 
+  @HibernateSessionThreadLocalConstructor
   public SignupsTable(String caption, ClickListener changeListener, ValueChangeListener selectListener)
   {
     super(caption);
@@ -109,17 +114,6 @@ public class SignupsTable extends Table
 
     addValueChangeListener(new SelectListener());
     addStyleName("m-signupstable");
-/*
-    addListener(new ItemClickListener()
-    {
-      private static final long serialVersionUID = 1L;
-      @Override
-      public void itemClick(ItemClickEvent event)
-      {
-        ((ApplicationEntryPoint)getApplication()).globs().controller().handleEvent(SHOWUSERPROFILECLICK,event.getItemId(),UserTable.this);
-      }
-    });
-*/
   }
 
   @SuppressWarnings("serial")
@@ -131,11 +125,12 @@ public class SignupsTable extends Table
       this.cb = cb;
     }
     @Override
+    @MmowgliCodeEntry
     public void valueChange(com.vaadin.data.Property.ValueChangeEvent event)
     {
-      Session sess = VHib.getVHSession();
+      Session sess = VHibPii.getASession();
       sess.beginTransaction();
-
+      
       QueryWrapper wrapper = cb.wrapper;
 
       boolean localInvited = cb.getValue();
@@ -144,30 +139,25 @@ public class SignupsTable extends Table
       if(localInvited && vipSaysOK) {
         wrapper.setInvited(localInvited);
         wrapper.setConfirmed(false);
-        //cb.mate.setValue(Boolean.FALSE);
         cb.mate.setConfirmed(false);
       }
       else if(localInvited && !vipSaysOK) {
         Vips.addEmail(wrapper.getEmail(),sess);
         wrapper.setInvited(localInvited);
         wrapper.setConfirmed(false);
-        //cb.mate.setValue(Boolean.FALSE);
         cb.mate.setConfirmed(false);
       }
       else if(!localInvited && vipSaysOK) {
         Vips.blackListEmail(wrapper.getEmail(),sess);
         wrapper.setInvited(localInvited);
         wrapper.setConfirmed(false);
-        //cb.mate.setValue(Boolean.FALSE);
         cb.mate.setConfirmed(false);
       }
       else if(!localInvited && !vipSaysOK) {
         wrapper.setInvited(localInvited);
         wrapper.setConfirmed(false);
-        //cb.mate.setValue(Boolean.FALSE);
         cb.mate.setConfirmed(false);
       }
-      sess.update(wrapper.getQuery());
       sess.getTransaction().commit();
       sess.close();
 
@@ -268,8 +258,6 @@ public class SignupsTable extends Table
     @Override
     public Component generateCell(Table source, Object itemId, Object columnId)
     {
-      //EntityItem ei = (EntityItem)SignupsTable.this.getItem(itemId);
-      //Query2Pii query = (Query2Pii)ei.getPojo();
       QueryWrapper wrapper = (QueryWrapper)itemId;
       Label lab;
       if(EMAIL_COL.equals(columnId)) {
@@ -292,10 +280,6 @@ public class SignupsTable extends Table
       if(INGAME_COL.equals(columnId)) {
         lab = new Label(wrapper.isIngame()?"yes":"");
         return lab;
-//        CheckBox cb = new QueryCB(wrapper);
-//        cb.setValue(isInGame(wrapper));
-//        cb.setReadOnly(true);
-//        return cb;
       }
       if(INVITED_COL.equals(columnId)) {
         QueryCB cb =  new QueryCB(wrapper);
@@ -317,14 +301,6 @@ public class SignupsTable extends Table
         linkConfirmedToInvited(wrapper,cc);
         cc.setEnabled(!wrapper.isIngame());
         return cc;
-        /*
-        QueryCB cb = new QueryCB(wrapper);
-        cb.setValue(wrapper.isConfirmed());
-        cb.setImmediate(true);
-        cb.addListener(confirmedListener);
-        linkConfirmedToInvited(wrapper,cb);
-        cb.setEnabled(!wrapper.isIngame());
-        return cb; */
       }
       return new Label("Program error in SignupsTable.java");
     }
@@ -333,6 +309,8 @@ public class SignupsTable extends Table
   @SuppressWarnings("serial")
   public static void showDialog(String title)
   {
+    final Button bulkMailButt = new Button("Initiate bulk mail job sending to filtered list");
+    
     final Button emailButt = new Button("Compose email");
     emailButt.setDescription("Opens editing dialog to compose an email message to the selected individuals");
     final Button displayButt = new Button("Display as plain text");
@@ -357,6 +335,7 @@ public class SignupsTable extends Table
     vl.setSizeFull();
     vl.setMargin(true);
     vl.setSpacing(true);
+    addFilterCheckBoxes(vl);
     vl.addComponent(new Label("Individuals who have established game accounts are shown faintly"));
 
     tab.setSizeFull();
@@ -365,7 +344,13 @@ public class SignupsTable extends Table
 
     HorizontalLayout buttHL = new HorizontalLayout();
     buttHL.setSpacing(true);
-
+   
+    buttHL.addComponent(bulkMailButt);
+    bulkMailButt.setImmediate(true);;
+    Label lab = new Label("");
+    buttHL.addComponent(lab );
+    buttHL.setExpandRatio(lab, 1.0f);
+    
     buttHL.addComponent(emailButt);
     emailButt.setImmediate(true);
     buttHL.addComponent(displayButt);
@@ -404,19 +389,47 @@ public class SignupsTable extends Table
     displayButt.addClickListener(new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        dumpSignups();
+        HSess.init();
+        dumpSignupsTL();
+        HSess.close();
       }
-
     });
+    
+    bulkMailButt.addClickListener(new ClickListener()
+    {
+      @Override
+      public void buttonClick(ClickEvent event)
+      {
+        BulkMailHandler.showDialog((QueryContainer)tab.getContainerDataSource());
+      }     
+    });
+    
     vl.addComponent(buttHL);
     vl.setComponentAlignment(buttHL, Alignment.MIDDLE_RIGHT);
 
     UI.getCurrent().addWindow(dialog);
     dialog.center();
   }
-
+  private static CheckBox confirmedCB, ingameCB, eligibleCB;
+  
+  private static void addFilterCheckBoxes(VerticalLayout vl)
+  {
+    HorizontalLayout hl = new HorizontalLayout();
+    hl.setSpacing(true);
+    hl.addComponent(new HtmlLabel("Filters:&nbsp;&nbsp;"));
+    hl.addComponent(confirmedCB = new CheckBox("confirmed"));
+    hl.addComponent(ingameCB = new CheckBox("in-game"));
+    hl.addComponent(eligibleCB = new CheckBox("eligible"));
+    confirmedCB.setDescription("email address has been confirmed");
+    ingameCB.setDescription("a player with this email address has established a game account");
+    eligibleCB.setDescription("email address meets elibibility rules (*.mil, *.navy.mil, etc.");
+  }
+  
   @SuppressWarnings("serial")
   public class QueryContainer extends BeanItemContainer<QueryWrapper>
   {
@@ -425,39 +438,39 @@ public class SignupsTable extends Table
     {
       super(QueryWrapper.class);
 
-      Session sess = VHibPii.getASession();
-      sess.beginTransaction();
+      Session piiSess = VHibPii.getASession();
+      piiSess.beginTransaction();
 
-      List<Query2Pii> lis = (List<Query2Pii>)sess.createCriteria(Query2Pii.class).list();
+      List<Query2Pii> lis = (List<Query2Pii>)piiSess.createCriteria(Query2Pii.class).list();
       Collections.sort(lis, new DomainComparator());
       Iterator<Query2Pii> itr = lis.iterator();
 
       while(itr.hasNext()) {
         QueryWrapper wrap = new QueryWrapper(itr.next());
-        synchronizeWithVipList(wrap,sess);  // may update in session
+        synchronizeWithVipList(wrap,piiSess);  // may update in session
         if(wrap.isIngame() == null)
-          isInGame(wrap, sess);
+          isInGame(wrap, piiSess);
         addBean(wrap);
       }
-      sess.getTransaction().commit();
-      sess.close();
+      piiSess.getTransaction().commit();
+      piiSess.close();
     }
 
-    private boolean isInGame(QueryWrapper wrap, Session sess)
+    private boolean isInGame(QueryWrapper wrap, Session piiSess)
     {
       if(wrap.isIngame() == null) {
         wrap.setIngame(!RegistrationPagePopupFirst.checkEmail(wrap.getEmail()));
-        sess.update(wrap.qpii);
+        piiSess.update(wrap.qpii);
       }
       return wrap.isIngame();
     }
   }
 
-  private void synchronizeWithVipList(QueryWrapper wrap, Session sess)
+  private void synchronizeWithVipList(QueryWrapper wrap, Session piiSess)
   {
     boolean localConfirmed = wrap.isConfirmed();
     boolean localInvited   = wrap.isInvited();
-    boolean vipSays = Vips.isVipOrVipDomainAndNotBlackListed(wrap.getEmail(), sess);
+    boolean vipSays = Vips.isVipOrVipDomainAndNotBlackListed(wrap.getEmail(), piiSess);
     boolean conflict = vipSays != localInvited;
 
     if(!conflict) {
@@ -467,20 +480,20 @@ public class SignupsTable extends Table
       wrap.setConfirmed(false);
       if(vipSays != localInvited)
         wrap.setInvited(vipSays);
-      sess.update(wrap.getQuery());
+      piiSess.update(wrap.getQuery());
     }
     else if(!localConfirmed && conflict) {
       wrap.setInvited(vipSays);
-      sess.update(wrap.getQuery());
+      piiSess.update(wrap.getQuery());
     }
   }  // does not commit transaction
 
-  public static void dumpSignups()
+  public static void dumpSignupsTL()
   {
     StringBuilder sb = new StringBuilder();
    // sb.append("<html><body>");
     sb.append("<h2>");
-    String title = Game.get(1L).getTitle();
+    String title = Game.getTL().getTitle();
 
     Session sess = VHibPii.getASession();
 
@@ -643,19 +656,6 @@ public class SignupsTable extends Table
     }
 
   }
-//  class QueryCB extends CheckBox
-//  {
-//    private static final long serialVersionUID = 1L;
-//
-//    public QueryWrapper wrapper;
-//    public QueryCB mate = null;
-//
-//    public QueryCB(QueryWrapper wrapper)
-//    {
-//      super();
-//      this.wrapper = wrapper;
-//   }
-//  }
 
   interface Mated
   {
@@ -734,56 +734,4 @@ public class SignupsTable extends Table
       return label.isVisible();
     }
   }
-
-/*  class ConfirmedComponent extends AbsoluteLayout implements ClickListener
-  {
-    private static final long serialVersionUID = 1L;
-    Label label;
-    Button button;
-    String position = "top:0px;left:0px";
-    String lposition= "top:3px;left:5px";
-    public ConfirmedComponent()
-    {
-      label = new Label("<b>confirmed</b>");
-      label.setContentMode(Label.CONTENT_XHTML);
-      button = new Button("confirm");
-      button.addStyleName(Reindeer.BUTTON_SMALL);
-      button.addListener(this);
-
-      this.addComponent(label, lposition);
-      this.addComponent(button,position);
-      showConfirmed(false);
-      setWidth("65px");
-      setHeight("20px");
-    }
-
-    ClickListener lis;
-
-    @Override
-    public void buttonClick(ClickEvent event)
-    {
-      if(lis != null)
-      ;// mike here; //test    lis.buttonClick(event);
-
-      showConfirmed(true);
-    }
-
-    public void addListener(ClickListener lis)
-    {
-      this.lis = lis;
-    }
-
-    public void setEnabled(boolean wh)
-    {
-      button.setEnabled(wh);
-      label.setEnabled(wh);
-    }
-
-    public void showConfirmed(boolean wh)
-    {
-      label.setVisible(wh);
-      button.setVisible(!wh);
-    }
-  }
-  */
 }
