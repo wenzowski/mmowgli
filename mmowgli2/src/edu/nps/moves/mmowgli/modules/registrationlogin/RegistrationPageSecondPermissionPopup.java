@@ -41,6 +41,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * LoginPopup.java Created on Dec 15, 2010
@@ -56,12 +57,13 @@ public class RegistrationPageSecondPermissionPopup extends MmowgliDialog
   
   private boolean rejected = true;  // so cancel button works
   
+  @HibernateSessionThreadLocalConstructor
   public RegistrationPageSecondPermissionPopup(Button.ClickListener listener)
   {
     super(listener);
     super.initGui();
     
-    Game g = Game.get(1L);
+    Game g = Game.getTL();
     
     setTitleString(g.getSecondLoginPermissionPageTitle());
 
@@ -81,8 +83,7 @@ public class RegistrationPageSecondPermissionPopup extends MmowgliDialog
     
     NativeButton rejectButt = new NativeButton();
     hl.addComponent(rejectButt);
-    rejectButt.setStyleName("m-rejectNoThanksButton");   //new way
-    // app.globs().mediaLocator().decorateDialogRejectButton(rejectButt);    old way
+    rejectButt.setStyleName("m-rejectNoThanksButton");
     rejectButt.addClickListener(new RejectListener());
     
     hl.addComponent(lab = new Label());
@@ -90,8 +91,7 @@ public class RegistrationPageSecondPermissionPopup extends MmowgliDialog
     
     NativeButton continueButt = new NativeButton();
     hl.addComponent(continueButt);
-    continueButt.setStyleName("m-acceptAndContinueButton");  // new way
-    //app.globs().mediaLocator().decorateDialogAcceptAndContinueButton(continueButt);  old way
+    continueButt.setStyleName("m-acceptAndContinueButton");
     continueButt.addClickListener(new MyContinueListener());
     
     continueButt.setClickShortcut(KeyCode.ENTER);
