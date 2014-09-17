@@ -33,6 +33,10 @@
 */
 package edu.nps.moves.mmowgli.modules.administration;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.MAP_LAT_DEFAULT;
+import static edu.nps.moves.mmowgli.MmowgliConstants.MAP_LON_DEFAULT;
+import static edu.nps.moves.mmowgli.MmowgliConstants.MAP_ZOOM_DEFAULT;
+
 import java.io.Serializable;
 
 import com.vaadin.data.Property;
@@ -45,12 +49,9 @@ import edu.nps.moves.mmowgli.AppEvent;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliEvent;
 import edu.nps.moves.mmowgli.db.Game;
-import edu.nps.moves.mmowgli.db.GameLinks;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
-import edu.nps.moves.mmowgli.modules.maps.MmowgliMap;
-import edu.nps.moves.mmowgli.modules.maps.MmowgliMap.MapParms;
 
 /**
  * HeaderFooterGameDesignPanel.java
@@ -69,9 +70,9 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
   private static final long serialVersionUID = -2704160408451356365L;
   
   String latestMapUrl;
-  MapParms latestMapParms;
+
   boolean indivUpdatesEnabled = true;
-  TextArea latTA, lonTA, zoomTA;//, msidTA;
+  TextArea latTA, lonTA, zoomTA;
   
   @HibernateSessionThreadLocalConstructor
   @SuppressWarnings("serial")
@@ -79,7 +80,6 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
   {
     super(false,globs);
     Game g = Game.getTL();
-    GameLinks gl = GameLinks.getTL();
     TextArea titleTA;
     final Serializable uid = Mmowgli2UI.getGlobals().getUserID();
    
@@ -87,14 +87,10 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
     titleTA.setValue(g.getMapTitle());
     titleTA.setRows(1);
 
-    latestMapUrl = gl.getMmowgliMapLink();
-    latestMapParms = MmowgliMap.getMapParmetersFromUrlString(latestMapUrl);
-    if (latestMapParms == null)
-      latestMapParms = new MapParms(0.0, 0.0, 0, "");
     latTA = addEditLine("Map Initial Latitude", "Game.mmowgliMapLatitude");
     boolean lastRO = latTA.isReadOnly();
     latTA.setReadOnly(false);
-    latTA.setValue(""+g.getMapLatitude()); //""+latestMapParms.lat);
+    latTA.setValue(""+g.getMapLatitude());
     latTA.setRows(1);
     latTA.setReadOnly(lastRO);
     latTA.addValueChangeListener(new Property.ValueChangeListener()
@@ -105,7 +101,6 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
       @HibernateClosed
       public void valueChange(ValueChangeEvent event)
       {
-        //System.out.println("lat valueChange");
         HSess.init();
         try {
           String val = event.getProperty().getValue().toString();
@@ -113,13 +108,6 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
           Game g = Game.getTL();
           g.setMapLatitude(lat);
           Game.updateTL();
-
-/*          latestMapParms.lat = Double.parseDouble(val);
-          String url = MmowgliMap.buildGoogleMapURL(latestMapParms.lat, latestMapParms.lon, latestMapParms.zoom, latestMapParms.msid);
-          GameLinks gl = GameLinks.get();
-          gl.setMmowgliMapLink(url);
-          GameLinks.update(gl);
-*/
           GameEventLogger.logGameDesignChangeTL("Map latitude", val, uid);
         }
         catch (Exception ex) {
@@ -132,7 +120,7 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
     lonTA = addEditLine("Map Initial Longitude", "Game.mmowgliMapLongitude");
     lastRO = lonTA.isReadOnly();
     lonTA.setReadOnly(false);
-    lonTA.setValue(""+g.getMapLongitude()); //""+latestMapParms.lon);
+    lonTA.setValue(""+g.getMapLongitude());
     lonTA.setRows(1);
     lonTA.setReadOnly(lastRO);
     lonTA.addValueChangeListener(new Property.ValueChangeListener()
@@ -150,14 +138,7 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
           double lon = Double.parseDouble(val);
           Game g = Game.getTL();
           g.setMapLongitude(lon);
-          Game.updateTL();
-                   
-/*          latestMapParms.lon = Double.parseDouble(val);
-          String url = MmowgliMap.buildGoogleMapURL(latestMapParms.lat, latestMapParms.lon, latestMapParms.zoom, latestMapParms.msid);
-          GameLinks gl = GameLinks.get();
-          gl.setMmowgliMapLink(url);
-          GameLinks.update(gl);
-*/          
+          Game.updateTL();                   
           GameEventLogger.logGameDesignChangeTL("Map longitude", val, uid);
         }
         catch (Exception ex) {
@@ -170,7 +151,7 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
     zoomTA = addEditLine("Map Initial Zoom", "Game.mmowgliMapZoom");
     lastRO = zoomTA.isReadOnly();
     zoomTA.setReadOnly(false);
-    zoomTA.setValue(""+g.getMapZoom()); //""+latestMapParms.zoom);
+    zoomTA.setValue(""+g.getMapZoom());
     zoomTA.setRows(1);
     zoomTA.setReadOnly(lastRO);
     zoomTA.addValueChangeListener(new Property.ValueChangeListener()
@@ -181,7 +162,6 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
       @HibernateClosed
       public void valueChange(ValueChangeEvent event)
       {
-        //System.out.println("zoom valueChange");
         HSess.init();
         try {
           String val = event.getProperty().getValue().toString();
@@ -189,11 +169,6 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
           Game g = Game.getTL();
           g.setMapZoom(zoom);
           Game.updateTL();
-          //latestMapParms.zoom = Integer.parseInt(val);
-         //String url = MmowgliMap.buildGoogleMapURL(latestMapParms.lat, latestMapParms.lon, latestMapParms.zoom, latestMapParms.msid);
-         // GameLinks gl = GameLinks.get();
-         // gl.setMmowgliMapLink(url);
-         // GameLinks.update(gl);
           GameEventLogger.logGameDesignChangeTL("Map zoom", val, uid);
         }
         catch (Exception ex) {
@@ -202,30 +177,6 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
         HSess.close();
       }
     });
-   /* 
-    msidTA = addEditLine("Map MSID (Google ID)", "Game.mmowgliMapLink");
-    msidTA.setValue(latestMapParms.msid);
-    msidTA.setRows(1);
-    msidTA.addValueChangeListener(new Property.ValueChangeListener()
-    {
-      @Override
-      public void valueChange(ValueChangeEvent event)
-      {
-        //System.out.println("msid valueChange");
-        try {
-          String val = event.getProperty().getValue().toString();
-          latestMapParms.msid = val;
-          String url = MmowgliMap.buildGoogleMapURL(latestMapParms.lat, latestMapParms.lon, latestMapParms.zoom, latestMapParms.msid);
-          GameLinks gl = GameLinks.get();
-          gl.setMmowgliMapLink(url);
-          GameLinks.update(gl);
-        }
-        catch (Exception ex) {
-          Notification.show("Parameter error", "<html>Check for proper format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE);
-        }
-      }
-    });
-    */
    Button b;
    this.addComponentLine(b=new Button("Set Map Default Values",new MapDefaultSetter()));
    b.setEnabled(!globs.readOnlyCheck(false));
@@ -237,11 +188,9 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
     @Override
     public void buttonClick(ClickEvent event)
     {
-      latTA.setValue(MmowgliMap.GOOGLEMAP_LAT_DEFAULT.toString());
-      lonTA.setValue(""+MmowgliMap.GOOGLEMAP_LON_DEFAULT);
-      zoomTA.setValue(""+MmowgliMap.GOOGLEMAP_ZOOM_DEFAULT);
-      //msidTA.setValue(MmowgliMap.GOOGLEMAP_MSID_DEFAULT);
-      // appropriate valueChange listeners will be called
+      latTA.setValue(""+MAP_LAT_DEFAULT);
+      lonTA.setValue(""+MAP_LON_DEFAULT);
+      zoomTA.setValue(""+MAP_ZOOM_DEFAULT);
     }    
   }
   
