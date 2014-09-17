@@ -37,6 +37,8 @@ import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.hibernate.Session;
 import org.w3c.dom.Comment;
@@ -46,7 +48,8 @@ import org.w3c.dom.Element;
 import edu.nps.moves.mmowgli.MmowgliConstants;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * ActionPlanExporter.java Created on Nov 28, 2011
@@ -72,6 +75,7 @@ public class ActionPlanExporter extends BaseExporter
   
   Long apId = null;
   
+  @HibernateSessionThreadLocalConstructor
   public ActionPlanExporter()
   { 
   }
@@ -100,7 +104,6 @@ public class ActionPlanExporter extends BaseExporter
     parameters = new HashMap<String,String>();
     parameters.put(ACTIONPLANID_KEY,apId.toString());
     showXml = false;
-  showXml=true; //test  
     exportToBrowser(title);    
   }
   
@@ -109,17 +112,15 @@ public class ActionPlanExporter extends BaseExporter
   {
     this.apId = null;
     parameters = new HashMap<String,String>();
-    showXml = false;
- showXml = true; //test   
+    showXml = false; 
     exportToBrowser(title);      
   }
 
-  public Document buildXmlDocument() throws Throwable
+  public Document buildXmlDocumentTL() throws Throwable
   {
     Document doc;
-    SingleSessionManager ssm = null;
-    Session sess = null;;
     try {
+      Session sess = HSess.get();
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       DocumentBuilder parser = factory.newDocumentBuilder();
       doc = parser.newDocument();
@@ -140,9 +141,6 @@ public class ActionPlanExporter extends BaseExporter
 
       root.setAttribute("exported", dateFmt.format(new Date()));
       
-      ssm = new SingleSessionManager();
-      sess = ssm.getSession();
-      
       root.setAttribute("multipleMoves", Boolean.toString(isMultipleMoves(sess)));
       Game g = (Game) sess.get(Game.class, 1L);
       String s = g.getTitle();
@@ -154,16 +152,11 @@ public class ActionPlanExporter extends BaseExporter
       @SuppressWarnings("unchecked")
       List<ActionPlan> lis = sess.createCriteria(ActionPlan.class).list();     
       List<RankedActionPlan>rlis = sortByRank(lis);
-      ssm.endSession();   
-      ssm = null;
-
+ 
       for (ActionPlan ap : lis)  {
-        ssm = new SingleSessionManager();
-        sess = ssm.getSession();
+        sess = HSess.get();
         ap = ActionPlan.merge(ap,sess);
         addPlanToDocument(root, ap, getRank(ap,rlis));
-        ssm.endSession();   
-        ssm = null;
       }
      
       /* This orders the list...use instead of above if desired
@@ -172,8 +165,6 @@ public class ActionPlanExporter extends BaseExporter
     }
     catch (Throwable t) {
       t.printStackTrace();
-      if(sess != null)
-        ssm.endSession();
       throw t; // rethrow
     }
     return doc;
@@ -182,7 +173,6 @@ public class ActionPlanExporter extends BaseExporter
   private void addPlanToDocument(Element root, ActionPlan ap, int rank) throws Throwable
   {
     try {
-      // System.out.println("exporting action plan "+ap.getId());
       Element apElem = createAppend(root, "ActionPlan");
       apElem.setAttribute("thumbs", twoPlaceDecimalFmt.format(ap.getAverageThumb()));
       apElem.setAttribute("sumThumbs", onePlaceDecimalFmt.format(ap.getSumThumbs()));
@@ -209,21 +199,17 @@ public class ActionPlanExporter extends BaseExporter
       addElementWithText(apElem, "HowWillItWork", toUtf8(nn(ap.getHowWillItWorkText().trim())));
       addElementWithText(apElem, "HowWillItChangeThings", toUtf8(nn(ap.getHowWillItChangeText().trim())));
 
-      // System.out.println("exp getting authors");
       Set<User> authors = ap.getAuthors();
       for (User u : authors) {
-        // System.out.println("exp author "+u.getUserName());
         Element author = createAppend(apElem, "Author");
         addElementWithText(author, "GameName", toUtf8(nn(u.getUserName())));
         // do not emit... addElementWithText(author,"Location",toUtf8(nn(u.getLocation())));
       }
 
-      // System.out.println("exp getting comments");
       SortedSet<Message> comments = ap.getComments();
       Element commentList = createAppend(apElem, "CommentList");
 
       for (Message m : comments) {
-        // System.out.println("exp comment "+n++);
         Element message = addElementWithText(commentList, "Comment", toUtf8(nn(m.getText())));
         message.setAttribute("postTime", dateFmt.format(m.getDateTime()));
         message.setAttribute("from", toUtf8(nn(m.getFromUser().getUserName())));
@@ -232,12 +218,10 @@ public class ActionPlanExporter extends BaseExporter
         message.setAttribute("moveNumber", "" + m.getCreatedInMove().getNumber());
       }
 
-      // System.out.println("exp getting media");
       List<Media> medlis = ap.getMedia();
       Element images = createAppend(apElem, "ImageList");
 
       for (Media med : medlis) {
-        // System.out.println("exp image "+ n++);
         if (med.getType() == MediaType.IMAGE) {
           Element imageEl = createAppend(images, "Image");
           addElementWithText(imageEl, "Title", toUtf8(nn(med.getTitle())));
@@ -262,7 +246,6 @@ public class ActionPlanExporter extends BaseExporter
       Element videos = createAppend(apElem, "VideoList");
 
       for (Media med : medlis) {
-        // System.out.println("exp video "+n++);
         if (med.getType() == MediaType.YOUTUBE) {
           Element vid = createAppend(videos, "Video");
           addElementWithText(vid, "Title", toUtf8(nn(med.getTitle())));
@@ -272,13 +255,11 @@ public class ActionPlanExporter extends BaseExporter
         }
       }
 
-      // System.out.println("exp getting chat log");
       ChatLog chat = ap.getChatLog();
       SortedSet<Message> chats = chat.getMessages();
       Element chatLog = createAppend(apElem, "ChatLog");
 
       for (Message m : chats) {
-        // System.out.println("exp chat "+n++);
         Element message = addElementWithText(chatLog, "Message", toUtf8(nn(m.getText())));
         message.setAttribute("postTime", dateFmt.format(m.getDateTime()));
         message.setAttribute("from", toUtf8(nn(m.getFromUser().getUserName())));
@@ -350,6 +331,18 @@ public class ActionPlanExporter extends BaseExporter
     }    
   }
   
+  @Override
+  protected void showFile(String ignore, Document doc, String name, String styleSheetNameInThisPackage, boolean showXml) throws TransformerConfigurationException, TransformerException
+  {
+    super.showFile("Action Plans", doc, name, styleSheetNameInThisPackage, showXml);
+  }
+
+  @Override
+  protected void showFile(String ignore, Document doc, String name, String styleSheetNameInThisPackage, String cdataElementList, boolean showXml) throws TransformerConfigurationException, TransformerException
+  {
+    super.showFile("Action Plans", doc, name, styleSheetNameInThisPackage, cdataElementList, showXml);
+  }
+
   @Override
   public String getCdataSections()
   {
