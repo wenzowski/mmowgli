@@ -77,9 +77,9 @@ public class DBGet
   //private static boolean GEVTCACHEDISABLED = false;
 
   // Card
-  public static Card getCard(Object id)
+   public static Card getCardTL(Object id)
   {
-    return getCard(id,VHib.getVHSession());
+    return getCard(id,HSess.get());
   }
   
   public static Card getCard(Object id, Session sess)
@@ -99,9 +99,9 @@ public class DBGet
     return mCacheMgr.getCard(id,sess);
   }
   
-  public static Card getCardFresh(Object id)
+  public static Card getCardFreshTL(Object id)
   {
-    return getCardFresh(id, VHib.getVHSession());
+    return getCardFresh(id, HSess.get());
   }
   
   public static Card getCardFresh(Object id, Session sess)
@@ -119,9 +119,9 @@ public class DBGet
 */  
   /********************************************************/
   // Users
-  public static User getUser(Object id)
+  public static User getUserTL(Object id)
   {
-    return getUser(id,VHib.getVHSession());
+    return getUser(id,HSess.get());
   }
   
   public static User getUser(Object id, Session sess)
@@ -153,9 +153,9 @@ public class DBGet
     return u;  
   }
   
-  public static User getUserFresh(Object id)
+  public static User getUserFreshTL(Object id)
   {
-    return getUserFresh(id, VHib.getVHSession());
+    return getUserFresh(id,HSess.get());
   }
   
   public static User getUserFresh(Object id, Session sess)
@@ -180,7 +180,6 @@ public class DBGet
   public static void cacheUser(User u)
   {
     userCache.addToCache(u.getId(), u);
-    //SysOut.print("(u+"+u.getId()+")");
   }
   
   public static void removeUser(Long id)
