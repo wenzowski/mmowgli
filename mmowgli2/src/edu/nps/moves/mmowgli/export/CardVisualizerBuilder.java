@@ -47,7 +47,9 @@ import org.hibernate.criterion.Restrictions;
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.CardType;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+//import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
 import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 
@@ -80,6 +82,7 @@ public class CardVisualizerBuilder
     fileSeparator = System.getProperty("file.separator");   
   }
   
+  @HibernateSessionThreadLocalConstructor  
   public CardVisualizerBuilder()
   {
   }
@@ -94,7 +97,7 @@ public class CardVisualizerBuilder
     String htmlFileTempPath = htmlFilePath+"temp";
     String d3jsFileTempPath = d3jsFilePath+"temp";
     
-    String appurl = AppMaster.getInstance().getAppUrlString();
+    String appurl = AppMaster.instance().getAppUrlString();
     
     // To minimize synchronization issues, write the html and the json into temp files, then quickly rename properly
     try {
@@ -156,13 +159,10 @@ public class CardVisualizerBuilder
   @SuppressWarnings("unchecked")
   public JsonObject buildJsonTree()
   {
-    Session sess = null;
+    Session sess = HSess.get();
     JsonObjectBuilder treeBuilder = null;
     JsonArrayBuilder rootArray = null;
     try {
-      SingleSessionManager ssm = new SingleSessionManager();
-      sess = ssm.getSession();
-     
       treeBuilder = Json.createObjectBuilder();
       treeBuilder.add("type", "Mmowgli Card Tree");
       treeBuilder.add("text", "Click on a card to zoom in, center to zoom out.");
@@ -182,8 +182,6 @@ public class CardVisualizerBuilder
     catch (Throwable ex) {
       System.err.println(ex.getClass().getSimpleName()+": "+ex.getLocalizedMessage());
     }
-    if(sess != null)
-      sess.close();
     
     treeBuilder.add("children", rootArray);
     return treeBuilder==null ? null : treeBuilder.build();
@@ -230,8 +228,5 @@ public class CardVisualizerBuilder
   private String getValueString(Card c)
   {
     return "5"; //todo
-  }
-  
-  
-  
+  } 
 }
