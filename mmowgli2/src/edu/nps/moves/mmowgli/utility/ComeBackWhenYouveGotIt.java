@@ -39,8 +39,7 @@ import java.lang.reflect.Method;
 import org.hibernate.Session;
 
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.MSessionManager;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -56,31 +55,31 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  */
 public class ComeBackWhenYouveGotIt
 {
-  /* These methods only work on callbacks with the signature (MSessionManager, Object id) */
-  public static void waitForMessage_oob(String methodName, Object methodObject, Object messageId)
+  public static Message waitForMessage_oob(Object methodObject, Object messageId)
   {
     try {
-      Method m = methodObject.getClass().getDeclaredMethod(methodName, new Class<?>[]{MSessionManager.class,Object.class});
-      loopOnIt(Message.class,messageId,m,methodObject);
+      return (Message)loopOnIt(Message.class,messageId);
     }
     catch (Exception e) {
-      System.err.println("ERROR: ComeBackWhenYouveGotIt.waitForMessage: "+e.getClass().getSimpleName()+": "+e.getLocalizedMessage());     
+      System.err.println("ERROR: ComeBackWhenYouveGotIt.waitForMessage: "+e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
+      return null;
     }   
   }
   
   //not used (yet)
-  public static void waitForGameEvent_oob(String methodName, Object methodObject, Object eventId)
+  public static void waitForGameEvent_oob(Object methodObject, Object eventId)
   {
     try {
-      Method method = methodObject.getClass().getDeclaredMethod(methodName, new Class<?>[]{MSessionManager.class,Object.class});
-      loopOnIt(GameEvent.class, eventId, method, methodObject);
+      loopOnIt(GameEvent.class, eventId);
     }
     catch (Exception e) {
       System.err.println("ERROR: ComeBackWhenYouveGotIt.waitForGameEvent: "+e.getClass().getSimpleName()+": "+e.getLocalizedMessage());     
     }   
   }
   
-  private static void loopOnIt(final Class<?> hibernateObjectClass, final Object objId, final Method callback, final Object methodObj)
+  /* These methods only work on callbacks with the signature (Object id) */
+  @SuppressWarnings("unused")
+  private static void oldloopOnIt(final Class<?> hibernateObjectClass, final Object objId, final Method callback, final Object methodObj)
   {
     MThreadManager.run(new Runnable()
     {
@@ -89,30 +88,70 @@ public class ComeBackWhenYouveGotIt
       public void run()
       {
         for(int i=0; i<10; i++) { // try for 10 seconds
-          try{Thread.sleep(1000l+firstRandomDelay);}catch(InterruptedException ex){} 
+          try{Thread.sleep(1000l+firstRandomDelay);}catch(InterruptedException ex){}
+          HSess.init();
           firstRandomDelay=0l;
-          SingleSessionManager ssm = new SingleSessionManager();
-          Session sess = ssm.getSession();
+          Session sess = HSess.get();
           Object dbObj = sess.get(hibernateObjectClass, (Serializable)objId);
           if(dbObj != null) { 
             MSysOut.println("Delayed fetch of "+hibernateObjectClass.getSimpleName()+" "+objId.toString()+" from db, got it on retry "+(i+1));            
             try {
-              callback.invoke(methodObj, ssm,objId);
+              callback.invoke(methodObj, objId);
             }
             catch (Exception e) {
               System.err.println("ERROR, ComBackWhenYouveGotIt.loopOnIt invoking callback: "+
                                   e.getClass().getSimpleName()+" "+e.getLocalizedMessage());
             }
-            ssm.endSession();
+            HSess.close();
             return;
           }
-          ssm.endSession();
+          HSess.close();
         }
         System.err.println("ERROR: Couldn't get "+hibernateObjectClass.getSimpleName()+ objId.toString()+" in 10 seconds");// give up
       }      
     });
   }
+
+  private static Object loopOnIt(final Class<?> hibernateObjectClass, final Object objId)//, final Method callback, final Object methodObj)
+  {
+
+    long firstRandomDelay = (long) Math.floor(Math.random() * 1000);
+
+    for (int i = 0; i < 10; i++) { // try for 10 seconds
+      sleep(1000l + firstRandomDelay);
+
+      HSess.init();
+      firstRandomDelay = 0l;
+      Session sess = HSess.get();
+      Object dbObj = sess.get(hibernateObjectClass, (Serializable) objId);
+      if (dbObj != null) {
+        MSysOut.println("Delayed fetch of " + hibernateObjectClass.getSimpleName() + " " + objId.toString() + " from db, got it on retry " + (i + 1));
+        // try {
+        // callback.invoke(methodObj, objId);
+        // }
+        // catch (Exception e) {
+        // System.err.println("ERROR, ComBackWhenYouveGotIt.loopOnIt invoking callback: "+
+        // e.getClass().getSimpleName()+" "+e.getLocalizedMessage());
+        // }
+        HSess.close();
+        return dbObj;
+      }
+      HSess.close();
+    }
+    System.err.println("ERROR: Couldn't get " + hibernateObjectClass.getSimpleName() + objId.toString() + " in 10 seconds");// give
+                                                                                                                           // up
+    return null;
+  }  
   
+  private static void sleep(long msec)
+  {
+    try {
+      Thread.sleep(msec);
+    }
+    catch (InterruptedException ex) {
+    }
+  }
+
   public static Card fetchCardWhenPossible(Long id)
   {
     ObjHolder oh = new ObjHolder(id,Card.class);
@@ -173,19 +212,18 @@ public class ComeBackWhenYouveGotIt
       {
         for(int i=0; i<10; i++) { // try for 10 seconds
           try{Thread.sleep(1000l);}catch(InterruptedException ex){}
-
-          SingleSessionManager ssm = new SingleSessionManager();
-          Session thisSess = ssm.getSession();
+          HSess.init();
+          Session thisSess = HSess.get();
           
           Object cd = thisSess.get(holder.cls, holder.id);
           if(cd != null) {
             if(i>0)
               MSysOut.println("Delayed fetch of "+holder.cls.getSimpleName()+" from db, got it on try "+i);
             holder.obj = cd;
-            ssm.endSession();
+            HSess.close();
             return;
           }
-          ssm.endSession();
+          HSess.close();
         }
         System.err.println("ERROR: Couldn't get "+holder.cls.getSimpleName() +" "+holder.id+" in 10 seconds");// give up
       }
