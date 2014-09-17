@@ -87,7 +87,7 @@ public class RegistrationPageAgreementCombo extends MmowgliDialog
     // First read
     hlayout.addComponent(lab = new HtmlLabel("&nbsp;&nbsp;"));
     lab.setHeight("10px");
-    GameLinks gl = GameLinks.get();
+    GameLinks gl = GameLinks.getTL();
     Link readLink = new Link("Read",new ExternalResource(gl.getInformedConsentLink())); //REGISTRATIONCONSENTURL));
     readLink.setTargetName("_agreements");
     readLink.setTargetBorder(BorderStyle.DEFAULT);
@@ -97,7 +97,6 @@ public class RegistrationPageAgreementCombo extends MmowgliDialog
     
     lab = new HtmlLabel("<i>Informed Consent to Participate in Research</i>");
     lab.setSizeUndefined();
-    //lab.addStyleName(labelStyle);
     hlayout.addComponent(lab);
    
     hlayout.setSizeUndefined();
@@ -128,7 +127,6 @@ public class RegistrationPageAgreementCombo extends MmowgliDialog
     
     lab = new HtmlLabel("<i>Department of Defense Social Media User Agreement</i>");
     lab.setSizeUndefined();
-    //lab.addStyleName(labelStyle);
     hlayout.addComponent(lab);
    
     hlayout.setSizeUndefined();
@@ -154,7 +152,6 @@ public class RegistrationPageAgreementCombo extends MmowgliDialog
     NativeButton rejectButt = new NativeButton();
     hl.addComponent(rejectButt);
     rejectButt.setStyleName("m-rejectNoThanksButton");   //new way
-    // app.globs().mediaLocator().decorateDialogRejectButton(rejectButt);    old way
     rejectButt.addClickListener(new RejectListener());
     
     hl.addComponent(lab = new Label());
@@ -163,7 +160,6 @@ public class RegistrationPageAgreementCombo extends MmowgliDialog
     NativeButton continueButt = new NativeButton();
     hl.addComponent(continueButt);
     continueButt.setStyleName("m-acceptAndContinueButton");  // new way
-    //app.globs().mediaLocator().decorateDialogAcceptAndContinueButton(continueButt);  old way
     continueButt.addClickListener(new MyContinueListener());
     
     continueButt.setClickShortcut(KeyCode.ENTER);
