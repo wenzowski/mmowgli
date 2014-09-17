@@ -34,7 +34,9 @@
 package edu.nps.moves.mmowgli.modules.cards;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
-import static edu.nps.moves.mmowgli.MmowgliEvent.*;
+import static edu.nps.moves.mmowgli.MmowgliEvent.CARDCHAINPOPUPCLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.CARDCREATEACTIONPLANCLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.IDEADASHBOARDCLICK;
 
 import java.io.Serializable;
 import java.net.URLEncoder;
@@ -42,7 +44,7 @@ import java.util.*;
 
 import org.hibernate.Session;
 
-import com.vaadin.data.*;
+import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.navigator.View;
@@ -54,15 +56,21 @@ import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.BaseTheme;
 
-import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.AppEvent;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.*;
 import edu.nps.moves.mmowgli.components.CardSummaryListHeader.NewCardListener;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.Sess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsCardUpdates;
+import edu.nps.moves.mmowgli.messaging.WantsUserUpdates;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.IDNativeButton;
-import edu.nps.moves.mmowgli.utility.M;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * CardChainPageNewInProgress.java
@@ -75,7 +83,7 @@ import edu.nps.moves.mmowgli.utility.M;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class CardChainPage extends VerticalLayout implements MmowgliComponent,NewCardListener,WantsCardUpdates, View
+public class CardChainPage extends VerticalLayout implements MmowgliComponent,NewCardListener,WantsCardUpdates, WantsUserUpdates, View
 {
   private static final long serialVersionUID = -7863991203052850316L;
   
@@ -95,26 +103,36 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   private boolean isGameMaster=false;
   private MarkingChangeListener markingListener;
   
+  @HibernateSessionThreadLocalConstructor
   public CardChainPage(Object cardId)
   {
     this.cardId = cardId;
     chainButt = new NativeButton();
     gotoIdeaDashButt = new IDNativeButton(null,IDEADASHBOARDCLICK);
-    isGameMaster = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID()).isGameMaster();
+    isGameMaster = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).isGameMaster();
   }
-
-  @SuppressWarnings("serial")
+  
   @Override
   public void initGui()
+  {
+    throw new UnsupportedOperationException("");
+  }
+  
+  @SuppressWarnings("serial")
+
+  @HibernateOpened
+  @HibernateRead
+  @HibernateClosed
+  public void initGuiTL()
   {
     VerticalLayout outerVl = this;
     outerVl.setWidth("100%");
     outerVl.setSpacing(true);
     
-    cardMarkingPanel = makeCardMarkingPanel();
-    Card c = DBGet.getCardFresh(cardId);
+    cardMarkingPanel = makeCardMarkingPanelTL();
+    Card c = DBGet.getCardFreshTL(cardId);
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-    User me = DBGet.getUser(globs.getUserID());
+    User me = DBGet.getUserTL(globs.getUserID());
     
     if(c == null)
       System.err.println("ERROR!!!! Once again, null card in CardChainPage.initGui(cardId = "+cardId+")");
@@ -131,7 +149,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       outerVl.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
       return;
     }
-    loadMarkingPanel_oob(c,VHib.getVHSession());
+    loadMarkingPanel_oobTL(c);
    // won't have Roles lazily update w/out above loadMarkingPanel_oob(DBGet.getCard(cardId));
     
     markingRadioGroup.addValueChangeListener(markingListener = new MarkingChangeListener());
@@ -148,15 +166,20 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     listsHL.setSpacing(true);
     setComponentAlignment(listsHL, Alignment.TOP_CENTER);
  
-    addChildLists();
+    addChildListsTL();
 
     chainButt.addClickListener(new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
+        HSess.init();
         AppEvent evt = new AppEvent(CARDCHAINPOPUPCLICK, CardChainPage.this, cardId);
-        Mmowgli2UI.getGlobals().getController().miscEvent(evt);
+        Mmowgli2UI.getGlobals().getController().miscEventTL(evt);
+        HSess.close();
         return;
       }
     });
@@ -167,7 +190,8 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     return cardId;
   }
   
-  private GhostVerticalLayoutWrapper makeCardMarkingPanel()
+  @HibernateRead
+  private GhostVerticalLayoutWrapper makeCardMarkingPanelTL()
   {
     GhostVerticalLayoutWrapper wrapper = new GhostVerticalLayoutWrapper();
     VerticalLayout vl = new VerticalLayout();
@@ -202,7 +226,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     Collection<?> markings = CardMarking.getContainer().getItemIds();
     CardMarking hiddencm = null;
     for(Object o : markings) {
-      CardMarking cm = CardMarking.get(o);
+      CardMarking cm = CardMarking.getTL(o);
       if(cm == CardMarkingManager.getHiddenMarking())
         hiddencm = cm;
       else 
@@ -212,17 +236,15 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     if(hiddencm != null)
       markingRadioGroup.addItem(hiddencm);
     
-    Card card = DBGet.getCard(cardId);
-    //if(DBGet.getCardCardType().isIdeaCard()) {
+    Card card = DBGet.getCardTL(cardId);
       vl.addComponent(lab = new Label());
       lab.setHeight("5px");
       
       NativeButton newActionPlanButt = new IDNativeButton("create action plan from this card",CARDCREATEACTIONPLANCLICK,cardId);
       newActionPlanButt.addStyleName(BaseTheme.BUTTON_LINK);
       vl.addComponent(newActionPlanButt);
-    //}
       
-    if (DBGet.getUser(Mmowgli2UI.getGlobals().getUserID()).isTweeter()) {
+    if (DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).isTweeter()) {
       String tweet = TWEETBUTTONEMBEDDED_0 + buildTweet(card) + TWEETBUTTONEMBEDDED_1;
       Label tweeter = new HtmlLabel(tweet);
       tweeter.setHeight(TWEETBUTTON_HEIGHT);
@@ -260,32 +282,35 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   private class MarkingChangeListener implements ValueChangeListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void valueChange(ValueChangeEvent event)
     {
+      HSess.init();
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       Property<?> prop = event.getProperty();
       CardMarking cm = (CardMarking)prop.getValue();
-      Card card = DBGet.getCardFresh(cardId);
+      Card card = DBGet.getCardFreshTL(cardId);
       
       if(cm == null) { // markings have been cleared
         if(card.getMarking()!=null && card.getMarking().size()>0) {
-          globs.getScoreManager().cardMarkingWillBeCleared(card);   // call this before hitting db
+          globs.getScoreManager().cardMarkingWillBeClearedTL(card);   // call this before hitting db
           card.getMarking().clear();
           card.setHidden(false);
-          //Card.update(card);
-          Sess.sessUpdate(card);
+          Card.updateTL(card);
         }
       }
       else {
-        cm = CardMarking.merge(cm);
-        globs.getScoreManager().cardMarkingWillBeSet(card,cm);  // call this before hitting db
+        cm = CardMarking.mergeTL(cm);
+        globs.getScoreManager().cardMarkingWillBeSetTL(card,cm);  // call this before hitting db
         card.getMarking().clear();        // Only one marking at a time
         card.getMarking().add(cm);
         card.setHidden(CardMarkingManager.isHiddenMarking(cm));
-        //Card.update(card);
-        Sess.sessUpdate(card);
+        Card.updateTL(card);
       }
-      GameEventLogger.cardMarked(cardId,Mmowgli2UI.getGlobals().getUserID());
+      GameEventLogger.cardMarkedTL(cardId,Mmowgli2UI.getGlobals().getUserID());
+      HSess.close();
     }
   }
   
@@ -299,8 +324,10 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     }
   }
   
-  private void loadMarkingPanel_oob(Card c, Session sess)
+  @HibernateRead
+  private boolean loadMarkingPanel_oobTL(Card c)
   {
+    boolean ret=false; // no update required
     if(markingListener != null)
       markingRadioGroup.removeValueChangeListener(markingListener);
     
@@ -308,7 +335,8 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // db now setup to insure never null, but for old cards:
     if(mSet == null) {
       c.setMarking(mSet = new TreeSet<CardMarking>());
-      Sess.sessOobUpdate(sess,c);
+      Sess.sessUpdateTL(c);
+      ret=true;
     }
     Collection<?> checkBoxes = markingRadioGroup.getItemIds();
     markingRadioGroup.setValue(null);
@@ -322,43 +350,55 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     
     if(markingListener != null)
       markingRadioGroup.addValueChangeListener(markingListener);
+    return ret;
   }
 
   @SuppressWarnings("serial")
   private class EditCardTextListener implements ClickListener
   {
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateRead
+    @HibernateClosed
     @Override
     public void buttonClick(ClickEvent event)
     {
-      Card c = DBGet.getCardFresh(cardId);
+      HSess.init();
+      Card c = DBGet.getCardFreshTL(cardId);
       EditCardTextWindow w = new EditCardTextWindow(c.getText());
       w.addCloseListener(new EditCardCloseListener());
+      HSess.close(false);  // no commit
     }
     
   }
   @SuppressWarnings("serial")
   private class EditCardCloseListener implements CloseListener
   {
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateRead
+    @HibernateClosed
     @Override
     public void windowClose(CloseEvent e)
     {
       EditCardTextWindow w = (EditCardTextWindow)e.getWindow();
       if(w.results != null) {
-        Card c = DBGet.getCardFresh(cardId);
+        HSess.init();
+        Card c = DBGet.getCardFreshTL(cardId);
         c.setText(w.results);
-        //Card.update(c);
-        Sess.sessUpdate(c);
-        GameEventLogger.cardTextEditted(cardId, Mmowgli2UI.getGlobals().getUserID());
+        Card.updateTL(c);
+        GameEventLogger.cardTextEdittedTL(cardId, Mmowgli2UI.getGlobals().getUserID());
+        HSess.close();
       }
     }   
   }
   
   private ArrayList<CardType> followOnTypes;
   private ArrayList<VerticalLayout> columnVLs;
-  
-  private void addChildLists()
+
+  private void addChildListsTL()
   {
-    MovePhase phase = MovePhase.getCurrentMovePhase();
+    MovePhase phase = MovePhase.getCurrentMovePhase(HSess.get());
     Set<CardType> allowedTypes = phase.getAllowedCards();
     followOnTypes = new ArrayList<CardType>();
     for (CardType ct : allowedTypes)
@@ -382,7 +422,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       columnVLs.add(vl);
       listsHL.addComponent(vl);
     }    
-    Card card = DBGet.getCard(cardId);
+    Card card = DBGet.getCardTL(cardId);
     Card parent = card.getParentCard();
     if(parent != null) {
       VerticalLayout spacerVL = new VerticalLayout();
@@ -390,7 +430,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       topHL.setExpandRatio(spacerVL, 1.0f);
       spacerVL.setHeight("100%");
       spacerVL.setWidth("100%");
-      parentSumm=CardSummary.newCardSummarySmall(parent.getId());
+      parentSumm=CardSummary.newCardSummarySmallTL(parent.getId());
       spacerVL.addComponent(parentSumm);
       parentSumm.initGui();
       spacerVL.setComponentAlignment(parentSumm, Alignment.MIDDLE_CENTER);
@@ -414,9 +454,9 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       }
     }
 
-    cardLg  = CardLarge.newCardLarge(card.getId());
+    cardLg  = CardLarge.newCardLargeTL(card.getId());
     topHL.addComponent(cardLg);
-    cardLg.initGui();
+    cardLg.initGuiTL();
     
     VerticalLayout buttVL = new VerticalLayout();
     buttVL.setHeight("100%");
@@ -431,7 +471,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     buttVL.addComponent(gotoIdeaDashButt);
     gotoIdeaDashButt.setStyleName("m-gotoIdeaDashboardButton");
     gotoIdeaDashButt.setDescription(idea_dash_tt);
-    //gotoIdeaDashButt.setDebugId(GO_TO_IDEA_DASHBOARD_BUTTON);
+    gotoIdeaDashButt.setId(GO_TO_IDEA_DASHBOARD_BUTTON);
     buttVL.setComponentAlignment(gotoIdeaDashButt, Alignment.MIDDLE_CENTER);
 
     buttVL.addComponent(chainButt);
@@ -454,9 +494,14 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       lstHdr.initGui();
     }
 
-    listFollowers_oob(VHib.getVHSession(), card.getId());  // gets current vaadin transaction session
+    listFollowers_oobTL(card.getId());  // gets current vaadin transaction session
   }
-
+  
+  private void listFollowers_oobTL(Object id)
+  {
+    listFollowers_oob(HSess.get(),id);
+  }
+  
   // This routine can be used by threads w/in the vaadin transaction and the external asynch ones that have their own session
   private void listFollowers_oob(Session sess, Object badboyId)
   {
@@ -488,7 +533,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
         }       
         for(CardSummary cs : vec)  {
           columnV.addComponent(cs);
-          cs.initGui();
+          cs.initGui(sess);
         }
       }
     }
@@ -506,7 +551,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   }
   
   /** This is an attempt to put more logic on the server and less into big client updates */
-  private void updateFollowers_oob(SingleSessionManager mgr, Object cId)
+  private void updateFollowers_oobTL(Object cId)
   {
     // Easiest to throw everything away and reload, but trying to increase performance here.
     
@@ -516,9 +561,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // The follow-on list in a card is now maintained sorted by Hibernate, so start picking off the top until
     // we get to one we have, then stop;  Then add the new ones to the top of the layout
 
-    Session sess = M.getSession(mgr);
-
-    Card card = DBGet.getCardFresh(cId, sess);
+    Card card = DBGet.getCardFreshTL(cId);
     Vector<Card> newCards = new Vector<Card>();
       
     for(Card c: card.getFollowOns() ) {
@@ -546,9 +589,9 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       for(int i=sz-1; i>=0;i--) {
         Card cd = newCards.get(i);
         VerticalLayout vl = getCardColumnLayout(cd);
-        CardSummary csum = CardSummary.newCardSummary_oob(cd.getId(), mgr);
+        CardSummary csum = CardSummary.newCardSummary_oobTL(cd.getId());
         vl.addComponent(csum,1); // under the header
-        csum.initGui(sess);
+        csum.initGui();
       }
     }
   }
@@ -561,18 +604,18 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   }
   
   @Override
-  public void cardCreated(Card c)
+  public void cardCreatedTL(Card c)
   {
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-    Card parent = DBGet.getCardFresh(cardId);
+    Card parent = DBGet.getCardFreshTL(cardId);
     c.setParentCard(parent);
     
     if(parent.isHidden())  // hidden parents produce hidden children
       markHidden(c);
     
-    Card.save(c);  // new one saved
+    Card.saveTL(c);  // new one saved
     
-    GameEventLogger.cardPlayed(c.getId());
+    GameEventLogger.cardPlayedTL(c.getId());
     
     SortedSet<Card> set = parent.getFollowOns();
     if(set == null)
@@ -580,16 +623,16 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     set.add(c);   
     parent.setFollowOns(set);  // think this is unnecessary
     
-    //Card.update(parent);
-    Sess.sessUpdate(parent);
+    Card.updateTL(parent);
+    
     // If the set has only one card, that's the one we added, so he had no children before.  We want to send an email
     // to the parent author saying that the first followon was played on his card.  But we only do that once -- each player
     // only gets one of this type of email.  Checked-for in mailmanager.
     if(set.size() == 1) {      
-      globs.getAppMaster().getMailManager().firstChildPlayed(parent,c);
+      globs.getAppMaster().getMailManager().firstChildPlayedTL(parent,c);
     }
       
-    globs.getScoreManager().cardPlayed(c); // update score only from this app instance  
+    globs.getScoreManager().cardPlayedTL(c); // update score only from this app instance  
     // Now it used to be that we'd wait for the update listener, then fill out our list all over
     // Trying to optimize so we stick the new one on the top of the list and don' bother updateing ourselves
     // if the new card is already there.
@@ -597,7 +640,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   }
 
   @Override
-  public void drawerOpened(Object cardTypeId)
+  public void drawerOpenedTL(Object cardTypeId)
   {
     int wcol = 0;
     for(CardType ct : followOnTypes) {
@@ -611,7 +654,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     }  
   }
   
-  public boolean cardPlayed_oob(SingleSessionManager mgr, Serializable externCardId)
+  public boolean cardPlayed_oobTL(Serializable externCardId)
   {
 //    System.out.println("CardChainPageNewInProgress knows card was played externally, app= "+app.toString());
 //    System.out.println("  My card (played)= "+DBGet.getCard(cardId).getText());
@@ -625,7 +668,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     return false; // don't need ui update
   }
   
-  public boolean cardUpdated_oob(SingleSessionManager mgr, Serializable externCardId)
+  public boolean cardUpdated_oobTL(Serializable externCardId)
   {
 //    System.out.println("CardChainPage knows card was updated externally, app= "+app.toString());
 //    System.out.println("  My card (updated)= "+DBGet.getCard(cardId).getText()+" cardid: "+cardId);
@@ -642,25 +685,38 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // read the mcast, but that's clumsy. It doesn't see to cause a problem here. Keep a lookout.
     // We might have fixed this with the synchro in the mcast
 
+    System.out.println("******In CardChainPage.cardUpdated_oobTL "+externCardId.toString()+" "+cardId.toString());
     if (externCardId.equals(cardId)) {   // Don't do this: externCardId == cardId  !
       // game masters can change text and marking
-      Session sess = M.getSession(mgr);
 
-      Card c = DBGet.getCardFresh(cardId, sess);
-      loadMarkingPanel_oob(c,sess);
-      cardLg.update_oob(mgr,cardId);
-      updateFollowers_oob(mgr, externCardId);
-      if(mgr != null)
-        mgr.setNeedsCommit(true); // database
+      Card c = DBGet.getCardFreshTL(cardId);
+      loadMarkingPanel_oobTL(c);
+      cardLg.update_oobTL(cardId);
+      updateFollowers_oobTL(externCardId);
       return true;              // ui
     }
     return false;
   }
+  /**
+   * We only want to check to see if the user star has changed
+   */
+  @Override
+  public boolean userUpdated_oobTL(Serializable uId)
+  {
+    MSysOut.println("CardChainPage.userUpdated_oobTL("+uId.toString()+")");
+    return cardLg.updateUser_oobTL(uId);
+  }
 
   /* View interface */
   @Override
+  @MmowgliCodeEntry
+  @HibernateConditionallyOpened
+  @HibernateConditionallyClosed
   public void enter(ViewChangeEvent event)
   {
-    initGui();
+    Object key = HSess.checkInit();
+    initGuiTL();
+    HSess.checkClose(key);
   }
+
 }
