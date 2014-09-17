@@ -65,12 +65,12 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 
+import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliConstants;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
-import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * BaseExporter.java Created on Nov 28, 2011
@@ -84,7 +84,7 @@ public abstract class BaseExporter implements Runnable
 {
   private Thread thread;
 
-  protected UI ui;
+  protected UI xui;
   protected SimpleDateFormat dateFmt = new SimpleDateFormat("EEEE, d MMMM yyyy HH:mm:ss-z");
   protected DecimalFormat twoPlaceDecimalFmt = new DecimalFormat("#.##"); 
   protected DecimalFormat onePlaceDecimalFmt = new DecimalFormat("#.#"); 
@@ -110,7 +110,7 @@ public abstract class BaseExporter implements Runnable
     }
   }
   
-  abstract protected Document buildXmlDocument() throws Throwable;
+  abstract protected Document buildXmlDocumentTL() throws Throwable;
   abstract protected String getThreadName();
   abstract protected String getCdataSections();
   abstract protected String getStyleSheetName();
@@ -190,21 +190,21 @@ public abstract class BaseExporter implements Runnable
   @Override
   public void run()
   {
+    HSess.init();
     try {
-      Document doc = buildXmlDocument();
+      Document doc = buildXmlDocumentTL();
       
       if(getStyleSheetName() != null) {
         String fn;
-        showFile(doc, fn=buildFileName(getFileNamePrefix()), getStyleSheetName(), getCdataSections(), showXml); //"CardTree","CardTree.xsl",CDATA_ELEMENTS);
+        showFile("File",doc, fn=buildFileName(getFileNamePrefix()), getStyleSheetName(), getCdataSections(), showXml); //"CardTree","CardTree.xsl",CDATA_ELEMENTS);
         showEndNotification(fn); //"CardTree");
       }
-      // todo V7
-      //framework.needToPushChanges();
-      //framework.pushPendingChangesIfNeeded();
+      Mmowgli2UI.getAppUI().access(new Runnable(){public void run(){Mmowgli2UI.getAppUI().push();}});
     }
     catch (Throwable ex) {
       System.err.println(ex.getClass().getSimpleName()+": "+ex.getLocalizedMessage());
     }
+    HSess.close();
   }
   
   protected void _export()
@@ -217,9 +217,9 @@ public abstract class BaseExporter implements Runnable
     thread.start();
   }
 
-  public ExportProducts exportToRepository() throws Throwable
+  public ExportProducts exportToRepositoryTL() throws Throwable
   {
-    Document doc = buildXmlDocument();
+    Document doc = buildXmlDocumentTL();
     StringWriter xmlSW  = this.doc2Xml(doc,  getCdataSections());
     StringWriter htmlSW = null;
     if(getStyleSheetName() != null)
@@ -450,9 +450,9 @@ public abstract class BaseExporter implements Runnable
     return iSz;
   }
 
-  protected void showFile(Document doc, String name, String styleSheetNameInThisPackage, boolean showXml) throws TransformerConfigurationException, TransformerException
+  protected void showFile(String handle, Document doc, String name, String styleSheetNameInThisPackage, boolean showXml) throws TransformerConfigurationException, TransformerException
   {
-    showFile(doc,name,styleSheetNameInThisPackage,null,showXml);
+    showFile(handle, doc,name,styleSheetNameInThisPackage,null,showXml);
   }
   
   protected StringWriter doc2Xml(Document doc, String cdataElementList) throws TransformerException
@@ -514,25 +514,46 @@ public abstract class BaseExporter implements Runnable
     return htmlSW;
   }
   
-  protected void showFile(Document doc, String name, String styleSheetNameInThisPackage, String cdataElementList, boolean showXml) throws TransformerConfigurationException, TransformerException
+  protected void showFile(String handl, Document doc, String name, String styleSheetNameInThisPackage, String cdataElementList, boolean showXml) throws TransformerConfigurationException, TransformerException
   {
-    final StringWriter xmlSW = doc2Xml(doc, cdataElementList);
+    StringWriter xmlSW = doc2Xml(doc, cdataElementList);
+    StringWriter htmlSW = null;
     // style to html if we can find a style sheet on our classpath
-    if (styleSheetNameInThisPackage != null) {
+    if (styleSheetNameInThisPackage != null)
       // Do the transformation
-      final StringWriter htmlSW = doc2Html(doc, xmlSW, styleSheetNameInThisPackage);  
-      BrowserWindowOpener.openWithHTML(htmlSW.toString(), "ActionPlans", "_blank");      
-    }
+      htmlSW = doc2Html(doc, xmlSW, styleSheetNameInThisPackage);  
     
-    if (showXml) {
-      // Build a source for browser display of xml
-      BrowserWindowOpener.openWithInnerHTML(xmlSW.toString(),"ActionPlans XML", "blank");
-    }
+//    if (showXml) {
+//      // Build a source for browser display of xml
+//      BrowserWindowOpener.openWithInnerHTML(xmlSW.toString(),"ActionPlans XML", "blank"); 
+//    }
+    if(!showXml)
+      xmlSW = null;
     
-    //todo this needs a push since we're off-thread and this is a new way of opening a window
-    MSysOut.println("todo this needs a push since we're off-thread and this is a new way of opening a window");
+    if(xmlSW == null && htmlSW == null)
+      ;
+    else
+      showExport(xmlSW,htmlSW);
+//    //todo this needs a push since we're off-thread and this is a new way of opening a window
+//    MSysOut.println("todo this needs a push since we're off-thread and this is a new way of opening a window");
   }
-
+  private void showExport(final StringWriter xmlSW, final StringWriter htmlSW)
+  {
+    // Build a source for browser display of xml
+    Mmowgli2UI.getAppUI().access(new Runnable()
+    {
+      public void run()
+      {
+        if(htmlSW != null)
+          BrowserWindowOpener.openWithHTML(htmlSW.toString(), "ActionPlans", "_blank"); 
+        if(xmlSW != null)
+          BrowserWindowOpener.openWithInnerHTML(xmlSW.toString(),"ActionPlans XML", "_blank");
+        
+        Mmowgli2UI.getAppUI().access(new Runnable(){public void run(){Mmowgli2UI.getAppUI().push();}});
+      }
+    });
+  }
+  
   public String toUtf8(final String inString)
   {
     if (null == inString)
@@ -597,12 +618,8 @@ public abstract class BaseExporter implements Runnable
   
   public String buildFileName(String prefix)
   {
-    SingleSessionManager ssm = new SingleSessionManager();
-    Session sess = ssm.getSession();
-
-    Game game = (Game)sess.get(Game.class, 1L);
+    Game game = Game.getTL();
     String name = prefix+"_"+game.getTitle();
-    ssm.endSession();
     return name.replaceAll(" ", "_"); // no spaces
   }
 }
