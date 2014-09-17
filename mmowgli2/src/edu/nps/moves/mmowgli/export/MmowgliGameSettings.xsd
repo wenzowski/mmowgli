@@ -196,7 +196,6 @@
 	<xs:element name="InitialLatitude" type="xs:NMTOKEN"/>
 	<xs:element name="InitialLongitude" type="xs:decimal"/>
 	<xs:element name="InitialZoom" type="xs:integer"/>
-	<xs:element name="Msid" type="xs:string"/>
 	<xs:element name="Other">
 		<xs:complexType>
 			<xs:sequence>
