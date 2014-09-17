@@ -33,16 +33,9 @@
 */
 package edu.nps.moves.mmowgli.modules.maps;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.JavaScript;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
@@ -67,68 +60,7 @@ public class OpenLayersMap extends VerticalLayout implements MmowgliComponent, V
   
   public static String DEF_TITLE_FIRST_PART = "<b style=\"color:#4F4F4F;font-family:'Arial';font-size:2.0em;line-height:150%;margin-left:20px;\">";
   public static String DEF_TITLE_LAST_PART  = "</b>";
-  
-  public static String GOOGLEMAP_MSID_DEFAULT = "207084999472810915099.0004a481650647e9c2718";
-  public static Double GOOGLEMAP_LAT_DEFAULT = 10.919618;
-  public static double GOOGLEMAP_LON_DEFAULT = 53.613281;
-  public static int GOOGLEMAP_ZOOM_DEFAULT = 5;
-  
-  //TODO This is historic.  Not used anymore.  Complete map url, including game-specific access key, is held in db.
- 
-  // This is a key registered to j.mike.bailey@gmail.com for any subdomain of
-  // nps.edu; Should be changed to the PI's key.
-
-  public static String GOOGLEMAPS_KEY = "ABQIAAAAn3XSZqF1QLTBgtDBqai1aRS2OZfXJqQmqyiXpSBIA8hKa2Rt8hTJ_EHieZltG5vTS2CqnVvV5EiIsQ";
-
-  public static String GOOGLEMAP_PRINTF =
-      "http://maps.google.com/maps/ms?"+
-      "hl=en&amp;ie=UTF8&amp;"+
-      "t=h&amp;"+
-      "msa=0&amp;"+
-      "msid="+
-      "%s"+ //207084999472810915099.0004a481650647e9c2718  //0 msid
-      "&amp;ll="+
-  
-      "%.6f"+ //"10.919618"+  //1  lat
-      ","+
-      "%.6f"+ //"53.613281"+ //2  lon
-      
-      "&amp;spn=15.060443,18.676758&amp;z="+
-      
-      "%d"+ //"5"+ //3 zoom
-
-      "&amp;output=embed";
-
-  public static String GOOGLEMAP_REGEX =
-      "http://maps.google.com/maps/ms?"+
-      ".*" +
-      //"hl=en&amp;ie=UTF8&amp;t=h&amp;msa=0&amp;"+
-      "msid="+
-      "(.*)"+        //0   207084999472810915099.0004a481650647e9c2718"+
-      "&amp;"+
-      "ll="+
-      
-      "([\\+-]*\\d+\\.?\\d+)"+ //%.6f"+ //"10.919618"+  //1  lat
-      ","+
-      "([\\+-]*\\d+\\.?\\d+)"+ //"%.6f"+ //"53.613281"+ //2  lon
-          
-      ".*"+ //"&amp;spn=15.060443,18.676758&amp;"+
-      "z="+
-          
-      "(\\d+)"+ //"%d"+ //"5"+ //3  zoom
-      ".*";
-      //"&amp;output=embed";
     
-  public static String buildGoogleMapURL(Double lat, Double lon, Integer zoom, String msid) throws Exception
-  {
-    try {
-      return String.format(GOOGLEMAP_PRINTF, msid, lat, lon, zoom);
-    }
-    catch(Throwable t) {
-      throw new Exception(t);
-    }
-  }
-
   public static class MapParms
   {
     public String msid = "";
@@ -142,38 +74,9 @@ public class OpenLayersMap extends VerticalLayout implements MmowgliComponent, V
     }
   }
 
-/*
-  public static MapParms getMapParmetersFromUrlString(String s)
-  {
-    try {
-      MapParms mp = new MapParms();
-      Pattern pattern = Pattern.compile(GOOGLEMAP_REGEX);
-      Matcher matcher = pattern.matcher(s);
-      String s0, s1, s2, s3;
-      if (matcher.find()) {
-        s0 = matcher.group(1);
-        s1 = matcher.group(2);
-        s2 = matcher.group(3);
-        s3 = matcher.group(4);
-        mp.msid = s0;
-        mp.lat  = Double.parseDouble(s1);
-        mp.lon  = Double.parseDouble(s2);
-        mp.zoom = Integer.parseInt(s3);
-        return mp;
-      }
-    }
-    catch (Exception ex) {
-    }
-    return null;
-  }
- */  
-  /* 28 Mar 2014, new google map format (in GameLinks.mmowgliMapLink):
-   * https://www.google.com/maps/embed/v1/view?key=AIzaSyBeWoPydbJRnvH0D8DnCCeLDP1VVPURKh0&center=36.596915,-121.873968&zoom=15&maptype=roadmap&region=us 
-   * where "key" is under the mmowgli.mapping google account -- one for each deployed game.
-   */
   public OpenLayersMap()
   {
-    this(DEF_TITLE_FIRST_PART +Game.get().getMapTitle()+DEF_TITLE_LAST_PART);
+    this(DEF_TITLE_FIRST_PART +Game.getTL().getMapTitle()+DEF_TITLE_LAST_PART);
   }
   
   public OpenLayersMap(String title)
@@ -236,8 +139,9 @@ public class OpenLayersMap extends VerticalLayout implements MmowgliComponent, V
   " mMap.addLayer(osLay);"+
   //" mMap.addLayer(shadeLayer);"+
   //" mMap.addControl(new OpenLayers.Control.LayerSwitcher());"+
-  " mMap.setCenter(position, zoom );"+
-  "";
+  " mMap.setCenter(position, zoom );";
+    
+    /*
   String worldWind = 
   "mMap = new OpenLayers.Map('mmowgliMap', {'maxResolution': .28125, tileSize: new OpenLayers.Size(512, 512)});"+
  "var osLay        = new OpenLayers.Layer.OSM();"+      
@@ -255,40 +159,9 @@ public class OpenLayersMap extends VerticalLayout implements MmowgliComponent, V
   //"mMap.setCenter(new OpenLayers.LonLat(-71.4, 42.3), 6);"+
   " mMap.setCenter(position, zoom );"+
 
-   "";
-    JavaScript.getCurrent().execute(jsOSM);
+   ""; */
     
-/*    GameLinks gl = GameLinks.get();
-    BrowserFrame emb = new BrowserFrame(null,new ExternalResource(gl.getMmowgliMapLink()));
-    emb.setWidth("950px");
-    emb.setHeight("600px");
-    emb.addStyleName("m-darkgreyborder");
-    addComponent(emb);
-    setComponentAlignment(emb,Alignment.TOP_CENTER); */
-  }
-
-  public static MapParms getMapParmetersFromUrlString(String s)
-  {
-    try {
-      MapParms mp = new MapParms();
-      Pattern pattern = Pattern.compile(GOOGLEMAP_REGEX);
-      Matcher matcher = pattern.matcher(s);
-      String s0, s1, s2, s3;
-      if (matcher.find()) {
-        s0 = matcher.group(1);
-        s1 = matcher.group(2);
-        s2 = matcher.group(3);
-        s3 = matcher.group(4);
-        mp.msid = s0;
-        mp.lat  = Double.parseDouble(s1);
-        mp.lon  = Double.parseDouble(s2);
-        mp.zoom = Integer.parseInt(s3);
-        return mp;
-      }
-    }
-    catch (Exception ex) {
-    }
-    return null;
+    JavaScript.getCurrent().execute(jsOSM);    
   }
 
   @Override
