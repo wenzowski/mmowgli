@@ -80,12 +80,12 @@ public class MailManager
    * @param child
    *          card
    */
-  public void firstChildPlayed(Card parent, Card child)
+  public void firstChildPlayedTL(Card parent, Card child)
   {
     try {
-      if(!Game.get().isExternalMailEnabled())
+      if(!Game.getTL().isExternalMailEnabled())
         return;
-      
+
       User author = parent.getAuthor();
       User player = child.getAuthor();
       
@@ -98,19 +98,17 @@ public class MailManager
         return; // don't remind if played on own cards.
       
       List<String> sLis = VHibPii.getUserPiiEmails(author.getId());
-      //List<Email> elis= author.getEmailAddresses();
       if(sLis == null || sLis.size()<=0) {
         System.err.println("No email address found for user "+author.getUserName());
         return;
       }
       
       author.setFirstChildEmailSent(true);
-      // User update here
-      User.update(author);
+      User.updateTL(author);
       
       String to = sLis.get(0); //elis.get(0).getAddress();
-      String from = buildMmowgliReturnAddress(); //"mmowgli<mmowgli@nps.navy.mil>";
-      String handle = Game.get().getGameHandle();
+      String from = buildMmowgliReturnAddressTL(); //"mmowgli<mmowgli@nps.navy.mil>";
+      String handle = Game.getTL().getGameHandle();
       String subj = handle+": Your idea has been noticed!";
 
       String parentCardType = parent.getCardType().getTitle();
@@ -120,7 +118,7 @@ public class MailManager
       String cardPlayer = child.getAuthorName();
       String cardType = child.getCardType().getTitle();
       String cardText = child.getText();
-      Game game = Game.get(1L);
+      Game game = Game.getTL();
       String gameAcronym = game.getAcronym();
       gameAcronym = gameAcronym==null?"":gameAcronym+" ";
 
@@ -160,18 +158,18 @@ public class MailManager
     }
   }
   
-  public void mailToUser(Object from, Object to, String subject, String body)
+  public void mailToUserTL(Object from, Object to, String subject, String body)
   {
-    mailToUser(from,to,subject,body, null, Channel.BOTH);
+    mailToUserTL(from,to,subject,body, null, Channel.BOTH);
   }
   
-  public void mailToUser(Object from, Object to, String subject, String body, String ccEmail, Channel chan)
+  public void mailToUserTL(Object from, Object to, String subject, String body, String ccEmail, Channel chan)
   {
-    User uFrom = DBGet.getUserFresh(from);  // Need to access internal tables, so needs to be fresh
-    User uTo   = DBGet.getUserFresh(to);
+    User uFrom = DBGet.getUserFreshTL(from);  // Need to access internal tables, so needs to be fresh
+    User uTo   = DBGet.getUserFreshTL(to);
     String fromUser = uFrom.getUserName();
-    Game game = Game.get();
-    GameLinks gl = GameLinks.get();
+    Game game = Game.getTL();
+    GameLinks gl = GameLinks.getTL();
     String emailRetAddr = gl.getGameFromEmail();
     String gameHandle = game.getGameHandle();
     if(!gameHandle.toLowerCase().equals("mmowgli"))      // if the handle is not mmowgli, don't display it in the return addr below
@@ -182,14 +180,13 @@ public class MailManager
     String gameAcronym = game.getAcronym();
     gameAcronym = gameAcronym==null?"":gameAcronym+" ";
     
-    if(Game.get().isExternalMailEnabled() && uTo.isOkEmail() && externemail) {
+    if(Game.getTL().isExternalMailEnabled() && uTo.isOkEmail() && externemail) {
       List<String> sLis = VHibPii.getUserPiiEmails(uTo.getId());
-      //List<Email> elis= uTo.getEmailAddresses();
       if(sLis == null || sLis.size()<=0) {
         System.err.println("No email address found for user "+uTo.getUserName());
       }
       else {
-        String toEmail = sLis.get(0); //elis.get(0).getAddress();
+        String toEmail = sLis.get(0);
         if(ccEmail == null)
           mailer.send(toEmail,gameAcronym+gameHandle+" user "+fromUser+"<"+emailRetAddr+">",subject,body+STANDARDEMAILFOOTER,true); 
         else
@@ -200,7 +197,7 @@ public class MailManager
       mailer.send(ccEmail,gameAcronym+gameHandle+" user "+fromUser+"<"+emailRetAddr+">",subject,body+STANDARDEMAILFOOTER, true);
     }
     
-    if(Game.get().isInGameMailEnabled() && uTo.isOkGameMessages() && ingamemail) {
+    if(Game.getTL().isInGameMailEnabled() && uTo.isOkGameMessages() && ingamemail) {
       StringBuilder sb = new StringBuilder();
       if(subject != null && subject.length()>0) {
         sb.append("<u>Re: ");
@@ -210,29 +207,27 @@ public class MailManager
       sb.append(body);
       
       Message msg = new Message(sb.toString().trim(),uFrom,uTo);
-      Message.save(msg);
+      Message.saveTL(msg);
       uTo.getGameMessages().add(msg);
-      // User update here
-      User.update(uTo);
+      User.updateTL(uTo);
     }
   }
   
-  public void onNewUserSignup(User uTo)
+  public void onNewUserSignupTL(User uTo)
   {
     try {
-      if(!Game.get().isExternalMailEnabled())
+      if(!Game.getTL().isExternalMailEnabled())
         return;
       
       if(!uTo.isOkEmail()) // only email, not in-game messaging
         return;
       
       List<String> sLis = VHibPii.getUserPiiEmails(uTo.getId());
-      //List<Email> elis= uTo.getEmailAddresses();
       if(sLis == null || sLis.size()<=0) {
         System.err.println("No email address found for user "+uTo.getUserName());
         return;
       }
-      Game g = Game.get(1L);
+      Game g = Game.getTL();
       String gameName = g.getTitle();
       String gameHandle = g.getGameHandle();
       if(!gameHandle.toLowerCase().equals("mmowgli"))
@@ -240,14 +235,14 @@ public class MailManager
       else
         gameHandle = gameHandle+" ";
       
-      String toAddr = sLis.get(0); //elis.get(0).getAddress();
-      String from = buildMmowgliReturnAddress(); //"mmowgli<mmowgli@nps.navy.mil>";
+      String toAddr = sLis.get(0);
+      String from = buildMmowgliReturnAddressTL(); //"mmowgli<mmowgli@nps.navy.mil>";
       String subj = "Thank you for registering in "+gameName+" "+gameHandle+"game";
 
-      String gameUrl = AppMaster.getInstance().getAppUrlString(); //((Mmowgli2UI)UI.getCurrent()).getGlobalse().gameUrl();app.globs().gameUrl();
+      String gameUrl = AppMaster.instance().getAppUrlString(); //((Mmowgli2UI)UI.getCurrent()).getGlobalse().gameUrl();app.globs().gameUrl();
       if(gameUrl.endsWith("/"))
         gameUrl = gameUrl.substring(0, gameUrl.length()-1);
-      String gameTrouble = GameLinks.get().getTroubleLink();
+      String gameTrouble = GameLinks.getTL().getTroubleLink();
       String gameAcronym = g.getAcronym();
       gameAcronym = gameAcronym==null?"":gameAcronym+" ";
 
@@ -303,9 +298,9 @@ public class MailManager
     }
   }
 
-  public void actionPlanInvite(ActionPlan ap, User u) // only email, not in-game messaging
+  public void actionPlanInviteTL(ActionPlan ap, User u) // only email, not in-game messaging
   {
-    Game g = Game.get();
+    Game g = Game.getTL();
     try {
       if(!g.isExternalMailEnabled())
         return;
@@ -313,19 +308,17 @@ public class MailManager
         return;
       
       List<String> sLis = VHibPii.getUserPiiEmails(u.getId());
-     // List<Email> elis= u.getEmailAddresses();
-     // if(elis == null || elis.size()<=0) {
       if(sLis == null || sLis.size()<=0) {
         System.err.println("No email address found for user "+u.getUserName());
         return;
       }
       
-      String toAddr = sLis.get(0); //elis.get(0).getAddress();
-      String from = buildMmowgliReturnAddress(); //"mmowgli<mmowgli@nps.navy.mil>";
+      String toAddr = sLis.get(0);
+      String from = buildMmowgliReturnAddressTL(); //"mmowgli<mmowgli@nps.navy.mil>";
       String handle = g.getGameHandle();
       String subj = handle+": Invitation to author Action Plan";
-      Game game = Game.get(1L);
-      String gameAcronym = game.getAcronym();
+;
+      String gameAcronym = g.getAcronym();
       gameAcronym = gameAcronym==null?"":gameAcronym+" ";
 
       StringBuilder sb = new StringBuilder();
@@ -362,19 +355,19 @@ public class MailManager
     }
   }
 
-  public void sendConfirmedReminder(String email, String uname, String gameUrl)
+  public void sendConfirmedReminderTL(String email, String uname, String gameUrl)
   {
     try {
       PagesData data = new PagesData();
       data.setuserName(uname);
       data.setgameUrl(gameUrl);
-      String from = buildMmowgliReturnAddress();
+      String from = buildMmowgliReturnAddressTL();
       
       String gameAcronym = data.getgameAcronym();
       gameAcronym = gameAcronym==null?"":gameAcronym+" ";     
       String subj = "Your "+data.getgameHandle()+" registration";
       
-      String body = Pages.get().getConfirmedReminderEmail();
+      String body = Pages.getTL().getConfirmedReminderEmail();
       body = Pages.replaceTokens(body, data);
 
       mailer.send(email, from, subj, body, true);
@@ -384,17 +377,17 @@ public class MailManager
     }    
   }
  
-  public void sendEmailConfirmation(String email, String uname, String confirmUrl)
+  public void sendEmailConfirmationTL(String email, String uname, String confirmUrl)
   {
     try {
       PagesData data = new PagesData();
       data.setuserName(uname);
       data.setconfirmLink(confirmUrl);
 
-      String body = Pages.get().getConfirmationEmail();
+      String body = Pages.getTL().getConfirmationEmail();
       body = Pages.replaceTokens(body, data);
 
-      String from = buildMmowgliReturnAddress();
+      String from = buildMmowgliReturnAddressTL();
       String subj = "Your " + data.getgameHandle() + " registration";
       String gameAcronym = data.getgameAcronym();
       gameAcronym = gameAcronym == null ? "" : gameAcronym + " ";
@@ -409,11 +402,11 @@ public class MailManager
   /**
    * @return (default) mmowgli<mmowgli@nps.navy.mil>
    */
-  public String buildMmowgliReturnAddress()
+  public String buildMmowgliReturnAddressTL()
   {
-    Game g = Game.get();
+    Game g = Game.getTL();
     String handle = g.getGameHandle();
-    String gameFromEmail = GameLinks.get().getGameFromEmail();
+    String gameFromEmail = GameLinks.getTL().getGameFromEmail();
     return handle+"<"+gameFromEmail+">";
   }
 }
