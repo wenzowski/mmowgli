@@ -41,6 +41,7 @@ import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * UserProfileTabPanel.java
@@ -56,10 +57,6 @@ import edu.nps.moves.mmowgli.hibernate.DBGet;
  */
 public abstract class UserProfileTabPanel extends HorizontalLayout implements MmowgliComponent
 {
-
-  /**
-   * 
-   */
   private static final long serialVersionUID = -2048617558073728089L;
   protected Object uid;
   protected boolean userIsMe = false;
@@ -72,15 +69,13 @@ public abstract class UserProfileTabPanel extends HorizontalLayout implements Mm
   private VerticalLayout leftAddedVL;
   private HtmlLabel leftLabel;
   
- // abstract public List<Card> getCardList();
- // abstract boolean confirmCard(Card c);
-  
+  @HibernateSessionThreadLocalConstructor
   public UserProfileTabPanel(Object uid)
   {;
     this.uid = uid;
-    User u = DBGet.getUser(uid);
+    User u = DBGet.getUserTL(uid);
     userName = u.getUserName();
-    me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     imAdminOrGameMaster = me.isAdministrator() || me.isGameMaster();    
     userIsMe = (u.getId() == me.getId());
   }
@@ -90,21 +85,19 @@ public abstract class UserProfileTabPanel extends HorizontalLayout implements Mm
   {
     setWidth("960px");
     setHeight("750px");  // must fill the background
-    setSpacing(false); // new
+    setSpacing(false);
     
     leftLay = new VerticalLayout();
     leftLay.addStyleName("m-userprofiletabpanel-left");
-    leftLay.setWidth("245px"); //"205px"); // plus 45 padding = 250
+    leftLay.setWidth("245px");// plus 45 padding 
     leftLay.setMargin(false);
     
     Label sp;
     leftLay.addComponent(sp=new Label());
     sp.setHeight("45px");
-    //sp.setWidth("215px");
     
     leftLabel = new HtmlLabel("placeholder");
     leftLay.addComponent(leftLabel);
-    //leftLabel.setWidth("215px");
 
     leftAddedVL = new VerticalLayout();
     leftLay.addComponent(leftAddedVL);
