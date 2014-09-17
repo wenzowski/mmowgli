@@ -59,7 +59,7 @@ abstract public class RegistrationPageAgreement extends MmowgliDialog
 
   abstract protected String getTitle();
   abstract protected String getLabelText();
-  abstract protected String getReadUrl();
+  abstract protected String getReadUrlTL();
   abstract protected String getReadLabel();
   
   public RegistrationPageAgreement(Button.ClickListener listener)
@@ -81,9 +81,9 @@ abstract public class RegistrationPageAgreement extends MmowgliDialog
     hlayout.setWidth("100%");
     hlayout.addStyleName(labelStyle);
     
-    String readUrl = getReadUrl();
+    String readUrl = getReadUrlTL();
     if(readUrl != null) {
-      Link readLink = new Link("Read",new ExternalResource(getReadUrl())); //REGISTRATIONCONSENTURL));
+      Link readLink = new Link("Read",new ExternalResource(getReadUrlTL())); //REGISTRATIONCONSENTURL));
       readLink.setTargetName("_agreements");
       readLink.setTargetBorder(BorderStyle.DEFAULT);
       readLink.setDescription("Opens in new window/tab");
@@ -95,7 +95,6 @@ abstract public class RegistrationPageAgreement extends MmowgliDialog
     lab = new Label(getReadLabel()); //"<i>Consent to Participate in Anonymous Survey</i>");
     lab.setContentMode(ContentMode.HTML);
     lab.setSizeUndefined();
-    //lab.addStyleName(labelStyle);
     hlayout.addComponent(lab);
     hlayout.setSizeUndefined();
     hlayout.setComponentAlignment(lab, Alignment.TOP_LEFT);
