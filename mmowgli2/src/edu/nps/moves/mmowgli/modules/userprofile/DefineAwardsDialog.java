@@ -43,7 +43,8 @@ import com.vaadin.ui.Button.ClickListener;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.AwardType;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
@@ -60,6 +61,8 @@ public class DefineAwardsDialog extends Window
   private static final long serialVersionUID = 5301099341257441994L;
   
   private GridLayout gridLayout;
+  
+  @HibernateSessionThreadLocalConstructor
   public DefineAwardsDialog()
   {
     setCaption("Define Player Awards");
@@ -86,7 +89,7 @@ public class DefineAwardsDialog extends Window
     gridLayout.addStyleName("m-headgrid");
     gridLayout.setWidth("100%");
     p.setContent(gridLayout);
-    fillPanel();
+    fillPanelTL();
     
     HorizontalLayout buttPan = new HorizontalLayout();
     buttPan.setWidth("100%");
@@ -107,10 +110,10 @@ public class DefineAwardsDialog extends Window
   }
 
   private ArrayList<AwardType> gridList;
-  private void fillPanel()
+  private void fillPanelTL()
   {
     @SuppressWarnings("unchecked")
-    List<AwardType> typs = (List<AwardType>)VHib.getVHSession().createCriteria(AwardType.class).list();
+    List<AwardType> typs = (List<AwardType>)HSess.get().createCriteria(AwardType.class).list();
     gridList = new ArrayList<AwardType>(typs.size());
     gridList.addAll(typs);
     gridLayout.removeAllComponents();
