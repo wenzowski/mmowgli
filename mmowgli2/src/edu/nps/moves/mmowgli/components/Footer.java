@@ -17,6 +17,7 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
 import edu.nps.moves.mmowgli.db.Media.Source;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
@@ -34,9 +35,10 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent
   private Link fouoLink;
 
   //@formatter:off
+  @HibernateSessionThreadLocalConstructor
   public Footer()
   {
-    GameLinks gl = GameLinks.get();
+    GameLinks gl = GameLinks.getTL();
     aboutButt    = makeLink("About",               gl.getAboutLink(), "About MMOWGLI project");
     creditsButt  = makeLink("Credits and Contact", gl.getCreditsLink(), "Who we are");
     faqsButt     = makeLink("FAQs",                gl.getFaqLink(), "Frequently answered questions");
@@ -87,15 +89,18 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent
     innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
     innerHorLay.addComponent(troubleButt);
     
-    GameLinks gl = GameLinks.get();
+    GameLinks gl = GameLinks.getTL();
 /*V7test    if(gl.getFixesLink().toLowerCase().contains("armyscitech") || gl.getGlossaryLink().toLowerCase().contains("armyscitech")) {
       ;  // This is a hack, but I don't want to pollute the db with a bogus boolean...this is a special case just for these folks.
     }
     else */{
-      Label svrLab=null;
-      mainAbsLay.addComponent(svrLab=new Label(AppMaster.getInstance().getServerName()),"bottom:3px;right:15px;");    
-      svrLab.setSizeUndefined(); // lose the 100% w
-      svrLab.addStyleName("m-footer-servername");  //small text
+      HorizontalLayout hl = new HorizontalLayout();
+      Label lab=null;
+      hl.addComponent(lab=new HtmlLabel("Build "+MMOWGLI_BUILD_ID)); lab.addStyleName("m-footer-servername");  //small text
+      hl.addComponent(lab=new HtmlLabel("&nbsp;&nbsp;Vaadin "+VAADIN_BUILD_VERSION));lab.addStyleName("m-footer-servername");  //small text
+      hl.addComponent(lab=new HtmlLabel("&nbsp;&nbsp;"+AppMaster.instance().getServerName()));lab.addStyleName("m-footer-servername");  //small text
+      hl.setSizeUndefined();
+      mainAbsLay.addComponent(hl,"bottom:3px;right:15px;");   
     }
     
 
@@ -116,7 +121,7 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent
     Resource icon = medLoc.locate(new Media("fouo250w36h.png", // todo, database-ize
                                   "", "",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
     fouoLink.setIcon(icon);
-    fouoLink.setDescription(Game.get().getFouoDescription());
+    fouoLink.setDescription(Game.getTL().getFouoDescription());
     fouoLink.setTargetName(PORTALTARGETWINDOWNAME);
     fouoLink.setTargetBorder(BorderStyle.DEFAULT);
     
