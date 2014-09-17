@@ -102,19 +102,19 @@ public class MmowgliLinkInserter
    * @return replaced
    */
   
-  public static String insertUserName_oob(String s, SessionManager sessMgr)
+  public static String insertUserName_oobTL(String s)
   {
     StringBuilder sb = null;
     Matcher m = userLinkPattern.matcher(s);
     int start = 0;
-    Session sess = M.getSession(sessMgr);
+
     while (m.find(start)) {
       if(sb == null)
         sb = new StringBuilder(s);
       User u = null;
       try {
         Long l = Long.parseLong(m.group(1));
-        u = DBGet.getUser(l,sess);
+        u = DBGet.getUserTL(l);
       }
       catch(Throwable t) {
         return s;
@@ -142,9 +142,13 @@ public class MmowgliLinkInserter
     return insertLinksCommon(s,g,sess);
   }
   
-  public static String insertLinks(String s, Game g)
+//  public static String insertLinks(String s, Game g)
+//  {
+//    return insertLinksCommon(s,g,VHib.getVHSession());
+//  }
+  public static String insertLinksTL(String s, Game g)
   {
-    return insertLinksCommon(s,g,VHib.getVHSession());
+    return insertLinksCommon(s,g,HSess.get());
   }
   
   private static String insertLinksCommon(String s, Game g, Session sess)
