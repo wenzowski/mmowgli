@@ -46,7 +46,8 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+//import edu.nps.moves.mmowgli.hibernate.VHib;
 
 /**
  * @author Mike Bailey, jmbailey@nps.edu
@@ -74,19 +75,7 @@ public class Move implements Serializable
   boolean       showMoveBranding = false;
   List<MovePhase> movePhases = new ArrayList<MovePhase>();
   MovePhase     currentMovePhase;
-  /*
-  @Transient
-  MovePhase     preMove;
-  @Transient
-  MovePhase     inMove;
-  @Transient
-  MovePhase     postMove; 
-  @Transient
-  String        callToActionBackgroundLinks;
-  @Transient
-  Phase         xcurrentPhase;
-  */     
-//@formatter:on
+ //@formatter:on
   
   public Move()
   {
@@ -101,21 +90,21 @@ public class Move implements Serializable
   }
 
   @SuppressWarnings("unchecked")
-  public static List<Move> getAll()
+  public static List<Move> getAllTL()
   {
-    Criteria crit = VHib.getVHSession().createCriteria(Move.class);
+    Criteria crit = HSess.get().createCriteria(Move.class);
     crit.addOrder(Order.asc("number"));
     return (List<Move>)crit.list();
   }
   
-  public static Move get(Object id)
+  public static Move getTL(Object id)
   {
-    return (Move)VHib.getVHSession().get(Move.class, (Serializable)id);
+    return (Move)HSess.get().get(Move.class, (Serializable)id);
   }
   
-  public static Move getMoveByNumber(int i)
+  public static Move getMoveByNumberTL(int i)
   {
-    Session sess = VHib.getVHSession();
+    Session sess = HSess.get();
     @SuppressWarnings("unchecked")
     List<Move> lis = (List<Move>)sess.createCriteria(Move.class)
                      .add(Restrictions.eq("number", i)).list();
@@ -124,19 +113,19 @@ public class Move implements Serializable
     return null;
   }
 
-  public static Move merge(Move m)
+  public static Move mergeTL(Move m)
   {
-    return (Move)VHib.getVHSession().merge(m);
+    return (Move)HSess.get().merge(m);
   }
-  
-  public static void update(Move m)
+
+  public static void updateTL(Move m)
   {
-    VHib.getVHSession().update(m);
+    HSess.get().update(m);
   }
-  
-  public static void save(Move m)
+
+  public static void saveTL(Move m)
   {
-    VHib.getVHSession().save(m);
+    HSess.get().save(m);
   }
   
   @OneToOne
@@ -163,20 +152,6 @@ public class Move implements Serializable
     this.movePhases = movePhases;
   }
 
-  /*   switch(getCurrentPhase())
-    {
-    case PRE:
-        return preMove;
-    case  IN:
-        return inMove;
-    case POST:
-        return postMove;
-    default:
-        System.err.println("No phase set in Move.");
-        return inMove;
-    }
-    return null;
-  } */
   @Id
   @Basic
   @GeneratedValue(strategy=GenerationType.AUTO)
@@ -198,40 +173,7 @@ public class Move implements Serializable
 
     return title + " / " + st + " to " +en;
   }
-/*
-  @OneToOne
-  public MovePhase getPreMove()
-  {
-    return preMove;
-  }
 
-  public void setPreMove(MovePhase preMove)
-  {
-    this.preMove = preMove;
-  }
-
-  @OneToOne
-  public MovePhase getInMove()
-  {
-    return inMove;
-  }
-
-  public void setInMove(MovePhase inMove)
-  {
-    this.inMove = inMove;
-  }
-
-  @OneToOne
-  public MovePhase getPostMove()
-  {
-    return postMove;
-  }
-
-  public void setPostMove(MovePhase postMove)
-  {
-    this.postMove = postMove;
-  }
-*/
   @Basic
   public String getTitle()
   {
@@ -275,18 +217,7 @@ public class Move implements Serializable
   {
     this.endDate = endDate;
   }
-/*
-  @Basic
-  public String getCallToActionBackgroundLinks()  //not used
-  {
-    return this.callToActionBackgroundLinks;
-  }
 
-  public void setCallToActionBackgroundLinks(String s)
-  {
-    this.callToActionBackgroundLinks = s;
-  }
-*/
   @Basic
   public int getNumber()
   {
@@ -354,9 +285,14 @@ public class Move implements Serializable
     this.callToActionVideoPostMove = callToActionVideoPostMove;
   }
 */
-  public static Move getCurrentMove()
+//  public static Move getCurrentMove()
+//  {
+//    return getCurrentMove(VHib.getVHSession());  // vaadin transaction context
+//  }
+  
+  public static Move getCurrentMoveTL()
   {
-    return getCurrentMove(VHib.getVHSession());  // vaadin transaction context
+    return getCurrentMove(HSess.get());
   }
   
   public static Move getCurrentMove(Session sess)
