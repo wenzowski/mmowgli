@@ -44,7 +44,10 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliEvent;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.components.VideoWithRightTextPanel;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.Media;
+import edu.nps.moves.mmowgli.db.MovePhase;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.utility.IDNativeButton;
 
 /**
@@ -68,6 +71,8 @@ public class CallToActionPage extends HorizontalLayout implements MmowgliCompone
   {
     this(false);
   }
+  
+  @HibernateSessionThreadLocalConstructor
   public CallToActionPage(boolean mockupOnly)
   {
     this.mockupOnly = mockupOnly;
@@ -84,12 +89,11 @@ public class CallToActionPage extends HorizontalLayout implements MmowgliCompone
     mainVl.setSpacing(true);
     mainVl.setWidth("100%");
 
-    MovePhase phase = MovePhase.getCurrentMovePhase();
+    MovePhase phase = MovePhase.getCurrentMovePhaseTL();
     String sum = phase.getCallToActionBriefingSummary();
     String tx = phase.getCallToActionBriefingText();
     Media v = phase.getCallToActionBriefingVideo();
 
-    //Embedded headerImg = new Embedded(null, app.globs().mediaLocator().getCallToActionTheSituation());
     Embedded headerImg = new Embedded(null, Mmowgli2UI.getGlobals().mediaLocator().getCallToActionBang());
     headerImg.setDescription("Review motivation and purpose of this game");
     
@@ -100,7 +104,7 @@ public class CallToActionPage extends HorizontalLayout implements MmowgliCompone
     vidPan.initGui();
     mainVl.addComponent(vidPan); 
     
-    String playCardString = Game.get(1L).getCurrentMove().getCurrentMovePhase().getPlayACardTitle();
+    String playCardString = Game.getTL().getCurrentMove().getCurrentMovePhase().getPlayACardTitle();
     NativeButton butt;
     if(!mockupOnly)
       butt = new IDNativeButton(playCardString, MmowgliEvent.PLAYIDEACLICK);
