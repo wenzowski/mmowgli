@@ -37,9 +37,6 @@ import java.awt.geom.Point2D;
 import java.io.Serializable;
 
 import javax.persistence.*;
-
-import edu.nps.moves.mmowgli.hibernate.VHib;
-
 	
 /**
  * GoogleMapMarker.java
@@ -85,21 +82,6 @@ public class GoogleMapMarker implements Serializable
   {
     this.lon = dub.x;
     this.lat = dub.y;
-  }
-  
-  public static void update(GoogleMapMarker marker)
-  {
-    VHib.getVHSession().update(marker);   
-  }
-  
-  public static void save(GoogleMapMarker marker)
-  {
-    VHib.getVHSession().save(marker);
-  }
-
-  public static void delete(GoogleMapMarker marker)
-  {
-    VHib.getVHSession().delete(marker);
   }
   
   /**
