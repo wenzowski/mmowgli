@@ -47,9 +47,10 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.messaging.WantsMessageUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsUserUpdates;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * UserProfilePageStyled.java
@@ -76,10 +77,11 @@ public class UserProfilePage3 extends AbsoluteLayout implements MmowgliComponent
   UserProfileTabPanel currentTabPanel;
   private boolean itsSomebodyElse = false;
 
+  @HibernateSessionThreadLocalConstructor
   public UserProfilePage3(Object uid)
   {
-    User u = DBGet.getUser(uid);
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User u = DBGet.getUserTL(uid);
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     itsSomebodyElse = (u.getId() != me.getId());
 
     myIdeasPanel       = new UserProfileMyIdeasPanel2(uid);   
@@ -179,40 +181,40 @@ public class UserProfilePage3 extends AbsoluteLayout implements MmowgliComponent
     @Override
     public void buttonClick(ClickEvent event)
     {
-        Button b = event.getButton();
-        if(b == currentTabButton)
-          return;
-        currentTabButton.addStyleName("m-transparent-background");
-        currentTabPanel.setVisible(false);
-        currentTabButton = b;
+      Button b = event.getButton();
+      if (b == currentTabButton)
+        return;
+      currentTabButton.addStyleName("m-transparent-background");
+      currentTabPanel.setVisible(false);
+      currentTabButton = b;
 
-        if(b == myIdeasButt) {
-          myIdeasButt.removeStyleName("m-transparent-background");
-          currentTabPanel = myIdeasPanel;
-          myIdeasPanel.setVisible(true);
-        }
-        else if(b == myActionPlansButt) {
-          myActionPlansButt.removeStyleName("m-transparent-background");
-          currentTabPanel = myActionsPanel;
-          myActionsPanel.setVisible(true);
-        }
-        else if(b == myBuddiesButt) {
-          myBuddiesButt.removeStyleName("m-transparent-background");
-          currentTabPanel = myBuddiesPanel;
-          myBuddiesPanel.setVisible(true);      
-        } 
-        else if(b == myMailButt) {
-          myMailButt.removeStyleName("m-transparent-background");
-          currentTabPanel = myMailPanel;
-          myMailPanel.setVisible(true);
-        }
+      if (b == myIdeasButt) {
+        myIdeasButt.removeStyleName("m-transparent-background");
+        currentTabPanel = myIdeasPanel;
+        myIdeasPanel.setVisible(true);
+      }
+      else if (b == myActionPlansButt) {
+        myActionPlansButt.removeStyleName("m-transparent-background");
+        currentTabPanel = myActionsPanel;
+        myActionsPanel.setVisible(true);
+      }
+      else if (b == myBuddiesButt) {
+        myBuddiesButt.removeStyleName("m-transparent-background");
+        currentTabPanel = myBuddiesPanel;
+        myBuddiesPanel.setVisible(true);
+      }
+      else if (b == myMailButt) {
+        myMailButt.removeStyleName("m-transparent-background");
+        currentTabPanel = myMailPanel;
+        myMailPanel.setVisible(true);
+      }
     }
   }
 
   @Override
-  public boolean userUpdated_oob(SingleSessionManager mgr, Serializable uId)
+  public boolean userUpdated_oobTL(Serializable uId)
   {
-    return topPan.userUpdated_oob(mgr, uId);
+    return topPan.userUpdated_oobTL(uId);
   }
 
   /**
@@ -221,9 +223,9 @@ public class UserProfilePage3 extends AbsoluteLayout implements MmowgliComponent
    * won't be getting anything but those.
    */
   @Override
-  public boolean messageCreated_oob(SingleSessionManager mgr, Serializable uId)
+  public boolean messageCreated_oobTL(Serializable uId)
   {
-    return myMailPanel.messageCreated_oob(mgr, uId);    
+    return myMailPanel.messageCreated_oobTL(uId);    
   }
 
   /* View interface */
