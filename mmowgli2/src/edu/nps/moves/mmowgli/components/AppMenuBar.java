@@ -4,20 +4,20 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.CLUSTERMONITORTARGETWINDOWN
 import static edu.nps.moves.mmowgli.MmowgliConstants.CLUSTERMONITORURL;
 import static edu.nps.moves.mmowgli.MmowgliEvent.*;
 
-import org.hibernate.Session;
-
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.*;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
 
-import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliController;
+import edu.nps.moves.mmowgli.MmowgliEvent;
 import edu.nps.moves.mmowgli.db.Game;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsGameUpdates;
 import edu.nps.moves.mmowgli.modules.administration.AdvanceMoveDialog;
 import edu.nps.moves.mmowgli.modules.administration.EntryPermissionsDialog;
-import edu.nps.moves.mmowgli.utility.M;
 
 /**
  * @author Mike Bailey, jmbailey@nps.edu
@@ -38,18 +38,6 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
   private MenuBar.MenuItem gameRoMI;
   private MenuBar.MenuItem cardsRoMI;
   private MenuBar.MenuItem topCardsRoMI;
- // private MenuBar.MenuItem adminLoginOnlyMI;
-
-  //private MenuBar.MenuItem allLoginsMI;
-  //private MenuBar.MenuItem ga_LoginsMI;
-  //private MenuBar.MenuItem gm_LoginsMI;
-  //private MenuBar.MenuItem gd_LoginsMI;
-  //private MenuBar.MenuItem noLoginsMI;
-
-  //private MenuBar.MenuItem signupRestrictedMI;
-  //private MenuBar.MenuItem signupIntervalRestrictedMI;
-  //private MenuBar.MenuItem newSignupsRestrictedMI;
-  //private MenuBar.MenuItem queriesAcceptedMI;
   private MenuBar.MenuItem emailConfirmationMI;
 
   private MenuBar.MenuItem cardDBTestStartMI;
@@ -97,6 +85,7 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
   {
     this(doGameMaster, doAdmin, false);
   }
+  @HibernateSessionThreadLocalConstructor
   public AppMenuBar(boolean doGameMaster, boolean doAdmin, boolean doDesigner)
   {
     menubar.setHtmlContentAllowed(true); // test for font icons
@@ -136,12 +125,11 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     ret.addItem("Set blog headline", new MCommand(MENUGAMEMASTERBLOGHEADLINE));
     ret.addSeparator();
 
-    if (Game.get().isActionPlansEnabled()) {
+    if (Game.getTL().isActionPlansEnabled()) {
         ret.addItem("Create Action Plan", new MCommand(MENUGAMEMASTERCREATEACTIONPLAN));
         ret.addItem("Invite additional players to be Action Plan authors", new MCommand(MENUGAMEMASTERINVITEAUTHORSCLICK)).setIcon(FontAwesome.USER_MD);
     }
 
-    //ret.addItem("Unlock Action Plan editing", new MCommand(MENUGAMEMASTERUNLOCKEDITSCLICK));
     ret.addSeparator();
     ret.addItem("Show active player count overall", new MCommand(MENUGAMEMASTERACTIVECOUNTCLICK)).setIcon(FontAwesome.USER_MD);
     ret.addItem("Show active player count by server", new MCommand(MENUGAMEMASTERACTIVECOUNTBYSERVERCLICK)).setIcon(FontAwesome.USER_MD);
@@ -152,14 +140,13 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
 
     ret.addSeparator();
 
-    if (Game.get().isActionPlansEnabled())
+    if (Game.getTL().isActionPlansEnabled())
         ret.addItem("Show displayed Action Plan as html", new MCommand(MENUGAMEMASTER_EXPORT_SELECTED_ACTIONPLAN));
     
     ret.addItem("Show displayed Idea Card tree as html", new MCommand(MENUGAMEMASTER_EXPORT_SELECTED_CARD));
     ret.addItem("Open game Reports Index page", new MCommand(MENUGAMEMASTEROPENREPORTSPAGE)).setIcon(FontAwesome.FILE_TEXT_O);
     ret.addSeparator();
     ret.addItem("View (read-only) game designer values", new MCommand(MENUGAMEADMIN_BUILDGAMECLICK_READONLY));
-    //ret.addItem("Log out", new MCommand(MENUGAMEMASTERLOGOUTCLICK));
     return ret;
   }
 
@@ -182,7 +169,7 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
    */
   private MenuBar.MenuItem buildAdminMenu()
   {
-    Game game = Game.get(1L);
+    Game game = Game.getTL();
 
     MenuBar.MenuItem ret = menubar.addItem("Game Administrator", null); ret.setIcon(FontAwesome.COG);
     ret.addItem("Player administration", new MCommand(MENUGAMEMASTERUSERADMIN)).setIcon(FontAwesome.USER_MD);
@@ -191,16 +178,10 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     setMaxUsersMIText(game);
 
     ret.addItem("<a href='"+CLUSTERMONITORURL+"' target='"+CLUSTERMONITORTARGETWINDOWNAME+"'>Open cluster monitor</a>",new NullMCommand());
-    // ret.addItem("<a href='https://mmowgli.nps.edu/energy/monitoring' target='energymonitor'>Open energy monitor</a>",new NullMCommand());
-    // ret.addItem("<a href='https://mmowgli.nps.edu/piracy/monitoring' target='piracymonitor'>Open piracy monitor</a>",new NullMCommand());
 
     ret.addSeparator();
-    // ret.addItem("Edit game parameters", new MCommand(MENUGAMEMASTEREDITCLICK));
-    // sources removed ret.addItem("Game setup", new MCommand(MENUGAMESETUPCLICK));
-    // ret.addItem("Zero basic scores for this move", new MCommand(MENUGAMEMASTERZEROBASICSCORES));
     ret.addItem("Dump player emails in plain text", new MCommand(MENUGAMEADMINDUMPEMAILS)).setIcon(FontAwesome.USER_MD);
     ret.addItem("Dump game master emails in plain text", new MCommand(MENUGAMEADMINDUMPGAMEMASTERS)).setIcon(FontAwesome.USER_MD);
-    //ret.addItem("Cleanup action plan invitees and authors", new MCommand(MENUGAMEADMINCLEANINVITEES));
     ret.addSeparator();
 
     topCardsRoMI = ret.addItem("Top idea cards read-only", topCardsReadOnlyChecked); topCardsRoMI.setIcon(FontAwesome.LOCK);
@@ -217,43 +198,7 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     ret.addSeparator();
 
     ret.addItem("Game login button displays and permissions", gamePermissionsClicked).setIcon(FontAwesome.SIGN_IN);
-    //allLoginsMI = ret.addItem("Allow all logins", allLoginsChecked); //new MCommand(MENUGAMEADMINSETLOGINS));
-    //allLoginsMI.setCheckable(true);
-    //allLoginsMI.setChecked(mp.isLoginAllowAll());
-    ////ga_LoginsMI = ret.addItem("&nbsp;&nbsp;Allow game admin logins",gaLoginsChecked);
-    ////ga_LoginsMI.setCheckable(true);
-    ////ga_LoginsMI.setChecked(game.isLoginAllowGameAdmins());
-    //gm_LoginsMI = ret.addItem("&nbsp;&nbsp;Allow game master logins",gmLoginsChecked);
-    //gm_LoginsMI.setCheckable(true);
-    //gm_LoginsMI.setChecked(mp.isLoginAllowGameMasters());
-    //gd_LoginsMI = ret.addItem("&nbsp;&nbsp;Allow game designer logins",gdLoginsChecked);
-    //gd_LoginsMI.setCheckable(true);
-    //gd_LoginsMI.setChecked(mp.isLoginAllowGameDesigners());
-    //noLoginsMI = ret.addItem("All no logins", noLoginsChecked);
-    //noLoginsMI.setCheckable(true);
-    //noLoginsMI.setChecked(game.isLoginAllowNone());
-
-    /*
-    adminLoginOnlyMI = ret.addItem("Restrict logins to game administrators", adminOnlyChecked);
-    adminLoginOnlyMI.setCheckable(true);
-    adminLoginOnlyMI.setChecked(!game.isLoginAllowAll() && game.isLoginAllowGameAdmins());
-    */
-    //signupRestrictedMI= ret.addItem("Restrict new user sign-in to VIP list entries", listSignupChecked);
-    //signupRestrictedMI.setCheckable(true);
-    //signupRestrictedMI.setChecked(mp.isRestrictByQueryList());
-    /*
-    signupIntervalRestrictedMI= ret.addItem("Restrict new user sign-in to Query database marked interval entries", intervalSignupChecked);
-    signupIntervalRestrictedMI.setCheckable(true);
-    signupIntervalRestrictedMI.setChecked(game.isRestrictByQueryListInterval());
-    */
-    //newSignupsRestrictedMI = ret.addItem("New game accounts closed",nonNewUsersChecked);
-    //newSignupsRestrictedMI.setCheckable(true);
-    //newSignupsRestrictedMI.setChecked(mp.isRegisteredLogonsOnly());
-
-    //queriesAcceptedMI = ret.addItem("Signup page enabled", queriesEnabledChecked);
-    //queriesAcceptedMI.setCheckable(true);
-    //queriesAcceptedMI.setChecked(game.getCurrentMove().getCurrentMovePhase().isSignupPageEnabled());
-
+    
     emailConfirmationMI = ret.addItem("Require new signup email confirmation",emailConfirmationChecked);
     emailConfirmationMI.setCheckable(true);
     emailConfirmationMI.setChecked(game.isEmailConfirmation());
@@ -265,120 +210,26 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
 
     ret.addSeparator();
 
-    String gameReports = Game.get().isActionPlansEnabled() ? "Publish Action Plan, Idea Card and Game Design reports now" : "Publish Idea Card and Game Design reports now";
+    String gameReports = Game.getTL().isActionPlansEnabled() ? "Publish Action Plan, Idea Card and Game Design reports now" : "Publish Idea Card and Game Design reports now";
     ret.addItem(gameReports, new MCommand(MENUGAMEADMINPUBLISHREPORTS)).setIcon(FontAwesome.FILE_TEXT_O);
 
-    if (Game.get().isActionPlansEnabled()) {
+    if (Game.getTL().isActionPlansEnabled()) {
         ret.addItem("Create and show Action Plans report in browser", new MCommand(MENUGAMEADMINEXPORTACTIONPLANS)).setIcon(FontAwesome.FILE_TEXT_O);
     }
 
     ret.addItem("Create and show Cards report in browser", new MCommand(MENUGAMEADMINEXPORTCARDS)).setIcon(FontAwesome.FILE_TEXT_O);
-
-//    ret.addSeparator();
-//    cardDBTestStartMI = ret.addItem("Begin Card db read test, 120Hz", new MCommand(MENUGAMEADMIN_START_CARD_DB_TEST));
-//    cardDBTestEndMI   = ret.addItem("End Card db read test, 120Hz",   new MCommand(MENUGAMEADMIN_END_CARD_DB_TEST));
-//    cardDBTestEndMI.setEnabled(false);
-//    userDBTestStartMI = ret.addItem("Begin User db read test, 120Hz", new MCommand(MENUGAMEADMIN_START_USER_DB_TEST));
-//    userDBTestEndMI   = ret.addItem("End User db read test, 120Hz",   new MCommand(MENUGAMEADMIN_END_USER_DB_TEST));
-//    userDBTestEndMI.setEnabled(false);
-
-//    ret.addSeparator();
-//    ret.addItem("Hack passwords", passwordHacker);
-
-//    ret.addSeparator();
-//    ret.addItem("Zero online player count, except self", new MCommand(MENUGAMEADMINZEROONLINEBITS)); not used
-
-//    ret.addItem("Debugging: Generate in-Vaadin-transaction exception", new MCommand(MENUGAMEADMINTESTEXCEPTION));
-//    ret.addItem("Debugging: Generate oob exception", new MCommand(MENUGAMEADMINTESTOOBEXCEPTION));
-
-//    ret.addSeparator();
-//    ret.addItem("Perform post-game score recalculation", new MCommand(MENUGAMEADMINPOSTGAMERECALCULATION));
 
     ret.addSeparator();
     ret.addItem("Advance game round and/or phase", advanceRoundClicked).setIcon(FontAwesome.ARROW_RIGHT);
     return ret;
   }
 
-/*
-  @SuppressWarnings("serial")
-  private Command passwordHacker = new Command()
-  {
-    @Override
-    public void menuSelected(MenuItem selectedItem)
-    {
-      final Window hackWindow = new Window("Password Hacker");
-      hackWindow.setModal(true);
-
-      VerticalLayout layout = (VerticalLayout) hackWindow.getContent();
-      layout.setMargin(true);
-      layout.setSpacing(true);
-      layout.setSizeUndefined();
-
-      layout.addComponent(new Label("UserName"));
-      final TextField tf = new TextField();
-      tf.setWidth("99%");
-      layout.addComponent(tf);
-
-      Button retrieveButt;
-      layout.addComponent(retrieveButt = new Button("Try to retrieve and decrypt password"));
-
-      layout.addComponent(new Label("Decrypted Password"));
-      final Label dePw = new Label("&nbsp;");
-      dePw.setContentMode(Label.CONTENT_XHTML);
-      dePw.setImmediate(true);
-      dePw.addStyleName("m-greyborder");
-      layout.addComponent(dePw);
-
-      Button doit;
-      layout.addComponent(doit = new Button("Hash password, reencrypt and update DB"));
-
-      getApplication().getMainWindow().addWindow(hackWindow);
-
-      ClickListener retrieveLis = new ClickListener()
-      {
-        @Override
-        public void buttonClick(ClickEvent event)
-        {
-          String nm = tf.getValue().toString();
-          if(nm == null || nm.length()<=0)
-            return;
-          User u = User.getUserWithUserName(nm);
-          if(u == null) {
-            dePw.setValue("no user by that name");
-            return;
-          }
-
-          try {
-            String pw = u.getPassword();
-            dePw.setValue(pw);
-          }
-          catch(Throwable t) {
-            dePw.setValue("cant get user password: "+t.getClass().getSimpleName()+" "+t.getLocalizedMessage());
-            return;
-          }
-        }
-      };
-
-      ClickListener doItLis = new ClickListener()
-      {
-        @Override
-        public void buttonClick(ClickEvent event)
-        {
-          didn't need to finish
-        }
-      };
-      retrieveButt.addListener(retrieveLis);
-      doit.addListener(doItLis);
-    }
-  };
- */
   @Override
-  public boolean gameUpdatedExternally(SingleSessionManager sMgr)
+  public boolean gameUpdatedExternallyTL()
   {
     boolean ret = false;
-    Session sess = M.getSession(sMgr);
     
-    Game game = Game.get(sess);
+    Game game = Game.getTL();
     if(cardsRoMI != null) {
       boolean oldck = cardsRoMI.isChecked();
       boolean newck = game.isCardsReadonly();
@@ -420,35 +271,8 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
 
     maxUsersMI.setText("Set login limit ("+num+")");
   }
-  /*
+
   @SuppressWarnings("serial")
-  private Command nonNewUsersChecked = new Command()
-  {
-    @Override
-    public void menuSelected(MenuItem selectedItem)
-    {
-       if(newSignupsRestrictedMI.isChecked())
-        controller.menuClick(MENUGAMEADMINSETNONEWSIGNUPS,menubar);
-      else
-        controller.menuClick(MENUGAMEADMINSETALLOWNEWSIGNUPS,menubar);
-    }
-  };
-  */
-  /*
-  @SuppressWarnings("serial")
-  private Command queriesEnabledChecked = new Command()
-  {
-    @Override
-    public void menuSelected(MenuItem selectedItem)
-    {
-       if(queriesAcceptedMI.isChecked())
-         controller.menuClick(MENUGAMEADMIN_QUERIES_ENABLED, menubar);
-      else
-        controller.menuClick(MENUGAMEADMIN_QUERIES_DISABLED,menubar);
-    }
-  };
-  */
- @SuppressWarnings("serial")
   private Command emailConfirmationChecked = new Command()
   {
     @Override
@@ -486,31 +310,21 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
         controller.menuClick(MENUGAMEADMINSETTOPCARDSREADWRITE,menubar);
     }
   };
-/*
-  @SuppressWarnings("serial")
-  private Command adminOnlyChecked = new Command()
-  {
-    @Override
-    public void menuSelected(MenuItem selectedItem)
-    {
-      if(selectedItem.isChecked())
-        controller.menuClick(MENUGAMEADMIN_ADMIN_LOGIN_ONLY,menubar);
-      else
-        controller.menuClick(MENUGAMEADMIN_ADMIN_LOGIN_ONLY_REMOVE,menubar);
-    }
-  };
- */
 
   @SuppressWarnings("serial")
   private Command advanceRoundClicked = new Command()
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void menuSelected(MenuItem selectedItem)
     {
+      HSess.init();
       Window win=new AdvanceMoveDialog();
       UI.getCurrent().addWindow(win);
       win.center();
-
+      HSess.close();
     }
   };
 
@@ -530,96 +344,19 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
   private Command viewGamePermissionsClicked = new Command()
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void menuSelected(MenuItem selectedItem)
     {
+      HSess.init();
       Window win=new EntryPermissionsDialog(true); // mark as read-only
       UI.getCurrent().addWindow(win);
       win.center();
+      HSess.close();
     }
   };
-/*
-  @SuppressWarnings("serial")
-  private Command allLoginsChecked = new Command()
-  {
-    @Override
-    public void menuSelected(MenuItem selectedItem)
-    {
-      Game g = Game.get(1L);
-      MovePhase mp = g.getCurrentMove().getCurrentMovePhase();
-      if(selectedItem.isChecked()) {
-        gm_LoginsMI.setChecked(true); gm_LoginsMI.setEnabled(false);
-        gd_LoginsMI.setChecked(true); gd_LoginsMI.setEnabled(false);
-        //noLoginsMI.setChecked(false);
-        mp.loginAllowAll();
-        Game.save(g);
-      }
-      else {
-        gm_LoginsMI.setChecked(true); gm_LoginsMI.setEnabled(true);
-        gd_LoginsMI.setChecked(true); gd_LoginsMI.setEnabled(true);
-        mp.loginAllowNone();
-        mp.loginAllowGameAdmins(true); // always
-        mp.loginAllowGameMasters(true);
-        mp.loginAllowGameDesigners(true);
-        Game.save(g);
-        AppMenuBar.this.getWindow().showNotification("You may want to disallow logins for game masters and/or game designers", Window.Notification.TYPE_WARNING_MESSAGE);
-      }
-    }
-  };
-  */
- /* @SuppressWarnings("serial");
-  private Command noLoginsChecked = new Command()
-  {
-    @Override
-    public void menuSelected(MenuItem selectedItem)
-    {
-      Game g = Game.get(1L);
-      if(selectedItem.isChecked()) {
-        ga_LoginsMI.setChecked(false); ga_LoginsMI.setEnabled(true);
-        gm_LoginsMI.setChecked(false); gm_LoginsMI.setEnabled(true);
-        gd_LoginsMI.setChecked(false); gd_LoginsMI.setEnabled(true);
-        allLoginsMI.setChecked(false);
-        g.loginAllowNone();
-        Game.save(g);
-      }
-      else {
-        ga_LoginsMI.setChecked(false); ga_LoginsMI.setEnabled(true);
-        gm_LoginsMI.setChecked(false); gm_LoginsMI.setEnabled(true);
-        gd_LoginsMI.setChecked(false); gd_LoginsMI.setEnabled(true);
-        g.loginAllowNone();
-        Game.save(g);
-      }
-    }
 
-  };
-  */
-  /*
-  @SuppressWarnings("serial")
-  private Command gmLoginsChecked = new Command()
-  {
-    @Override
-    public void menuSelected(MenuItem selectedItem)
-    {
-      Game g = Game.get(1L);
-      MovePhase mp = g.getCurrentMove().getCurrentMovePhase();
-      mp.loginAllowGameMasters(selectedItem.isChecked());
-      Game.save(g);
-    }
-  };
-  */
-  /*
-  @SuppressWarnings("serial")
-  private Command gdLoginsChecked = new Command()
-  {
-    @Override
-    public void menuSelected(MenuItem selectedItem)
-    {
-      Game g = Game.get(1L);
-      MovePhase mp = g.getCurrentMove().getCurrentMovePhase();
-      mp.loginAllowGameDesigners(selectedItem.isChecked());
-      Game.save(g);
-    }
-  };
-  */
   @SuppressWarnings("serial")
   private Command gameReadOnlyChecked = new Command()
   {
@@ -632,38 +369,7 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
         controller.menuClick(MENUGAMEADMINSETGAMEREADWRITE,menubar);
     }
   };
-  /*
-  @SuppressWarnings("serial")
-  private Command intervalSignupChecked = new Command()
-  {
-    @Override
-    public void menuSelected(MenuItem selectedItem)
-    {
-      if(selectedItem.isChecked()) {
-        controller.menuClick(MENUGAMEADMINSETSIGNUPINTERVALRESTRICTED,menubar);
-        signupRestrictedMI.setChecked(true);   // paired
-      }
-      else
-        controller.menuClick(MENUGAMEADMINSETSIGNUPINTERVALOPEN,menubar);
-    }
-  };
-  */
-  /*
-  @SuppressWarnings("serial")
-  private Command listSignupChecked = new Command()
-  {
-    @Override
-    public void menuSelected(MenuItem selectedItem)
-    {
-      if(selectedItem.isChecked())
-        controller.menuClick(MENUGAMEADMINSETSIGNUPRESTRICTED,menubar);
-      else {
-        controller.menuClick(MENUGAMEADMINSETSIGNUPOPEN,menubar);
-        signupIntervalRestrictedMI.setChecked(false); // paired.
-      }
-    }
-  };
-  */
+
   public boolean showDesignerMenu(boolean yn)
   {
     if(yn) {
@@ -755,74 +461,5 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     @Override
     public void menuSelected(MenuItem selectedItem)
     { }
-  }
-
-  public static boolean isAdminMenuEvent(MmowgliEvent mEv)
-  {
-    switch(mEv) {
-    case MENUGAMEADMIN_END_EMAILCONFIRMATION:
-    case MENUGAMEADMIN_START_EMAILCONFIRMATION:
-    case MENUGAMEADMINCLEANINVITEES:
-    case MENUGAMEADMINDUMPEMAILS:
-    case MENUGAMEADMINDUMPGAMEMASTERS:
-    case MENUGAMEADMINEXPORTACTIONPLANS:
-    case MENUGAMEADMINEXPORTCARDS:
-    case MENUGAMEADMINLOGINLIMIT:
-    case MENUGAMEADMINPUBLISHREPORTS:
-    case MENUGAMEADMINSETCARDSREADONLY:
-    case MENUGAMEADMINSETCARDSREADWRITE:
-    case MENUGAMEADMINSETGAMEREADONLY:
-    case MENUGAMEADMINSETGAMEREADWRITE:
-    case MENUGAMEADMINSETTOPCARDSREADONLY:
-    case MENUGAMEADMINSETTOPCARDSREADWRITE:
-    case MENUGAMEMASTERADDTOVIPLIST:
-    case MENUGAMEMASTERUSERADMIN:
-    case MENUGAMEMASTERVIEWVIPLIST:
-    //case MENUGAMEMASTERZEROBASICSCORES:
-      return true;
-    default:
-      return false;
-    }
-  }
-
-  public static boolean isGameMasterMenuEvent(MmowgliEvent mEv)
-  {
-    switch(mEv) {
-    case MENUGAMEMASTER_EXPORT_SELECTED_ACTIONPLAN:
-    case MENUGAMEMASTER_EXPORT_SELECTED_CARD:
-    case MENUGAMEMASTERACTIVECOUNTBYSERVERCLICK:
-    case MENUGAMEMASTERACTIVECOUNTCLICK:
-    case MENUGAMEMASTERBLOGHEADLINE:
-    case MENUGAMEMASTERBROADCAST:
-    case MENUGAMEMASTERBROADCASTTOGMS:
-    case MENUGAMEMASTERCARDCOUNTCLICK:
-    case MENUGAMEMASTERCREATEACTIONPLAN:
-    case MENUGAMEMASTERINVITEAUTHORSCLICK:
-    case MENUGAMEMASTERLOGOUTCLICK:
-    case MENUGAMEMASTERMONITOREVENTS:
-    case MENUGAMEMASTEROPENREPORTSPAGE:
-    case MENUGAMEMASTERPOSTCOMMENT:
-    case MENUGAMEMASTERTOTALREGISTEREDUSERS:
-    case MENUGAMEMASTERUNLOCKEDITSCLICK:
-    case MENUGAMEMASTERUSERPOLLINGCLICK:
-      return true;
-
-    default:
-      return false;
-    }
-
-  }
-
-  public static boolean isGameDesignerMenuEvent(MmowgliEvent mEv)
-  {
-    switch(mEv) {
-    case MENUGAMEADMIN_BUILDGAMECLICK:
-    case MENUGAMEADMIN_EXPORTGAMESETTINGS:
-    case MENUGAMEADMINDUMPSIGNUPS:
-      return true;
-
-    default:
-      return false;
-    }
   }
 }
