@@ -33,7 +33,7 @@
 */
 package edu.nps.moves.mmowgli.components;
 
-import static edu.nps.moves.mmowgli.MmowgliEvent.*;
+import static edu.nps.moves.mmowgli.MmowgliEvent.SHOWUSERPROFILECLICK;
 
 import java.util.List;
 
@@ -53,8 +53,9 @@ import com.vaadin.ui.themes.BaseTheme;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
@@ -99,25 +100,25 @@ public class UserTable extends Table implements Button.ClickListener
   
   public static UserTable makeLeaderBoardTable()
   {
-    UserTable tab = _makeEmptyLeaderBoardTable();
+    UserTable tab = _makeEmptyLeaderBoardTableTL();
     tab.initFromDataSource(new LeaderBoardContainer<User>());
     tab.setPageLength(30);
     tab.sortByBasicScore();
     return tab;
   }
   
-  public static UserTable makeLeaderBoardTable(int moveNum)
+  public static UserTable makeLeaderBoardTableTL(int moveNum)
   {
-    UserTable tab = _makeEmptyLeaderBoardTable(moveNum);
+    UserTable tab = _makeEmptyLeaderBoardTableTL(moveNum);
     tab.initFromDataSource(new LeaderBoardContainer<User>());
     tab.setPageLength(30);
     tab.sortByBasicScore();
     return tab;
   }
   
-  public static Table makeLeaderBoardCombinedScoreTable()
+  public static Table makeLeaderBoardCombinedScoreTableTL()
   {
-    UserTable tab = _makeEmptyLeaderBoardTableCombinedScore();
+    UserTable tab = _makeEmptyLeaderBoardTableCombinedScoreTL();
     tab.initFromDataSource(new LeaderBoardContainer<User>());
     tab.setPageLength(30);
     tab.sortByBasicScore();
@@ -129,7 +130,7 @@ public class UserTable extends Table implements Button.ClickListener
   {
     public LeaderBoardContainer()
     {
-      this(VHib.getSessionFactory());
+      this(HSess.getSessionFactory());
     }
     public LeaderBoardContainer(SessionFactory fact)
     {
@@ -137,9 +138,9 @@ public class UserTable extends Table implements Button.ClickListener
     }
     
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
-      Criteria crit = super.getBaseCriteria();
+      Criteria crit = super.getBaseCriteriaTL();
       crit.add(Restrictions.eq("gameMaster", false))
       .add(Restrictions.eq("administrator", false))
       .add(Restrictions.eq("accountDisabled", false))
@@ -149,11 +150,11 @@ public class UserTable extends Table implements Button.ClickListener
     }
   }
   
-  private static UserTable _makeEmptyLeaderBoardTable()
+  private static UserTable _makeEmptyLeaderBoardTableTL()
   {
     String[] cols,names;
     int[] widths;
-    if(Game.get().isActionPlansEnabled()) {
+    if(Game.getTL().isActionPlansEnabled()) {
       cols  = new String[]{ ORDER_COLUMN,AVATAR_COLUMN, USERNAME_COLUMN, LOCATION_COLUMN, BASICSCORE_COLUMN, INNOVATIONSCORE_COLUMN };
       names = new String[]{ "rank", "", "name", "location", "exploration pts", "innovation pts" };
       widths= new int[]   {45,30,150,-1,150,150};
@@ -170,11 +171,11 @@ public class UserTable extends Table implements Button.ClickListener
     return tab;    
   }
   
-  private static UserTable _makeEmptyLeaderBoardTableCombinedScore()
+  private static UserTable _makeEmptyLeaderBoardTableCombinedScoreTL()
   {
     String[] cols,names;
     int[] widths;
-    if(Game.get().isActionPlansEnabled()) {
+    if(Game.getTL().isActionPlansEnabled()) {
        cols  = new String[]{ ORDER_COLUMN,AVATAR_COLUMN, USERNAME_COLUMN, LOCATION_COLUMN, BASIC_COMBINED_SCORE_COLUMN, INNOV_COMBINED_SCORE_COLUMN };
        names = new String[]{ "rank", "", "name", "location", "exploration pts", "innovation pts" };
        widths= new int[]   {45,30,150,-1,150,150};
@@ -193,11 +194,11 @@ public class UserTable extends Table implements Button.ClickListener
   }
 
   // Move number is 1-based
-  private static UserTable _makeEmptyLeaderBoardTable(int moveNum)
+  private static UserTable _makeEmptyLeaderBoardTableTL(int moveNum)
   {
     String[] cols,names;
     int[] widths;
-    if(Game.get().isActionPlansEnabled()) {
+    if(Game.getTL().isActionPlansEnabled()) {
       cols =  new String[]{ ORDER_COLUMN,AVATAR_COLUMN, USERNAME_COLUMN, LOCATION_COLUMN, BASICSCORE_BY_MOVE_COLUMN[moveNum-1], INNOVSCORE_BY_MOVE_COLUMN[moveNum-1] };
       names=  new String[]{ "rank", "", "name", "location", "exploration pts", "innovation pts" };
       widths= new int[]   {45,30,150,-1,150,150};
@@ -215,11 +216,11 @@ public class UserTable extends Table implements Button.ClickListener
     return tab;    
    
   }
-  public static UserTable makeBuddyTable()
+  public static UserTable makeBuddyTableTL()
   {
     String[] cols,names;
     int[] widths;
-    if(Game.get().isActionPlansEnabled()) {
+    if(Game.getTL().isActionPlansEnabled()) {
       cols = new String[]{ AVATAR_COLUMN, USERNAME_COLUMN, LOCATION_COLUMN, BASICSCORE_COLUMN, INNOVATIONSCORE_COLUMN};
       names= new String[]{ "", "name", "location", "basic points", "innovation points"};
       widths= new int[]{30,150,-1,110,150};
@@ -235,6 +236,7 @@ public class UserTable extends Table implements Button.ClickListener
     return tab;
   }
   
+  @HibernateSessionThreadLocalConstructor
   public UserTable(String caption, String[] visibleColumns, String[] displayedNames, int[] columnWidths)
   {
     super(caption);
@@ -253,9 +255,14 @@ public class UserTable extends Table implements Button.ClickListener
     {
       private static final long serialVersionUID = 1L;
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void itemClick(ItemClickEvent event)
       {
-        Mmowgli2UI.getGlobals().getController().handleEvent(SHOWUSERPROFILECLICK,event.getItemId(),UserTable.this); 
+        HSess.init();
+        Mmowgli2UI.getGlobals().getController().handleEventTL(SHOWUSERPROFILECLICK,event.getItemId(),UserTable.this); 
+        HSess.close();
       }
     });
   }
@@ -429,10 +436,6 @@ public class UserTable extends Table implements Button.ClickListener
         return b;
       }
       if(USERNAME_COLUMN.equals(columnId)) {
-        //IDNativeButton uButt = new IDNativeButton(user.getUserName(),SHOWUSERPROFILECLICK,user.getId());
-        //uButt.setStyleName(BaseTheme.BUTTON_LINK);
-        //uButt.addStyleName("m-link-button");
-        //return uButt;
         Label lab = new Label(user.getUserName());
         lab.addStyleName("m-userTableText");
         return lab;
@@ -444,17 +447,7 @@ public class UserTable extends Table implements Button.ClickListener
         Label lab = new Label(sLis==null?"":sLis.get(0));
         lab.addStyleName("m-userTableText");
         return lab;
-
- /*       
-        List<Email> mailLis = user.getEmailAddresses();
-        if(mailLis != null && mailLis.size()<=0)
-          mailLis = null;
-        Label lab = new Label(mailLis==null?"":mailLis.get(0).getAddress());
-        lab.addStyleName("m-userTableText");
-        return lab;
-        */
       }
-
       return new Label("Program error in UserTable.java");
     }
   }
