@@ -32,6 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 package edu.nps.moves.mmowgli.hibernate;
+
+
 /**
  * DbUtils.java
  * Created on Dec 6, 2013
@@ -64,6 +66,35 @@ public class DbUtils
       s = s.substring(0,509);
     
     return s;
+  }
+  
+  /*
+   * Using the post-update event listener, I found that update events were not being generated on updates to the "joins".  For instance,
+   * if I mark a card as a favorite, that card goes into the favorites list in the User object.  Hibernate adds the card and user ids to
+   * the "User_FavoriteCards" join table.  Neither the user nor the carc db row is changed, so apparently no event gets generated for "post-update".
+   * This routine, called from every db class update routine bumps an unused field in the row (linkedin_id) and that forces the event
+   * Update...use the evict.
+   */
+  
+  public static void forceUpdateEvent(Object o)
+  {
+    HSess.get().evict(o);
+/*    
+    try {
+      Method setter = o.getClass().getDeclaredMethod("setLinkedInId", String.class);
+
+      if (setter == null) {
+        MSysOut.println("No setter for update-forcing in " + o.getClass().getSimpleName());
+      }
+      else {
+        Double junk = Math.random();
+        setter.invoke(o, Double.toString(junk));   // should do it.
+      }
+    }
+    catch (Exception ex) {
+      MSysOut.println("Exception forcing db update for class " + o.getClass().getSimpleName());
+    }
+    */
   }
 
 }
