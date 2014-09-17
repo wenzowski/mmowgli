@@ -60,8 +60,9 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.EmailPii;
 import edu.nps.moves.mmowgli.db.pii.Query2Pii;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -85,6 +86,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
 
   User user = null;  // what gets returned
 
+  @HibernateSessionThreadLocalConstructor
   public RegistrationPagePopupFirst(ClickListener listener)
   {
     super(listener);
@@ -195,37 +197,6 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
     lab.setWidth(null);  // makes it undefined so it's not 100%
     contentVLayout.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
 
- /*
-    contentVLayout.addComponent(lab = new Label("Enter characters from image:"));
-    lab.addStyleName("m-dialog-label");
-
-    HorizontalLayout hl = new HorizontalLayout();
-    hl.addComponent(lab = new Label());
-    hl.setExpandRatio(lab, 1.0f);
-    hl.setSpacing(true);
-    hl.addComponent(captchaTf = new TextField());
-    //captchaTf.setColumns(15);
-   // hl.setExpandRatio(captchaTf, 1.0f);
-    hl.setComponentAlignment(captchaTf, Alignment.MIDDLE_CENTER);
-    captcha = buildCaptcha();
-    captchaEmbedded = buildCaptchaImage();
-    hl.addComponent(captchaEmbedded);
-
-    NativeButton redoCaptcha = new NativeButton();
-    redoCaptcha.addStyleName("borderless");
-    redoCaptcha.setIcon(app.globs().mediaLocator().getDialogRegenButton());
-    redoCaptcha.setHeight("24px");
-    redoCaptcha.setWidth("105px"); //"98px"); // bump it because of the margin or padding that I cant control
-
-    hl.addComponent(redoCaptcha);
-    hl.setComponentAlignment(redoCaptcha, Alignment.MIDDLE_CENTER);
-    redoCaptcha.addListener(new RedoListener());
-    hl.addComponent(lab = new Label());
-    hl.setExpandRatio(lab, 1.0f);
-
-    contentVLayout.addComponent(hl);
-    contentVLayout.setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
- */
     hl = new HorizontalLayout();
     hl.setWidth("100%");
     contentVLayout.addComponent(hl);
@@ -251,9 +222,9 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
    * where users are added to the db.  Hibernate transaction serialization may also deal with this.
    * Synchronized keywork would not help in a clustered environment, however.
    */
-  private User checkUserName(String uName, String email)//, String password)
+  private User checkUserNameTL(String uName, String email)//, String password)
   {
-    if( !checkClassField(User.class,"userName",uName.toLowerCase(), null)) //A
+    if( !checkClassFieldTL(User.class,"userName",uName.toLowerCase(), null)) //A
       return null;
     User u=null;
     UserPii uPii=null;
@@ -262,24 +233,20 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       u = new User(uName); //,hashedPassword);
 
       // A user id is auto-generated from this call (tdn)
-      User.save(u);  //B
+      User.saveTL(u);  //B
 
       // This is necessary to receive an email to activate your registration
-      Mmowgli2UI.getGlobals().setUserID(u.getId());
+      Mmowgli2UI.getGlobals().setUserIDTL(u.getId());
 
       uPii = new UserPii();
       uPii.setUserObjectId(u.getId());
       VHibPii.save(uPii);
 
-      u.setLevel(Level.getFirstLevel());
+      u.setLevel(Level.getFirstLevelTL());
       u.setRegisterDate(new Date());
       VHibPii.setUserPiiEmail(u.getId(), email);
 
-      //Email E = new Email(email,true);
-      //u.getEmailAddresses().add(E);
-      //Email.save(E);
-
-      User.update(u); // now update  // not needed now
+      User.updateTL(u);
       return u;
     }
     catch(Exception ex) {
@@ -288,18 +255,16 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
           VHibPii.delete(uPii);
         }catch(Throwable t){}
       if(u != null)
-        try{ User.delete(u); }catch(Throwable t) {}
+        try{ User.deleteTL(u); }catch(Throwable t) {}
 
       MSysOut.println("Checking new user, name = "+uName+"; unexpected exception: "+ex.getClass().getSimpleName()+" "+ex.getLocalizedMessage());
       return null;
     }
-    //User u = User.getUserWithUserName(HibernateContainers.getSession(), uName);  // this is a case-insensitive search, a function of the field being varchar in the db instead of varbinary
-    //return (u == null);
   }
 
-  private boolean checkInvitees(String checkEmail)
+  private boolean checkInviteesTL(String checkEmail)
   {
-    Game g = Game.get();
+    Game g = Game.getTL();
     MovePhase mp = g.getCurrentMove().getCurrentMovePhase();
     if(! mp.isRestrictByQueryList() )
       return true; // not checking
@@ -312,10 +277,6 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
 
     // A digest generator. THis should NOT be used to digest passwords; this should be used for emails only.
     StandardStringDigester emailDigester = VHibPii.getDigester();
-    //new StandardStringDigester();
-    //emailDigester.setAlgorithm("SHA-1"); // optionally set the algorithm
-    //emailDigester.setIterations(1);  // low iterations are OK, brute force attacks not a problem
-    //emailDigester.setSaltGenerator(new ZeroSaltGenerator()); // No salt; OK, because we don't fear brute force attacks
 
     String checkDigest = emailDigester.digest(checkEmail.trim().toLowerCase());
 
@@ -323,7 +284,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
     Criteria crit = sess.createCriteria(Query2Pii.class)
                     .add(Restrictions.eq("digest", checkDigest));
 
-    Criterion res = getIntervalRestriction();
+    Criterion res = getIntervalRestrictionTL();
     if(res != null)
       crit.add(res);
 
@@ -334,9 +295,9 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
   }
 
   @SuppressWarnings("unchecked")
-  public static Criterion getIntervalRestriction()
+  public static Criterion getIntervalRestrictionTL()
   {
-    Game game = Game.get(1L);
+    Game game = Game.getTL();
     if(!game.isRestrictByQueryListInterval())
       return null;
 
@@ -368,43 +329,12 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
     }
   }
 
-  /*
-  public static int QUERYFETCHSIZE = 5; //1000;
-  private boolean checkInviteesSlow(String email)
-  {
-    email = email.trim().toLowerCase();
-
-    Session sess = HibernateContainers.getSession();
-    Criteria crit = sess.createCriteria(Query2.class);
-    crit.setFetchSize(QUERYFETCHSIZE);
-    @SuppressWarnings("unchecked")
-    List<Query2> lis = (List<Query2>)crit.list();
-    Iterator<Query2> itr = lis.iterator();
-   // Collection<?> coll = Query2.getContainer().getItemIds();
-   // Iterator<?> itr = coll.iterator();
-
-    while(itr.hasNext()) {
-      for(int i=0;i<QUERYFETCHSIZE;i++) {
-        if(!itr.hasNext())
-          break;
-        Object id = itr.next();
-        Query2 q = (Query2)id; //Query2.get(id);
-        String qEmail = q.getEmail().trim().toLowerCase();
-        //System.out.println("Checking "+email+" against "+qEmail);
-        if(qEmail.equals(email))
-            return true;
-      }
-      Thread.yield();  // do 100 between yields
-    }
-    return false; // sorry
-  }
-  */
   public static boolean checkEmail(String email)
   {
     Session sess = VHibPii.getASession();
     String digested = getDigester().digest(email);
 
-    boolean ret = checkClassField(EmailPii.class,"digest",digested,sess); //"address",email, sess);
+    boolean ret = checkClassFieldTL(EmailPii.class,"digest",digested,sess); //TL ok
     sess.close();
     return ret;
   }
@@ -421,14 +351,14 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
   public static boolean checkEmail(String email, Session sess)
   {
     String digested = getDigester().digest(email);
-    boolean ret = checkClassField(EmailPii.class,"digest",digested,sess);
+    boolean ret = checkClassFieldTL(EmailPii.class,"digest",digested,sess);
     return ret;
   }
 
-  private static boolean checkClassField(Class<?> cls, String field, String value, Session sess)
+  private static boolean checkClassFieldTL(Class<?> cls, String field, String value, Session sess)
   {
     if(sess == null)
-     sess = VHib.getVHSession();
+     sess = HSess.get();
     Criteria crit = sess.createCriteria(cls).add(Restrictions.eq(field,value));
 
     @SuppressWarnings("rawtypes")
@@ -450,78 +380,63 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
   class MyContinueListener implements Button.ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
-     // emailTf, userIDTf, passwordTf, confirmTf, captchaTf;
+      HSess.init();
 
       // Checks:
       // 1. Email address has ampersand
       String email = emailTf.getValue().toString().trim();
       if(email == null || email.indexOf('@')==-1 || email.indexOf('.') == -1 || email.length()<5) {
-        errorOut("Invalid email address");
+        errorOutTL("Invalid email address");
+        HSess.close();
         return;
       }
-
+            
       // 2. No user already there with given email
       if(!checkEmail(email)){
-        errorOut("Email address already used.");
+        errorOutTL("Email address already used.");
+        HSess.close();
         return;
       }
 
       // 3. (email address in list of invitees?
-      if(!checkInvitees(email)) {
-        GameEventLogger.logRegistrationAttempt(email);     // visited/link stuff doesn't work in notification
-        errorOut("Email address not found on invitee list (or other reason).  Request an invitation at <a class='m-link-nodifference-white' href='http://mmowgli.nps.edu/trouble'>http://mmowgli.nps.edu/trouble</a>.");
+      if(!checkInviteesTL(email)) {
+        GameEventLogger.logRegistrationAttemptTL(email);     // visited/link stuff doesn't work in notification
+        errorOutTL("Email address not found on invitee list (or other reason).  Request an invitation at <a class='m-link-nodifference-white' href='http://mmowgli.nps.edu/trouble'>http://mmowgli.nps.edu/trouble</a>.");
+        HSess.close();
         return;
       }
-
-//      Session sess = HibernateContainers.getSession();
-//      Criteria crit = sess.createCriteria(Email.class)
-//      .add(Restrictions.eq("address", email));
-//
-//      /* could search through users, but the above is easier and probably faster.
-//       * you would do it my making a criteria on the criteria:
-//        crit = crit.createCriteria("emailAddresses")
-//        .add(Restrictions.eq("address", email));
-//      */
-//
-//      @SuppressWarnings("rawtypes")
-//      List lis = crit.list();
-//      if(lis != null && lis.size()>0) {
-//        errorOut("Email address already used.");
-//        return;
-//      }
 
       // 4. pw and confirm match
       String pw = passwordTf.getValue().toString();
       if(pw == null || pw.length()<3) {
-        errorOut("Enter a password of at least 3 characters");
+        errorOutTL("Enter a password of at least 3 characters");
+        HSess.close();
         return;
       }
       String pwconf = confirmTf.getValue().toString();
       //if(!pw.toLowerCase().equals(pwconf.toLowerCase())) {
       if(!pw.equals(pwconf)) {
-        errorOut("Passwords do not match.");
+        errorOutTL("Passwords do not match.");
+        HSess.close();
         return;
       }
 
       // 5. No user already there with given username
       String uname = userIDTf.getValue().toString();
-      User _usr = checkUserName(uname,email); //, pw);       // This saves the user and builds UserPii
+      User _usr = checkUserNameTL(uname,email); //, pw);       // This saves the user and builds UserPii
       if(_usr == null) {
-        errorOut("Existing user with that name/ID");
+        errorOutTL("Existing user with that name/ID");
+        HSess.close();
         return;
       }
 
       user = _usr;
- /*
-      // 6. Captcha correct
-      String captEntered = captchaTf.getValue().toString();
-      if(captEntered == null || !captEntered.equals(captcha.getAnswer())) {
-        errorOut("Wrong match of image characters.  Press regen and try again.");
-        return;
-      }
-*/
+
       // 7. Something entered for first and last name
       String fName = firstNameTf.getValue().toString().trim();
       String lName = lastNameTf.getValue().toString().trim();
@@ -533,105 +448,34 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       UserPii uPii = VHibPii.getUserPii(user.getId()); //new UserPii();
       uPii.setUserObjectId(user.getId());
       uPii.setRealFirstName(fName);
-      //user.setRealFirstName(fName);
-      //user.setRealLastName(lName);
       uPii.setRealLastName(lName);
       String hashedPassword = new StrongPasswordEncryptor().encryptPassword(pw);
       uPii.setPassword(hashedPassword);
       VHibPii.update(uPii);
 
-      user.setAvatar(Avatar.get(chooser.getSelectedAvatarId()));
-      User.update(user);
+      user.setAvatar(Avatar.getTL(chooser.getSelectedAvatarId()));
+      User.updateTL(user);
 
       VHibPii.markInGame(user);
+      HSess.close();
 
       listener.buttonClick(event);
     }
 
-    private void errorOut(String s)
+    private void errorOutTL(String s)
     {
-      //RegistrationPagePopupFirst.this.showNotification("Could not register",s,Notification.TYPE_ERROR_MESSAGE);
-      //app.getMainWindow().showNotification("Could not register",s,Notification.TYPE_ERROR_MESSAGE);
-      Notification.show("Could not register",s,Notification.Type.ERROR_MESSAGE);
-        if (user != null) {
-            User.delete(user);
-            UserPii uPii = VHibPii.getUserPii(user.getId());
-            VHibPii.delete(uPii);
-            EmailPii epii = VHibPii.getUserPiiEmail(uPii.getUserObjectId());
-            VHibPii.delete(epii);
-        }
+      Notification.show("Could not register", s, Notification.Type.ERROR_MESSAGE);
+      if (user != null) {
+        User.deleteTL(user);
+        UserPii uPii = VHibPii.getUserPii(user.getId());
+        VHibPii.delete(uPii);
+        EmailPii epii = VHibPii.getUserPiiEmail(uPii.getUserObjectId());
+        VHibPii.delete(epii);
+      }
       user = null;
     }
   }
-  /*
-  class RedoListener implements Button.ClickListener
-  {
-    private static final long serialVersionUID = -5867508420460164992L;
 
-    @Override
-    public void buttonClick(ClickEvent event)
-    {
-      captcha = buildCaptcha();
-      Embedded em = buildCaptchaImage();
-
-      captchaEmbedded.setSource(em.getSource());
-      //captchaTf.setValue(captcha.getAnswer()); //todo remove...this is a test
-      captchaEmbedded.requestRepaint();
-    }
-  }
-
-  // Choose chars from this list, avoid i, l, 1, 0, o and some others
-  char[] srcChars = new char[] { 'a', 'b', 'c', 'd',
-      'e', 'f', 'g', 'h', 'k', 'm', 'n', 'p', 'r', 'w', 'x', 'y',
-      '2', '3', '4', '5', '6', '7', '8', };
-
-  private Captcha buildCaptcha()
-  {
-    Captcha.Builder bldr = new Captcha.Builder(180, 50); // w,h
-    //bldr.addText();  default len = 5
-    bldr.addText(new DefaultTextProducer(8,srcChars));
-    bldr.gimp();
-    bldr.addNoise(new StraightLineNoiseProducer());
-    return bldr.build();
-  }
-
-  private Embedded buildCaptchaImage()
-  {
-    try {
-      BufferedImage bi = captcha.getImage();
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ImageIO.write(bi, "png", baos);
-      final InputStream is = new ByteArrayInputStream(baos.toByteArray());
-      Resource res = buildCaptchaStreamResource(is);
-
-      Embedded em = new Embedded(null, res);
-      return em;
-    }
-    catch (IOException ex) {
-      throw new RuntimeException("Program error in RegistrationPagePopupFirst.java");
-    }
-  }
-
-  private Resource buildCaptchaStreamResource(final InputStream is)
-  {
-    StreamResource.StreamSource ss = new StreamResource.StreamSource()
-    {
-      private static final long serialVersionUID = 1L;
-
-      @Override
-      public InputStream getStream()
-      {
-        return is;
-      }
-    };
-
-    StreamResource sr = new StreamResource(ss, "captcha.png", app);
-    sr.setCacheTime(0); // needs to be reloaded each time
-    SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-    sr.setFilename("captcha"+df.format(new Date())+".png");
-    return sr;
-  }
-  */
   @Override
   public User getUser()
   {
@@ -649,6 +493,4 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
   {
     return 585;
   }
-
-
 }
