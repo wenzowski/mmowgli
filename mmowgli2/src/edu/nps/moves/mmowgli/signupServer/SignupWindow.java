@@ -33,8 +33,6 @@
 */
 package edu.nps.moves.mmowgli.signupServer;
 
-import org.hibernate.Session;
-
 import com.vaadin.event.MouseEvents;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Page;
@@ -42,11 +40,12 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.GameLinks;
 import edu.nps.moves.mmowgli.db.pii.Query2Pii;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * SignupWindow.java
@@ -66,22 +65,34 @@ public class SignupWindow extends Window
   private TextField emailTF;
   private TextField interestTF;
   private String gameImagesUrl;
-  private SignupServer ui;
+  private final SignupServer ui;
+  private String appUrl;
   
-  public SignupWindow(String title, SignupServer ui, String gameImagesUrl)
+  @SuppressWarnings("serial")
+  @HibernateSessionThreadLocalConstructor
+  public SignupWindow(String title, SignupServer ssui)
   {
     super(title);
-    this.ui = ui;
-    this.gameImagesUrl = gameImagesUrl;
+    this.ui = ssui;
+    gameImagesUrl = AppMaster.instance().getGameImagesUrlString();
     if(!gameImagesUrl.endsWith("/"))
       gameImagesUrl = gameImagesUrl+"/";
+    appUrl = Page.getCurrent().getLocation().toString();
+    appUrl = appUrl.substring(0,appUrl.lastIndexOf("/"));
     
     setContent(new Content());
+    this.addCloseListener(new CloseListener()
+    {
+      @Override
+      public void windowClose(CloseEvent e)
+      {
+        ui.quitAndGoTo(appUrl);        
+      }     
+    });
   }
   
   String thanksHdr1 = "Thanks for your interest in the <a href='";
   String thanksHdr2 = "'>";
-  //String thanksHdr3 = " mmowgli</a>.";
   String thanksHdr3 = "</a> game.";
   
   //String bannerUrl = "https://web.mmowgli.nps.edu/mmowMedia/images/mmowgli_logo_final.png";
@@ -95,19 +106,20 @@ public class SignupWindow extends Window
   {
     private static final long serialVersionUID = 1L;
 
+    @HibernateSessionThreadLocalConstructor
     public Content()
     {
       Label lab;
       Button submitButton;
       
+      setMargin(true);
+      
       lab = new Label();
       lab.setHeight("30px");
       addComponent(lab);
       
-      SingleSessionManager ssm = new SingleSessionManager();
-      Session sess = ssm.getSession();
-      Game g = Game.get(sess);
-      GameLinks gl = GameLinks.get(sess);
+      Game g = Game.getTL();
+      GameLinks gl = GameLinks.getTL();
       String signupImgLink = g.getCurrentMove().getCurrentMovePhase().getSignupHeaderImage();
       if(signupImgLink != null) {
         if(!signupImgLink.toLowerCase().startsWith("http"))
@@ -129,7 +141,8 @@ public class SignupWindow extends Window
       VerticalLayout vl = new VerticalLayout();
       addComponent(vl);
       setComponentAlignment(vl,Alignment.MIDDLE_CENTER);
-      vl.setWidth("66%");
+      vl.setWidth("700px"); //"66%");
+      
       vl.addStyleName("m-greyborder");
       vl.setMargin(true);
       vl.setSpacing(true);
@@ -182,10 +195,10 @@ public class SignupWindow extends Window
       setComponentAlignment(npsBanner, Alignment.MIDDLE_CENTER);
       */
       
-      vl.setComponentAlignment(lab, Alignment.MIDDLE_CENTER); 
+      vl.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
       
-      ssm.setNeedsCommit(false);
-      ssm.endSession();
+      lab = new Label();
+      lab.setHeight("30px");
     }
 
     @Override
@@ -212,9 +225,6 @@ public class SignupWindow extends Window
       }
       SignupHandler.handle(email, interestTF.getValue().toString());
       
-//      if(SignupWindow.this.thanksForInterestLink != null)
-//        app.setLogoutURL(SignupWindow.this.thanksForInterestLink);
-//      app.close();
       ui.quitAndGoTo(SignupWindow.this.thanksForInterestLink);
     }
   }
@@ -226,11 +236,7 @@ public class SignupWindow extends Window
     @Override
     public void click(com.vaadin.event.MouseEvents.ClickEvent event)
     {
-//      if(SignupWindow.this != null)
-//        app.setLogoutURL(SignupWindow.this.aboutLink);
-//      app.close();
       ui.quitAndGoTo(SignupWindow.this.aboutLink);
-
     }   
   }
 }
