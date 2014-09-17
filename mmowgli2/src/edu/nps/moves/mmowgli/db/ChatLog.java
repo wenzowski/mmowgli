@@ -35,14 +35,16 @@ package edu.nps.moves.mmowgli.db;
 
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.persistence.*;
 
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * ChatLog.java
@@ -69,21 +71,15 @@ public class ChatLog implements Serializable
   {
   }
   
-  public static ChatLog get(Object id)
+  public static void updateTL(ChatLog c)
   {
-    return (ChatLog)VHib.getVHSession().get(ChatLog.class, (Serializable)id);
+    HSess.get().update(c);   
   }
  
-  public static void update(ChatLog c)
+  public static void saveTL(ChatLog c)
   {
-    VHib.getVHSession().update(c);   
+    HSess.get().save(c);
   }
- 
-  public static void save(ChatLog c)
-  {
-    VHib.getVHSession().save(c);    
-  }
-  
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(nullable = false)
