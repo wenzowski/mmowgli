@@ -39,11 +39,7 @@ import java.util.*;
 import javax.persistence.*;
 
 import org.hibernate.Session;
-
-//import com.vaadin.data.hbnutil.HbnContainer;
-
-import edu.nps.moves.mmowgli.hibernate.Sess;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * One game represents an interaction that may have several "turns". For example, a game about piracy in Somalia.
@@ -166,12 +162,6 @@ public class Game implements Serializable
   public static short LOGIN_ALLOW_ALL = -1; //0xFFFF;
   public static short LOGIN_ALLOW_NONE = 0x0;
 */  
- /* @SuppressWarnings("unchecked")
-  public static HbnContainer<Game> getContainer()
-  {
-    return (HbnContainer<Game>) HibernateContainers.getContainer(Game.class);
-  }
-*/
   public static Game get(Session sess)
   {
     return get(sess,1L);  //only one entry in current design
@@ -182,19 +172,14 @@ public class Game implements Serializable
     return (Game)sess.get(Game.class, id);
   }
   
-  public static Game get()
+  public static Game getTL()
   {
-    return get(1L);  //only one entry in current design
+    return getTL(1L);
   }
   
-  public static Game get(Serializable id)
+  public static Game getTL(Object id)
   {
-    return get(VHib.getVHSession(),id);
-  }
-  
-  public static void save(Game g)
-  {
-    VHib.getVHSession().save(g);
+    return (Game)HSess.get().get(Game.class, (Serializable)id);
   }
   
   /**
@@ -429,19 +414,14 @@ public class Game implements Serializable
     this.maxUsersRegistered = maxUsersRegistered;
   }
 
-  public static void update(Game g)
+  public static void updateTL()
   {
-    Sess.sessUpdate(g);      
+    HSess.get().update(Game.getTL());
   }
-  
-  public static void update()
+  // This is needed for game designer
+  public static void updateTL(Game g) 
   {
-    update(Game.get());
-  }
-  
-  public static Game merge(Game g)
-  {
-    return (Game)Sess.sessMerge(g);
+    HSess.get().update(g);
   }
  
   @OneToMany(cascade = CascadeType.ALL)
