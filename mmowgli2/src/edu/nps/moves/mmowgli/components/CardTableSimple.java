@@ -47,6 +47,10 @@ import edu.nps.moves.mmowgli.AppEvent;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 
 /**
  * CardTable.java
@@ -76,8 +80,6 @@ public class CardTableSimple extends Table implements ItemClickListener
     else
       this.container = cntr;   
 
-//    setWidth("97%");setWidth("700px"); //test
-//    setHeight("600px");
     setSelectable(true);
     setColumnHeaderMode(Table.ColumnHeaderMode.HIDDEN);
     setMultiSelect(false);
@@ -98,13 +100,18 @@ public class CardTableSimple extends Table implements ItemClickListener
   
   @SuppressWarnings("rawtypes")
   @Override
+  @MmowgliCodeEntry
+  @HibernateOpened
+  @HibernateClosed
   public void itemClick(ItemClickEvent event)
   {
+    HSess.init();
     //if (event.isDoubleClick()) {
       EntityItem item = (EntityItem) event.getItem();
       Card card = (Card) ((EntityItem) item).getPojo();
-      Mmowgli2UI.getGlobals().getController().miscEvent(new AppEvent(CARDCLICK, this, card.getId()));
+      Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(CARDCLICK, this, card.getId()));
     //}
+    HSess.close();
   }
   
   protected void setAllColumnWidths()
