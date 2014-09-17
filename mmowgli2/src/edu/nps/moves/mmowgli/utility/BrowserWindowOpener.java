@@ -1,7 +1,5 @@
 package edu.nps.moves.mmowgli.utility;
 
-import java.util.UUID;
-
 import com.vaadin.ui.JavaScript;
 
 /**
@@ -27,21 +25,26 @@ public class BrowserWindowOpener
     JavaScript.getCurrent().execute("window.open('"+url+"','"+windowName+"');");
   }
   
-  private static String winName="win1xxx";
+  private static String winVar="win1xxx";
   public static void openWithHTML(String htmlStr, String title, String windowName)
   {
     StringBuilder javascript = new StringBuilder();
-    htmlStr = openCommon(htmlStr,javascript);
- 
-    javascript.append(winName);
+    htmlStr = openCommon(htmlStr,windowName,javascript);
+    
+    javascript.append(winVar);
+    javascript.append(".document.title='");
+    javascript.append(title);
+    javascript.append("';\n");
+    
+    javascript.append(winVar);
     javascript.append(".document.open();\n");
     
-    javascript.append(winName);
+    javascript.append(winVar);
     javascript.append(".document.write(\"");
     javascript.append(htmlStr);
     javascript.append("\");\n"); 
     
-    javascript.append(winName);
+    javascript.append(winVar);
     javascript.append(".document.close();\n");
     
     //System.out.println(javascript.toString());
@@ -52,9 +55,14 @@ public class BrowserWindowOpener
   {
     
     StringBuilder javascript = new StringBuilder();
-    htmlStr=openCommon(htmlStr,javascript);
+    htmlStr=openCommon(htmlStr,windowName,javascript);
      
-    javascript.append(winName);
+    javascript.append(winVar);
+    javascript.append(".document.title='");
+    javascript.append(title);
+    javascript.append("';\n");
+    
+    javascript.append(winVar);
     javascript.append(".document.body.innerHTML=\"");
     javascript.append(htmlStr);    
     javascript.append("\";");
@@ -63,13 +71,13 @@ public class BrowserWindowOpener
     JavaScript.getCurrent().execute(javascript.toString());  // this does work...tested on small content
   }
   
-  private static String openCommon(String s, StringBuilder javascript)
+  private static String openCommon(String s, String windowName, StringBuilder javascript)
   {
     //javascript.append("debugger;\n");
     javascript.append("var ");
-    javascript.append(winName);
-    javascript.append("=window.open('', '_");
-    javascript.append(UUID.randomUUID());
+    javascript.append(winVar);
+    javascript.append("=window.open('', '");
+    javascript.append(windowName);
     javascript.append("');\n");
     s = s.replace("\"", "&nbsp;");
     s = s.replace("\n", "&#xA;");  // This was hard to find!
