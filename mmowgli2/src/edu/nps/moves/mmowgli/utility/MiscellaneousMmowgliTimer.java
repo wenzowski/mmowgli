@@ -35,6 +35,7 @@ package edu.nps.moves.mmowgli.utility;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -69,13 +70,13 @@ public class MiscellaneousMmowgliTimer
     @Override
     public void run()
     {
-//todo reenable DeferredSysOut.println("*TICK* " + tickFormat.format(new Date()));
+      MSysOut.immPrintln("-tick-" + tickFormat.format(new Date()));
     }
   }
 
   public static class MSysOut extends TimerTask
   {
-    public static long PERIOD_MS = 5 * 1000;
+    public static long PERIOD_MS = 100; //todo back to 5 * 1000;
     private static StringBuilder sb = new StringBuilder();
     private static String nl = System.getProperty("line.separator");
 
