@@ -40,8 +40,6 @@ import java.util.List;
 
 import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
-
 /**
  * GoogleMapPolyOverlay.java
  * Created on June 8, 2011
@@ -71,16 +69,6 @@ public class GoogleMapPolyOverlay implements Serializable
   {
   }
     
-  public static void update(GoogleMapPolyOverlay ovr)
-  {
-    VHib.getVHSession().update(ovr);   
-  }
-  
-  public static void save(GoogleMapPolyOverlay ovr)
-  {
-    VHib.getVHSession().save(ovr);
-  }
-
   /**
    * Primary key, auto-increment, unique
    */
