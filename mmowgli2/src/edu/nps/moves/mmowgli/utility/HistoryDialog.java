@@ -46,6 +46,10 @@ import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.Edits;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 
 /**
  * HistoryDialog.java Created on Apr 5, 2012
@@ -118,11 +122,16 @@ public class HistoryDialog extends Window
       private static final long serialVersionUID = 1L;
 
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
+        HSess.init();
         UI.getCurrent().removeWindow(HistoryDialog.this);
         if(doneListener != null)
-          doneListener.done(null, -1);
+          doneListener.doneTL(null, -1);
+        HSess.close();
       }
     });
     okButt.addClickListener(new ClickListener()
@@ -130,18 +139,23 @@ public class HistoryDialog extends Window
       private static final long serialVersionUID = 1L;
 
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
+        HSess.init();
         UI.getCurrent().removeWindow(HistoryDialog.this);
         StringBean obj = (StringBean) table.getValue();
         if(doneListener != null) {
           if(obj != null) {
             int idx = obj.getOrder();          
-            doneListener.done(obj.getString(),idx);           
+            doneListener.doneTL(obj.getString(),idx);           
           }
           else
-            doneListener.done(null,-1);
+            doneListener.doneTL(null,-1);
         }
+        HSess.close();
       }
     });
   }
@@ -153,7 +167,7 @@ public class HistoryDialog extends Window
   
   public interface DoneListener
   {
-    public void done(String selected, int idx);
+    public void doneTL(String selected, int idx);
   }
 
   @SuppressWarnings("serial")
