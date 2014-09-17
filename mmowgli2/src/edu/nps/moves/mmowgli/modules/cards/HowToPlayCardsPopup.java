@@ -45,6 +45,7 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.Media;
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * HowToPlayCardsPopup.java Created on Feb 26, 2011
@@ -58,6 +59,7 @@ public class HowToPlayCardsPopup extends MmowgliDialog implements ClickListener
 {
   private static final long serialVersionUID = -4806292137082005538L;
 
+  @HibernateSessionThreadLocalConstructor
   public HowToPlayCardsPopup()
   {
     super(null);
@@ -68,7 +70,6 @@ public class HowToPlayCardsPopup extends MmowgliDialog implements ClickListener
 
     setTitleString("How to Play");
     Media m = getMedia();
-    //Resource res = getVideoResource(m);
     Component comp = new Label("Not found");
 
     if (m.getType() == Media.MediaType.VIDEO) {
@@ -104,14 +105,9 @@ public class HowToPlayCardsPopup extends MmowgliDialog implements ClickListener
 
   protected Media getMedia()
   {
-    return Mmowgli2UI.getGlobals().mediaLocator().getHowToPlayCardsVideoMedia();
+    return Mmowgli2UI.getGlobals().mediaLocator().getHowToPlayCardsVideoMediaTL();
   }
-/*
-  protected Resource getVideoResource(Media m)
-  {
-    return Mmowgli2UI.getGlobals().mediaLocator().locate(m);
-  }
-*/
+
   @Override
   public User getUser()
   {
