@@ -41,7 +41,7 @@ import javax.persistence.*;
 
 import org.hibernate.Session;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * @author Mike Bailey, jmbailey@nps.edu
@@ -155,31 +155,31 @@ public class MovePhase implements Serializable
   public static short LOGIN_ALLOW_NONE = 0x0;
 //@formatter:on
 
-  public static MovePhase merge(MovePhase ph)
+  public static MovePhase mergeTL(MovePhase ph)
   {
-    return (MovePhase)VHib.getVHSession().merge(ph);
-  }
-  
-  public static MovePhase get(Serializable id)
-  {
-    return (MovePhase)VHib.getVHSession().get(MovePhase.class, id);
-  }
-  
-  public static void update(MovePhase ph)
-  {
-    VHib.getVHSession().update(ph);
-  }
-  
-  public static void save(MovePhase ph)
-  {
-    VHib.getVHSession().save(ph);
+    return (MovePhase)HSess.get().merge(ph);
   }
 
-  public static void delete(MovePhase mp)
+  public static MovePhase getTL(Object id)
   {
-    VHib.getVHSession().delete(mp);    
+    return (MovePhase)HSess.get().get(MovePhase.class, (Serializable)id);
   }
 
+  public static void updateTL(MovePhase ph)
+  {
+    HSess.get().update(ph);;
+  }
+
+  public static void saveTL(MovePhase ph)
+  {
+    HSess.get().save(ph);
+  }
+
+  public static void deleteTL(MovePhase mp)
+  {
+    HSess.get().delete(mp);
+  }
+  
   public MovePhase()
   {}
     
@@ -888,27 +888,26 @@ public class MovePhase implements Serializable
     setAllowedCards(cSet);
   }
   
-  public static MovePhase getCurrentMovePhase()
+  public static MovePhase getCurrentMovePhaseTL()
   {
-    return getCurrentMovePhase(VHib.getVHSession()); // vaadin transaction context
+    return getCurrentMovePhase(HSess.get());
   }
-
   public static MovePhase getCurrentMovePhase(Session sess)
   {
     return Move.getCurrentMove(sess).getCurrentMovePhase();
   }
   
-  public static boolean isGuestAndIsPreparePhase(User me)
+  public static boolean isGuestAndIsPreparePhaseTL(User me)
   {
     if(!me.isViewOnly())
       return false;
     
-    return inThePreparePhase();
+    return inThePreparePhaseTL();
   }
   
-  public static boolean inThePreparePhase()
+  public static boolean inThePreparePhaseTL()
   {
-    return MovePhase.getCurrentMovePhase().isPreparePhase();
+    return MovePhase.getCurrentMovePhaseTL().isPreparePhase();
   }
 
 }
