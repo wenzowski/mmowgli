@@ -35,13 +35,7 @@ package edu.nps.moves.mmowgli.db;
 
 import java.io.Serializable;
 
-import javax.persistence.Basic;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import javax.persistence.*;
 
 /**
  *         31 Mar 2011
@@ -106,10 +100,4 @@ public class Affiliation implements Serializable
   {
     this.affiliation = affiliation;
   }
-
-  public static Affiliation get(Object id)
-  {
-    return (Affiliation)VHib.getVHSession().get(Affiliation.class, (Serializable)id);
-  }
-
 }
