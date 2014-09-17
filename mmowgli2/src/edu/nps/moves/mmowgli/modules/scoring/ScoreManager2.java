@@ -38,9 +38,8 @@ import java.util.Set;
 
 import org.hibernate.Session;
 
-import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 /**
@@ -68,7 +67,7 @@ public class ScoreManager2
   private float cardSuperInterestingPoints = 0.0f;
   
   private float actionPlanRaterPoints = 0.0f;
-  private float actionPlanSuperInterestingPoints = 0.0f;
+  //private float actionPlanSuperInterestingPoints = 0.0f;
   private float actionPlanCommentPoints = 0.0f;
   private float actionPlanAuthorPoints = 0.0f;
   private float actionPlanThumbFactor = 1.0f;
@@ -80,200 +79,214 @@ public class ScoreManager2
   
   // Called by code which has just created and saved to db.
   // This call updates author Users in db.
-  public void cardPlayed(Card newCard)
-  //----------------------------------
+//  public void cardPlayed(Card newCard)
+//  //----------------------------------
+//  {
+//    MSysOut.println(marker+"ScoreManager2.cardPlayed()");
+//    refreshScoringParameters();
+//    
+//    awardCardAuthorPoints(newCard);
+//    awardCardAncestorPoints(newCard); /**/
+//  }
+  
+  public void cardPlayedTL(Card newCard)
   {
     MSysOut.println(marker+"ScoreManager2.cardPlayed()");
-    refreshScoringParameters();
+    refreshScoringParametersTL();
     
-    awardCardAuthorPoints(newCard);
-    awardCardAncestorPoints(newCard); /**/
+    awardCardAuthorPointsTL(newCard);
+    awardCardAncestorPointsTL(newCard); /**/
+    
   }
   
   // Called when the card marking is about to be removed.  This concerns us (Score mgr) if the card was previously super-interesting
   // or hidden.  In the former, we take away points; in the latter we add points.
   // Does nothing with Hibernate on the card, such as update();
-  public void cardMarkingWillBeCleared(Card card)
+
+  public void cardMarkingWillBeClearedTL(Card card)
   //---------------------------------------------
   {
-    MSysOut.println(marker+"ScoreManager2.cardMarkingWillBeCleared()");
-    refreshScoringParameters();
+    MSysOut.println(marker+"ScoreManager2.cardMarkingWillBeClearedTL()");
+    refreshScoringParametersTL();
     Set<CardMarking> mark = card.getMarking();
     if(mark==null || mark.size()<=0)
       return; // already cleared
     
     if(CardMarkingManager.isHidden(card)) {
-      awardCardAuthorPoints(card);
+      awardCardAuthorPointsTL(card);
     }
     
     if(CardMarkingManager.isSuperInteresting(card)) {
-      removeCardSuperInterestingPoints(card);
+      removeCardSuperInterestingPointsTL(card);
     }
   }
-
+  
   // Called when the card is about to be (re) marked.  Same issues as above.
   // Does nothing with Hibernate on the card, such as update();
-  public void cardMarkingWillBeSet(Card card, CardMarking cm)
+
+  public void cardMarkingWillBeSetTL(Card card, CardMarking cm)
   //---------------------------------------------------------
   {
     MSysOut.println(marker+"ScoreManager2.cardMarkingWillBeSet()");
-    refreshScoringParameters();
+    refreshScoringParametersTL();
     Set<CardMarking> mark = card.getMarking();
     // First look as existing
     if (mark != null && mark.size() > 0) {
       if (CardMarkingManager.isHidden(card)) {
         if(CardMarkingManager.isHiddenMarking(cm))
           return; // hidden to hidden
-        awardCardAuthorPoints(card); // was hidden, now not
+        awardCardAuthorPointsTL(card); // was hidden, now not
       }
       if (CardMarkingManager.isSuperInteresting(card)) {
         if (CardMarkingManager.isSuperInteresting(card)) {
           if(CardMarkingManager.isSuperInterestingMarking(cm))
             return; // no change
-          removeCardSuperInterestingPoints(card);  // was super interesting, now not
+          removeCardSuperInterestingPointsTL(card);  // was super interesting, now not
         }
       }
     }
     
     if(CardMarkingManager.isHiddenMarking(cm))
-      removeCardAuthorPoints(card);
+      removeCardAuthorPointsTL(card);
     
     if(CardMarkingManager.isSuperInterestingMarking(cm))
-      awardCardSuperInterestingPoints(card);
+      awardCardSuperInterestingPointsTL(card);
   }
 
   /* Begin ActionPlan scoring events */
   /***********************************/
   // A
-  public void actionPlanUserJoins(ActionPlan ap, User usr)
+  public void actionPlanUserJoinsTL(ActionPlan ap, User usr)
   {
     MSysOut.println(marker+"ScoreManager2.actionPlanUserJoins()");
-    refreshScoringParameters();
-    actionPlanNewAuthorPoints(usr,ap);
-    actionPlanNewAuthorCommentPoints(usr,ap);
-    actionPlanNewAuthorThumbPoints(usr,ap);
+    refreshScoringParametersTL();
+    actionPlanNewAuthorPointsTL(usr,ap);
+    actionPlanNewAuthorCommentPointsTL(usr,ap);
+    actionPlanNewAuthorThumbPointsTL(usr,ap);
   }
     
   // C
-  public void actionPlanCommentEntered(ActionPlan plan, Message comment)
+  public void actionPlanCommentEnteredTL(ActionPlan plan, Message comment)
   // --------------------------------------------------------------------
   {
     // Little bump for making a comment
     MSysOut.println(marker+"ScoreManager2.actionPlanCommentEntered()");
-    refreshScoringParameters();
+    refreshScoringParametersTL();
     User writer = comment.getFromUser();
-    writer = User.merge(writer);
-    incrementInnovationScore(writer, userActionPlanCommentPoints);
-    User.update(writer);
+    writer = User.mergeTL(writer);
+    incrementInnovationScoreTL(writer, userActionPlanCommentPoints);
+    User.updateTL(writer);
 
     // Authors need a bump
     Set<User> authors = plan.getAuthors();
     for (User author : authors) {
-      setActionPlanCommentScore(author, plan);
-      User.update(author); /**/
+      setActionPlanCommentScoreTL(author, plan);
+      User.updateTL(author); /**/
     }
   }
 
   // F
-  public void actionPlanMarkedSuperInteresting(ActionPlan plan)
-  //-----------------------------------------------------------
-  {
-    MSysOut.println(marker+"ScoreManager2.actionPlanMarkedSuperInteresting()");
-    refreshScoringParameters();
-    Set<User> authors =  plan.getAuthors();
-    for(User author : authors) {
-      incrementInnovationScore(author,actionPlanSuperInterestingPoints);
-      User.update(author); /**/
-    }   
-  }
+//  public void actionPlanMarkedSuperInteresting(ActionPlan plan)
+//  //-----------------------------------------------------------
+//  {
+//    MSysOut.println(marker+"ScoreManager2.actionPlanMarkedSuperInteresting()");
+//    refreshScoringParameters();
+//    Set<User> authors =  plan.getAuthors();
+//    for(User author : authors) {
+//      incrementInnovationScore(author,actionPlanSuperInterestingPoints);
+//      User.update(author); /**/
+//    }   
+//  }
   
   // F
-  public void actionPlanUnmarkedSuperInteresting(ActionPlan plan)
-  // -------------------------------------------------------------
-  {
-    MSysOut.println(marker+"ScoreManager2.actionPlanUnmarkedSuperInteresting()");
-    refreshScoringParameters();
-    Set<User> authors = plan.getAuthors();
-    for (User author : authors) {
-      incrementInnovationScore(author, actionPlanSuperInterestingPoints * -1.0f);
-      User.update(author); /**/
-    }
-  }
+//  public void actionPlanUnmarkedSuperInteresting(ActionPlan plan)
+//  // -------------------------------------------------------------
+//  {
+//    MSysOut.println(marker+"ScoreManager2.actionPlanUnmarkedSuperInteresting()");
+//    refreshScoringParameters();
+//    Set<User> authors = plan.getAuthors();
+//    for (User author : authors) {
+//      incrementInnovationScore(author, actionPlanSuperInterestingPoints * -1.0f);
+//      User.update(author); /**/
+//    }
+//  }
   
   //Called when user is clicking or unclicking a thumb.  Does not do Hibernate.updates
   // The map of user->thumbs is now updated
   // Caller should do User.update
   // Users who are authors  are User.update 'ed here
   // D
-  public void actionPlanWasRated(User me, ActionPlan ap, int count)
+  public void actionPlanWasRatedTL(User me, ActionPlan ap, int count)
   //---------------------------------------------------------------
   {
     MSysOut.println(marker+"ScoreManager2.actionPlanWasRated()");
-    refreshScoringParameters();
+    refreshScoringParametersTL();
     // count not used, already given to ap
     Set<User> authors = ap.getAuthors();
     if (authors.contains(me))
       return; // no points for rating your own plan
 
     // The rater gets a bump
-    setUsersActionPlanThumbScore(me, ap, actionPlanRaterPoints);
+    setUsersActionPlanThumbScoreTL(me, ap, actionPlanRaterPoints);
     
     // The authors get points
     for(User author : authors) {
-      setActionPlanThumbScore(author,ap,actionPlanThumbFactor * (float)ap.getSumThumbs());
-      User.update(author); /**/
+      setActionPlanThumbScoreTL(author,ap,actionPlanThumbFactor * (float)ap.getSumThumbs());
+      User.updateTL(author); /**/
     }
   }
  
    /* Begin non-card / non-actionplan scoring event(s) */
   /****************************************************/
   // Called when login completes
-  public void userCreated(User user)
+  public void userCreatedTL(User user)
   //--------------------------------
   {
     MSysOut.println(marker+"ScoreManager2.userCreated()");
-    refreshScoringParameters();
+    refreshScoringParametersTL();
     if(userSignupAnswerPoints == 0.0f)
       return;
     
     String answer = user.getAnswer();
     if(answer != null && answer.length()>0)
-      incrementBasicScore(user,userSignupAnswerPoints);    
+      incrementBasicScoreTL(user,userSignupAnswerPoints);    
   }
       
   /*************************************************************/
   /* utility methods */
   /*************************************************************/
   // A
-  private void actionPlanNewAuthorPoints(User author, ActionPlan ap)
+  private void actionPlanNewAuthorPointsTL(User author, ActionPlan ap)
   {
-    setActionPlanAuthorScore(author, ap, actionPlanAuthorPoints);
+    setActionPlanAuthorScoreTL(author, ap, actionPlanAuthorPoints);
   }
   //C
-  private void actionPlanNewAuthorCommentPoints(User author, ActionPlan ap)
+  private void actionPlanNewAuthorCommentPointsTL(User author, ActionPlan ap)
   {
     Set<Message> set = ap.getComments();
     if(set.isEmpty())
       return;
-    setActionPlanCommentScore(author, ap);
+    setActionPlanCommentScoreTL(author, ap);
   }
   // B
-  private void actionPlanNewAuthorThumbPoints(User author, ActionPlan ap)
+  private void actionPlanNewAuthorThumbPointsTL(User author, ActionPlan ap)
   {
-    setActionPlanThumbScore(author,ap,actionPlanThumbFactor * (float)ap.getSumThumbs());
+    setActionPlanThumbScoreTL(author,ap,actionPlanThumbFactor * (float)ap.getSumThumbs());
   }
   
-
-  private void refreshScoringParameters()
+  private void refreshScoringParametersTL()
   {
-    Game g = Game.get();
+    _refreshScoringParameters(Game.getTL());
+  }
+  private void _refreshScoringParameters(Game g)
+  {
     cardAuthorPoints = g.getCardAuthorPoints();
     cardAncestorPoints = g.getCardAncestorPoints();
     cardSuperInterestingPoints = g.getCardSuperInterestingPoints();
     ancestorFactors = parseGenerationFactors(g);
     
     actionPlanRaterPoints = g.getActionPlanRaterPoints();
-    actionPlanSuperInterestingPoints = g.getActionPlanSuperInterestingPoints();
+   // actionPlanSuperInterestingPoints = g.getActionPlanSuperInterestingPoints();
     actionPlanCommentPoints = g.getActionPlanCommentPoints();
     actionPlanAuthorPoints = g.getActionPlanAuthorPoints();
     actionPlanThumbFactor = g.getActionPlanThumbFactor();
@@ -314,31 +327,31 @@ public class ScoreManager2
   }
   
   
-  private boolean setActionPlanCommentScore(User author, ActionPlan ap)
+  private boolean setActionPlanCommentScoreTL(User author, ActionPlan ap)
   {
     Set<Message> set = ap.getComments();
     if(set.isEmpty())
       return false;
     
-    return setActionPlanMappedScore(author.getActionPlanCommentScores(), author, ap, set.size() * actionPlanCommentPoints);
+    return setActionPlanMappedScoreTL(author.getActionPlanCommentScores(), author, ap, set.size() * actionPlanCommentPoints);
   }
 
-  private boolean setActionPlanThumbScore(User author, ActionPlan ap, float newThumbScoreForThisAP)
+  private boolean setActionPlanThumbScoreTL(User author, ActionPlan ap, float newThumbScoreForThisAP)
   {
-    return setActionPlanMappedScore(author.getActionPlanThumbScores(), author, ap, newThumbScoreForThisAP);
+    return setActionPlanMappedScoreTL(author.getActionPlanThumbScores(), author, ap, newThumbScoreForThisAP);
   }
 
-  private boolean setUsersActionPlanThumbScore(User rater, ActionPlan ap, float newRatedScoreForThisAP)
+  private boolean setUsersActionPlanThumbScoreTL(User rater, ActionPlan ap, float newRatedScoreForThisAP)
   {
-    return setActionPlanMappedScore(rater.getActionPlanRatedScores(), rater, ap, newRatedScoreForThisAP);
+    return setActionPlanMappedScoreTL(rater.getActionPlanRatedScores(), rater, ap, newRatedScoreForThisAP);
   }
 
-  private boolean setActionPlanAuthorScore(User author, ActionPlan ap, float newAuthorScoreForThisAP)
+  private boolean setActionPlanAuthorScoreTL(User author, ActionPlan ap, float newAuthorScoreForThisAP)
   {
-    return setActionPlanMappedScore(author.getActionPlanAuthorScores(), author, ap, newAuthorScoreForThisAP);
+    return setActionPlanMappedScoreTL(author.getActionPlanAuthorScores(), author, ap, newAuthorScoreForThisAP);
   }
   
-  private boolean setActionPlanMappedScore(Map<ActionPlan,Double> apScores, User usr, ActionPlan ap, float newScore)
+  private boolean setActionPlanMappedScoreTL(Map<ActionPlan,Double> apScores, User usr, ActionPlan ap, float newScore)
   {
     Double oldScore = apScores.get(ap);
     if(oldScore == null)
@@ -351,55 +364,54 @@ public class ScoreManager2
     
     // now tweek the total by subtracting our old value, adding the new
     float existingTotalScoreForAllAPs = usr.getInnovationScore();
-    usr.mmowgliSetInnovationScore(existingTotalScoreForAllAPs - oldScore.floatValue() + (float)newScore);
+    usr.mmowgliSetInnovationScoreTL(existingTotalScoreForAllAPs - oldScore.floatValue() + (float)newScore);
      
     return true;
   }
   
-  private User incrementInnovationScore(User u, float f)
+  private User incrementInnovationScoreTL(User u, float f)
   {
-    User author = User.get(u.getId(),VHib.getVHSession()); //DBGet.getUserFresh(u.getId());
+    User author = User.getTL(u.getId()); //DBGet.getUserFresh(u.getId());
     float pts = Math.max(author.getInnovationScore()+f, 0.0f);
-    author.mmowgliSetInnovationScore(pts); 
+    author.mmowgliSetInnovationScoreTL(pts); 
     return author;
   }
 
-  private User incrementBasicScore(User u, float f)
+  // This call updates User objects in db /**/
+  private void awardCardAuthorPointsTL(Card card)
   {
-    User author = User.get(u.getId(),VHib.getVHSession()); //DBGet.getUserFresh(u.getId());
-    float pts = Math.max(author.getBasicScore()+f, 0.0f); // never negative
-    author.mmowgliSetBasicScore(pts);
-    return author;
-  }
-  
-  private User incrementBasicScore(long userid, float f)
-  {
-    return incrementBasicScore(User.get(userid, VHib.getVHSession()),f); //DBGet.getUserFresh(userid),f);
+    awardOrRemoveCardAuthorPointsTL(card, +1.0f); /**/
   }
   
   // This call updates User objects in db /**/
-  private void awardCardAuthorPoints(Card card)
+  private void removeCardAuthorPointsTL(Card card)
   {
-    awardOrRemoveCardAuthorPoints(card, +1.0f); /**/
-  }
-  
-  // This call updates User objects in db /**/
-  private void removeCardAuthorPoints(Card card)
-  {
-    awardOrRemoveCardAuthorPoints(card, -1.0f);    /**/
+    awardOrRemoveCardAuthorPointsTL(card, -1.0f);    /**/
   }
 
   // Updated users in db /**/
-  private void awardOrRemoveCardAuthorPoints(Card newCard, float factor)
+  private void awardOrRemoveCardAuthorPointsTL(Card newCard, float factor)
   {    
     float authorPoints = cardAuthorPoints * factor;
     if(authorPoints != 0.0f) {
-      User u = incrementBasicScore(newCard.getAuthor(),authorPoints);
-      User.update(u);  /**/
+      User u = incrementBasicScoreTL(newCard.getAuthor(),authorPoints);
+      User.updateTL(u);
     }
   }
+  private User incrementBasicScoreTL(User u, float f)
+  {
+    User author = User.getTL(u.getId()); //DBGet.getUserFresh(u.getId());
+    float pts = Math.max(author.getBasicScore()+f, 0.0f); // never negative
+    author.mmowgliSetBasicScoreTL(pts);
+    return author;
+  }
   
-  private void awardCardAncestorPoints(Card c)  /**/
+  private User incrementBasicScoreTL(long userid, float f)
+  {
+    return incrementBasicScoreTL(User.getTL(userid),f); //DBGet.getUserFresh(userid),f);
+  }
+  
+  private void awardCardAncestorPointsTL(Card c)  /**/
   {
     if(cardAncestorPoints == 0.0f)
       return;
@@ -413,44 +425,44 @@ public class ScoreManager2
         if(CardMarkingManager.isHidden(c) || CardMarkingManager.isScenarioFail(c))
           ;
         else
-          awardCardAncestorPoints(aId, cardAncestorPoints*ancestorFactors[level]);  
+          awardCardAncestorPointsTL(aId, cardAncestorPoints*ancestorFactors[level]);  
       }
       level++;
     }  
   }
   
-  private void awardCardAncestorPoints(long aId, float points) /**/
+  private void awardCardAncestorPointsTL(long aId, float points) /**/
   {
-    User usr = incrementBasicScore(aId,points);
-    User.update(usr); /**/
+    User usr = incrementBasicScoreTL(aId,points);
+    User.updateTL(usr); /**/
   }
   
-  private void removeCardSuperInterestingPoints(Card c)
+  private void removeCardSuperInterestingPointsTL(Card c)
   {
     if(cardSuperInterestingPoints == 0.0f)
       return;
     User author = c.getAuthor();
-    User me = User.get(Mmowgli2UI.getGlobals().getUserID(), VHib.getVHSession()); //DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User me = User.getTL(Mmowgli2UI.getGlobals().getUserID()); //DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
     
     if(me.getId() != author.getId())  // can't get points for saying you're interesting
-      incrementBasicScore(author,-1.0f*cardSuperInterestingPoints); 
+      incrementBasicScoreTL(author,-1.0f*cardSuperInterestingPoints); 
   }
   
-  private void awardCardSuperInterestingPoints(Card c)
+  private void awardCardSuperInterestingPointsTL(Card c)
   {
     if(cardSuperInterestingPoints == 0.0f)
       return;
     User author = c.getAuthor();
-    User me = User.get(Mmowgli2UI.getGlobals().getUserID(), VHib.getVHSession()); //DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User me = User.getTL(Mmowgli2UI.getGlobals().getUserID()); //DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
     
     if(me.getId() != author.getId())  // can't get points for saying you're interesting
-      incrementBasicScore(author,cardSuperInterestingPoints);
+      incrementBasicScoreTL(author,cardSuperInterestingPoints);
   }
   
  /* Called only from ApplicationMaster when switching moves */
  public static float getBasicPointsFromCurrentMove(User u, Session sess)
  {
-   int moveNum = Move.getCurrentMove().getNumber();
+   int moveNum = Move.getCurrentMove(sess).getNumber();
    return u.getBasicScoreMoveX(moveNum);
  }
  
