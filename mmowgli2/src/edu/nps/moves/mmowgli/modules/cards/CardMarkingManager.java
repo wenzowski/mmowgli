@@ -41,7 +41,8 @@ import org.hibernate.criterion.Restrictions;
 
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.CardMarking;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * CardMarkingManager.java
@@ -54,58 +55,44 @@ import edu.nps.moves.mmowgli.hibernate.VHib;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
+@HibernateSessionThreadLocalConstructor
 public class CardMarkingManager
 {
-  private static CardMarking superinteresting, scenariofail, commonknowledge, hidden; //positive, negative;
+  private static CardMarking superinteresting, scenariofail, commonknowledge, hidden;
   
   public static CardMarking getSuperInterestingMarking()
   {
     if(superinteresting == null)
-      superinteresting=getMarking(CardMarking.SUPER_INTERESTING_LABEL); //"Super-Interesting");
+      superinteresting=getMarking(CardMarking.SUPER_INTERESTING_LABEL);
     return superinteresting;
   }
   public static CardMarking getScenarioFailMarking()
   {
     if(scenariofail == null)
-      scenariofail = getMarking(CardMarking.SCENARIO_FAIL_LABEL); //"Scenario Fail");
+      scenariofail = getMarking(CardMarking.SCENARIO_FAIL_LABEL);
     return scenariofail;
   }
   public static CardMarking getCommonKnowledgeMarking()
   {
     if(commonknowledge == null)
-      commonknowledge = getMarking(CardMarking.COMMON_KNOWLEDGE_LABEL); //"Common Knowledge");
+      commonknowledge = getMarking(CardMarking.COMMON_KNOWLEDGE_LABEL);
     return commonknowledge;
   }
   public static CardMarking getHiddenMarking()
   {
     if(hidden == null)
-      hidden = getMarking(CardMarking.HIDDEN_LABEL);//"Hidden");
+      hidden = getMarking(CardMarking.HIDDEN_LABEL);
     return hidden;
   }
-  
-//  public static CardMarking getPositiveMarking()
-//  {
-//    if(positive == null)
-//      positive=getMarking("Positive");
-//    return positive;
-//  }
-//  
-//  public static CardMarking getNegativeMarking()
-//  {
-//    if(negative == null)
-//      negative=getMarking("Negative");
-//    return negative;
-//  }
-  
+    
   @SuppressWarnings("unchecked")
   private static CardMarking getMarking(String label)
   {
-    Session sess = VHib.getSessionFactory().openSession();       // no leaking sessions
+    Session sess = HSess.get();
     List<CardMarking> types = (List<CardMarking>)
                                   sess.createCriteria(CardMarking.class).
                                   add(Restrictions.eq("label", label)).
                                   list();
-    sess.close();
     if(types != null && types.size()>0)
       return types.get(0);
     return null;
