@@ -45,7 +45,8 @@ import com.vaadin.ui.Label;
 
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanTable;
 
 /**
@@ -64,6 +65,7 @@ public class UserProfileMyActionsPanel extends UserProfileTabPanel
 {
   private static final long serialVersionUID = 6213829028886384848L;
 
+  @HibernateSessionThreadLocalConstructor
   public UserProfileMyActionsPanel(Object uid)
   {
     super(uid);
@@ -73,7 +75,7 @@ public class UserProfileMyActionsPanel extends UserProfileTabPanel
   public void initGui()
   {
     super.initGui();
-    Game g = Game.get();
+    Game g = Game.getTL();
     if(g.isActionPlansEnabled()) {    
       String name = userIsMe?"you are":userName+" is";
       getLeftLabel().setValue("Here are Action Plans "+name+" currently co-authoring.");
@@ -86,18 +88,13 @@ public class UserProfileMyActionsPanel extends UserProfileTabPanel
       Label sp;
       getRightLayout().addComponent(sp = new Label());
       sp.setHeight("20px");
-//    Label title = new Label();
-//    title.setContentMode(Label.CONTENT_XHTML);
-//    title.setValue("Action Plans in which I share authorship <small>(Double-click a row to go to action plan page)</small>");
-//    title.addStyleName("m-tabletitle");
-//    getRightLayout().addComponent(title);
       showMyActionPlans();
     }
   }
   
   private void showMyActionPlans()
   {
-    ActionPlanTable tab = new ActionPlanTable();
+    ActionPlanTable tab = new ActionPlanTable(null);
     tab.initFromDataSource(new MyActionsContainer<ActionPlan>());
     
     // put table in place
@@ -113,7 +110,7 @@ public class UserProfileMyActionsPanel extends UserProfileTabPanel
   {
     public MyActionsContainer()
     {
-      this(VHib.getSessionFactory());
+      this(HSess.getSessionFactory());
     }    
     public MyActionsContainer(SessionFactory fact)
     {
@@ -121,11 +118,11 @@ public class UserProfileMyActionsPanel extends UserProfileTabPanel
     }
     
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
-      User me = DBGet.getUserFresh(uid);
+      User me = DBGet.getUserFreshTL(uid);
       
-      Criteria crit = super.getBaseCriteria();
+      Criteria crit = super.getBaseCriteriaTL();
       
       Set<ActionPlan> imAuthor = me.getActionPlansAuthored();
       if(imAuthor != null && imAuthor.size()>0) {
@@ -137,8 +134,7 @@ public class UserProfileMyActionsPanel extends UserProfileTabPanel
       else
         crit.add(Restrictions.idEq(-1L)); // will never pass, so we get an empty set
       
-      Card.adjustCriteriaToOmitCards(crit, me);
-
+      Card.adjustCriteriaToOmitCardsTL(crit, me);
       return crit;
     }
   }
