@@ -49,12 +49,14 @@ import com.vaadin.data.util.BeanItem;
 
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
-//import edu.nps.moves.mmowgli.hibernate.HibernateContainers;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.VHibPii;
 import edu.nps.moves.mmowgli.messaging.InterTomcatIO.InterTomcatReceiver;
 import edu.nps.moves.mmowgli.messaging.MMessage;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
-import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.BeanContainerWithCaseInsensitiveSorter;
+import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -107,7 +109,7 @@ public class MCacheManager implements InterTomcatReceiver
   {
     MSysOut.println("Enter MCacheManager constructor");
     try {
-      Session sess = VHib.getSessionFactory().openSession();
+      Session sess = HSess.getSessionFactory().openSession();
       supActMgr = new MSuperActiveCacheManager();
       cardCache = new ObjectCache<Card>(null); // no timeout
 
@@ -405,46 +407,46 @@ public class MCacheManager implements InterTomcatReceiver
   }
 
   @Override
-  public boolean handleIncomingTomcatMessageOob(MMessagePacket packet, SessionManager sessMgr)
+  public boolean handleIncomingTomcatMessageTL(MMessagePacket packet)
   {
-    MSysOut.println("MCacheManager.handleIncomingTomcatMessageOob()");
+    MSysOut.println("MCacheManager.handleIncomingTomcatMessageTL()");
     
-    boolean needMgr = sessMgr==null;
-    if(needMgr)
-      sessMgr = new SingleSessionManager();
+//    boolean needMgr = sessMgr==null;
+//    if(needMgr)
+//      sessMgr = new SingleSessionManager();
     
     switch (packet.msgType) {
       case NEW_CARD:
       case UPDATED_CARD:
-        newOrUpdatedCard(packet.msgType,packet.msg,sessMgr);
+        newOrUpdatedCardTL(packet.msgType,packet.msg);
         break;
       case NEW_USER:
       case UPDATED_USER:
-        newOrUpdatedUser(packet.msgType,packet.msg,sessMgr);
+        newOrUpdatedUserTL(packet.msgType,packet.msg);
         break;
       case DELETED_USER:
-        deletedUser(packet.msgType,packet.msg,sessMgr);
+        deletedUserTL(packet.msgType,packet.msg);
         break;
       case GAMEEVENT:
-        newGameEvent(packet.msgType,packet.msg,sessMgr);
+        newGameEventTL(packet.msgType,packet.msg);
         break;
       default:
     }
-    if(needMgr)
-      ((SingleSessionManager)sessMgr).endSession();
+//    if(needMgr)
+//      ((SingleSessionManager)sessMgr).endSession();
     
     return false; // don't want a retry    
   }
 
   @Override
-  public void handleIncomingTomcatMessageEventBurstCompleteOob(SessionManager sessMgr)
+  public void handleIncomingTomcatMessageEventBurstCompleteTL()
   {
   }
 
-  private void newGameEvent(char messageType, String message, SessionManager sessMgr)
+  private void newGameEventTL(char messageType, String message)
   {
     Long id = MMessage.MMParse(messageType,message).id;
-    GameEvent ev = (GameEvent)M.getSession(sessMgr).get(GameEvent.class, id);
+    GameEvent ev = GameEvent.getTL(id); //(GameEvent)M.getSession(sessMgr).get(GameEvent.class, id);
 
     // Here's the check for receiving notification that an event has been created, but it ain't in the db yet.
     if(ev == null) {
@@ -482,17 +484,17 @@ public class MCacheManager implements InterTomcatReceiver
       {
         for(int i=0; i<10; i++) { // try for 10 seconds
           try{Thread.sleep(1000l);}catch(InterruptedException ex){}
-          SingleSessionManager ssm = new SingleSessionManager();
-          Session sess = ssm.getSession();
+          HSess.init();
+          Session sess = HSess.get();
           GameEvent ge = (GameEvent)sess.get(GameEvent.class, evorig.getId());
           if(ge != null) {
             if(i>0)
               MSysOut.println("(MCacheManager)Delayed fetch of GameEvent from db, got it on try "+i);
             evorig.clone(ge); // get its data
-            ssm.endSession();
+            HSess.close();
             return;
           }
-          ssm.endSession();
+          HSess.close();
         }
         System.err.println("ERROR: Couldn't get game event "+evorig.getId()+" in 10 seconds");// give up
       }
@@ -512,7 +514,7 @@ public class MCacheManager implements InterTomcatReceiver
     }
   }
 
-  private void deletedUser(char messageType, String message, SessionManager sessMgr)
+  private void deletedUserTL(char messageType, String message)
   {
     Long id = MMessage.MMParse(messageType, message).id; //Long.parseLong(message);
     removeUser(id);
@@ -524,12 +526,11 @@ public class MCacheManager implements InterTomcatReceiver
     this.deleteUserInContainer(id);
   }
 
-  private void newOrUpdatedUser(char messageType, String message, SessionManager sessMgr)
+  private void newOrUpdatedUserTL(char messageType, String message)
   {
     synchronized(usersQuick) {
       Long id = MMessage.MMParse(messageType, message).id; //Long.parseLong(message);
-      User u = DBGet.getUserFresh(id, M.getSession(sessMgr)); //the fresh should not be required since the Obj cache should have been updated first
-      //User u = DBGet.getUser(id, sessMgr.getSession());   // wrong, it is required, sincd addOrUpdatUserInContainer read email collection
+      User u = DBGet.getUserFreshTL(id); //the fresh should not be required since the Obj cache should have been updated first
 
       addOrUpdateUserInContainer(u);
 
@@ -540,13 +541,13 @@ public class MCacheManager implements InterTomcatReceiver
     }
   }
 
-  private void newOrUpdatedCard(char messageType, String message, SessionManager sessMgr)
+  private void newOrUpdatedCardTL(char messageType, String message)
   {
     long id = MMessage.MMParse(messageType, message).id;
-    Card c = (Card)M.getSession(sessMgr).get(Card.class, id);
+    Card c = Card.getTL(id);
     if (c == null) {
       c = ComeBackWhenYouveGotIt.fetchCardWhenPossible(id);
-      c = (Card)M.getSession(sessMgr).merge(c);
+      c = Card.mergeTL(c);
     }
 
     getCardCache().addToCache(id, c);
@@ -554,7 +555,6 @@ public class MCacheManager implements InterTomcatReceiver
     CardType ct = c.getCardType();
     long cardTypeId = ct.getId();
 
-    //Card c = DBGet.getCardFresh(id, sessMgr.getSession());
     if(cardTypeId == negativeTypeCurrentMove.getId())
       newOrUpdatedCurrentMoveNegativeCard(c);
 
@@ -701,12 +701,7 @@ public class MCacheManager implements InterTomcatReceiver
 
   public void putCard(Card c)
   {
-        getCardCache().addToCache(c.getId(), c);
-  }
-
-  public Card getCard(Object id)
-  {
-    return getCard(id,VHib.getVHSession());
+    getCardCache().addToCache(c.getId(), c);
   }
 
   public Card getCard(Object id, Session sess)
@@ -772,7 +767,6 @@ public class MCacheManager implements InterTomcatReceiver
       v = new Vector<Card>(unhiddenPositiveIdeaCardsCurrentMove.values());
     }
     return v;
-    //return unhiddenResourceCards.values();
   }
 
   public Collection<Card> getAllNegativeIdeaCards()
@@ -791,7 +785,6 @@ public class MCacheManager implements InterTomcatReceiver
       v = new Vector<Card>(allNegativeIdeaCardsCurrentMove.values());
     }
     return v;
-    //return allRiskCards.values();
   }
 
   public Collection<Card> getAllNegativeUnhiddenIdeaCards()
@@ -822,22 +815,12 @@ public class MCacheManager implements InterTomcatReceiver
       throw new RuntimeException("Only risk and resource cards available through this interface");
   }
 
-//  private MCacheData<Card> getResourceCards(Card updateFirst, int start, Integer count)
-//  {
-//    return getResourceCards(updateFirst,start,count,false);
-//  }
-
   private  MCacheData<Card> getResourceCards(Card updateFirst, int start, Integer count, boolean unhiddenOnly)
   {
     if(unhiddenOnly)
       return getIdeaCard(unhiddenPositiveIdeaCardsCurrentMove,updateFirst,start,count);
     return getIdeaCard(allPositiveIdeaCardsCurrentMove, updateFirst, start, count);
   }
-
-//  private  MCacheData<Card> getRiskCards(Card updateFirst, int start, Integer count)
-//  {
-//    return getRiskCards(updateFirst,start,count,false);
-//  }
 
   private  MCacheData<Card> getRiskCards(Card updateFirst, int start, Integer count, boolean unhiddenOnly)
   {
@@ -947,20 +930,14 @@ public class MCacheManager implements InterTomcatReceiver
 
       UserPii upii = VHibPii.getUserPii(u.getId());
       if(upii != null) {
-        setRealFirstName(upii.getRealFirstName()); //u.getRealFirstName());
-        setRealLastName(upii.getRealLastName()); //u.getRealLastName());
+        setRealFirstName(upii.getRealFirstName());
+        setRealLastName(upii.getRealLastName());
         List<String> lisPii = VHibPii.getUserPiiEmails(u.getId());
-        //List<EmailPii> lisPii = upii.getEmailAddresses();
         if(lisPii != null && lisPii.size()>0) {
           setEmail(lisPii.get(0));
           setMultipleEmails(lisPii.size()>1);
         }
       }
-      /*
-      List<Email> lis = u.getEmailAddresses();
-      if(lis != null && lis.size()>0)
-        setEmail(lis.get(0).getAddress());
-        */
     }
 
     public long getId()             {return id;}
