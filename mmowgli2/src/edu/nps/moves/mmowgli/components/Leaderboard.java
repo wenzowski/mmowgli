@@ -50,7 +50,8 @@ import com.vaadin.ui.themes.BaseTheme;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.Move;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsUserUpdates;
 import edu.nps.moves.mmowgli.utility.IDNativeButton;
 
@@ -69,13 +70,20 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
   private Table table;
   private VerticalLayout tableVLayout;
   private IDNativeButton tips;
-  
+
+  @HibernateSessionThreadLocalConstructor
   public Leaderboard()
   {
     tips = new IDNativeButton("Want to improve your score?", IMPROVESCORECLICK);
   }
 
+  @Override
   public void initGui()
+  {
+    throw new UnsupportedOperationException("");
+  }
+  
+  public void initGuiTL()
   {
     setSizeUndefined();
     setWidth(APPLICATION_SCREEN_WIDTH);
@@ -84,18 +92,11 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     Label sp;
     
-    //addComponent(sp=new Label());
-    //sp.setHeight("10px");
-    
     HorizontalLayout titleHL = new HorizontalLayout();
     addComponent(titleHL);
     titleHL.setMargin(new MarginInfo(false,true,false,true));  //sides only
     titleHL.setWidth("100%");
-    //setComponentAlignment(titleHL,Alignment.TOP_CENTER);
-    
-    //titleHL.addComponent(sp=new Label());
-   // sp.setWidth("20px");
-    //titleHL.setComponentAlignment(sp, Alignment.MIDDLE_LEFT);
+
     Component c;
     titleHL.addComponent(c=globs.getMediaLocator().getLeaderboardTitle());
     titleHL.setComponentAlignment(c, Alignment.MIDDLE_LEFT);
@@ -103,23 +104,15 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     
     maybeShowMoveSelector(titleHL);
   
-   // titleHL.addComponent(sp=new Label());
-   // titleHL.setExpandRatio(sp, 1.0f);
-   // sp.setWidth("30px");
-    
     tips.setStyleName(BaseTheme.BUTTON_LINK);
     tips.addStyleName("m-link-button");
     titleHL.addComponent(tips);
     titleHL.setComponentAlignment(tips, Alignment.MIDDLE_RIGHT);
     titleHL.setExpandRatio(tips, 0.5f);
     
-    //titleHL.addComponent(sp=new Label());
-   // sp.setWidth("30px");
-    
     tableVLayout = new VerticalLayout();
     tableVLayout.setSizeUndefined();
     tableVLayout.setWidth(APPLICATION_SCREEN_WIDTH);
-    //tableVLayout.setHeight("810px"); //"900px");
     tableVLayout.setSpacing(true);
     tableVLayout.setMargin(true);
     tableVLayout.addStyleName("m-whitepage-header");
@@ -146,7 +139,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
   private static String TOTALS = "Totals";
   private void maybeShowMoveSelector(HorizontalLayout hl)
   {
-    Move m = Move.getCurrentMove();
+    Move m = Move.getCurrentMoveTL();
     int thisMove = m.getNumber();
     if(thisMove<=1)
       return;
@@ -173,9 +166,6 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     sel.setNullSelectionAllowed(false);
     sel.setValue(""+thisMove);
     sel.setImmediate(true);
- /*   sel.setSizeUndefined();  // trying to get it to size itself accurately
-    sel.setWidth("100%");
-    sel.setHeight("100%");*/
     sel.addValueChangeListener(new MoveListener());
     
     hl.addComponent(sel);
@@ -186,13 +176,20 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
   class MoveListener implements ValueChangeListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void valueChange(ValueChangeEvent event)
     {
+      HSess.init();
+      
       String mv = (String)event.getProperty().getValue();
       if(mv.equals(TOTALS))
-        setTableByCombinedScore();
+        setTableByCombinedScoreTL();
       else
-        setTableByMoveNumber(Integer.parseInt(mv));
+        setTableByMoveNumberTL(Integer.parseInt(mv));
+      
+      HSess.close();
     }   
   }
   
@@ -206,14 +203,14 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     return tab;
   }
   
-  private void setTableByCombinedScore()
+  private void setTableByCombinedScoreTL()
   {
-    setTableCommon(UserTable.makeLeaderBoardCombinedScoreTable());
+    setTableCommon(UserTable.makeLeaderBoardCombinedScoreTableTL());
   }
   
-  private void setTableByMoveNumber(int num)
+  private void setTableByMoveNumberTL(int num)
   {
-    setTableCommon(UserTable.makeLeaderBoardTable(num));    
+    setTableCommon(UserTable.makeLeaderBoardTableTL(num));    
   }
   
   private void setTableCommon(Table newTable)
@@ -230,59 +227,23 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     tableVLayout.setExpandRatio(table, 1.0f);
     
   }
- /*
-  @SuppressWarnings("serial")
-  class RefreshListener implements ClickListener
-  {
-    @Override
-    public void buttonClick(ClickEvent event)
-    {
-      int idx = tableContainer.getComponentIndex(table);
-      tableContainer.removeComponent(table);
-      //table.removeAllItems();
-     // refillTable(table);
-      Table tab = createTable();
-      tableContainer.addComponent(tab, idx);
-      table = tab;
-      
-      refreshButt.removeStyleName("m-colorred");
-      refreshButt.setEnabled(false);
-    }
-  }
-*/
   
   // Here we're told that user data has changed, probably scores
   @Override
-  public boolean userUpdated_oob(SingleSessionManager mgr, Serializable uId)
+  public boolean userUpdated_oobTL(Serializable uId)
   {
- /* not working for me
-     //System.out.println("Leaderboard userUpdatedExternally, uId= "+uId);
-    
-    if (refreshButt.isEnabled()) {
-      if(updatedUserId.equals(uId))
-        return;
-      refreshButt.setCaption("User data has changed.  Press to refresh.");
-    }
-    else {
-      User u = DBGet.getUser(uId,session);
-      refreshButt.setCaption("Data for user " + u.getUserName() + " has changed. Press to refresh.");
-    }
-    updatedUserId = uId;
-    refreshButt.addStyleName("m-colorred");
-    refreshButt.setEnabled(true);
-
-    // app.getMainWindow().showNotification("User change","Data for user "+u.getUserName()+" has been updated.",Notification.TYPE_WARNING_MESSAGE);
-    // Can't do this, it uses "getCurrentSession()", which is a leak for us
-    // table.setContainerDataSource(User.getContainer()); // replace with new one
-
-*/
     return false; // don't need a ui update
   }
 
   @Override
+  @MmowgliCodeEntry
+  @HibernateConditionallyOpened
+  @HibernateConditionallyClosed
   public void enter(ViewChangeEvent event)
   {
-    initGui();  
+    Object sessKey = HSess.checkInit();
+    initGuiTL(); 
+    HSess.checkClose(sessKey);
   }
 
 }
