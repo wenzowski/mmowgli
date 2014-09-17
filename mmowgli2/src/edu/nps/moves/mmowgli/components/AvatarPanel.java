@@ -37,11 +37,15 @@ import java.util.Collection;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.event.MouseEvents;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Embedded;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Panel;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.Avatar;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
@@ -63,6 +67,7 @@ public class AvatarPanel extends Panel implements MmowgliComponent
   private Integer selectedIdx;
   private HorizontalLayout imgLay;
   
+  @HibernateSessionThreadLocalConstructor
   public AvatarPanel(String caption)
   {
   }
@@ -74,11 +79,11 @@ public class AvatarPanel extends Panel implements MmowgliComponent
 
     imgLay = new HorizontalLayout();
     setContent(imgLay);
-    imgLay.setHeight("105px"); //"85px");
+    imgLay.setHeight("105px");
     imgLay.setSpacing(true);
     
     @SuppressWarnings("unchecked")
-    HbnContainer<Avatar> contr = (HbnContainer<Avatar>)VHib.getContainer(Avatar.class);
+    HbnContainer<Avatar> contr = (HbnContainer<Avatar>)HSess.getContainer(Avatar.class);
     Collection<?> lis = contr.getItemIds();
     avIdArr = new Object[lis.size()];
 
@@ -88,7 +93,7 @@ public class AvatarPanel extends Panel implements MmowgliComponent
     for(Object id : lis) {
       avIdArr[idx++] = id;
 
-      Avatar a = Avatar.get(id);
+      Avatar a = Avatar.getTL(id);
       Embedded em = new Embedded(null, loc.locate(a.getMedia()));
       em.setWidth("95px");
       em.setHeight("95px");
@@ -135,6 +140,7 @@ public class AvatarPanel extends Panel implements MmowgliComponent
   class ImageClicked implements MouseEvents.ClickListener
   {
     @Override
+    @MmowgliCodeEntry
     public void click(com.vaadin.event.MouseEvents.ClickEvent event)
     {
       Embedded emb = (Embedded)event.getSource();
