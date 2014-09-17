@@ -22,7 +22,7 @@ import edu.nps.moves.mmowgli.db.User;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public final class VHib extends AbstractVHib implements SessionManager
+public final class VHib extends AbstractVHib
 {
   private static VHib me = null;
   public static VHib instance()
@@ -31,6 +31,9 @@ public final class VHib extends AbstractVHib implements SessionManager
       me = new VHib();
     return me;
   }
+  
+  private boolean initted=false;
+  
   private VHib()
   {}
 
@@ -42,6 +45,9 @@ public final class VHib extends AbstractVHib implements SessionManager
   
   public void init(ServletContext context)
   {
+    if(initted)
+      return;
+    
     init1(context);
     // Now all the unique stuff to override
     configureHibernateSearch();
@@ -50,6 +56,7 @@ public final class VHib extends AbstractVHib implements SessionManager
     
     // Build search index
     Session srsess = openSession();
+    srsess.beginTransaction();
     FullTextSession ftSess = Search.getFullTextSession(srsess);
     try {
       ftSess.createIndexer().startAndWait();
@@ -57,9 +64,12 @@ public final class VHib extends AbstractVHib implements SessionManager
     catch(InterruptedException ex) {
       System.err.println("Error building search index.");
     }
-    srsess.close();
       
-    AdHocDBInits.databaseCheckUpdate();  // one-time only stuff
+    AdHocDBInits.databaseCheckUpdate(srsess);  // one-time only stuff
+    srsess.getTransaction().commit();
+    srsess.close();
+    
+    initted=true;
   }
   
   public static SessionFactory getSessionFactory()
@@ -67,18 +77,7 @@ public final class VHib extends AbstractVHib implements SessionManager
     return instance()._getSessionFactory();
   }
   
-  @Override
-  public Session getSession()
-  {
-    return VHib.getVHSession();
-  }
-  
-  public static Session getVHSession()
-  {
-    return instance()._getVHSession();
-  }
-
-  public static Session openSession()
+  /*package*/ static Session openSession()
   {
     return instance()._openSession();
   }
