@@ -43,11 +43,15 @@ import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.BaseTheme;
 
-import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.AppEvent;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliController;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.IDButton;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
@@ -71,6 +75,7 @@ public class CardSummaryLine extends HorizontalLayout implements MmowgliComponen
   private SimpleDateFormat dateForm;
   private Embedded avatar;
   
+  @HibernateSessionThreadLocalConstructor
   public CardSummaryLine(Object cardId)
   {
     this.cardId = cardId;
@@ -85,7 +90,7 @@ public class CardSummaryLine extends HorizontalLayout implements MmowgliComponen
   @Override
   public void initGui()
   {
-    Card c = DBGet.getCard(cardId);
+    Card c = DBGet.getCardTL(cardId);
     String tooltip = c.getText();
     
     User auth = c.getAuthor();
@@ -137,15 +142,20 @@ public class CardSummaryLine extends HorizontalLayout implements MmowgliComponen
   }
 
   @Override
+  @MmowgliCodeEntry
+  @HibernateOpened
+  @HibernateClosed
   public void layoutClick(LayoutClickEvent event)
   {
+    HSess.init();
     MmowgliController cntlr = Mmowgli2UI.getGlobals().getController();
     if(event.getClickedComponent() == avatar) {
-      Card c = DBGet.getCard(cardId);
-      cntlr.miscEvent(new AppEvent(SHOWUSERPROFILECLICK,this,c.getAuthor().getId()));
+      Card c = DBGet.getCardTL(cardId);
+      cntlr.miscEventTL(new AppEvent(SHOWUSERPROFILECLICK,this,c.getAuthor().getId()));
     }
     else
-      cntlr.miscEvent(new AppEvent(CARDCLICK, this, cardId));
+      cntlr.miscEventTL(new AppEvent(CARDCLICK, this, cardId));
+    HSess.close();
   }
 
 }
