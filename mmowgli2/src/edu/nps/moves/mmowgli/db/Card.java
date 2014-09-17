@@ -33,7 +33,7 @@
  */
 package edu.nps.moves.mmowgli.db;
 
-import static edu.nps.moves.mmowgli.hibernate.DbUtils.len255;
+import static edu.nps.moves.mmowgli.hibernate.DbUtils.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -50,8 +50,7 @@ import org.hibernate.search.annotations.*;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
-import edu.nps.moves.mmowgli.hibernate.Sess;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * Card.java
@@ -109,19 +108,19 @@ public class Card implements Serializable
   @SuppressWarnings({ "serial" })
   public static HbnContainer<Card> getContainer()
   {
-    return new HbnContainer<Card>(Card.class,VHib.getSessionFactory())
+    return new HbnContainer<Card>(Card.class,HSess.getSessionFactory())
     {
       @Override
-      protected Criteria getBaseCriteria()
+      protected Criteria getBaseCriteriaTL()
       {
-        return super.getBaseCriteria().addOrder(Order.desc("creationDate")); // newest first
+        return super.getBaseCriteriaTL().addOrder(Order.desc("creationDate")); // newest first
       }      
     };
   }
 
-  public static Card get(Serializable id)
+  public static Card getTL(Object id)
   {
-    return (Card)VHib.getVHSession().get(Card.class, id);
+    return (Card)HSess.get().get(Card.class, (Serializable)id);
   }
   
   public static Card get(Serializable id, Session sess)
@@ -133,22 +132,22 @@ public class Card implements Serializable
   {
     return (Card)sess.merge(c);
   }
-  
-  public static Card merge(Card c)
+  public static Card mergeTL(Card c)
   {
-    return Card.merge(c,VHib.getVHSession());
+    return Card.merge(c,HSess.get());
   }
  
-  public static void update(Card c)
+  public static void updateTL(Card c)
   {
-    Sess.sessUpdate(c);
+    forceUpdateEvent(c);
+    HSess.get().update(c);
   }
  
-  public static void save(Card c)
+  public static void saveTL(Card c)
   {
-    Sess.sessSave(c);
+    HSess.get().save(c);
   }
-  
+
   @Override
   public String toString()
   {
@@ -172,15 +171,6 @@ public class Card implements Serializable
     sb.append(" / this id:");
     sb.append(id);
     return sb.toString();
-  }
-
-  @SuppressWarnings("unchecked")
-  public static List<Card> getFactCards()
-  {
-    Session sess = VHib.getVHSession();
-    return (List<Card>) sess.createCriteria(Card.class)
-                            .add(Restrictions.eq("factCard", true))
-                            .list();
   }
   
   @Id
@@ -350,7 +340,33 @@ public class Card implements Serializable
     }
   }
   
-  public static Criteria adjustCriteriaToOmitCards(Criteria crit, User me)
+//  public static Criteria adjustCriteriaToOmitCards(Criteria crit, User me)
+//  {
+//    // 2 conflicting requirements:
+//    // 1: if guest and we're in prep phase, don't allow viewing of current moves cards;
+//    // 2: if game doesn't allow prior card viewing, don't show old moves cards;
+//
+//    // since the combination of the 2 would potentially prohibit viewing all cards, only use one at at time.
+//    // since the guest case is the special and most unfrequent one one, check for it first
+//    Move thisMove = Move.getCurrentMove();
+//    boolean canSeeCurrent = !MovePhase.isGuestAndIsPreparePhase(me);
+//    boolean canSeePast = me.isAdministrator() || Game.get().isShowPriorMovesCards();
+//
+//    if (!canSeeCurrent && !canSeePast) {
+//      crit.add(Restrictions.eq("factCard", true)); // effectively hides everything since we don't do fact cards
+//    }
+//    else {
+//      if (!canSeeCurrent) {
+//        crit.createAlias("createdInMove", "MOVE").add(Restrictions.ne("MOVE.number", thisMove.getNumber()));
+//      }
+//      if (!canSeePast) {
+//        crit.createAlias("createdInMove", "MOVE").add(Restrictions.eq("MOVE.number", thisMove.getNumber()));
+//      }
+//    }
+//    return crit;
+//  }
+  
+  public static Criteria adjustCriteriaToOmitCardsTL(Criteria crit, User me)
   {
     // 2 conflicting requirements:
     // 1: if guest and we're in prep phase, don't allow viewing of current moves cards;
@@ -358,9 +374,9 @@ public class Card implements Serializable
 
     // since the combination of the 2 would potentially prohibit viewing all cards, only use one at at time.
     // since the guest case is the special and most unfrequent one one, check for it first
-    Move thisMove = Move.getCurrentMove();
-    boolean canSeeCurrent = !MovePhase.isGuestAndIsPreparePhase(me);
-    boolean canSeePast = me.isAdministrator() || Game.get().isShowPriorMovesCards();
+    Move thisMove = Move.getCurrentMoveTL();
+    boolean canSeeCurrent = !MovePhase.isGuestAndIsPreparePhaseTL(me);
+    boolean canSeePast = me.isAdministrator() || Game.getTL().isShowPriorMovesCards();
 
     if (!canSeeCurrent && !canSeePast) {
       crit.add(Restrictions.eq("factCard", true)); // effectively hides everything since we don't do fact cards
@@ -376,11 +392,18 @@ public class Card implements Serializable
     return crit;
   }
   
-  public static boolean canSeeCard(Card card, User me)
+  public static boolean canSeeCardTL(Card card, User me)
   {
-    return canSeeCard_oob(card,me,VHib.getVHSession());
+    return canSeeCard_oob(card,me,HSess.get());
   }
-  
+//  public static boolean canSeeCard(Card card, User me)
+//  {
+//    return canSeeCard_oob(card,me,VHib.getVHSession());
+//  }
+  public static boolean canSeeCard_oobTL(Card card, User me)
+  {
+    return canSeeCard_oob(card,me,HSess.get());
+  }
   public static boolean canSeeCard_oob(Card card, User me, Session sess)
   {
     //card = (Card)sess.merge(card); too expensive, and not needed if card.hidden bit is used instead of marking array
