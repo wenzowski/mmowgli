@@ -35,13 +35,12 @@ package edu.nps.moves.mmowgli.db.pii;
 import java.io.Serializable;
 
 import javax.persistence.*;
-import javax.persistence.Entity;
 
-import org.hibernate.annotations.*;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 import org.jasypt.hibernate4.type.EncryptedStringType;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
 
 /** Used for jasypt encryption of fields */
@@ -73,20 +72,6 @@ public class EmailPii implements Serializable
   public EmailPii(String s)
   {
     setAddress(s);
-  }
-  
-  public static void update(EmailPii em)
-  {
-    VHib.getVHSession().update(em);   
-  }
-  
-  public static void save(EmailPii email)
-  {
-    VHib.getVHSession().save(email);
-  }
-  public static void delete(EmailPii email)
-  {
-    VHib.getVHSession().delete(email);
   }
   
   @Id
