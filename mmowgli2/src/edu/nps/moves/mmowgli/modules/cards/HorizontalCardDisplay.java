@@ -49,7 +49,10 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.CardSummary;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 
 /**
  * HorizontalCardDisplay.java
@@ -145,24 +148,18 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       start = new NativeButton(null,startLis);
       start.setImmediate(true);
       start.addStyleName("m-vcr-fonticon");
- //   start.addStyleName("v-nativebutton-m-vcrBackAllButtonRA");
       start.setDescription("show earliest cards");
-   // start.setWidth("15px");
-   //   start.setHeight("15px");
-    start.setHtmlContentAllowed(true);
-    //start.setCaption(Icon.step_backward.toString());
-    start.setIcon(FontAwesome.STEP_BACKWARD);
+
+      start.setHtmlContentAllowed(true);
+
+      start.setIcon(FontAwesome.STEP_BACKWARD);
       addComponent(start);
     
       left = new NativeButton(null,leftLis);
       left.setImmediate(true);
-      //left.addStyleName("v-nativebutton-m-vcrBackButtonRA");
       left.addStyleName("m-vcr-fonticon");
       left.setDescription("show earlier cards");
-   //   left.setWidth("15px");
-   //   left.setHeight("15px");
       left.setHtmlContentAllowed(true);
-      //left.setCaption(Icon.backward.toString());
       left.setIcon(FontAwesome.BACKWARD);
       addComponent(left);
       
@@ -171,27 +168,19 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       
       right = new NativeButton(null,rightLis);
       right.setImmediate(true);
-      //right.addStyleName("v-nativebutton-m-vcrFwdButtonLA");
       right.addStyleName("m-vcr-fonticon");
       right.setDescription("show newer cards");
-      //right.setWidth("15px");
-     // right.setHeight("15px");
       right.setHtmlContentAllowed(true);
-      //right.setCaption(Icon.play.toString());
       right.setIcon(FontAwesome.PLAY);
       addComponent(right);
       
       end = new NativeButton(null,endLis);
       end.setImmediate(true);
-      //end.addStyleName("v-nativebutton-m-vcrFwdAllButtonLA");
       end.addStyleName("m-vcr-fonticon");
       end.setDescription("show newest cards");
-      //end.setWidth("15px");
-      //end.setHeight("15px");
       end.setHtmlContentAllowed(true);
-      //end.setCaption(Icon.step_forward.toString());
       end.setIcon(FontAwesome.STEP_FORWARD);
-     addComponent(end);
+      addComponent(end);
       
       addComponent(sp=new Label());
       sp.setWidth("1px");
@@ -217,25 +206,25 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
   public void show(Session sess)
   {
     if(leftIndex != -1)
-      showLeftSide(leftIndex,sess);
+      showLeftSideTL(leftIndex,sess);
     else
       showEnd(sess);
       
   }
   public void showEnd(Session sess)
   {
-     showRightSide(cardIds.size()-1, sess); //0 based index, so -1   
+     showRightSideTL(cardIds.size()-1, sess); //0 based index, so -1   
   }
 
   public void showStart(Session sess)
   {
-    showLeftSide(0, sess);
+    showLeftSideTL(0, sess);
   }
   
   /*
    *  display 4 cards with the specified one being as far right as possible (don't think that's right...recompute
    */
-  private void showRightSide(int idx, Session sess)
+  private void showRightSideTL(int idx, Session sess)
   {
     CardSummary[] arr = new CardSummary[numVisible];
     int i =0;
@@ -252,10 +241,10 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       }
       start++;
     }
-    fillDisplay(arr);    
+    fillDisplayTL(arr);    
   }
   
-  private void showLeftSide(int idx, Session sess)
+  private void showLeftSideTL(int idx, Session sess)
   {
     CardSummary[] arr = new CardSummary[numVisible];
     int i=0;
@@ -269,10 +258,10 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       }
       idx++;
     }
-    fillDisplay(arr);
+    fillDisplayTL(arr);
   }
   
-  private void fillDisplay(CardSummary[] cards)
+  private void fillDisplayTL(CardSummary[] cards)
   {
     for(CardSummary cs : displayedCards)
       cardHL.removeComponent(cs);
@@ -322,24 +311,29 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       this.typ = typ;
     }
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
-      Session sess = VHib.getVHSession();
+      HSess.init();
+      
+      Session sess = HSess.get();
       switch(typ) {
       case START:
         showStart(sess);
         break;
       case LEFT:
-        showLeftSide(Math.max(leftIndex-numVisible,0),sess);
+        showLeftSideTL(Math.max(leftIndex-numVisible,0),sess);
         break;
       case RIGHT:
-        showRightSide(Math.min(leftIndex+numVisible, cardIds.size()-1),sess);
+        showRightSideTL(Math.min(leftIndex+numVisible, cardIds.size()-1),sess);
         break;
       case END:
         showEnd(sess);
         break;
       }
-      
+      HSess.close();
     }
   }
 }
