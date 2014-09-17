@@ -51,10 +51,11 @@ import edu.nps.moves.mmowgli.components.SendMessageWindow;
 import edu.nps.moves.mmowgli.components.ToggleLinkButton;
 import edu.nps.moves.mmowgli.db.Message;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsMessageUpdates;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPageCommentPanel2.ActionPlanComment;
-import edu.nps.moves.mmowgli.utility.M;
 
 /**
  * UserProfileMyBuddiesPanel.java
@@ -75,6 +76,7 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
   private boolean showingHiddenMsgs = false;
   private ToggleLinkButton showButt;
 
+  @HibernateSessionThreadLocalConstructor
   public UserProfileMyMailPanel(Object uid)
   {
     super(uid);
@@ -99,7 +101,7 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
     getLeftLabel().setValue(left);
     
     if (!userIsMe) {
-      User u = DBGet.getUser(uid);
+      User u = DBGet.getUserTL(uid);
       if (u.isOkEmail() || u.isOkGameMessages()) {
         final NativeButton sendEmailButt = new NativeButton("Send private mail to this user");
         sendEmailButt.addStyleName(BaseTheme.BUTTON_LINK);
@@ -121,13 +123,20 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
         {
           private static final long serialVersionUID = 1L;
           @Override
+          @MmowgliCodeEntry
+          @HibernateOpened
+          @HibernateClosed
           public void buttonClick(ClickEvent event)
           {
-            User u = DBGet.getUser(uid);
+            HSess.init();
+            
+            User u = DBGet.getUserTL(uid);
             if (u.isOkEmail() || u.isOkGameMessages())  // redundant here
               new SendMessageWindow(u,imAdminOrGameMaster);
             else
               Notification.show("Sorry", "Player " + u.getUserName() + " does not receive mail.", Notification.Type.WARNING_MESSAGE);
+            
+            HSess.close();
           }
         });
       }
@@ -146,7 +155,7 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
     sp.setHeight("10px");
     rightVL.addComponent(mailPanel);
  
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     Set<Message> msgs = me.getGameMessages();
 
     int num = msgs.size();
@@ -165,9 +174,9 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
     }
 
     @Override
-    protected void hideClicked()
+    protected void hideClickedTL()
     { 
-      super.hideClicked();
+      super.hideClickedTL();
       handleVisible(this);
     }   
   }
@@ -176,12 +185,10 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
   {
     addOneMessageCommon(msg,idx,total,position,null);
   }
-  
-  private void addOneMessage_oob(Message msg, int idx, int total, Integer position, Session sess)
+  private void addOneMessage_oobTL(Message msg, int idx, int total, Integer position)
   {
-    addOneMessageCommon(msg,idx,total,position,sess);
+    addOneMessageCommon(msg,idx,total,position,HSess.get());
   }
-  
   private void addOneMessageCommon(Message msg, int idx, int total, Integer position, Session sess)
   {
     ActionPlanComment comment = new MyActionPlanComment(idx,total,msg,true);  // show indiv show/hide button link
@@ -202,11 +209,9 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
   }
   
   @Override
-  public boolean messageCreated_oob(SingleSessionManager mgr, Serializable uId)
+  public boolean messageCreated_oobTL(Serializable uId)
   {
-    Session sess = M.getSession(mgr);
-
-    Message msg = (Message)sess.get(Message.class, (Serializable)uId);
+    Message msg = (Message)HSess.get().get(Message.class, (Serializable)uId);
     if(!userIsMe || msg.getToUser().getId() != (Long)Mmowgli2UI.getGlobals().getUserID())  // If I'm displaying some other user, or the message is not for me, bail
       return false;
     
@@ -215,7 +220,7 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
     for(int i=0;i<oldtotal;i++)
       adjustTotals((ActionPlanComment)panelVL.getComponent(i),newtotal);
     
-    addOneMessage_oob(msg,newtotal,newtotal,0,sess);
+    addOneMessage_oobTL(msg,newtotal,newtotal,0);
     return true;
   } 
   
