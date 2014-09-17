@@ -41,7 +41,8 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.ComboBox;
 
 import edu.nps.moves.mmowgli.db.Affiliation;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * BoundAffiliationCombo.java
@@ -58,6 +59,7 @@ public class BoundAffiliationCombo extends ComboBox
 {
   private static final long serialVersionUID = 8304263483697267947L;
 
+  @HibernateSessionThreadLocalConstructor
   public BoundAffiliationCombo()
   {
     super();
@@ -71,21 +73,12 @@ public class BoundAffiliationCombo extends ComboBox
   }
   
   private void common()
-  {
-//    setContainerDataSource(Affiliation.getContainer());
-    
-    // Elcrappo below-o doesn't work...can the HibernateContainer*/
-    /* In the update to 6.6.1, this widget was failing when being called from Select.java; comments in HbnContainer said getIdByIndex must be called before indexOfId */
-    /* These three lines made it work */
-//    Collection<?> coll = this.getItemIds();
-//    for(int i=0;i<coll.size();i++)
-//      ((HbnContainer<?>)getContainerDataSource()).getIdByIndex(i);
-    
+  {    
     @SuppressWarnings("unchecked")
-    List<Affiliation> lis = VHib.getVHSession().createCriteria(Affiliation.class).addOrder(Order.asc("id")).list();
+    List<Affiliation> lis = HSess.get().createCriteria(Affiliation.class).addOrder(Order.asc("id")).list();
     
     setContainerDataSource(new BeanItemContainer<Affiliation>(Affiliation.class,lis));
-    setItemCaptionMode(ItemCaptionMode.PROPERTY); //ComboBox.ITEM_CAPTION_MODE_PROPERTY);  // works!
+    setItemCaptionMode(ItemCaptionMode.PROPERTY);
     setItemCaptionPropertyId("affiliation");
     setNullSelectionAllowed(false);
     setNewItemsAllowed(false);
