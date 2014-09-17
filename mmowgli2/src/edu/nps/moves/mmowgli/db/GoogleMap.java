@@ -34,14 +34,13 @@
 package edu.nps.moves.mmowgli.db;
 
 import java.awt.geom.Point2D;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 
 /**
@@ -82,14 +81,13 @@ public class GoogleMap implements Serializable
     this.zoom = zoom;
   }
     
-  public static void update(GoogleMap map)
+  public static void updateTL(GoogleMap map)
   {
-    VHib.getVHSession().update(map);   
+    HSess.get().update(map);
   }
-  
-  public static void save(GoogleMap map)
+  public static void saveTL(GoogleMap map)
   {
-    VHib.getVHSession().save(map);
+    HSess.get().save(map);
   }
 
   /**
