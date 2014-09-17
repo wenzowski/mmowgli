@@ -34,11 +34,15 @@
 package edu.nps.moves.mmowgli.modules.userprofile;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.*;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.data.hbnutil.HbnContainer.EntityItem;
@@ -52,9 +56,12 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliEvent;
 import edu.nps.moves.mmowgli.components.CardTableSimple;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
 import edu.nps.moves.mmowgli.utility.IDNativeButton;
 
@@ -79,6 +86,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
   private HorizontalLayout allRow, buildsRow, favsRow, profileRow;
   
   private SimpleDateFormat dateForm;
+  @HibernateSessionThreadLocalConstructor
   public UserProfileMyIdeasPanel2(Object uid)
   {
     super(uid);
@@ -91,9 +99,6 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     super.initGui();
     VerticalLayout leftLayout = getLeftLayout();
     leftLayout.setSpacing(true);
-//    Label leftLabel = getLeftLabel();
-//    leftLabel.setContentMode(Label.CONTENT_XHTML);
-//    leftLabel.setValue("&nbsp;<br/>&nbsp;");
     getLeftLabel().setValue(""); //"Click on the links below to display lists of cards in play.");
     int i = leftLayout.getComponentIndex(getLeftLabel()) +1;
     // start adding from here
@@ -171,8 +176,12 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
    }
   
   @Override
+  @MmowgliCodeEntry
+  @HibernateOpened
+  @HibernateClosed
   public void buttonClick(ClickEvent event)
   {
+    HSess.init();
     Button clickee = event.getButton();
     if(clickee == allButt)
       showAllMyIdeas();
@@ -184,6 +193,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
       showProfile();
     
     flipChecks(clickee);
+    HSess.close();
   }
   
   private void flipChecks(Button b)
@@ -264,21 +274,19 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
       lastTable = null;
     }
     if(profile == null)
-      profile = createProfile();
+      profile = createProfileTL();
     getRightLayout().setSizeUndefined();  // if layout is full size, content goes in center, we want top
     getRightLayout().addComponent(profile);
     getRightLayout().setComponentAlignment(profile, Alignment.TOP_CENTER);
 
-   // profile.setHeight("720px");
-   // profile.setWidth("670px");
     lastTable = profile;   
   }
   
   private Criteria commonCriteria()
   {
-    User usr = DBGet.getUser(uid);
+    User usr = DBGet.getUserTL(uid);
     
-    Criteria crit = VHib.getVHSession().createCriteria(Card.class)
+    Criteria crit = HSess.get().createCriteria(Card.class)
                     .add(Restrictions.eq("author", usr))
                      .add(Restrictions.eq("factCard", false));
     if(me.isGameMaster() || me.isAdministrator())
@@ -290,7 +298,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
  }
   
   @SuppressWarnings({ "unchecked", "deprecation"})
-  private Component createProfile()
+  private Component createProfileTL()
   {
     VerticalLayout lay = new VerticalLayout();
     lay.setWidth("670px");
@@ -314,41 +322,41 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     int count=0;
     int largest=-1;
     
-    List<Card> lisPos = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getPositiveIdeaCardType())).list();
+    List<Card> lisPos = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getPositiveIdeaCardTypeTL())).list();
     count+=lisPos.size();
     largest = Math.max(largest, lisPos.size());
     
-    List<Card> lisNeg = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getNegativeIdeaCardType())).list();
+    List<Card> lisNeg = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getNegativeIdeaCardTypeTL())).list();
     count+=lisNeg.size();
     largest=Math.max(largest, lisNeg.size());
     
-    List<Card> lisExpand = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getExpandType())).list();
+    List<Card> lisExpand = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getExpandTypeTL())).list();
     count+=lisExpand.size();
     largest=Math.max(largest,lisExpand.size());
     
-    List<Card> lisAdapt = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getAdaptType())).list();
+    List<Card> lisAdapt = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getAdaptTypeTL())).list();
     count+=lisAdapt.size();
     largest=Math.max(largest,lisAdapt.size());
 
-    List<Card> lisCounter = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getCounterType())).list();
+    List<Card> lisCounter = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getCounterTypeTL())).list();
     count+=lisCounter.size();
     largest=Math.max(largest,lisCounter.size());
 
-    List<Card> lisExplore = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getExploreType())).list();
+    List<Card> lisExplore = commonCriteria().add(Restrictions.eq("cardType",ct=CardTypeManager.getExploreTypeTL())).list();
     count+=lisExplore.size();
     largest=Math.max(largest,lisExplore.size());
 
-    ct = CardTypeManager.getPositiveIdeaCardType();
+    ct = CardTypeManager.getPositiveIdeaCardTypeTL();
     row(ct.getSummaryHeader(),largest,lisPos.size(),ct,gridL);
-    ct = CardTypeManager.getNegativeIdeaCardType();
+    ct = CardTypeManager.getNegativeIdeaCardTypeTL();
     row(ct.getSummaryHeader(),largest,lisNeg.size(),ct,gridL);
-    ct = CardTypeManager.getExpandType();
+    ct = CardTypeManager.getExpandTypeTL();
     row(ct.getSummaryHeader(),largest,lisExpand.size(),ct,gridL);
-    ct = CardTypeManager.getAdaptType();
+    ct = CardTypeManager.getAdaptTypeTL();
     row(ct.getSummaryHeader(),largest,lisAdapt.size(),ct,gridL);
-    ct= CardTypeManager.getCounterType();
+    ct= CardTypeManager.getCounterTypeTL();
     row(ct.getSummaryHeader(),largest,lisCounter.size(),ct,gridL);
-    ct = CardTypeManager.getExploreType();
+    ct = CardTypeManager.getExploreTypeTL();
     row(ct.getSummaryHeader(),largest,lisExplore.size(),ct,gridL);
     
     gridL.addComponent(new Label(""));
@@ -502,18 +510,19 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
   {
     public MyCardsContainer()
     {
-      this(VHib.getSessionFactory());
+      this(HSess.getSessionFactory());  //threadlocal ok
     }
     public MyCardsContainer(SessionFactory fact)
     {
       super((Class<T>)Card.class,fact);
     }
     
+    @MmowgliCodeEntry   // from HbnContainer
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
-      Criteria crit = super.getBaseCriteria();           // gets all cards
-      crit.add(Restrictions.eq("author", DBGet.getUser(uid)));// written by me
+      Criteria crit = super.getBaseCriteriaTL();           // gets all cards
+      crit.add(Restrictions.eq("author", DBGet.getUserTL(uid)));// written by me
       crit.add(Restrictions.eq("factCard", false));      // which aren't fact cards
       crit.addOrder(Order.desc("creationDate"));   // newest first
       
@@ -522,8 +531,8 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
       else
         crit.add(Restrictions.eq("hidden", false));
       
-      Card.adjustCriteriaToOmitCards(crit, me);
-      
+      Card.adjustCriteriaToOmitCardsTL(crit, me);
+
       return crit;
     }
   }
@@ -533,7 +542,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
   {
     public MyBuildsContainer()
     {
-      this(VHib.getSessionFactory());
+      this(HSess.getSessionFactory()); //thread local ok
     }
     public MyBuildsContainer(SessionFactory fact)
     {
@@ -541,10 +550,10 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     }
    
     @Override
-    protected Criteria getBaseCriteria()
-    {      
-      User moi = DBGet.getUser(uid);
-      Criteria crit = super.getBaseCriteria();   // gets all cards
+    protected Criteria getBaseCriteriaTL()
+    { 
+      User moi = DBGet.getUserTL(uid);
+      Criteria crit = super.getBaseCriteriaTL();   // gets all cards
       //crit.add(Restrictions.ne("author", moi));  // that are not written by me
       crit.createAlias("parentCard","parent");   // who have parent cards
       crit.add(Restrictions.eq("parent.author",moi));  // whose author is me
@@ -555,8 +564,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
       else
         crit.add(Restrictions.eq("hidden", false));
       
-      Card.adjustCriteriaToOmitCards(crit, me);
-
+      Card.adjustCriteriaToOmitCardsTL(crit, me);
       return crit;
     }
   }
@@ -565,24 +573,24 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
   {
     public MyFavoritesContainer()
     {
-      this(VHib.getSessionFactory());
+      this(HSess.getSessionFactory());   //Thread local ok
     }
+    
     public MyFavoritesContainer(SessionFactory fact)
     {
       super((Class<T>) Card.class,fact);
     }
     
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
-      Criteria crit = super.getBaseCriteria();              // gets all cards
+      Criteria crit = super.getBaseCriteriaTL();              // gets all cards
       crit.addOrder(Order.desc("creationDate"));   // newest first
-      ///crit.add(Restrictions.eq("factCard", false));
       
       Disjunction disj;
       crit.add(disj = Restrictions.disjunction());
       
-      User usr = DBGet.getUserFresh(uid);     
+      User usr = DBGet.getUserFreshTL(uid);     
       Set<Card> favs = usr.getFavoriteCards();
       if(favs != null && favs.size()>0) {
         for(Card c: favs) {
@@ -597,8 +605,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
       else
         crit.add(Restrictions.eq("hidden", false));
       
-      Card.adjustCriteriaToOmitCards(crit, me);
-      
+      Card.adjustCriteriaToOmitCardsTL(crit, me);
       return crit;
     }   
   }
