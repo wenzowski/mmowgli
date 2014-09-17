@@ -52,8 +52,10 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.actionplans.AddAuthorDialog;
+import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
 import edu.nps.moves.mmowgli.utility.BaseCoroutine;
 import edu.nps.moves.mmowgli.utility.CardStyler;
 
@@ -78,42 +80,40 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
   public static final String CARDLISTHEADER_CONTENT_H = "80px";
   public static final String CARDLISTHEADER_CONTENT_W = "190px";
   public static final String CARDLISTHEADER_CONTENT_POS = "top:58px;left:20px";
-  public static final String CARDLISTHEADER_DRAWER_H    = "138px";
-  public static final String CARDLISTHEADER_DRAWER_W    = "236px";
-  public static final String CARDLISTHEADER_DRAWER_POS  = "top:127px;left:-1px";
+  public static final String CARDLISTHEADER_DRAWER_H = "138px";
+  public static final String CARDLISTHEADER_DRAWER_W = "236px";
+  public static final String CARDLISTHEADER_DRAWER_POS = "top:127px;left:-1px";
 
-  public static final String CARDLISTHEADER_DRAWER_TEXT_W     = "208px";
-  public static final String CARDLISTHEADER_DRAWER_TEXT_H     = "70px";
-  public static final String CARDLISTHEADER_DRAWER_TEXT_POS   = "top:32px;left:14px";
+  public static final String CARDLISTHEADER_DRAWER_TEXT_W = "208px";
+  public static final String CARDLISTHEADER_DRAWER_TEXT_H = "70px";
+  public static final String CARDLISTHEADER_DRAWER_TEXT_POS = "top:32px;left:14px";
 
-  public static final String CARDLISTHEADER_DRAWER_COUNT_W    = "64px";
-  public static final String CARDLISTHEADER_DRAWER_COUNT_H    = "15px";
-  public static final String CARDLISTHEADER_DRAWER_COUNT_POS  = "top:109px;left:15px";
-  public static final String CARDLISTHEADER_DRAWER_CANCEL_W   = "64px";
-  public static final String CARDLISTHEADER_DRAWER_CANCEL_H   = "15px";
+  public static final String CARDLISTHEADER_DRAWER_COUNT_W = "64px";
+  public static final String CARDLISTHEADER_DRAWER_COUNT_H = "15px";
+  public static final String CARDLISTHEADER_DRAWER_COUNT_POS = "top:109px;left:15px";
+  public static final String CARDLISTHEADER_DRAWER_CANCEL_W = "64px";
+  public static final String CARDLISTHEADER_DRAWER_CANCEL_H = "15px";
   public static final String CARDLISTHEADER_DRAWER_CANCEL_POS = "top:106px;left:87px";
-  public static final String CARDLISTHEADER_DRAWER_OKBUTT_W   = "64px";
-  public static final String CARDLISTHEADER_DRAWER_OKBUTT_H   = "15px";
+  public static final String CARDLISTHEADER_DRAWER_OKBUTT_W = "64px";
+  public static final String CARDLISTHEADER_DRAWER_OKBUTT_H = "15px";
   public static final String CARDLISTHEADER_DRAWER_OKBUTT_POS = "top:106px;left:155px";
 
-  
   public static CardSummaryListHeader newCardSummaryListHeader(CardType ct, Card parent)
   {
-    return newCardSummaryListHeader(ct,false,parent);
+    return newCardSummaryListHeader(ct, false, parent);
   }
+
   public static CardSummaryListHeader newCardSummaryListHeader(CardType ct, boolean mockupOnly, Card parent)
   {
-    CardSummaryListHeader lstHdr = new CardSummaryListHeader(ct.getId(),mockupOnly, parent);
+    CardSummaryListHeader lstHdr = new CardSummaryListHeader(ct.getId(), mockupOnly, parent);
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     lstHdr.bckgrndResource = globs.mediaLocator().getCardSummaryListHeaderBackground(ct);
     lstHdr.drawerResource = globs.mediaLocator().getCardSummaryDrawerBackground(ct);
-   // lstHdr.titleResource = app.globs().mediaLocator().getCardSummaryTitleImage(ct);
     return lstHdr;
   }
 
   private Resource bckgrndResource;
   private Resource drawerResource;
- // private Resource titleResource;  // if present, use instead of title words
   private Label title;
   private Embedded titleImage;
   private Label content;
@@ -121,11 +121,12 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
   private CardType ct;
   BuilderDrawer drawerComponent;
 
-  private boolean mockupOnly=false;
+  private boolean mockupOnly = false;
   private Card parent = null; // may remain null
   private String HEIGHT_NODRAWER = CARDLISTHEADER_H;
   private String HEIGHT_YESDRAWER = CARDLISTHEADER_TOTAL_H;
 
+  @HibernateSessionThreadLocalConstructor
   private CardSummaryListHeader(Object cardTypeId, boolean mockupOnly, Card parent)
   {
     title = new Label();
@@ -145,7 +146,7 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
       addComponent(bkgnd, "top:0px;left:0px");
     }
     final MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-    ct = CardType.get(ctId);
+    ct = CardType.getTL(ctId);
     String textColorStyle = CardStyler.getCardInverseTextColorStyle(ct);
 
     // nested abslay for the click handler
@@ -153,39 +154,34 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
     topHalfLay.setWidth(CARDLISTHEADER_W);
     topHalfLay.setHeight(HEIGHT_NODRAWER);
     addComponent(topHalfLay, "top:0px;left:0px");
-  /*  if(titleResource != null) {
-      titleImage = new Embedded(null,titleResource);
-      titleImage.setWidth(CARDLISTHEADER_TITLE_IMG_W);
-      titleImage.setHeight(CARDLIST_HEADER_TITLE_IMG_H);
-      titleImage.addStyleName("m-cursor-pointer");
-      topHalfLay.addComponent(titleImage,CARDLISTHEADER_TITLE_IMG_POS);
-    }
-    else*/ {
-      title.setValue(ct.getTitle()); //.toUpperCase());
-      title.setHeight(CARDLISTHEADER_TITLE_H);
-      title.setWidth(CARDLISTHEADER_TITLE_W);
-      title.addStyleName("m-cardsummarylist-header-title");
-      title.addStyleName("m-cursor-pointer");
-      title.addStyleName("m-vagabond-font");
-      if(textColorStyle!= null)
-        title.addStyleName(textColorStyle);
 
-      topHalfLay.addComponent(title, CARDLISTHEADER_TITLE_POS);
-    }
+    title.setValue(ct.getTitle()); // .toUpperCase());
+    title.setHeight(CARDLISTHEADER_TITLE_H);
+    title.setWidth(CARDLISTHEADER_TITLE_W);
+    title.addStyleName("m-cardsummarylist-header-title");
+    title.addStyleName("m-cursor-pointer");
+    title.addStyleName("m-vagabond-font");
+    if (textColorStyle != null)
+      title.addStyleName(textColorStyle);
+
+    topHalfLay.addComponent(title, CARDLISTHEADER_TITLE_POS);
+
     content.setValue(ct.getPrompt());
     content.setHeight(CARDLISTHEADER_CONTENT_H);
     content.setWidth(CARDLISTHEADER_CONTENT_W);
     content.addStyleName("m-cardsummarylist-header-content");
     content.addStyleName("m-cursor-pointer");
-    if(textColorStyle != null)
+    if (textColorStyle != null)
       content.addStyleName(textColorStyle);
-    // cause exception w/ 2 windows? content.setDebugId(CardTypeManager.getCardCreateClickDebugId(ct));
+    // cause exception w/ 2 windows?
+    // content.setDebugId(CardTypeManager.getCardCreateClickDebugId(ct));
+    content.setId(CardTypeManager.getCardCreateClickDebugId(ct));
     topHalfLay.addComponent(content, CARDLISTHEADER_CONTENT_POS);
-    if(globs.canCreateCard(ct.isIdeaCard())) {
+    if (globs.canCreateCard(ct.isIdeaCard())) {
       Label lab;
-      topHalfLay.addComponent(lab=new Label("click to add new"), "top:130px;left:75px");
+      topHalfLay.addComponent(lab = new Label("click to add new"), "top:130px;left:75px");
       lab.addStyleName("m-click-to-add-new");
-      if(textColorStyle!= null)
+      if (textColorStyle != null)
         lab.addStyleName(textColorStyle);
     }
     drawerComponent = new BuilderDrawer();
@@ -194,88 +190,97 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
 
     setWidth(CARDLISTHEADER_W);
     setHeight(HEIGHT_NODRAWER);
- 
-    boolean cantCreateBecauseHiddenParent = checkNoCreateBecauseHidden(parent);
-    
-    if(!mockupOnly && !cantCreateBecauseHiddenParent)
-    topHalfLay.addLayoutClickListener(new LayoutClickListener()
-    {
-      @Override
-      public void layoutClick(LayoutClickEvent event)
+
+    boolean cantCreateBecauseHiddenParent = checkNoCreateBecauseHiddenTL(parent);
+
+    if (!mockupOnly && !cantCreateBecauseHiddenParent)
+      topHalfLay.addLayoutClickListener(new LayoutClickListener()
       {
-        if (drawerComponent.isVisible())
-          closeDrawer();
-        else {
-          if(!globs.canCreateCard(ct.isIdeaCard()) ) {
-            if(!markedAsNoCreate)
-              handleNoCreate();
-          }               
+        @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
+        public void layoutClick(LayoutClickEvent event)
+        {
+          HSess.init();
+          if (drawerComponent.isVisible())
+            closeDrawer();
           else {
-            showDrawer();
-            handleCanCreate();  // reset tt, etc.
-            if (newCardListener != null)
-              newCardListener.drawerOpened(ctId);
+            if (!globs.canCreateCard(ct.isIdeaCard())) {
+              if (!markedAsNoCreate)
+                handleNoCreate();
+            }
+            else {
+              showDrawer();
+              handleCanCreate(); // reset tt, etc.
+              if (newCardListener != null)
+                newCardListener.drawerOpenedTL(ctId);
+            }
           }
+          HSess.close();
         }
-      }
-    });
-    if(cantCreateBecauseHiddenParent)
-      handleNoCreate("Can't add card to hidden parent");    
-    else if(!globs.canCreateCard(ct.isIdeaCard()) )
+      });
+    if (cantCreateBecauseHiddenParent)
+      handleNoCreate("Can't add card to hidden parent");
+    else if (!globs.canCreateCard(ct.isIdeaCard()))
       handleNoCreate();
     else
       setTooltip("Click to add card");
   }
-  
-  private boolean checkNoCreateBecauseHidden(Card c)
+
+  private boolean checkNoCreateBecauseHiddenTL(Card c)
   {
-    if(c == null)
+    if (c == null)
       return false; // ok to create
-    User me = User.get(Mmowgli2UI.getGlobals().getUserID(), VHib.getVHSession()); //DBGet.getUser(app.getUser());
+    User me = User.getTL(Mmowgli2UI.getGlobals().getUserID()); // DBGet.getUser(app.getUser());
     return c.isHidden() && !me.isGameMaster();
   }
-  
+
   private void handleCanCreate()
   {
-    if(markedAsNoCreate) {
-      markedAsNoCreate=false;
+    if (markedAsNoCreate) {
+      markedAsNoCreate = false;
       setTooltip("Click to add card");
       CardSummaryListHeader.this.addStyleName("m-cursor-pointer");
       title.addStyleName("m-cursor-pointer");
       content.addStyleName("m-cursor-pointer");
     }
   }
-  private boolean markedAsNoCreate = false;  
+
+  private boolean markedAsNoCreate = false;
+
   private void handleNoCreate()
   {
     handleNoCreate(null);
   }
+
   private void handleNoCreate(String msg)
   {
-    if(!markedAsNoCreate) {
+    if (!markedAsNoCreate) {
       markedAsNoCreate = true;
-      if(msg == null) {
+      if (msg == null) {
         MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
         setTooltip(globs.whyCantCreateCard(ct.isIdeaCard()));
       }
       else
         setTooltip(msg);
-      
+
       CardSummaryListHeader.this.removeStyleName("m-cursor-pointer");
       title.removeStyleName("m-cursor-pointer");
       content.removeStyleName("m-cursor-pointer");
     }
   }
-  
+
   private void setTooltip(String tt)
   {
     setDescription(tt); // abslay
-    if(titleImage != null)
+    if (titleImage != null)
       titleImage.setDescription(tt);
-    if(title != null)
+    if (title != null)
       title.setDescription(tt);
     content.setDescription(tt);
   }
+
   public void closeDrawer()
   {
     drawerComponent.setVisible(false);
@@ -298,22 +303,24 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
     NativeButton cancelButt;
 
     BuilderDrawer()
-    {      
+    {
       if (drawerResource != null) {
         Embedded drawerBkg = new Embedded(null, drawerResource);
         addComponent(drawerBkg, "top:0px;left:0px");
       }
       content = new TextArea();
-      //  only shows if no focus, and if we don't have focus, it's not normally showing
+      // only shows if no focus, and if we don't have focus, it's not normally showing
       // content.setInputPrompt("Type here to add to this card chain.");
       content.setWordwrap(true);
       content.setImmediate(true);
       content.setTextChangeEventMode(TextChangeEventMode.LAZY);
       content.setTextChangeTimeout(500);
-   // cause exception w/ 2 windows? content.setDebugId(CardTypeManager.getCardContentDebugId(ct));
+      // cause exception w/ 2 windows?
+      // content.setDebugId(CardTypeManager.getCardContentDebugId(ct));
+      content.setId(CardTypeManager.getCardContentDebugId(ct));
 
       content.addTextChangeListener(new characterTypedHandler());
-      
+
       content.setWidth(CARDLISTHEADER_DRAWER_TEXT_W);
       content.setHeight(CARDLISTHEADER_DRAWER_TEXT_H);
       content.addStyleName("m-white-background");
@@ -334,29 +341,31 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
       addComponent(cancelButt, CARDLISTHEADER_DRAWER_CANCEL_POS);
 
       submitButt = new NativeButton("submit");
-   // cause exception w/ 2 windows? submitButt.setDebugId(CardTypeManager.getCardSubmitDebugId(ct));
+      // cause exception w/ 2 windows?
+      // submitButt.setDebugId(CardTypeManager.getCardSubmitDebugId(ct));
+      submitButt.setId(CardTypeManager.getCardSubmitDebugId(ct));
 
       submitButt.setWidth(CARDLISTHEADER_DRAWER_OKBUTT_W);
       submitButt.setHeight(CARDLISTHEADER_DRAWER_OKBUTT_H);
       submitButt.addStyleName("borderless");
       submitButt.addStyleName("m-cardbuilder-button-text");
-      submitButt.addClickListener(new cardPlayHandler());
+      submitButt.addClickListener(new CardPlayHandler());
       addComponent(submitButt, CARDLISTHEADER_DRAWER_OKBUTT_POS);
 
       setWidth(CARDLISTHEADER_DRAWER_W);
       setHeight(CARDLISTHEADER_DRAWER_H);
     }
-    
+
     public AbstractField<?> getTextEntryComponent()
     {
       return content;
     }
-    
+
     @Override
     public void setVisible(boolean visible)
     {
       super.setVisible(visible);
-      if(visible && content.getValue().toString().length()>0)
+      if (visible && content.getValue().toString().length() > 0)
         content.selectAll();
     }
 
@@ -385,20 +394,24 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
         }
       }
     }
-  
+
     @SuppressWarnings("serial")
-    class cardPlayHandler extends BaseCoroutine implements Button.ClickListener
+    class CardPlayHandler extends BaseCoroutine implements Button.ClickListener
     {
       private User author;
       private String txt;
       private ClickEvent event;
-      
+
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        // In a Vaadin transaction session here
+        HSess.init();
         this.event = event;
         run(); // executes step1() of the coroutine
+        HSess.close();
       }
 
       @Override
@@ -416,39 +429,42 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
           doNotAdvanceSteps(); // come into step1 again next time
           return;
         }
-        
+
         // Admins get to add cards under other names
-        author = User.get(Mmowgli2UI.getGlobals().getUserID(), VHib.getVHSession()); //DBGet.getUser(uId); // assumes vaadin transaction session
-        if(author.isAdministrator())
+        author = User.get(Mmowgli2UI.getGlobals().getUserID(), HSess.get()); // DBGet.getUser(uId);
+                                                                             // //
+                                                                             // assumes
+                                                                             // vaadin
+                                                                             // transaction
+                                                                             // session
+        if (author.isAdministrator())
           adminSwitchAuthors(event.getButton(), this);
         else
-          run();    // does not need to suspend, so "continues" and executes step2 in the same clicklistener thread         
+          run(); // does not need to suspend, so "continues" and executes step2
+                 // in the same clicklistener thread
       }
 
       @Override
       public void step2()
       {
-        CardType ct = CardType.get(ctId);
+        CardType ct = CardType.getTL(ctId);
         Date dt = new Date();
         Card c = new Card(txt, ct, dt);
-        c.setCreatedInMove(Move.getCurrentMove());
-        c.setAuthor(User.get(author.getId())); //fresh
-        // let listener do this
-        // sess.save(c); // make it persistent
-        // sess.flush();
+        c.setCreatedInMove(Move.getCurrentMoveTL());
+        c.setAuthor(User.getTL(author.getId())); // fresh
         if (newCardListener != null)
-          newCardListener.cardCreated(c);
+          newCardListener.cardCreatedTL(c);
 
         content.setValue("");
         content.setInputPrompt("Enter text for another card.");
         closeDrawer();
-        
-        resetCoroutine();  // for another click
-      }      
+
+        resetCoroutine(); // for another click
+      }
     }
-    
+
     @SuppressWarnings("serial")
-    private void adminSwitchAuthors(Button butt, final cardPlayHandler coroutine)
+    private void adminSwitchAuthors(Button butt, final CardPlayHandler coroutine)
     {
       ArrayList<User> meLis = new ArrayList<User>(1);
       meLis.add(coroutine.author);
@@ -459,27 +475,27 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
       dial.setMultiSelect(false);
       dial.cancelButt.setCaption("Use myself");
       dial.addButt.setCaption("Use selected");
-      
+
       // Rearrange buttons, add real cancel butt.
-      //-------------------
+      // -------------------
       HorizontalLayout buttonHL = dial.getButtonHorizontalLayout();
       Iterator<Component> itr = buttonHL.iterator();
       Vector<Component> v = new Vector<Component>();
-      while(itr.hasNext()) {
+      while (itr.hasNext()) {
         Component component = itr.next();
-        if(component instanceof Button)
+        if (component instanceof Button)
           v.add(component);
       }
       buttonHL.removeAllComponents();
       itr = v.iterator();
-      while(itr.hasNext()) {
+      while (itr.hasNext()) {
         buttonHL.addComponent(itr.next());
       }
       Label sp = null;
-      buttonHL.addComponent(sp=new Label());
+      buttonHL.addComponent(sp = new Label());
       sp.setWidth("1px");
       buttonHL.setExpandRatio(sp, 1.0f);
-      
+
       Button cancelButt = null;
       buttonHL.addComponent(cancelButt = new Button("Cancel"));
       cancelButt.addClickListener(new ClickListener()
@@ -489,27 +505,33 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
         {
           UI.getCurrent().removeWindow(dial);// dial.getParent().removeWindow(dial);
           coroutine.resetCoroutine();
-        }       
+        }
       });
-      //-------------------
-      
+      // -------------------
+
       dial.selectItemAt(0);
       dial.addListener(new CloseListener()
       {
         @Override
+        @MmowgliCodeEntry
+        @HibernateOpened
+        @HibernateClosed
         public void windowClose(CloseEvent e)
         {
+          HSess.init();
           if (dial.addClicked) {
             Object o = dial.getSelected();
 
             if (o instanceof User) {
               coroutine.author = (User) o;
-            } else if (o instanceof QuickUser) {
+            }
+            else if (o instanceof QuickUser) {
               QuickUser qu = (QuickUser) o;
-              coroutine.author = DBGet.getUserFresh(qu.id);
+              coroutine.author = DBGet.getUserFreshTL(qu.id);
             }
           }
           coroutine.run(); // finish up
+          HSess.close();
         }
       });
 
@@ -527,7 +549,8 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
 
   public static interface NewCardListener
   {
-    public void cardCreated(Card c);
-    public void drawerOpened(Object cardTypeId);
+    public void cardCreatedTL(Card c);
+
+    public void drawerOpenedTL(Object cardTypeId);
   }
 }
