@@ -58,23 +58,21 @@ public class DatabaseListeners
   public MyPostUpdateEventListener postUpdateListener;
   
   public MySaveOrUpdateListener saveOrUpdateListener;
-  //public MyMergeListener mergeListener;
   public MyDeleteListener deleteListener;
- // private AppMaster appMaster;
   private MCacheManager mcache;
-  //private AppMaster appMaster;
-  public DatabaseListeners(ServiceRegistry sRegistry) //, AppMaster appMaster)
+
+  public DatabaseListeners(ServiceRegistry sRegistry)
   {
-    //this.appMaster = appMaster;
-    saveListener = new MySaveListener();
-    postInsertListener = new MyPostInsertEventListener();
+    saveListener         = new MySaveListener();
+    postInsertListener   = new MyPostInsertEventListener();
     
-    updateListener = new MyUpdateListener();
-    postUpdateListener = new MyPostUpdateEventListener();
+    updateListener       = new MyUpdateListener();
+    postUpdateListener   = new MyPostUpdateEventListener();
     
     saveOrUpdateListener = new MySaveOrUpdateListener();
-    //mergeListener = new MyMergeListener();
-    deleteListener = new MyDeleteListener();
+    
+    deleteListener       = new MyDeleteListener();
+    
     mcache = MCacheManager.instance();
 /*    
     EventListenerRegistry eventListenerRegistry = sRegistry.getService(EventListenerRegistry.class);
@@ -102,13 +100,12 @@ public class DatabaseListeners
     postUpdateListener.enabled = tf;
     
     saveOrUpdateListener.enabled = tf;
-    //mergeListener.enabled = tf;
+
     deleteListener.enabled = tf;    
   }  
   
   @SuppressWarnings("serial")
-  class MySaveListener extends DefaultSaveEventListener // implements
-                                                        // SaveOrUpdateEventListener
+  class MySaveListener extends DefaultSaveEventListener // implements SaveOrUpdateEventListener
   {
     public boolean enabled = false;
 
@@ -339,7 +336,7 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
         DBGet.cacheUser((User)obj);
       }
       else if (obj instanceof ActionPlan) {
-        MSysOut.println("postupdate ap");
+        MSysOut.println("postupdate ap***********************************************************");
         msgTyp = UPDATED_ACTIONPLAN;
         msg = "" + ((ActionPlan) obj).getId();
       }
@@ -415,40 +412,6 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
   }
   
   @SuppressWarnings("serial")
-  class MyMergeListener extends DefaultMergeEventListener
-  {
-    int count = 0;
-    boolean enabled = false;
-
-    @Override
-    public void onMerge(MergeEvent event) throws HibernateException
-    {
-      /* This is not used */
-      MSysOut.println("*************merge listener**********");
-      super.onMerge(event);
-      if(!enabled)
-        return;
-
-      Object obj = event.getOriginal();
-
-      char msgTyp;
-      String msg;
-
-      // The user profile page uses a form, which, when you do a commit, does a merge from hbncontainer
-      if (obj instanceof User) {
-        msgTyp = UPDATED_USER;
-        msg = "" + ((User) obj).getId();
-      }
-      else {
-        //System.err.println("Unprocessed db merge in ApplicationMaster: " + obj.getClass().getSimpleName());
-        return;
-      }
-
-      messageOut(event,msgTyp,msg);
-    }
-  }
-  
-  @SuppressWarnings("serial")
   class MySaveOrUpdateListener extends DefaultSaveOrUpdateEventListener // implements SaveOrUpdateEventListener
   {
     int count = 0;
@@ -476,11 +439,11 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
       session_id = ui.getUserSessionUUID();
       ui_id = ui.getUI_UUID();
     }
-    AppMaster.getInstance().incomingDatabaseEvent(
+    AppMaster.instance().incomingDatabaseEvent(
         new MMessagePacket(msgTyp,
                            msg,
                            ui_id,
                            session_id,
-                           AppMaster.getInstance().getServerName()));
+                           AppMaster.instance().getServerName()));
   }
 }
