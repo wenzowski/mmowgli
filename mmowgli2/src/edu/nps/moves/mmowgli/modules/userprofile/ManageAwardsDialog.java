@@ -43,6 +43,7 @@ import com.vaadin.ui.Button.ClickListener;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
@@ -60,10 +61,12 @@ public class ManageAwardsDialog extends Window
   
   private Object uId;
   private GridLayout gridLayout;
+  
+  @HibernateSessionThreadLocalConstructor
   public ManageAwardsDialog(Object uId)
   {
     this.uId = uId;
-    User u = DBGet.getUser(uId);
+    User u = DBGet.getUserTL(uId);
     
     setCaption("Manage Awards for "+u.getUserName());
     setModal(true);
@@ -87,7 +90,7 @@ public class ManageAwardsDialog extends Window
     gridLayout.addStyleName("m-headgrid");
     gridLayout.setWidth("100%");
     p.setContent(gridLayout);
-    fillPanel();
+    fillPanelTL();
     
     HorizontalLayout buttPan = new HorizontalLayout();
     buttPan.setWidth("100%");
@@ -106,10 +109,10 @@ public class ManageAwardsDialog extends Window
   }
 
   private ArrayList<AwardType> gridList;
-  private void fillPanel()
+  private void fillPanelTL()
   {
     @SuppressWarnings("unchecked")
-    List<AwardType> typs = (List<AwardType>)VHib.getVHSession().createCriteria(AwardType.class).list();
+    List<AwardType> typs = (List<AwardType>)HSess.get().createCriteria(AwardType.class).list();
     gridList = new ArrayList<AwardType>(typs.size());
     gridList.addAll(typs);
     gridLayout.removeAllComponents();
@@ -118,7 +121,7 @@ public class ManageAwardsDialog extends Window
     gridLayout.setSpacing(true);
     gridLayout.setColumnExpandRatio(2, 0.5f);
     gridLayout.setColumnExpandRatio(3, 0.5f);
-    User u = DBGet.getUserFresh(uId);
+    User u = DBGet.getUserFreshTL(uId);
     Set<Award> uAwards = u.getAwards();
     MediaLocator mediaLoc = Mmowgli2UI.getGlobals().getMediaLocator();
     for(AwardType at: typs) {
@@ -159,11 +162,15 @@ public class ManageAwardsDialog extends Window
   
   @SuppressWarnings("serial")
   class SaveListener implements ClickListener
-  {  
+  {
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     @Override
     public void buttonClick(ClickEvent event)
     {
-      User u = DBGet.getUserFresh(uId);
+      HSess.init();
+      User u = DBGet.getUserFreshTL(uId);
       HashSet<Award> awSet = new HashSet<Award>();
       Set<Award>dbset = u.getAwards();
       for(Award a : dbset) {
@@ -173,17 +180,18 @@ public class ManageAwardsDialog extends Window
       
       for (int i = 0;i<gridLayout.getRows(); i++) {
         CheckBox cb = (CheckBox)gridLayout.getComponent(0, i);
-        addRemoveAward(awSet,newSet,gridList.get(i),u,(Boolean)cb.getValue());
+        addRemoveAwardTL(awSet,newSet,gridList.get(i),u,(Boolean)cb.getValue());
       }
       u.setAwards(newSet);
-      Sess.sessUpdate(u);
+      User.updateTL(u);
       
       UI.getCurrent().removeWindow(ManageAwardsDialog.this);
+      HSess.close();
     }
 
-    private void addRemoveAward(Set<Award> oldSet, Set<Award> newSet, AwardType at, User u, boolean add)
+    private void addRemoveAwardTL(Set<Award> oldSet, Set<Award> newSet, AwardType at, User u, boolean add)
     {
-      User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
 
       boolean handled = false;
       
@@ -198,7 +206,7 @@ public class ManageAwardsDialog extends Window
             }
             else { // remove
               oldSet.remove(a);
-              Award.delete(a);
+              Award.deleteTL(a);
             }
             handled = true;
             break; // out of for
@@ -217,9 +225,9 @@ public class ManageAwardsDialog extends Window
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         aw.setTimeAwarded(cal);
-        aw.setMove(Game.get().getCurrentMove());
+        aw.setMove(Game.getTL().getCurrentMove());
         aw.setStoryUrl(""); // todo
-        Award.save(aw);
+        Award.saveTL(aw);
         
         newSet.add(aw);       
       }
@@ -239,13 +247,20 @@ public class ManageAwardsDialog extends Window
   @SuppressWarnings("serial")
   class DefineListener implements ClickListener
   {  
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     @Override
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
+      
       DefineAwardsDialog dad = new DefineAwardsDialog();
       dad.addCloseListener(new DefineCloseListener());
       UI.getCurrent().addWindow(dad);
-      dad.center();      
+      dad.center();
+      
+      HSess.close();
     }
   }
 }
