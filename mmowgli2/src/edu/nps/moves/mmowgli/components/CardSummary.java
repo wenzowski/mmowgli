@@ -33,7 +33,8 @@
 */
 package edu.nps.moves.mmowgli.components;
 
-import static edu.nps.moves.mmowgli.MmowgliEvent.*;
+import static edu.nps.moves.mmowgli.MmowgliEvent.CARDAUTHORCLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.CARDCLICK;
 
 import java.text.SimpleDateFormat;
 import java.util.Set;
@@ -47,11 +48,16 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
-import edu.nps.moves.mmowgli.*;
-import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.AppEvent;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.Move;
+import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.CardStyler;
-import edu.nps.moves.mmowgli.utility.M;
 /**
  * CardSummary.java
  * Created on Jan 24, 2011
@@ -65,14 +71,8 @@ import edu.nps.moves.mmowgli.utility.M;
  */
 public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, Comparable<CardSummary>
 {
- // private static String content_tt = "Card text in full";
-  
   private static final long serialVersionUID = 1683092723635952535L;
   
-//  public static CardSummary newCardSummary(ApplicationEntryPoint app, Object cardId)
-//  {
-//    return newCardSummary(app, cardId, HibernateContainers.getSession(), false, null);  // get vaadin transaction session
-//  }
   public static CardSummary newCardSummary(Object cardId, Session sess, User me)
   {
     return newCardSummary(cardId,sess,me,false);
@@ -82,22 +82,11 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
   {
     return newCardSummary(cardId, sess, false, me, mockupOnly);
   }
-  public static CardSummary newCardSummary_oob(Object cardId, SingleSessionManager mgr)
-  {
-    return newCardSummary_oob(cardId,mgr,false);
-  }
-
-  public static CardSummary newCardSummary_oob(Object cardId, SingleSessionManager mgr, boolean mockupOnly)
-  {
-    // No writes to the db are being done here
-    Session sess = M.getSession(mgr);
-    return newCardSummary(cardId, sess, false, null, mockupOnly);
-  }
   
-//  public static CardSummary newCardSummary(ApplicationEntryPoint app, Object cardId, boolean isFactCard)
-//  {
-//    return newCardSummary(app, cardId, HibernateContainers.getSession(), isFactCard, null);  // get vaadin transaction session
-//  }
+  public static CardSummary newCardSummary_oobTL(Object cardId)
+  {
+    return newCardSummary(cardId,HSess.get(),false,null,false);
+  }
   
   public static CardSummary newCardSummary(Object cardId, Session sess, boolean isFactCard, User me, boolean mockupOnly)
   { 
@@ -113,16 +102,15 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
     return summ;
   }
   
-  public static CardSummary newCardSummarySmall(Object cardId)
+  public static CardSummary newCardSummarySmallTL(Object cardId)
   {
-    return newCardSummarySmall(cardId, null);
+    return newCardSummarySmallTL(cardId, null);
   }
   
-  public static CardSummary newCardSummarySmall(Object cardId, Session sess)
+  public static CardSummary newCardSummarySmallTL(Object cardId, Session sess)
   {
     if(sess == null)
-      sess = VHib.getVHSession();  // assume vaadin transaction session
-
+      sess = HSess.get();
     
     CardSummary summ = new CardSummary(cardId,false,sess);
     summ.widthStr           ="145px";//"144px";
@@ -138,7 +126,7 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
     summ.userWidthStr       = "55px";
     summ.userHeightStr      = "10px";
     summ.userStyle          = "m-cardsummary-user-small";
-    summ.bckgrndResource    = Mmowgli2UI.getGlobals().mediaLocator().getCardSummaryBackgroundSmall(cardId);
+    summ.bckgrndResource    = Mmowgli2UI.getGlobals().mediaLocator().getCardSummaryBackgroundSmallTL(cardId);
     summ.headerStyleStr     = "m-cardsummary-header-small";
     summ.headerWidthStr     = "100px";
     summ.headerHeightStr    = "10px";
@@ -224,24 +212,20 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
   {
     this(cardId,isFactCard,sess,false);
   }
+  
+  @HibernateSessionThreadLocalConstructor
+  @HibernateRead  
   private CardSummary(Object cardId, boolean isFactCard, Session sess, boolean mockupOnly)
   {
-//    this(appl,cardId,isFactCard,sess,DBGet.getUserFresh(appl.getUser(),sess));
-//  }
-//  private CardSummary(ApplicationEntryPoint appl, Object cardId, boolean isFactCard, Session sess, User myUser)
-//  {
     this.cardId = cardId;
     this.isFactCard = isFactCard;
     this.mockupOnly = mockupOnly;
-   // constructorSession = sess;
     
     // Assumption: the initGui() method below, where these 2 hib. objects are referenced, will be called in
     // the same thread/vaadin session so the hib. session passed in on the constructor will still be valid
     
     card = DBGet.getCard(cardId,sess);
     
-   // me = myUser;
-  //  if(me == null)
     me   = DBGet.getUserFresh(Mmowgli2UI.getGlobals().getUserID(),sess);  // need joined favorites
     
     content = new HtmlLabel();
@@ -252,14 +236,14 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
     star    = new NativeButton();
     dateFormatter = new SimpleDateFormat("MM/dd HH:mm z");
     
-    //headerStyleStr = StyleManager.getCardSummaryHeaderStyle(card);
     textColorStyleStr = CardStyler.getCardTextColorStyle(card.getCardType());
   }
   
   public void initGui()
   {
-    initGui(VHib.getVHSession());
+    initGui(HSess.get());
   }
+  
   @SuppressWarnings("serial")
   public void initGui(Session sess)
   {
@@ -363,24 +347,26 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
     if(!mockupOnly)
     this.addLayoutClickListener(new LayoutClickListener()
     {
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateRead
       public void layoutClick(LayoutClickEvent event)
       {
+        HSess.init();
         Component c = event.getChildComponent();
-        Card card = DBGet.getCard(cardId);  // in vaadin transaction here
+        Card card = DBGet.getCardTL(cardId);  // in TL transaction here
         if(c == star) {
           //Let the starlistener below handle it
-          return;
         }
-        if (c == user) {
+        else if (c == user) {
           AppEvent evt = new AppEvent(CARDAUTHORCLICK, CardSummary.this, card.getAuthor().getId());
-          Mmowgli2UI.getGlobals().getController().miscEvent(evt);
-          return;
+          Mmowgli2UI.getGlobals().getController().miscEventTL(evt);
         }
         else { //if (c == content) {
           AppEvent evt = new AppEvent(CARDCLICK, CardSummary.this, card.getId());
-          Mmowgli2UI.getGlobals().getController().miscEvent(evt);
-          return;
+          Mmowgli2UI.getGlobals().getController().miscEventTL(evt);
         }
+        HSess.close();
       }
     });
   }
@@ -390,10 +376,17 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
     private static final long serialVersionUID = 7092717307047085740L;
 
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateRead
+    @HibernateUpdate
+    @HibernateCommitted
     public void buttonClick(ClickEvent event)
     {
-      User me = DBGet.getUserFresh(Mmowgli2UI.getGlobals().getUserID());  // in vaadin transaction here
-      Card card = DBGet.getCardFresh(cardId);
+      HSess.init();
+      
+      User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());  // in vaadin transaction here
+      Card card = DBGet.getCardFreshTL(cardId);
       
       if (me.getFavoriteCards().contains(card)) {
         // remove it
@@ -404,7 +397,9 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
         me.getFavoriteCards().add(card);
         star.setIcon(starRedResource);
       }
-      User.update(me);
+      User.updateTL(me);
+      
+      HSess.close(); // commit
     }  
   }
   
@@ -431,20 +426,7 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
   {
     return txt; // Don't do this here, the layout listener will take us to the card, and we get confused...return MmowgliLinkInserter.insertLinks(txt);
   }
-/*  
-//  @Override
-  public int compareTo(CardSummary cardSumm)
-  {
-    Card card = DBGet.getCard(cardId);
-    Date thisDate = card.getCreationDate();
-    long thisdate = (thisDate==null?0:thisDate.getTime());
-    
-    Card other = DBGet.getCard(cardId,constructorSession);
-    Date thatDate = other.getCreationDate();
-    long thatdate = (thatDate==null?0:thatDate.getTime());
-    return (int)(thatdate - thisdate);
-  }
-*/
+
   public Object getCardId()
   {
     return cardId;
