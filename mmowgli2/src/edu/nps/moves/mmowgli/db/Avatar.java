@@ -39,7 +39,7 @@ import javax.persistence.*;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * Avatar.java
@@ -73,14 +73,14 @@ public class Avatar implements Serializable
     setDescription(description);  
   }
   
-  public static Avatar get(Object id)
+  public static Avatar getTL(Object id)
   {
-    return (Avatar)VHib.getVHSession().get(Avatar.class, (Serializable)id);
+    return (Avatar)HSess.get().get(Avatar.class, (Serializable)id);
   }
   
   public static HbnContainer<Avatar> getContainer()
   {
-    return new HbnContainer<Avatar>(Avatar.class,VHib.getSessionFactory());   
+    return new HbnContainer<Avatar>(Avatar.class,HSess.getSessionFactory());   
   }
 
   @Override
