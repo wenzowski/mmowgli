@@ -45,11 +45,16 @@ import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.data.hbnutil.HbnContainer.EntityItem;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Table;
 
 import edu.nps.moves.mmowgli.components.UserTable;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 ;
 
 /**
@@ -67,6 +72,7 @@ public class UserProfileMyBuddiesPanel extends UserProfileTabPanel implements It
 {
   private static final long serialVersionUID = 6712398487478286813L;
 
+  @HibernateSessionThreadLocalConstructor
   public UserProfileMyBuddiesPanel(Object uid)
   {
     super(uid);
@@ -84,19 +90,13 @@ public class UserProfileMyBuddiesPanel extends UserProfileTabPanel implements It
     Label sp;
     getRightLayout().addComponent(sp = new Label());
     sp.setHeight("20px");
-    
-//    Label title = new Label();
-//    title.setContentMode(Label.CONTENT_XHTML);
-//    title.setValue("Users I'm following <small>(Check the box in their user-profile page to follow)</small>");
-//    title.addStyleName("m-tabletitle");
-//    getRightLayout().addComponent(title);
-   
-    showMyBuddies();
+       
+    showMyBuddiesTL();
   }
  
-  private void showMyBuddies()
+  private void showMyBuddiesTL()
   {
-    UserTable tab = UserTable.makeBuddyTable();
+    UserTable tab = UserTable.makeBuddyTableTL();
     tab.initFromDataSource(new MyBuddiesContainer<Object>());
     tab.addItemClickListener((ItemClickListener)this);
     
@@ -113,11 +113,12 @@ public class UserProfileMyBuddiesPanel extends UserProfileTabPanel implements It
   public void itemClick(ItemClickEvent event)
   {
     // This is handled by the UserTable
-  // if(event.isDoubleClick()) {
-//     EntityItem it = (EntityItem)event.getItem();
-//     User u = (User)it.getPojo();
-//     app.globs().controller().miscEvent(new ApplicationEvent(SHOWUSERPROFILECLICK, this, u.getId()));
-  // }
+    // if(event.isDoubleClick()) {
+    // EntityItem it = (EntityItem)event.getItem();
+    // User u = (User)it.getPojo();
+    // app.globs().controller().miscEvent(new
+    // ApplicationEvent(SHOWUSERPROFILECLICK, this, u.getId()));
+    // }
   }
 
   class MyColumnCustomizer implements Table.ColumnGenerator
@@ -136,13 +137,7 @@ public class UserProfileMyBuddiesPanel extends UserProfileTabPanel implements It
         if(sLis != null && sLis.size()<=0)
           sLis = null;
         return new Label(sLis==null?"":sLis.get(0));
-/*
-        List<Email> mailLis = u.getEmailAddresses();
-        if(mailLis != null && mailLis.size()<=0)
-          mailLis = null;
-        return new Label(mailLis==null?"":mailLis.get(0).getAddress()); */
-      }
-      
+      }     
       return new Label("Program error in UserProfileMyIdeasPanel.java");
     }   
   }
@@ -152,7 +147,7 @@ public class UserProfileMyBuddiesPanel extends UserProfileTabPanel implements It
   {
     public MyBuddiesContainer()
     {
-      this(VHib.getSessionFactory());
+      this(HSess.getSessionFactory());
     }
     public MyBuddiesContainer(SessionFactory fact)
     {
@@ -160,11 +155,11 @@ public class UserProfileMyBuddiesPanel extends UserProfileTabPanel implements It
     }
    
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
-      User me = DBGet.getUserFresh(uid);
+      User me = DBGet.getUserFreshTL(uid);
       
-      Criteria crit = super.getBaseCriteria();
+      Criteria crit = super.getBaseCriteriaTL();
       crit.add(Restrictions.not(Restrictions.idEq(me.getId())));  
       
       Set<User> imFollowing = me.getImFollowing();
@@ -176,9 +171,7 @@ public class UserProfileMyBuddiesPanel extends UserProfileTabPanel implements It
       }
       else
         crit.add(Restrictions.isNull("userName")); // will never be empty, so we get an empty set
-
       return crit;
     }
-  }
-  
+  }  
 }
