@@ -56,41 +56,22 @@ public class Sess
   public static boolean PRINT_UPDATE_CALLER = true;
   public static boolean PRINT_SAVE_CALLER = true;
   
-  private static String UPSTRINGOOB = "Hib: oob session update called with ";
-  private static String SVSTRINGOOB = "Hib: oob session save called with ";
   private static String UPSTRING = "Hib: session update called with ";
   private static String SVSTRING = "Hib: session save called with ";
   
   private enum sType {SAVE,UPDATE,MERGE};
   
-  public static void sessOobUpdate(Session sess, Object o)
-  {
-    printIt(PRINT_UPDATE_CALLER,UPSTRINGOOB,sess,o,sType.UPDATE);
-    sess.update(o);
-  }
   
-  public static void sessUpdate(Object o)
+  public static void sessUpdateTL(Object o)
   {
-    Session sess = VHib.getVHSession();
+    Session sess = HSess.get();
     printIt(PRINT_UPDATE_CALLER,UPSTRING,sess,o,sType.UPDATE);
     sess.update(o);
   }
-  
-  public static Object sessMerge(Object o)
+    
+  public static void sessSaveTL(Object o)
   {
-    Session sess = VHib.getVHSession();
-    return sess.merge(o);    
-  }
-  
-  public static void sessOobSave(Session sess, Object o)
-  {
-    printIt(PRINT_SAVE_CALLER,SVSTRINGOOB,sess,o,sType.SAVE);
-    sess.save(o);
-  }
-  
-  public static void sessSave(Object o)
-  {
-    Session sess = VHib.getVHSession();
+    Session sess = HSess.get();
     printIt(PRINT_SAVE_CALLER,SVSTRING,sess,o,sType.SAVE);
     sess.save(o);
   }
@@ -108,7 +89,7 @@ public class Sess
       int lnNum = callingFrame. getLineNumber();
       int lnNum1= callingFrame1.getLineNumber();
       MSysOut.println(title+objName+" from "+clsName+ "."+mthName+ "/"+lnNum+
-                                            ","+clsName1+"."+mthName1+"/"+lnNum1+"("+AppMaster.getInstance().getServerName()+")");
+                                            ","+clsName1+"."+mthName1+"/"+lnNum1+"("+AppMaster.instance().getServerName()+")");
     }
   }
 }
