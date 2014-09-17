@@ -44,7 +44,7 @@ import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.MovePhase;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * SignupServer.java
@@ -63,48 +63,45 @@ public class SignupServer extends UI
 {
   private static final long serialVersionUID = 9205707803230381489L;
   private String tail2 = "/signup";
-  private static String gameImagesUrl;
   /**
    * Init is invoked on application load (when a user accesses the application
    * for the first time).
    */
+  
   @Override
   public void init(VaadinRequest req)
   {
     // Check if we want a signup window
-    SingleSessionManager ssm = new SingleSessionManager();
-    MovePhase ph = ((Game)ssm.getSession().get(Game.class, 1L)).getCurrentMove().getCurrentMovePhase();
-    ssm.endSession();
+    HSess.init();
+    Game g = Game.getTL();
+    MovePhase ph = g.getCurrentMove().getCurrentMovePhase();
     
     if(ph.isSignupPageEnabled()) {
-      addWindow(new SignupWindow("Signup for mmowgli",this,gameImagesUrl));
-      //setMainWindow(new SignupWindow("Signup for mmowgli",this,gameImagesUrl));
+      Window w = new SignupWindow("Signup for mmowgli",this);
+      w.center();
+      addWindow(w);
     }
     else {
       // Redirect to game site
-      String url = AppMaster.getInstance().getAppUrl().toExternalForm();// String url = this.getURL().toExternalForm();
+      // Appmaster is in main game context, but should be ok
+      String url = AppMaster.instance().getAppUrl().toExternalForm();
       if(url.endsWith("/") || url.endsWith("\\"))
         url = url.substring(0,url.length()-1);
       if(url.toLowerCase().endsWith(tail2))
         url = url.substring(0, url.length()-tail2.length());
       else
         System.err.println("********* Don't recognize this url: "+url);
-      
-      addWindow(new RedirWindow(url));
-      //setMainWindow(new RedirWindow(url,this));
+      Window w = new RedirWindow(url);
+      w.center();
+      addWindow(w);
     }    
+    HSess.close();
   }
+  
   public void quitAndGoTo(String logoutUrl)
   {
     getPage().setLocation(logoutUrl);
     getSession().close();
-  }
-
-
-  /* A hack to allow us to retrieve images from the game image repository*/
-  public static void setGameImagesUrl(String gameImagesUrl)
-  {
-    SignupServer.gameImagesUrl = gameImagesUrl;    
   }
 
   class RedirWindow extends Window implements ClickListener
