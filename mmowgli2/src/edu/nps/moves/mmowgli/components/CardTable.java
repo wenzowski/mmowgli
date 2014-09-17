@@ -53,6 +53,9 @@ import edu.nps.moves.mmowgli.MmowgliController;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.CardType;
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.utility.IDButton;
 
 /**
@@ -103,8 +106,6 @@ public class CardTable extends Table implements ItemClickListener
       this.container = cntr;   
     dateForm = new SimpleDateFormat("MM/dd HH:mm"); // z");
 
-//    setWidth("97%");setWidth("700px"); //test
-//    setHeight("600px");
     setSelectable(true);
     setMultiSelect(false);
     setImmediate(true); // remove if not necessary
@@ -146,18 +147,22 @@ public class CardTable extends Table implements ItemClickListener
   
   @SuppressWarnings("rawtypes")
   @Override
+  @MmowgliCodeEntry
+  @HibernateOpened 
   public void itemClick(ItemClickEvent event)
   {
+    HSess.init();
     //if (event.isDoubleClick()) {
     Object cellId = event.getPropertyId();
     EntityItem item = (EntityItem) event.getItem();
     Card card = (Card) ((EntityItem) item).getPojo();  
     MmowgliController cntlr = Mmowgli2UI.getGlobals().getController();
     if(cellId != null && GENAUTHOR.equals(cellId))
-      cntlr.miscEvent(new AppEvent(SHOWUSERPROFILECLICK, this, card.getAuthor().getId()));
+      cntlr.miscEventTL(new AppEvent(SHOWUSERPROFILECLICK, this, card.getAuthor().getId()));
     else
-      cntlr.miscEvent(new AppEvent(CARDCLICK, this, card.getId()));
+      cntlr.miscEventTL(new AppEvent(CARDCLICK, this, card.getId()));
    // }
+    HSess.close(); //commit
   }
 
   private void privateSetColumnHeaders()
