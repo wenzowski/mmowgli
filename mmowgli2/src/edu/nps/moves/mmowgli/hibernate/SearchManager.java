@@ -48,7 +48,6 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.messaging.MMessage;
 
-//import com.vaadin.data.hbnutil.HbnContainer.SessionManager;
 /**
  * SearchManager.java Created on May 18, 2011
  * 
@@ -165,31 +164,30 @@ public class SearchManager
   /** Messages from the inter-session message bus arrive here, sent from ApplicationMaster. Returns true if the message
    * needs to be resent.
    */
-  public static boolean indexObjectFromMessage(char messageType, String message, Session session)
+  public static boolean indexObjectFromMessageTL(char messageType, String message)
   {
 	  // Message type tags are defined in ApplicationConstants. C=new card, U = new user,
 	  // u = modified user. Right now we index cards and users.
+    Session session = HSess.get();
 	  switch(messageType)
 	  {
-	    // New card
 	  	case NEW_CARD: //C':
-	  		Long cardId = MMessage.MMParse(messageType,message).id;//Long.parseLong(message);
-	  		Card aCard = DBGet.getCardFresh(cardId,session);  // need obj associated with this session
+	  		Long cardId = MMessage.MMParse(messageType,message).id;
+	  		Card aCard = DBGet.getCardFreshTL(cardId);  // need obj associated with this session
 		    SearchManager.indexHibernateObject(aCard, session);
 		    break;
 		 
-		// New or updated user
 	  	case NEW_USER: //'U':
 	  	case UPDATED_USER: //'u':
-	  	  Long userId = MMessage.MMParse(messageType,message).id; //Long.parseLong(message);
-	  		User aUser = DBGet.getUserFresh(userId, session);
+	  	  Long userId = MMessage.MMParse(messageType,message).id; 
+	  		User aUser = DBGet.getUserFreshTL(userId);
 	  		SearchManager.indexHibernateObject(aUser, session);
 	  		break;
 	  		
 	  	case NEW_ACTIONPLAN:
 	  	case UPDATED_ACTIONPLAN:
-	  	  Long apId = MMessage.MMParse(messageType,message).id; //Long.parseLong(message);
-	  	  ActionPlan ap = (ActionPlan)session.get(ActionPlan.class, apId);  // need obj associated with this session
+	  	  Long apId = MMessage.MMParse(messageType,message).id; 
+	  	  ActionPlan ap = ActionPlan.getTL(apId);
 	  	  SearchManager.indexHibernateObject(ap, session);
 	  	  break;
   	
@@ -260,8 +258,6 @@ public class SearchManager
       this.sess = sess;
       this.ftSess = ftSess;
       this.trans = trans;
-      //Exception e = new Exception("Stack trace");
-      //e.printStackTrace();
     }
   }
   /*
