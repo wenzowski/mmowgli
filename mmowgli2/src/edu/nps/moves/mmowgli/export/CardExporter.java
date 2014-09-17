@@ -37,12 +37,17 @@ import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.hibernate.Session;
-import org.w3c.dom.*;
+import org.w3c.dom.Comment;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 
 /**
@@ -67,6 +72,7 @@ public class CardExporter extends BaseExporter
   
   private static Map<String,String> parameters = null;
  
+  @HibernateSessionThreadLocalConstructor
   public CardExporter()
   {
   }
@@ -85,9 +91,6 @@ public class CardExporter extends BaseExporter
   
   public void exportSingleCardTreeToBrowser(String title, Object cId)
   {
-
-    //this.framework = framework;
-    //parameters = new HashMap<String,String>();
     parameters.put(CARD_TREE_ROOT_KEY,cId.toString());
     showXml = false;
     
@@ -95,12 +98,12 @@ public class CardExporter extends BaseExporter
   }
 
   @Override
-  public Document buildXmlDocument() throws Throwable
+  public Document buildXmlDocumentTL() throws Throwable
   {
-    Document doc;
-    SingleSessionManager ssm = null;
-    Session sess = null;
+    Document doc;;
     try {
+      Session sess = HSess.get();
+      
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       DocumentBuilder parser = factory.newDocumentBuilder();
       doc = parser.newDocument();
@@ -120,13 +123,9 @@ public class CardExporter extends BaseExporter
       //root.setAttribute("xsi:schemaLocation", "http://edu.nps.moves.mmowgli.cardTree CardTree.xsd");
       
       root.setAttribute("exported", dateFmt.format(new Date()));
-      
-      ssm = new SingleSessionManager();
-      sess = ssm.getSession();
-      
       root.setAttribute("multipleMoves", Boolean.toString(isMultipleMoves(sess)));
       
-      Game g = (Game)sess.get(Game.class, 1L);
+      Game g = Game.getTL();
       String s = g.getTitle();
       addElementWithText(root, "GameTitle", s.replace(' ', '_'));     // for better file-name building
       addElementWithText(root, "GameSecurity", g.isShowFouo()?"FOUO":"open");
@@ -138,13 +137,10 @@ public class CardExporter extends BaseExporter
       
       @SuppressWarnings("unchecked")    
       List<Card> lis = sess.createCriteria(Card.class).list();
-      ssm.endSession();      // free table
-      ssm = null;
 
       for (Card card : lis) {
-        ssm = new SingleSessionManager();
-        sess = ssm.getSession();  
-        card = Card.merge(card,sess);
+        sess = HSess.get();
+        card = Card.mergeTL(card);
         CardType typ = card.getCardType();
         if(typ.isIdeaCard()) {
           if(typ.isPositiveIdeaCard())
@@ -152,14 +148,10 @@ public class CardExporter extends BaseExporter
           else 
             walkCardTree(defendRoot,card,1);;
         }
-        ssm.endSession();
-        ssm = null;
       }
     }
     catch (Throwable t) {
       t.printStackTrace();
-      if(ssm != null)
-        ssm.endSession();
       throw t; // rethrow
     }
     return doc;  
@@ -192,6 +184,18 @@ public class CardExporter extends BaseExporter
       walkCardTree(elm,c,level);    
   }
   
+  @Override
+  protected void showFile(String ignore, Document doc, String name, String styleSheetNameInThisPackage, boolean showXml) throws TransformerConfigurationException, TransformerException
+  {
+    super.showFile("Cards", doc, name, styleSheetNameInThisPackage, showXml);
+  }
+
+  @Override
+  protected void showFile(String ignore, Document doc, String name, String styleSheetNameInThisPackage, String cdataElementList, boolean showXml) throws TransformerConfigurationException, TransformerException
+  {
+    super.showFile("Cards", doc, name, styleSheetNameInThisPackage, cdataElementList, showXml);
+  }
+
   private String getBackgroundColor(Card c)
   {
     String s = CardStyler.getCardBaseColor(c.getCardType());
