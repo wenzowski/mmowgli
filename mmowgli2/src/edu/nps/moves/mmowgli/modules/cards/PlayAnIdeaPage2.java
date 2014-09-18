@@ -39,7 +39,9 @@ import static edu.nps.moves.mmowgli.MmowgliEvent.IDEADASHBOARDCLICK;
 
 import java.awt.Dimension;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 import org.hibernate.Session;
 import org.vaadin.jouni.animator.Animator;
@@ -57,13 +59,12 @@ import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.components.*;
 import edu.nps.moves.mmowgli.components.CardSummaryListHeader.NewCardListener;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsCardUpdates;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.IDNativeButton;
-import edu.nps.moves.mmowgli.utility.M;
 
 /**
  * PlayAnIdeaPage2.java
@@ -118,6 +119,8 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
   {
     this(false);
   }
+  
+  @HibernateSessionThreadLocalConstructor
   public PlayAnIdeaPage2(boolean mockupOnly)
   {
     this.mockupOnly = mockupOnly;
@@ -132,7 +135,7 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     lab.setWidth(CALLTOACTION_HOR_OFFSET_STR);
     addComponent(lab);
    
-    MovePhase phase = MovePhase.getCurrentMovePhase();
+    MovePhase phase = MovePhase.getCurrentMovePhaseTL();
 
     String playTitle = phase.getPlayACardTitle();
     if (playTitle != null && playTitle.length() > 0) {
@@ -140,13 +143,6 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
       setComponentAlignment(lab, Alignment.TOP_CENTER);
       lab.addStyleName("m-calltoaction-playprompt");
     }
-/*
-    String playSubtitle = phase.getPlayACardSubtitle();
-    if (playSubtitle != null && playSubtitle.length() > 0) {
-      addCenteredLabel(this, lab = new Label(playSubtitle));
-      lab.addStyleName("m-calltoaction-playprompt-subtext");
-    } 
-*/  
     AbsoluteLayout mainAbsL = new AbsoluteLayout();
     mainAbsL.setWidth(PAIP_WIDTH);
     mainAbsL.setHeight("675px");
@@ -163,23 +159,13 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     leftAbsL.setHeight(PAIP_TOP_HEIGHT);
     rightAbsL.setHeight(PAIP_TOP_HEIGHT);
     
-    GameLinks gl = GameLinks.get();
+    GameLinks gl = GameLinks.getTL();
     final String howToPlayLink = gl.getHowToPlayLink();
     if(howToPlayLink != null && howToPlayLink.length()>0) {
       howToPlayButt = new NativeButton(null);
       BrowserWindowOpener bwo = new BrowserWindowOpener(howToPlayLink);
       bwo.setWindowName(MmowgliConstants.PORTALTARGETWINDOWNAME);
       bwo.extend(howToPlayButt);      
-  /*    howToPlayButt.addClickListener(new ClickListener()
-      {
-        private static final long serialVersionUID = 1L;
-        @Override
-        public void buttonClick(ClickEvent event)
-        {
-          event.getButton().getApplication().getMainWindow().open(new ExternalResource(howToPlayLink), MmowgliConstants.PORTALTARGETWINDOWNAME);  
-        }        
-      });
-  */
     }
     else if(mockupOnly)
       howToPlayButt = new NativeButton(null);
@@ -187,10 +173,8 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
       howToPlayButt = new IDNativeButton(null, HOWTOPLAYCLICK);
     
     leftAbsL.addComponent(howToPlayButt,HOWTO_POS);
-   // leftAbsL.addComponent(lab=new Label("click to add new"),POS_HELP_POS);
-   // lab.addStyleName("m-playidea-help-text");
     
-    leftType = CardType.getPositiveIdeaCardType();
+    leftType = CardType.getPositiveIdeaCardTypeTL();
     leftAbsL.addComponent(poshdr = CardSummaryListHeader.newCardSummaryListHeader(leftType, mockupOnly, null),POS_POS);
     poshdr.initGui();
     poshdr.addNewCardListener(newCardListener);
@@ -201,10 +185,8 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
       gotoDashboardButt = new IDNativeButton(null, IDEADASHBOARDCLICK);    
     
     rightAbsL.addComponent(gotoDashboardButt,GOTO_POS);
-  //  rightAbsL.addComponent(lab=new Label("click to add new"),NEG_HELP_POS);
-  //  lab.addStyleName("m-playidea-help-text");
     
-    rightType = CardType.getNegativeIdeaCardType();    
+    rightType = CardType.getNegativeIdeaCardTypeTL();    
     rightAbsL.addComponent(neghdr = CardSummaryListHeader.newCardSummaryListHeader(rightType, mockupOnly, null),NEG_POS);
     neghdr.initGui();
     neghdr.addNewCardListener(newCardListener);
@@ -219,47 +201,45 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     
     HorizontalLayout hLay = buildLabelPopupRow(
         leftType.getTitle(),
-        topNewCardLabel = new Label("new card played")); //topPopup = new Animator(animLab));
+        topNewCardLabel = new Label("new card played"));
 
     bottomVLay.addComponent(hLay);
     bottomVLay.setComponentAlignment(hLay,Alignment.MIDDLE_LEFT);
     
-    User me = User.get(Mmowgli2UI.getGlobals().getUserID(), VHib.getVHSession()); //DBGet.getUser(app.getUser());
+    User me = User.getTL(Mmowgli2UI.getGlobals().getUserID());
     
     topholder = new HorizontalCardDisplay(new Dimension(CARDWIDTH,CARDHEIGHT),NUMCARDS,me,mockupOnly,"top");
     bottomVLay.addComponent(topholder);;
     topholder.initGui();
-   // bottomVLay.addComponent(getNewestOldestLabels());
 
     bottomVLay.addComponent(lab=new Label());
     lab.setHeight("10px");
         
     hLay = buildLabelPopupRow(
         rightType.getTitle(),
-        bottomNewCardLabel=new Label("new card played")); //rightPopup = new Animator(new Label("new card played")));
+        bottomNewCardLabel=new Label("new card played"));
 
     bottomVLay.addComponent(hLay);
     bottomVLay.setComponentAlignment(hLay,Alignment.MIDDLE_LEFT);
     bottomholder = new HorizontalCardDisplay(new Dimension(CARDWIDTH,CARDHEIGHT),NUMCARDS,me,mockupOnly,"bottom");
     bottomVLay.addComponent(bottomholder);
     bottomholder.initGui();
-   // bottomVLay.addComponent(getNewestOldestLabels());
     
     MCacheManager cMgr = Mmowgli2UI.getGlobals().getAppMaster().getMcache();
     
     if(mockupOnly) {
-      addCards(   topholder,cMgr.getPositiveIdeaCardsCurrentMove());
-      addCards(bottomholder,cMgr.getNegativeIdeaCardsCurrentMove());
+      addCardsTL(   topholder,cMgr.getPositiveIdeaCardsCurrentMove());
+      addCardsTL(bottomholder,cMgr.getNegativeIdeaCardsCurrentMove());
     }
     else {
-      Game g = Game.get();
+      Game g = Game.getTL();
       if(g.isShowPriorMovesCards() || me.isAdministrator()) {
-        addCards(   topholder,cMgr.getAllPositiveIdeaCards());
-        addCards(bottomholder,cMgr.getAllNegativeIdeaCards());
+        addCardsTL(   topholder,cMgr.getAllPositiveIdeaCards());
+        addCardsTL(bottomholder,cMgr.getAllNegativeIdeaCards());
       }
       else if(!g.isShowPriorMovesCards()){
-        addCards(   topholder,cMgr.getPositiveUnhiddenIdeaCardsCurrentMove());
-        addCards(bottomholder,cMgr.getNegativeUnhiddenIdeaCardsCurrentMove());      
+        addCardsTL(   topholder,cMgr.getPositiveUnhiddenIdeaCardsCurrentMove());
+        addCardsTL(bottomholder,cMgr.getNegativeUnhiddenIdeaCardsCurrentMove());      
       }
     }
   }
@@ -289,58 +269,17 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     return hLay;
   }
   
- /* 
-  private Component getNewestOldestLabels()
+  private void addCardsTL(HorizontalCardDisplay hcd, Collection<Card> coll)
   {
-    HorizontalLayout hLay = new HorizontalLayout();
-    hLay.setWidth("980px");
-    
-    Label lab;
-    hLay.addComponent(lab=new Label());
-    lab.setWidth("35px");   
-    hLay.addComponent(lab=new Label("earliest"));
-    lab.setSizeUndefined();
-    lab.addStyleName("m-playidea-help-text");
-    hLay.addComponent(lab=new Label());
-    hLay.setExpandRatio(lab, 1.0f);    
-    hLay.addComponent(lab=new Label("newest"));
-    lab.setSizeUndefined();
-    lab.addStyleName("m-playidea-help-text");   
-    return hLay;
-  }
-  
-  private void addCardsOld(LazyHorizontalScroller scroller, Collection<Card> coll)
-  {
-    Session sess = HibernateContainers.getSession();
-    User me = DBGet.getUser(app.getUser());
-   // synchronized(coll) {
-      Iterator<Card> itr = coll.iterator();
-      while(itr.hasNext()) {
-        Card c = itr.next();  //todo can get concurrentmodification exception here, apparently sync doesn't work
-        CardSummary summ = CardSummary.newCardSummary(app, c.getId(), sess ,me, mockupOnly);
-        //scroller.addScrollee(new CardWrapper(summ));
-        scroller.addScrolleeToLeftQuick(new CardWrapper(summ));
-        scroller.moveToEnd();
-      }
-    //scroller.moveToEnd();
-   // }
-  }
-  */
-  private void addCards(HorizontalCardDisplay hcd, Collection<Card> coll)
-  {
-    Session sess = VHib.getVHSession();
- 
-    User me = User.get(Mmowgli2UI.getGlobals().getUserID(), sess); //DBGet.getUser(app.getUser());
+    User me = User.getTL(Mmowgli2UI.getGlobals().getUserID()); //DBGet.getUser(app.getUser());
     ArrayList<Object> wrappers = new ArrayList<Object>(coll.size());
+    
+    Session sess = HSess.get();
     Iterator<Card> itr = coll.iterator();
     while(itr.hasNext()) {
       Card c = itr.next();  //todo can get concurrentmodification exception here, apparently sync doesn't work
-     // CardSummary summ = CardSummary.newCardSummary(app, c.getId(), sess ,me, mockupOnly);
-      //wrappers.add(0, summ);
       if(Card.canSeeCard_oob(c, me, sess))
         wrappers.add(0,c.getId());
-      //else
-        //System.out.println("Hid card "+c.getId());
     }
     hcd.loadWrappers(wrappers);
     hcd.show(sess);
@@ -349,47 +288,41 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
   private Card pendingRightBottom = null;
   
   @Override
-  public boolean cardPlayed_oob(SingleSessionManager mgr, Serializable cId)
+  @HibernateRead
+  public boolean cardPlayed_oobTL(Serializable cId)
   {
     boolean ret = false; // don't need ui update by default
-    Session sess = M.getSession(mgr);
     
-    Card c = Card.get(cId,sess); //DBGet.getCard(cId, sess);
-    User me = User.get(Mmowgli2UI.getGlobals().getUserID(), sess); //DBGet.getUser(app.globs().user(), sess);
+    Card c = Card.getTL(cId); //DBGet.getCard(cId, sess);
+    User me = User.getTL(Mmowgli2UI.getGlobals().getUserID());
     if (c == null)
       c = ComeBackWhenYouveGotIt.fetchCardWhenPossible((Long)cId);
     if(c == null)
       System.err.println("Error, CallToActionPage.newCardMade_oob, card with id " + cId + " not found.");
     else {
       CardType ct = c.getCardType();
-      if (Card.canSeeCard_oob(c, me, sess)) {
-        if (ct.getId() == leftType.getId()) {
-          // CardSummary summ = CardSummary.newCardSummary(app, c.getId(),sess,me,mockupOnly);
-          // topholder.addScrolleeToLeft(new CardWrapper(summ));
+      if (Card.canSeeCard_oobTL(c, me)) {
+        if (ct.getId() == leftType.getId()) {;
           topholder.addScrollee(c.getId());
           showNotif(topNewCardLabel);
           ret = true;
           // Shift to show new card if we played it
           if(pendingLeftTop != null) {
             pendingLeftTop = null;
-            topholder.showEnd(sess);
+            topholder.showEnd(HSess.get());
           }
         }
         else if (ct.getId() == rightType.getId()) {
-          // CardSummary summ = CardSummary.newCardSummary(app, c.getId(),sess,me,mockupOnly);
-          // bottomholder.addScrolleeToLeft(new CardWrapper(summ));
           bottomholder.addScrollee(c.getId());
           showNotif(bottomNewCardLabel);
           ret = true;
           // Shift to show new card if we played it
           if(pendingRightBottom != null) {
             pendingRightBottom = null;
-            bottomholder.showEnd(sess);
+            bottomholder.showEnd(HSess.get());
           }
         }
       }
-      //else
-      //  System.out.println("Disallowed viewing of card "+c.getId());
     }
     return ret;
   }
@@ -401,7 +334,7 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
   }
 
   @Override
-  public boolean cardUpdated_oob(SingleSessionManager mgr, Serializable cardId)
+  public boolean cardUpdated_oobTL(Serializable cardId)
   {
     return false;
   }
@@ -431,7 +364,7 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
   class ThisNewCardListener implements NewCardListener
   {
     @Override
-    public void cardCreated(Card c)
+    public void cardCreatedTL(Card c)
     {
       if(mockupOnly)
         return;
@@ -441,13 +374,13 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
       else
         pendingRightBottom = c;
       
-      Card.save(c); // this hits the db.
-      GameEventLogger.cardPlayed(c.getId());
-      Mmowgli2UI.getGlobals().getScoreManager().cardPlayed(c);// update score only from this app instance      
+      Card.saveTL(c); // this hits the db.
+      GameEventLogger.cardPlayedTL(c.getId());
+      Mmowgli2UI.getGlobals().getScoreManager().cardPlayedTL(c);// update score only from this app instance      
     }
 
     @Override
-    public void drawerOpened(Object cardTypeId)
+    public void drawerOpenedTL(Object cardTypeId)
     {
     }    
   }
@@ -456,8 +389,13 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
    * View interface
    */
   @Override
+  @MmowgliCodeEntry
+  @HibernateConditionallyOpened
+  @HibernateConditionallyClosed
   public void enter(ViewChangeEvent event)
   {
-    initGui();    
+    Object key = HSess.checkInit();
+    initGui();
+    HSess.checkClose(key);
   }
  }
