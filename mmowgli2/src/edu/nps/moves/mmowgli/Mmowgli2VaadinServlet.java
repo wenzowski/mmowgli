@@ -37,10 +37,12 @@ import java.io.IOException;
 import java.util.Enumeration;
 
 import javax.servlet.*;
+import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.*;
 
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
@@ -84,12 +86,16 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 @SuppressWarnings("serial")
 // the "/" means only urls at the context root (Mmowgli2/) come here,  default is /*
-@WebServlet(value = "/*", asyncSupported = true, loadOnStartup=1)//, 
-                          //initParams = {@WebInitParam(name="org.atmosphere.useWebSocketAndServlet3",  value="true")},
-                                        //@WebInitParam(name="org.atmosphere.cpr.AtmosphereInterceptor",value="edu.nps.moves.mmowgli.MmowgliAtmosphereInterceptor")
-                                       //})
-//@VaadinServletConfiguration(productionMode = false, ui = Mmowgli2UILogin.class)  must use web.xml
-public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet implements SessionInitListener, SessionDestroyListener
+@WebServlet(value = "/*", asyncSupported = true, loadOnStartup=1,
+            initParams = {@WebInitParam(name="org.atmosphere.useWebSocketAndServlet3",  value="true")})
+                       //{@WebInitParam(name="org.atmosphere.useNative",  value="true")})
+                       //@WebInitParam(name="org.atmosphere.cpr.AtmosphereInterceptor",value="edu.nps.moves.mmowgli.MmowgliAtmosphereInterceptor")
+// AsyncSupported not being recognized? see http://stackoverflow.com/questions/7749350/illegalstateexception-not-supported-on-asynccontext-startasyncreq-res
+// Atmosphere parameters are listed in org.atmosphere.cpr.ApplicationConfig
+// Streaming plus tomcat 7, see https://vaadin.com/wiki/-/wiki/Main/Working%20around%20push%20issues
+
+// Settings in web.xml override those listed here
+public class Mmowgli2VaadinServlet extends VaadinServlet implements SessionInitListener, SessionDestroyListener
 {
   private AppMaster appMaster;
   private int sessionCount = 0;
@@ -107,24 +113,25 @@ public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet impl
     super.servletInitialized();
     
     getService().addSessionInitListener(this);
-   // getService().addSessionDestroyListener(this);
-    
 
     ServletContext context = getServletContext();
-    //try:
-    // Already done in session interceptor
-    /*
-    vHib = VHib.instance();
-    vHib.init(context);
-    vHibPii = VHibPii.instance();
-    vHibPii.init(context);
-    */
-    // end try
     MSysOut.println("Mmowgli: contextPath: "+context.getContextPath());
-    appMaster = AppMaster.getInstance(context);// Initialize app master, global across on user sessions on this cluster node
+    appMaster = AppMaster.instance(context);// Initialize app master, global across on user sessions on this cluster node
    
     context.setAttribute(MmowgliConstants.APPLICATION_MASTER_ATTR_NAME, appMaster);
-    appMaster.init();
+    appMaster.init(context);
+    
+    //You can set the system message provider in the servletInitialized() method of a custom
+    //servlet class, for example as follows:
+    getService().setSystemMessagesProvider(
+      new SystemMessagesProvider()
+      {
+        @Override
+        public SystemMessages getSystemMessages(SystemMessagesInfo systemMessagesInfo)
+        {
+          return new MmowgliSystemMessages();
+       }
+    });
   }
 
   @Override
@@ -133,47 +140,23 @@ public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet impl
     new MmowgliSessionGlobals(event,this);   // Initialize global object across all users windows, gets stored in VaadinSession object referenced in event
     event.getSession().addUIProvider(new Mmowgli2UIProvider());
     //MSysOut.println("JMETERdebug: Session created, id = "+event.getSession().hashCode());
-    // How to include openlayers js (todo)
-/*
-    event.getSession().addBootstrapListener(new BootstrapListener() {
-      @Override
-      public void modifyBootstrapPage(BootstrapPageResponse response) {
-  
-         // With this code, Vaadin servlet will add the line:
-         // <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" />
-         //
-         // as the first line inside the document's head tag in the generated html document
-         response.getDocument().head().prependElement("script").attr("type", "text/javascript").attr("src",
-             "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js");
 
-      }
-
-      @Override
-      public void modifyBootstrapFragment(BootstrapFragmentResponse response) {}
-    });
-*/
-    
-    
-    
-    
     if(appMaster != null)  // might be with error on startup
       appMaster.doSessionCountUpdate(++sessionCount);   
   }
 
-
   @Override
   public void sessionDestroy(SessionDestroyEvent event)
   {
-    //MSysOut.println("JMETERdebug: Session destroyed, id = "+event.getSession().hashCode());
-    
+    //MSysOut.println("JMETERdebug: Session destroyed, id = "+event.getSession().hashCode());    
     if(appMaster != null) { // might be with error on startup
       appMaster.doSessionCountUpdate(--sessionCount);
       appMaster.logSessionEnd(event.getSession().hashCode());
     }   
   }
-
-
-
+  
+  // Methods to override if needed
+/*
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
   {
@@ -233,6 +216,7 @@ public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet impl
   @Override
   public void service(ServletRequest arg0, ServletResponse arg1) throws ServletException, IOException
   {
+    arg0.setAttribute("org.apache.catalina.ASYNC_SUPPORTED", true);//http://stackoverflow.com/questions/7749350/illegalstateexception-not-supported-on-asynccontext-startasyncreq-res
     super.service(arg0, arg1);
     //MSysOut.println("service.............");
   }
@@ -299,7 +283,7 @@ public class Mmowgli2VaadinServlet extends /*ICEPushServlet*/ VaadinServlet impl
     super.log(msg);
     MSysOut.println("log...........");
   }
-
+*/
 
 
 }
