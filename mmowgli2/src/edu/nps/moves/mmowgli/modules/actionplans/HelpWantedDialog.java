@@ -41,6 +41,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.ActionPlan;
@@ -193,7 +194,7 @@ public class HelpWantedDialog extends Window
         
         List<User> authors = parseAuthorsTL(tos.toString().trim());
         MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-        MailManager mmgr = globs.getAppMaster().getMailManager();
+        MailManager mmgr = AppMaster.instance().getMailManager();
         User me = DBGet.getUserTL(globs.getUserID());
         for(User u : authors) {
           mmgr.mailToUserTL(me.getId(), u.getId(), subj.toString(), msg.toString());

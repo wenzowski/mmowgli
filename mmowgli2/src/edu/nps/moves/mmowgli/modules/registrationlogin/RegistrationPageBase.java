@@ -668,7 +668,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       EmailConfirmation.saveTL(ec);
 
       String confirmUrl = buildConfirmUrl(ec);
-      Mmowgli2UI.getGlobals().getAppMaster().getMailManager().sendEmailConfirmationTL(email, u.getUserName(), confirmUrl);
+      AppMaster.instance().getMailManager().sendEmailConfirmationTL(email, u.getUserName(), confirmUrl);
       HSess.close();
     } // else weren't confirmed
   }
@@ -683,7 +683,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
     if (user != null) {
       user = DBGet.getUserFreshTL(user.getId());
       if (!user.isWelcomeEmailSent()) {
-        MailManager mmgr = Mmowgli2UI.getGlobals().getAppMaster().getMailManager();
+        MailManager mmgr = AppMaster.instance().getMailManager();
         mmgr.onNewUserSignupTL(user);
         user.setWelcomeEmailSent(true);
         User.updateTL(user);

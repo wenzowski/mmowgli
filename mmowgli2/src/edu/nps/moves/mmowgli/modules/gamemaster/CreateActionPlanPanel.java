@@ -52,9 +52,7 @@ import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.BaseTheme;
 
-import edu.nps.moves.mmowgli.AppEvent;
-import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.MmowgliEvent;
+import edu.nps.moves.mmowgli.*;
 import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
@@ -508,7 +506,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
       }
       User.updateTL(u);
 
-      Mmowgli2UI.getGlobals().getAppMaster().getMailManager().actionPlanInviteTL(ap, u);
+      AppMaster.instance().getMailManager().actionPlanInviteTL(ap, u);
     }
     
     @SuppressWarnings("serial")

@@ -42,6 +42,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
 import edu.nps.moves.mmowgli.db.User;
@@ -91,7 +92,7 @@ public class AddAuthorDialog extends Window
     userList = new ListSelect();
     userList.addStyleName("m-greyborder");
     
-    List<QuickUser> qlis = Mmowgli2UI.getGlobals().getAppMaster().getMcache().getUsersQuickList();
+    List<QuickUser> qlis = AppMaster.instance().getMcache().getUsersQuickList();
     BeanItemContainer<QuickUser> beanContainerQ = new BeanItemContainer<QuickUser>(QuickUser.class,qlis);
     
     userList.setContainerDataSource(beanContainerQ);

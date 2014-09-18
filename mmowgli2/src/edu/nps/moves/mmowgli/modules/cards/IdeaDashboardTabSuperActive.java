@@ -40,6 +40,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.Card;
@@ -109,7 +110,7 @@ public class IdeaDashboardTabSuperActive extends IdeaDashboardTabPanel
   private void loadTreeTL()
   {
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-    List<Card> list = globs.getAppMaster().getMcache().getSuperActiveChainRoots();
+    List<Card> list = AppMaster.instance().getMcache().getSuperActiveChainRoots();
     User me = DBGet.getUserTL(globs.getUserID());
     ArrayList<Card> arLis = new ArrayList<Card>();
     
