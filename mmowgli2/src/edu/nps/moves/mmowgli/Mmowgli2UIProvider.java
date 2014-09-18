@@ -39,15 +39,11 @@ public class Mmowgli2UIProvider extends DefaultUIProvider
     
     int count = uis.size();
    
-    System.out.println("###########");
-    System.out.println("UIProvider found "+count+" uis for this vaadin session");
-    System.out.println("###########");
-
     if(count == 0)
       return Mmowgli2UILogin.class;
     
     MmowgliSessionGlobals globs = ((Mmowgli2UI)uis.toArray()[0]).getSessionGlobals();
-    if(globs != null & globs.isLoggedIn())
+    if(globs != null && globs.isLoggedIn())
       return Mmowgli2UISubsequent.class;
     
     return Mmowgli2UIError.class;
