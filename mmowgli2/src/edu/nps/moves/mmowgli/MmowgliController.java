@@ -52,25 +52,11 @@ import com.vaadin.ui.*;
 
 public interface MmowgliController
 {
-
-  //original controller interface 
   void menuClick(MmowgliEvent mEv, MenuBar menubar);
-  void handleEvent(MmowgliEvent mEv, Object param, Component source);
-  void miscEvent(AppEvent ev);
+  void handleEventTL(MmowgliEvent mEv, Object param, Component source);
+  void miscEventTL(AppEvent ev);
   void buttonClick(ClickEvent ev);
 
   void init();
-  void setupNavigator(Navigator nav);
-  /*
-  void cardPlayed(Card card);
-  void cardUpdated(Card card);
-  void localCardPlayed(Card card);
-  void loggedIn(Object userId);
-  void loggedOut(Session sess);
-  void onLogin(LoginEvent event); // todo remove?
-  void addNewsListener(NewsListener lis);
-  void removeNewsListener(NewsListener lis);
-  void shutdown();
-*/
-  
+  void setupNavigator(Navigator nav);  
 }
