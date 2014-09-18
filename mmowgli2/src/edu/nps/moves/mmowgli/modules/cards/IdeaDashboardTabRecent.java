@@ -43,8 +43,14 @@ import com.vaadin.ui.themes.BaseTheme;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.CardTable;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 
 /**
  * ActionPlanPageTabImages.java
@@ -106,7 +112,7 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
       tableLay.setWidth("680px");
       tableLay.setHeight("730px");
     }
-    insertAllIdeasTable();
+    insertAllIdeasTableTL();
     lastButt = allIdeasButt; 
   }
 
@@ -132,13 +138,13 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
   
   private CardTable allIdeasTable;
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  private void insertAllIdeasTable()
+  private void insertAllIdeasTableTL()
   {
     if (allIdeasTable == null || (lastTable != null && lastTable != allIdeasTable)) {
       if(isGameMaster)
         allIdeasTable = new CardTable(null, null, true, false, false);
       else {
-        User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+        User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
         allIdeasTable = new CardTable(null,new NotHiddenCardContainer(me),true,false,false);
       }
       allIdeasTable.setPageLength(40);
@@ -153,10 +159,10 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
   
   private CardTable superTable;
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  private void insertSuperInterestingTable()
+  private void insertSuperInterestingTableTL()
   {
     if (superTable == null || (lastTable != null && lastTable != superTable)) { 
-      User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
       superTable = new CardTable(null,new SuperInterestingCardContainer(me),true,false,false);
       superTable.setPageLength(40);
       superTable.setWidth("679px");
@@ -168,9 +174,9 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
     }
   }
   
-  private CardTable createTypeTable(CardType typ)
+  private CardTable createTypeTableTL(CardType typ)
   {
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     @SuppressWarnings({ "unchecked", "rawtypes" })
     CardTable ct = new CardTable(null,new CardTypeContainer(typ,me),true,false,false);
     ct.setPageLength(40);
@@ -180,10 +186,10 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
   }
   
   private CardTable expandTable;
-  private void insertExpandTable()
+  private void insertExpandTableTL()
   {
     if(expandTable == null  || (lastTable != null && lastTable != expandTable)) {
-      expandTable = createTypeTable(CardTypeManager.getExpandType());
+      expandTable = createTypeTableTL(CardTypeManager.getExpandTypeTL());
       
       if(lastTable!= null)
         tableLay.removeComponent(lastTable);
@@ -192,10 +198,10 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
   }
   
   private CardTable adaptTable;
-  private void insertAdaptTable() 
+  private void insertAdaptTableTL() 
   {
     if(adaptTable == null || (lastTable != null && lastTable != adaptTable)) {
-      adaptTable = createTypeTable(CardTypeManager.getAdaptType());   
+      adaptTable = createTypeTableTL(CardTypeManager.getAdaptTypeTL());   
       
       if(lastTable!= null)
         tableLay.removeComponent(lastTable);
@@ -205,10 +211,10 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
   
   private CardTable counterTable;
 
-  private void insertCounterTable()
+  private void insertCounterTableTL()
   {
     if (counterTable == null || (lastTable != null && lastTable != counterTable)) {
-      counterTable = createTypeTable(CardTypeManager.getCounterType());
+      counterTable = createTypeTableTL(CardTypeManager.getCounterTypeTL());
 
       if (lastTable != null)
         tableLay.removeComponent(lastTable);
@@ -217,10 +223,10 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
   }
   
   private CardTable exploreTable;
-  private void insertExploreTable()
+  private void insertExploreTableTL()
   {
     if(exploreTable == null || (lastTable != null && lastTable != exploreTable)) {
-      exploreTable = createTypeTable(CardTypeManager.getExploreType());    
+      exploreTable = createTypeTableTL(CardTypeManager.getExploreTypeTL());    
 
       if (lastTable != null)
         tableLay.removeComponent(lastTable);
@@ -229,6 +235,9 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
   }
 
   @Override
+  @MmowgliCodeEntry
+  @HibernateOpened
+  @HibernateClosed
   public void buttonClick(ClickEvent event)
   {
     Button b = event.getButton();
@@ -236,24 +245,27 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
       return ;
     lastButt = b;
     
+    HSess.init();
     if(b == allIdeasButt) {
-      insertAllIdeasTable();
+      insertAllIdeasTableTL();
     }
     else if(b == supInterestingButt) {
-      insertSuperInterestingTable();
+      insertSuperInterestingTableTL();
     }
     else if(b == expandButt) {
-      insertExpandTable();
+      insertExpandTableTL();
     }
     else if(b == adaptButt) {
-      insertAdaptTable();
+      insertAdaptTableTL();
     }
     else if(b == counterButt) {
-      insertCounterTable();
+      insertCounterTableTL();
     }
     else if(b == exploreButt) {
-      insertExploreTable();
-    }      
+      insertExploreTableTL();
+    } 
+    
+    HSess.close();
   }
   
   @Override
