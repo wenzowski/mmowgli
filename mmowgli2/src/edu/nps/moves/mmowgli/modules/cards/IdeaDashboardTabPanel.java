@@ -35,9 +35,13 @@ package edu.nps.moves.mmowgli.modules.cards;
 
 import static edu.nps.moves.mmowgli.modules.cards.IdeaDashboard.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
-import org.hibernate.*;
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
@@ -46,9 +50,14 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.themes.Reindeer;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.components.*;
+import edu.nps.moves.mmowgli.components.CardTable;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
+import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
+
 /**
  * IdeaDashboardTabPanel.java
  * Created on Feb 8, 2011
@@ -69,10 +78,11 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
   abstract public List<Card> getCardList();
   abstract boolean confirmCard(Card c);
   protected boolean isGameMaster = false;
-  
+
+  @HibernateSessionThreadLocalConstructor
   public IdeaDashboardTabPanel()
   {
-    isGameMaster = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID()).isGameMaster();
+    isGameMaster = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).isGameMaster();
 
     setWidth(IDEADASHBOARD_TABCONTENT_W);
     setHeight(IDEADASHBOARD_TABCONTENT_H);
@@ -129,7 +139,7 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
 
   protected void buildCardClassTable(CardType ct)
   {
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     CardTable ctab = new CardTable(null,new CardClassContainer<Card>(ct.getCardClass(),me),true,false,false);
     ctab.setPageLength(40);
     ctab.setWidth("679px");
@@ -174,14 +184,14 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
   /**
    * Only needed if sub class calls buildCardTable()
    */
-  protected List<Card> getCardList(User me, CardMarking mark)
+  protected List<Card> getCardListTL(User me, CardMarking mark)
   {
-    Session sess = VHib.getVHSession(); // current vaadin transaction session
+    Session sess = HSess.get();
 
     Criteria crit = sess.createCriteria(Card.class)
         .addOrder(Order.desc("creationDate"));
 
-    Card.adjustCriteriaToOmitCards(crit, me);
+    Card.adjustCriteriaToOmitCardsTL(crit, me);
     List<Card> lis = (List<Card>) crit.list();
 
     ArrayList<Card> arLis = new ArrayList<Card>();
@@ -194,26 +204,26 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
   }
 
   @SuppressWarnings("unchecked")
-  protected List<Card> getCardList(CardType typ, User me)
+  protected List<Card> getCardListTL(CardType typ, User me)
   {
-    Session sess = VHib.getVHSession(); // current vaadin transaction session
-    // List<Card> lis = (List<Card>)
+    Session sess = HSess.get();
     Criteria crit = sess.createCriteria(Card.class)
         .add(Restrictions.eq("cardType", typ))
         .addOrder(Order.desc("creationDate"));
 
-    Card.adjustCriteriaToOmitCards(crit, me);
+    Card.adjustCriteriaToOmitCardsTL(crit, me);
 
     return (List<Card>) crit.list();
   }
+  
   @SuppressWarnings({ "serial", "unchecked" })
- public static class CardClassContainer<T> extends HbnContainer<T>
- {
+  public static class CardClassContainer<T> extends HbnContainer<T>
+  {
     private CardType.CardClass cls;
     private User me;
     public CardClassContainer(CardType.CardClass cls, User me)
     {
-      this(cls,me,VHib.getSessionFactory());
+      this(cls,me,HSess.getSessionFactory());  //ok threadlocal
     }
     public CardClassContainer(CardType.CardClass cls, User me, SessionFactory fact)
     {
@@ -222,9 +232,9 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
       this.me = me;
     }
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
-      Criteria crit = super.getBaseCriteria();
+      Criteria crit = super.getBaseCriteriaTL();
       crit.createAlias("cardType", "TYPE")
       .add(Restrictions.eq("TYPE.cardClass", cls));
 
@@ -233,7 +243,7 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
       else
         crit.add(Restrictions.eq("hidden", false));
       
-      Card.adjustCriteriaToOmitCards(crit, me);
+      Card.adjustCriteriaToOmitCardsTL(crit, me);
       return crit;
     }
  }
@@ -245,7 +255,7 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
     User me;
     public CardTypeContainer(CardType ct, User me)
     {
-      this(ct,me,VHib.getSessionFactory());
+      this(ct,me,HSess.getSessionFactory()); // thread local ok
     }
     public CardTypeContainer(CardType ct, User me, SessionFactory fact)
     {
@@ -255,9 +265,9 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
     }
 
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
-      Criteria crit = super.getBaseCriteria();
+      Criteria crit = super.getBaseCriteriaTL();
       crit.add(Restrictions.eq("cardType", ct))
       .addOrder(Order.desc("creationDate"));
 
@@ -266,7 +276,7 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
       else
         crit.add(Restrictions.eq("hidden", false));
       
-      Card.adjustCriteriaToOmitCards(crit, me);
+      Card.adjustCriteriaToOmitCardsTL(crit, me);
       return crit;
     }
   }
@@ -277,7 +287,7 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
     User me;
     public SuperInterestingCardContainer(User me)
     {
-      this(me,VHib.getSessionFactory());
+      this(me,HSess.getSessionFactory()); //thread local ok
     }
     public SuperInterestingCardContainer(User me, SessionFactory fact)
     {
@@ -286,16 +296,16 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
     }
    
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
       CardMarking supInt = CardMarkingManager.getSuperInterestingMarking();
       
-      Criteria crit = super.getBaseCriteria()
+      Criteria crit = super.getBaseCriteriaTL()
       .addOrder(Order.desc("creationDate"))
       .createAlias("marking", "MARK")
       .add(Restrictions.eq("MARK.label", supInt.getLabel()));
       
-      Card.adjustCriteriaToOmitCards(crit, me);
+      Card.adjustCriteriaToOmitCardsTL(crit, me);
       return crit;
     }
   }  
@@ -306,7 +316,7 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
     User me;
     public NotHiddenCardContainer(User me)
     {
-      this(me,VHib.getSessionFactory());
+      this(me,HSess.getSessionFactory());  // thread local ok
     }   
     public NotHiddenCardContainer(User me,SessionFactory fact)
     {
@@ -315,13 +325,13 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
     }
     
     @Override
-    protected Criteria getBaseCriteria()
+    protected Criteria getBaseCriteriaTL()
     {
-      Criteria crit = super.getBaseCriteria()
+      Criteria crit = super.getBaseCriteriaTL()
       .addOrder(Order.desc("creationDate"))
       .add(Restrictions.eq("hidden", false));
       
-      Card.adjustCriteriaToOmitCards(crit, me);
+      Card.adjustCriteriaToOmitCardsTL(crit, me);
       return crit;
     }
   }  
