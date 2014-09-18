@@ -92,6 +92,8 @@ public class AppEvent extends EventObject
       throw new IllegalArgumentException("null fragment");
     
     s = s.trim();
+    if(s.startsWith("!"))
+      s = s.substring(1);
     
     if(s.indexOf('_') == -1) {
       try {
