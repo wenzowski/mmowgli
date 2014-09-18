@@ -53,6 +53,7 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.BrowserWindowOpener;
 import com.vaadin.ui.*;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliConstants;
 import edu.nps.moves.mmowgli.cache.MCacheManager;
@@ -225,7 +226,7 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     bottomVLay.addComponent(bottomholder);
     bottomholder.initGui();
     
-    MCacheManager cMgr = Mmowgli2UI.getGlobals().getAppMaster().getMcache();
+    MCacheManager cMgr = AppMaster.instance().getMcache();
     
     if(mockupOnly) {
       addCardsTL(   topholder,cMgr.getPositiveIdeaCardsCurrentMove());

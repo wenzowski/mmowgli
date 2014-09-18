@@ -64,9 +64,7 @@ import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.Reindeer;
 
-import edu.nps.moves.mmowgli.AppEvent;
-import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
+import edu.nps.moves.mmowgli.*;
 import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
@@ -1270,7 +1268,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       // done above ActionPlan.update(ap);
     }
 
-    Mmowgli2UI.getGlobals().getAppMaster().getMailManager().actionPlanInviteTL(ap, u);
+    AppMaster.instance().getMailManager().actionPlanInviteTL(ap, u);
   }
 
   @SuppressWarnings("serial")

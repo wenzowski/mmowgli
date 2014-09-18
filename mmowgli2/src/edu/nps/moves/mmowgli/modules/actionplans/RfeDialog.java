@@ -42,6 +42,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
@@ -213,7 +214,7 @@ public class RfeDialog extends Window
     String message = me.getUserName()+ " changed the \"request-for-expertise\" posting on Action Plan "+ap.getId()+" to:  ";
     message = message + (ap.getHelpWanted()==null?"(removed)":ap.getHelpWanted());
 
-    MailManager mmgr = Mmowgli2UI.getGlobals().getAppMaster().getMailManager();
+    MailManager mmgr = AppMaster.instance().getMailManager();
     for(User u : authors) {
       mmgr.mailToUserTL(me.getId(), u.getId(), "Action Plan Request-for-Expertise Message Changed", message);
     }

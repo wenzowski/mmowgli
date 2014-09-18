@@ -48,6 +48,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
@@ -127,7 +128,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
       return;
     HSess.init();
     EventLine line = (EventLine)vLay.getComponent(numLines-1);
-    GameEvent[] arr = Mmowgli2UI.getGlobals().getAppMaster().getMcache().getNextGameEvents(numLines-1, line.gameEvent.getId(), MAX_RESULT_SET);
+    GameEvent[] arr = AppMaster.instance().getMcache().getNextGameEvents(numLines-1, line.gameEvent.getId(), MAX_RESULT_SET);
 
     if(arr.length != MAX_RESULT_SET)
       event.getButton().setEnabled(false);
@@ -313,7 +314,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
 
   private void loadEvents()
   {
-    addEvents(Mmowgli2UI.getGlobals().getAppMaster().getMcache().getNextGameEvents(null, null, MAX_RESULT_SET));
+    addEvents(AppMaster.instance().getMcache().getNextGameEvents(null, null, MAX_RESULT_SET));
   }
 
   @Override

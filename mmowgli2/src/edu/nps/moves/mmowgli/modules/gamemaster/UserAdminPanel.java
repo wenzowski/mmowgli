@@ -742,7 +742,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
           confirmedCb.setValue(true);
           warn = true;
         }
-        Mmowgli2UI.getGlobals().getAppMaster().getMailManager().sendConfirmedReminderTL(email, u.getUserName(), gameUrl);
+        AppMaster.instance().getMailManager().sendConfirmedReminderTL(email, u.getUserName(), gameUrl);
         if(warn)
           Notification.show("Email sent", "Be sure to \"apply\" before closing dialog.",Notification.Type.WARNING_MESSAGE);
         else
@@ -955,7 +955,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     public void fillTable(Table table)
     {
       if(container == null) {
-        MCacheManager cm = Mmowgli2UI.getGlobals().getAppMaster().getMcache();
+        MCacheManager cm = AppMaster.instance().getMcache();
         if(termsArr != null) {
           container = new BeanContainerWithCaseInsensitiveSorter<Long,QuickUser>(QuickUser.class);
           BeanContainer<Long,QuickUser> bc = cm.getQuickUsersContainer();

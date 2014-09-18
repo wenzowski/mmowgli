@@ -56,9 +56,7 @@ import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.BaseTheme;
 
-import edu.nps.moves.mmowgli.AppEvent;
-import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
+import edu.nps.moves.mmowgli.*;
 import edu.nps.moves.mmowgli.components.*;
 import edu.nps.moves.mmowgli.components.CardSummaryListHeader.NewCardListener;
 import edu.nps.moves.mmowgli.db.*;
@@ -629,7 +627,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // to the parent author saying that the first followon was played on his card.  But we only do that once -- each player
     // only gets one of this type of email.  Checked-for in mailmanager.
     if(set.size() == 1) {      
-      globs.getAppMaster().getMailManager().firstChildPlayedTL(parent,c);
+      AppMaster.instance().getMailManager().firstChildPlayedTL(parent,c);
     }
       
     globs.getScoreManager().cardPlayedTL(c); // update score only from this app instance  
