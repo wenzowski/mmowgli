@@ -9,7 +9,9 @@ import java.util.Calendar;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.*;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
@@ -26,10 +28,16 @@ import edu.nps.moves.mmowgli.db.pii.Query2Pii;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.export.ActionPlanExporter;
 import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2;
+import edu.nps.moves.mmowgli.modules.actionplans.RfeDialog;
 import edu.nps.moves.mmowgli.modules.cards.CardChainPage;
-import edu.nps.moves.mmowgli.modules.gamemaster.*;
+import edu.nps.moves.mmowgli.modules.gamemaster.CreateActionPlanWindow;
+import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
+import edu.nps.moves.mmowgli.modules.gamemaster.SetBlogHeadlineWindow;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
 import edu.nps.moves.mmowgli.utility.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
@@ -49,7 +57,7 @@ public class AbstractMmowgliControllerHelper
 {
   public static String linesep = System.getProperty("line.separator");
 
-  void doSessionReport(SingleSessionManager mgr, String message)
+  void doSessionReportTL(String message)
   {
     //todo
     /*
@@ -72,7 +80,7 @@ public class AbstractMmowgliControllerHelper
     */
   }
   
-  private boolean iterateUIContents(SingleSessionManager sessMgr, Object obj, ContentsHandler handler)
+  private boolean iterateUIContents(Object obj, ContentsHandler handler)
   {
     boolean push = false;
     Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
@@ -82,12 +90,12 @@ public class AbstractMmowgliControllerHelper
       Mmowgli2UI mui = (Mmowgli2UI)ui;
       Component comp = mui.getFrameContent();
       if(comp != null)
-        if(handler.handle(comp, sessMgr, obj))
+        if(handler.handle(comp, obj))
           push = true;
     }   
     return push;
   }
-  private boolean iterateUIs(SingleSessionManager sessMgr, Object obj, UIHandler handler)
+  private boolean iterateUIs(Object obj, UIHandler handler)
   {
     boolean push = false;
     Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
@@ -96,92 +104,92 @@ public class AbstractMmowgliControllerHelper
         continue;
       Mmowgli2UI mui = (Mmowgli2UI)ui;
       if(mui != null)
-        if(handler.handle(mui, sessMgr, obj))
+        if(handler.handle(mui,obj))
           push = true;
     } 
     return push;
   }
   
-  interface ContentsHandler {boolean handle(Component c, SingleSessionManager sessMgr, Object obj);}
-  interface UIHandler       {boolean handle(UI ui, SingleSessionManager sessMgr, Object obj);}
+  interface ContentsHandler {boolean handle(Component c, Object obj);}
+  interface UIHandler       {boolean handle(UI ui, Object obj);}
   
-  boolean mediaUpdated_oob(SingleSessionManager sessMgr, Object medId)
+  boolean mediaUpdated_oobTL(Object medId)
   {
-    return iterateUIContents(sessMgr, medId, new ContentsHandler()
+    return iterateUIContents(medId, new ContentsHandler()
     {
-      public boolean handle(Component comp, SingleSessionManager sessMgr, Object medId)
+      public boolean handle(Component comp, Object medId)
       {
         if(comp instanceof WantsMediaUpdates)
-          return((WantsMediaUpdates) comp).mediaUpdatedOob(sessMgr, (Serializable)medId);
+          return((WantsMediaUpdates) comp).mediaUpdatedOobTL((Serializable)medId);
         return false;
       }
     });
   }
   
-  boolean chatLogUpdated_oob(SingleSessionManager mgr, Object logId)
+  boolean chatLogUpdated_oobTL(Object logId)
   {
-    return iterateUIContents(mgr,logId,new ContentsHandler()
+    return iterateUIContents(logId,new ContentsHandler()
     {
-      public boolean handle(Component comp, SingleSessionManager sessMgr, Object logId)
+      public boolean handle(Component comp, Object logId)
       {
         if(comp instanceof WantsChatLogUpdates)
-          return ((WantsChatLogUpdates) comp).logUpdated_oob(sessMgr, (Serializable)logId);
+          return ((WantsChatLogUpdates) comp).logUpdated_oobTL((Serializable)logId);
         return false;
       }    
     });
   }
 
-  boolean actionPlanUpdated_oob(SingleSessionManager sessMgr, Object apId)
+  boolean actionPlanUpdated_oobTL(Object apId)
   {
-    return iterateUIContents(sessMgr,apId,new ContentsHandler()
+    return iterateUIContents(apId,new ContentsHandler()
     {
-      public boolean handle(Component comp, SingleSessionManager sessMgr, Object apId)
+      public boolean handle(Component comp, Object apId)
       {
         if(comp instanceof WantsActionPlanUpdates)
-          return ((WantsActionPlanUpdates) comp).actionPlanUpdatedOob(sessMgr, (Serializable)apId);
+          return ((WantsActionPlanUpdates) comp).actionPlanUpdatedOobTL((Serializable)apId);
         return false;
       }     
     });
   }
 
-  boolean userUpdated_oob(SingleSessionManager mgr, Object uId)
+  boolean userUpdated_oobTL(Object uId)
   {
     //todo
     // what's this? app.globs().userUpdated_oob(mgr, uId);
     final Object meId = Mmowgli2UI.getGlobals().getUserID();
-    return iterateUIs(mgr,uId,new UIHandler()
+    return iterateUIs(uId,new UIHandler()
     {
-      public boolean handle(UI ui, SingleSessionManager sessMgr, Object uId)
+      public boolean handle(UI ui, Object uId)
       {
         boolean push=false;
         
         if(uId.equals(meId)){ // is it me, did my score change because of what somebody else did?
-           if(((Mmowgli2UI)ui).refreshUser_oob(uId, sessMgr))
+           if(((Mmowgli2UI)ui).refreshUser_oobTL(uId))
              push = true;
          }
         Component c = ((Mmowgli2UI)ui).getFrameContent();
         if (c != null && c instanceof WantsUserUpdates)
-          if(((WantsUserUpdates) c).userUpdated_oob(sessMgr, (Serializable)uId))
+          if(((WantsUserUpdates) c).userUpdated_oobTL((Serializable)uId))
            push = true;
         
         return push;
       }
     });
   }
-  boolean moveUpdated_oob(SingleSessionManager mgr, Object uId)
+  boolean moveUpdated_oobTL(Object uId)
   {
-    return iterateUIs(mgr,uId,new UIHandler()
+    return iterateUIs(uId,new UIHandler()
     {
-      public boolean handle(UI ui, SingleSessionManager sessMgr, Object uId)
+      public boolean handle(UI ui, Object uId)
       {
         boolean push=false;
         
-        if(((Mmowgli2UI)ui).moveUpdatedOob(sessMgr,(Serializable)uId))
+        if(((Mmowgli2UI)ui).moveUpdatedOobTL((Serializable)uId))
           push = true;
 
         Component c = ((Mmowgli2UI)ui).getFrameContent();
         if (c != null && c instanceof WantsMoveUpdates)
-          if(((WantsMoveUpdates) c).moveUpdatedOob(sessMgr, (Serializable)uId))
+          if(((WantsMoveUpdates) c).moveUpdatedOobTL((Serializable)uId))
            push = true;
         
         return push;
@@ -189,73 +197,75 @@ public class AbstractMmowgliControllerHelper
     });   
   }
 
-  public boolean movePhaseUpdated_oob(SingleSessionManager mgr, long uId)
+  public boolean movePhaseUpdated_oobTL(long uId)
   {
     MSysOut.println("AbstractMmowgliControllerHelper.movePhaseUpdated_oob()");
-    return iterateUIs(mgr,uId,new UIHandler()
+    return iterateUIs(uId,new UIHandler()
     {
-      public boolean handle(UI ui, SingleSessionManager sessMgr, Object uId)
+      public boolean handle(UI ui, Object uId)
       {
         MSysOut.println("AbstractMmowgliControllerHelper.movePhaseUpdated_oob.handle() UI = "+ui.getClass().getSimpleName()+" "+ui.hashCode());
         
         boolean push=false;
         
-        if(((Mmowgli2UI)ui).movePhaseUpdatedOob(sessMgr,(Serializable)uId))
+        if(((Mmowgli2UI)ui).movePhaseUpdatedOobTL((Serializable)uId))
           push = true;
 
         Component c = ((Mmowgli2UI)ui).getFrameContent();
         if (c != null && c instanceof WantsMoveUpdates)
-          if(((WantsMovePhaseUpdates) c).movePhaseUpdatedOob(sessMgr, (Serializable)uId))
+          if(((WantsMovePhaseUpdates) c).movePhaseUpdatedOobTL((Serializable)uId))
            push = true;
         
         return push;
       }
     });   
-
   }
 
-  boolean cardUpdated_oob(SingleSessionManager mgr, Object cardId)
+  boolean cardUpdated_oobTL(Object cardId)
   {
-    return iterateUIContents(mgr,cardId,new ContentsHandler()
+    MSysOut.println("cardUpdated_oobTL");
+    return iterateUIContents(cardId,new ContentsHandler()
     {
-      public boolean handle(Component comp, SingleSessionManager sessMgr, Object cId)
+      public boolean handle(Component comp, Object cId)
       {
         if(comp instanceof WantsCardUpdates)
-          return ((WantsCardUpdates) comp).cardUpdated_oob(sessMgr, (Serializable)cId);
+          return ((WantsCardUpdates) comp).cardUpdated_oobTL((Serializable)cId);
         return false;
       }     
     });
   }
-
-  
   
   // Mail messages
-  boolean newGameMessage_oob(SingleSessionManager mgr, Object uid)
+  boolean newGameMessage_oobTL(Object uid)
   {
-    Session sess = M.getSession(mgr);
-    Message msg = (Message)sess.get(Message.class, (Serializable)uid);
-    if(msg == null) {
-      // Here's a way to get the message when it's ready:
-      ComeBackWhenYouveGotIt.waitForMessage_oob("_newGameMessage_oob", this, uid);
+    Message msg = (Message)HSess.get().get(Message.class, (Serializable)uid);
+    if(msg == null) // Here's a way to get the message when it's ready:
+      msg = ComeBackWhenYouveGotIt.waitForMessage_oob(/*"_newGameMessage_oobTL",*/ this, uid);
+    if(msg == null)
       return false;
-    }
+    
     User toUser = msg.getToUser(); // null if Act. Pln comment
     if(toUser == null || toUser.getId() != (Long)Mmowgli2UI.getGlobals().getUserID())
       return false;
 
-    return iterateUIContents(mgr,uid,new ContentsHandler()
+    return iterateUIContents(uid,new ContentsHandler()
     {
-      public boolean handle(Component comp, SingleSessionManager sessMgr, Object id)
+      public boolean handle(Component comp, Object id)
       {
         if(comp instanceof WantsMessageUpdates)
-          return ((WantsMessageUpdates) comp).messageCreated_oob(sessMgr, (Serializable)id);
+          return ((WantsMessageUpdates) comp).messageCreated_oobTL((Serializable)id);
         return false;
       }     
     });
-
+  }
+  
+  public void _newGameMessage_oobTL(Object uid, final UI ui)
+  {
+    newGameMessage_oobTL(uid);
+    ui.access(new Runnable(){public void run(){ui.push();}});
   }
 
-  boolean newUser_oob(SingleSessionManager mgr, Object uId)
+  boolean newUser_oobTL(Object uId)
   {
     // Let the score manager do something if he wants
     // no...this should be a one-time only thing, is done at reg time
@@ -263,41 +273,41 @@ public class AbstractMmowgliControllerHelper
     return false; // no push
   }
   
-  boolean cardPlayed_oob(SingleSessionManager mgr, Object cardId)
+  boolean cardPlayed_oobTL(Object cardId)
   {
     // no, we can't update scores based on receiving word from somebody else, else
     // every instance would bump the same score!
     // app.globs().scoreManager().cardPlayed(card);
     
-    return iterateUIContents(mgr,cardId,new ContentsHandler()
+    return iterateUIContents(cardId,new ContentsHandler()
     {
-      public boolean handle(Component comp, SingleSessionManager sessMgr, Object cId)
+      public boolean handle(Component comp, Object cId)
       {
         if(comp instanceof WantsCardUpdates)
-          return ((WantsCardUpdates) comp).cardPlayed_oob(sessMgr, (Serializable)cId);
+          return ((WantsCardUpdates) comp).cardPlayed_oobTL((Serializable)cId);
         return false;
       }     
     });
   }
 
-  boolean gameUpdated_oob(SingleSessionManager sessMgr)
+  boolean gameUpdated_oobTL()
   {
     if(Mmowgli2UI.getGlobals() instanceof WantsGameUpdates)
-      Mmowgli2UI.getGlobals().gameUpdatedExternally(sessMgr);
+      Mmowgli2UI.getGlobals().gameUpdatedExternallyTL();
     
-    return iterateUIContents(sessMgr,1L,new ContentsHandler()
+    return iterateUIContents(1L,new ContentsHandler()
     {
-      public boolean handle(Component comp, SingleSessionManager sessMgr, Object cId)
+      public boolean handle(Component comp, Object cId)
       {
         if(comp instanceof WantsGameUpdates)
-          return((WantsGameUpdates) comp).gameUpdatedExternally(sessMgr);
+          return((WantsGameUpdates) comp).gameUpdatedExternallyTL();
         return false;
       }     
     });
   }
 
 
-  boolean gameEvent_oob(SingleSessionManager sessMgr, char typ, String message)
+  boolean gameEvent_oobTL(char typ, String message)
   {
     MMessage MSG = MMessage.MMParse(typ, message);
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
@@ -320,26 +330,27 @@ public class AbstractMmowgliControllerHelper
         return true; // show notifications
       }
     }
-    Mmowgli2UI.getAppUI().gameEvent_oob(sessMgr, typ, message); // for head and blog headline
+    boolean ret = Mmowgli2UI.getAppUI().gameEvent_oobTL(typ, message); // for head and blog headline
     
-    boolean ret = notifyGameEventListeners_oob(sessMgr,MSG);
-
+    if(notifyGameEventListeners_oobTL(MSG))
+      ret = true;
+      
     if (eventType == GameEvent.EventType.MESSAGEBROADCAST ||
         eventType == GameEvent.EventType.MESSAGEBROADCASTGM) {
 
       if(meId == NO_LOGGEDIN_USER_ID)
         return ret;  // Don't display messages during login sequence
 
-      GameEvent ge = (GameEvent) M.getSession(sessMgr).get(GameEvent.class, MSG.id);
+      GameEvent ge = (GameEvent) HSess.get().get(GameEvent.class, MSG.id);
       if(ge == null)
         ge = ComeBackWhenYouveGotIt.fetchGameEventWhenPossible(MSG.id);
       
       if(ge == null) {
-        System.err.println("Can't get Game Event from database: id="+MSG.id+", MmowgliOneApplicationController on "+AppMaster.getInstance().getServerName());
+        System.err.println("Can't get Game Event from database: id="+MSG.id+", MmowgliOneApplicationController on "+AppMaster.instance().getServerName());
         return ret;
       }
       String bdcstMsg = ge.getDescription();
-      bdcstMsg = MmowgliLinkInserter.insertUserName_oob(bdcstMsg,sessMgr);
+      bdcstMsg = MmowgliLinkInserter.insertUserName_oobTL(bdcstMsg);
 
       if(eventType == GameEvent.EventType.MESSAGEBROADCAST) {
         showNotifInAllBrowserWindows(bdcstMsg, "IMPORTANT!!", "m-yellow-notification");
@@ -355,6 +366,7 @@ public class AbstractMmowgliControllerHelper
     }
     return ret;
   }
+  
   private void filterContent(StringBuilder sb)
   {
   
@@ -373,8 +385,8 @@ public class AbstractMmowgliControllerHelper
     notif.setPosition(Position.MIDDLE_CENTER);
     notif.setStyleName(style);
     
-    iterateUIs(null, notif, new UIHandler() {
-      public boolean handle(UI ui, SingleSessionManager notused, Object notif)
+    iterateUIs(notif, new UIHandler() {
+      public boolean handle(UI ui, Object notif)
       {
         ((Notification) notif).show(ui.getPage());
         return true;
@@ -408,7 +420,7 @@ public class AbstractMmowgliControllerHelper
     */
   }
 
-  private boolean notifyGameEventListeners_oob(SingleSessionManager sessMgr, MMessage MSG)
+  private boolean notifyGameEventListeners_oobTL(MMessage MSG)
   {
     // sessMgr may be null
   // Question here...checking for WantsGameEventUpdates against the framework as well as component. probably historical
@@ -429,12 +441,12 @@ public class AbstractMmowgliControllerHelper
       }
     }
     */
-    return iterateUIContents(sessMgr,MSG,new ContentsHandler()
+    return iterateUIContents(MSG,new ContentsHandler()
     {
-      public boolean handle(Component comp, SingleSessionManager sessMgr, Object MSG)
+      public boolean handle(Component comp, Object MSG)
       {
         if(comp instanceof WantsGameEventUpdates)
-          return ((WantsGameEventUpdates) comp).gameEventLoggedOob(sessMgr, ((MMessage)MSG).id);
+          return ((WantsGameEventUpdates) comp).gameEventLoggedOobTL(((MMessage)MSG).id);
         return false;
       }     
     });   
@@ -473,25 +485,18 @@ public class AbstractMmowgliControllerHelper
     svrCountWin.setPositionY(0);
   }
 
-  void handleShowActiveUsersAction(MenuBar menubar)
+  void handleShowActiveUsersActionTL(MenuBar menubar)
   {
-    Session session =  VHib.getVHSession();
+    Session session =  HSess.get();
 
     Criteria criteria = session.createCriteria(User.class);
     criteria.setProjection(Projections.rowCount());
     criteria.add(Restrictions.eq("accountDisabled", false));
     int totcount = ((Long)criteria.list().get(0)).intValue();
 
-    // old unreliable way:
-//    criteria = session.createCriteria(User.class);
-//    criteria.add(Restrictions.eq("online", true));
-//    criteria.setProjection(Projections.rowCount());
-//    int count = ((Long)criteria.list().get(0)).intValue();
-
     // new and improved
     int count = Mmowgli2UI.getGlobals().getSessionCount();
 
-    // Create the window...
     Window countWin = new Window("Display Active User Count");
     countWin.setModal(true);
 
@@ -589,6 +594,9 @@ public class AbstractMmowgliControllerHelper
     ClickListener lis = new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
         if (event.getButton() == bcancelButt)
@@ -597,13 +605,15 @@ public class AbstractMmowgliControllerHelper
           // This check is now done in GameEvent.java, but should ideally prompt the user.
           String msg = ta.getValue().toString().trim();
           if (msg.length() > 0) {
+            HSess.init();
             if (msg.length() > 255) // clamp to 255 to avoid db exception
               msg = msg.substring(0, 254);
-            User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+            User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
             if (typ == GameEvent.EventType.GAMEMASTERNOTE)
-              GameEventLogger.logGameMasterComment(msg, u);
+              GameEventLogger.logGameMasterCommentTL(msg, u);
             else
-              GameEventLogger.logGameMasterBroadcast(typ, msg, u); // GameEvent.save(new GameEvent(typ,msg));
+              GameEventLogger.logGameMasterBroadcastTL(typ, msg, u); // GameEvent.save(new GameEvent(typ,msg));
+            HSess.close();
           }
         }
 
@@ -631,23 +641,31 @@ public class AbstractMmowgliControllerHelper
     ClickListener okLis = new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
-        User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+        HSess.init();
+        
+        User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
         if(subWin.getNullHeadline()) {
-          GameEventLogger.updateBlogHeadline(null, null, null, me.getId());
+          GameEventLogger.updateBlogHeadlineTL(null, null, null, me.getId());
           UI.getCurrent().removeWindow(subWin);
+          HSess.close();
           return;
-       }
+        }
         String txt = subWin.getTextEntry();
         String url = subWin.getUrlEntry();
         String tt  = subWin.getToolTipEntry();
         if(txt != null && txt.length()>0 && url != null && url.length()>0) {
-          GameEventLogger.updateBlogHeadline(txt,tt,url, me.getId());
+          GameEventLogger.updateBlogHeadlineTL(txt,tt,url, me.getId());
           UI.getCurrent().removeWindow(subWin);
         }
         else
           Notification.show("Error","Text and url fields must be entered",Notification.Type.WARNING_MESSAGE);
+        
+        HSess.close();
       }
     };
     subWin.setCancelListener(canLis);
@@ -662,7 +680,7 @@ public class AbstractMmowgliControllerHelper
   
   public void handleShowPollingResults(MenuBar mbar)
   {
-    String[][] sa = Mmowgli2UI.getGlobals().getAppMaster().getPollReport();
+    String[][] sa = AppMaster.instance().getPollReport();
     Window pollResultWin = new Window("User Polling Results");
     pollResultWin.setModal(true);
     pollResultWin.setWidth("640px");
@@ -714,9 +732,9 @@ public class AbstractMmowgliControllerHelper
     return lab;
   }
   
-  public void handleShowNumberCardsAction(MenuBar mbar)
+  public void handleShowNumberCardsActionTL(MenuBar mbar)
   {
-    Session session =  VHib.getVHSession();
+    Session session =  HSess.get();
     Criteria criteria = session.createCriteria(Card.class);
     criteria.setProjection(Projections.rowCount());
     int count = ((Long)criteria.list().get(0)).intValue();
@@ -751,9 +769,9 @@ public class AbstractMmowgliControllerHelper
     countWin.setPositionY(0);
   }
   
-  public void handleShowTotalRegistered(MenuBar mbar)
+  public void handleShowTotalRegisteredTL(MenuBar mbar)
   {
-    Session session = VHib.getVHSession();
+    Session session = HSess.get();
     Criteria criteria = session.createCriteria(User.class);
     criteria.setProjection(Projections.rowCount());
     criteria.add(Restrictions.eq("accountDisabled", false));
@@ -814,7 +832,7 @@ public class AbstractMmowgliControllerHelper
     }
   }
 
-  public void handleLoginLimitAction()
+  public void handleLoginLimitActionTL()
   {
     // Create the window...
     final Window loginWin = new Window("Change Session Login Limit");
@@ -831,7 +849,7 @@ public class AbstractMmowgliControllerHelper
     final TextField utf = new TextField();
     utf.setColumns(10);
 
-    final int oldVal = Game.get(1L).getMaxUsersOnline();
+    final int oldVal = Game.getTL().getMaxUsersOnline();
     utf.setValue("" + oldVal);
     hl.addComponent(utf);
 
@@ -861,17 +879,20 @@ public class AbstractMmowgliControllerHelper
         if (event.getButton() == cancelButt) {
         }
         else if (event.getButton() == okButt) {
+          HSess.init();
           try {
             int i = Integer.parseInt(utf.getValue().toString());
-            Game g = Game.get(1L);
+            Game g = Game.getTL();
             g.setMaxUsersOnline(i);
-            Game.update(g);
-            GameEventLogger.logLoginLimitChange(oldVal, i);
+            Game.updateTL();
+            GameEventLogger.logLoginLimitChangeTL(oldVal, i);
           }
           catch (Throwable t) {
             Notification.show("Error", "Invalid integer", Notification.Type.ERROR_MESSAGE);
+            HSess.close();
             return;
           }
+          HSess.close();
         }
         loginWin.close();
       }
@@ -880,39 +901,39 @@ public class AbstractMmowgliControllerHelper
     okButt.addClickListener(llis);
   }
 
-  public void setTopCards(boolean ro, EventType evt)
+  public void setTopCardsTL(boolean ro, EventType evt)
   {
-    Game g = Game.get();
+    Game g = Game.getTL();
     g.setTopCardsReadonly(ro);
-    Game.update(g);
-    User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    Game.updateTL();
+    User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     GameEvent ev = new GameEvent(evt,"by "+u.getUserName());
-    GameEvent.save(ev);    
+    GameEvent.saveTL(ev);    
   }
   
-  public void setCards(boolean ro, EventType evt)
+  public void setCardsTL(boolean ro, EventType evt)
   {
-    Game g = Game.get();
+    Game g = Game.getTL();
     g.setCardsReadonly(ro);
-    Game.update(g);
-    User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    Game.updateTL();
+    User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     GameEvent ev = new GameEvent(evt,"by "+u.getUserName());
-    GameEvent.save(ev);        
+    GameEvent.saveTL(ev);        
   }
   
-  public void setGame(boolean ro, EventType evt)
+  public void setGameTL(boolean ro, EventType evt)
   {
-    Game g = Game.get();
+    Game g = Game.getTL();
     g.setReadonly(ro);
-    Game.update(g);
-    User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    Game.updateTL();
+    User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     GameEvent ev = new GameEvent(evt,"by "+u.getUserName());
-    GameEvent.save(ev);        
+    GameEvent.saveTL(ev);        
   }
   
   public void handlePublishReports()
   {
-    AppMaster.getInstance().pokeReportGenerator();
+    AppMaster.instance().pokeReportGenerator();
 
     Notification notification = new Notification("", "Report publication begun", Notification.Type.WARNING_MESSAGE);
 
@@ -921,18 +942,18 @@ public class AbstractMmowgliControllerHelper
     notification.show(Page.getCurrent());
   }
 
-  public void setEmailConfirmation(boolean tf, EventType evt)
+  public void setEmailConfirmationTL(boolean tf, EventType evt)
   {
-    Game g = Game.get();
+    Game g = Game.getTL();
     g.setEmailConfirmation(tf);
-    Game.update(g);
-    User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    Game.updateTL();
+    User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     GameEvent ev = new GameEvent(evt,"by "+u.getUserName());
-    GameEvent.save(ev);    
+    GameEvent.saveTL(ev);    
   }
 
   @SuppressWarnings("unchecked")
-  public void handleDumpGameMasterEmails()
+  public void handleDumpGameMasterEmailsTL()
   {
     StringBuilder sb = new StringBuilder();
    // sb.append("<html><body>");
@@ -942,22 +963,13 @@ public class AbstractMmowgliControllerHelper
     sb.append(dateFormatter.format(new Date())); // now
     sb.append("</h1>");
 
-    List<User> lis = VHib.getVHSession().createCriteria(User.class).
+    List<User> lis = HSess.get().createCriteria(User.class).
                      add(Restrictions.eq("gameMaster", true)).
                      list();
 
     handleGameMasterList(lis,sb);
 
-  //  sb.append(("<b>Please use your brower's back button to return to the previous page</b>"));
-
-   // sb.append("</body></html>");
-   // StreamResource.StreamSource ss = new QuickStringStream(sb);
-   // StreamResource sr = new StreamResource(ss, "emails-" + UUID.randomUUID(), app);
-   // sr.setMIMEType("text/html");
-
-    // Don't open as a pop-up ....v7 its a new window
     BrowserWindowOpener.openWithInnerHTML(sb.toString(),"Game master emails","_blank");
-
   }
   
   private void handleGameMasterList(List<User> lis, StringBuilder sb)
@@ -990,7 +1002,7 @@ public class AbstractMmowgliControllerHelper
   }
 
   @SuppressWarnings("unchecked")
-  public void handleDumpEmails()
+  public void handleDumpEmailsTL()
   {
     StringBuilder sb = new StringBuilder();
 
@@ -1000,7 +1012,7 @@ public class AbstractMmowgliControllerHelper
     sb.append(dateFormatter.format(new Date())); // now
     sb.append("</h1>");
 
-    List<User> lis = VHib.getVHSession().createCriteria(User.class).
+    List<User> lis = HSess.get().createCriteria(User.class).
                      add(Restrictions.eq("okEmail", true)).
                      add(Restrictions.eq("accountDisabled", false)).
                      list();
@@ -1009,7 +1021,7 @@ public class AbstractMmowgliControllerHelper
     sb.append("<h4>tab-delimited</h4>");
     handleEmailList(lis,sb);
 
-    lis = VHib.getVHSession().createCriteria(User.class).
+    lis = HSess.get().createCriteria(User.class).
                      add(Restrictions.eq("okEmail", false)).
                      add(Restrictions.eq("accountDisabled", false)).
                     list();
@@ -1023,11 +1035,11 @@ public class AbstractMmowgliControllerHelper
   }
 
   @SuppressWarnings("unchecked")
-  public void handleDumpSignups()
+  public void handleDumpSignupsTL()
   {
     StringBuilder sb = new StringBuilder();
     sb.append("<h2>");
-    String title = Game.get(1L).getTitle();
+    String title = Game.getTL().getTitle();
 
     Session sess = VHibPii.getASession();
 
@@ -1107,13 +1119,6 @@ public class AbstractMmowgliControllerHelper
         sb.append("--no email--");
       else
         sb.append(slis.get(0));
-      /*
-      List<Email> elis = usr.getEmailAddresses();
-      if(elis == null || elis.size()<=0)
-        sb.append("--no email--");
-      else
-        sb.append(elis.get(0).getAddress());
-      */
       sb.append("\t");
       sb.append(usr.getId());
       sb.append("\t");
@@ -1147,7 +1152,7 @@ public class AbstractMmowgliControllerHelper
     }
   }
 
-  public void handleCreateActionPlan()
+  public void handleCreateActionPlanTL()
   {   
     Object cardRootId = null;
     Component c = Mmowgli2UI.getAppUI().getFrameContent();
@@ -1169,5 +1174,12 @@ public class AbstractMmowgliControllerHelper
       spopup = new SearchPopup();
 
     RegistrationPageBase.openPopupWindow(UI.getCurrent(), spopup, 650);
+  }
+
+  public void showRfeWindow(Object param)
+  {
+    RfeDialog dial = new RfeDialog(param);
+    UI.getCurrent().addWindow(dial);
+    dial.center();
   }
 }
