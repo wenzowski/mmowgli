@@ -35,7 +35,9 @@ package edu.nps.moves.mmowgli.modules.cards;
 
 import java.util.*;
 
-import com.vaadin.ui.*;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
@@ -43,6 +45,7 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * IdeaDashboardTabSuperActive.java
@@ -61,6 +64,7 @@ public class IdeaDashboardTabSuperActive extends IdeaDashboardTabPanel
   private CardChainTree tree;
   private boolean initted = false;
   
+  @HibernateSessionThreadLocalConstructor
   public IdeaDashboardTabSuperActive()
   {
     super();
@@ -97,50 +101,25 @@ public class IdeaDashboardTabSuperActive extends IdeaDashboardTabPanel
     super.setVisible(yn);
     if(yn)
       if(!initted) {
-        loadTree();
+        loadTreeTL();
         initted = true;
       }
   }
 
-  private void loadTree()
+  private void loadTreeTL()
   {
-   /* Session sess = HibernateContainers.getSession();  // current vaadin transaction session
-    
-    List<CardType> cts = CardType.getIdeaCards();    
-    Disjunction disj = Restrictions.disjunction(); // or
-    for (CardType ct : cts) {
-      disj.add(Restrictions.eq("cardType", ct));
-    }
-    
-    Criteria crit = sess.createCriteria(Card.class);
-    crit.add(disj);
-    crit.addOrder(Order.desc("creationDate"));
-    crit.add(Restrictions.eq("factCard", false));
-    if(!isGameMaster)
-      crit.add(Restrictions.eq("hidden", false)); */
-    
- //   List<Card> lis = (List<Card>)crit.list();
-    
-    //List<ArrayDeque<Card>>lislis = findSuperActiveChains(lis);
-    
- //   for(ArrayDeque<Card> clis : lislis)
- //     tree.addChain(clis);    
- // Test ///a little faster
-    
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     List<Card> list = globs.getAppMaster().getMcache().getSuperActiveChainRoots();
-    User me = DBGet.getUser(globs.getUserID());
+    User me = DBGet.getUserTL(globs.getUserID());
     ArrayList<Card> arLis = new ArrayList<Card>();
     
     for(Card c : list) {
-      if(Card.canSeeCard(c, me))
+      if(Card.canSeeCardTL(c, me))
         arLis.add(c);
     }
     tree.addChains(arLis);
-    
-  //  List<Card> activeLis = findSuperActiveChains2(lis);
-  //  tree.addChains(activeLis);
   }
+  
   class TallyPkt {HashSet<Long> authors=new HashSet<Long>(); int numFourCardLevs=0;}
   
   @SuppressWarnings("unused")
@@ -156,6 +135,7 @@ public class IdeaDashboardTabSuperActive extends IdeaDashboardTabPanel
     }
     return aLis;
   }
+  
   private boolean isSupAct(TallyPkt pkt)
   {
     if(pkt.numFourCardLevs >= 2)
@@ -163,6 +143,7 @@ public class IdeaDashboardTabSuperActive extends IdeaDashboardTabPanel
         return true;
     return false;
   }
+  
   private void checkOneRoot(Card c, TallyPkt pkt)
   {
     for(Card child : c.getFollowOns())
@@ -188,7 +169,6 @@ public class IdeaDashboardTabSuperActive extends IdeaDashboardTabPanel
     for(Card c : ideaCards) {
       ArrayDeque<Card> ad = new ArrayDeque<Card>();
       ad.add(c);
-      //System.out.println("Chain top, card = "+c.getText());
       decompose(ad);
     }
     // now all the recursion should be done; have a look at chains   
@@ -223,25 +203,11 @@ public class IdeaDashboardTabSuperActive extends IdeaDashboardTabPanel
   {
     chains.add(lis);
   }
-  
-//  private void dumpArrayDeque(ArrayDeque<Card> ad)
-//  {
-//    System.out.print(""+ad.size()+" ");
-//    for(Card c : ad){
-//      String s = c.getText();
-//      if(s.length()>10)
-//        s=s.substring(0,10);
-//      System.out.print(s+" ");
-//    }
-//    System.out.println();
-//  }
-  
+    
   private void decompose(ArrayDeque<Card> clis)
   {
-    //System.out.print("Decomposing ");dumpArrayDeque(clis);
     Card c = clis.getLast();
     if(c.getFollowOns() == null || c.getFollowOns().size()<=0) {
-      //System.out.println("Saving last");
       saveChain(clis);
       return;
     }    
