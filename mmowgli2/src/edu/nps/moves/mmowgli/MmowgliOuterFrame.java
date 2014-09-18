@@ -42,6 +42,8 @@ import com.vaadin.ui.VerticalLayout;
 import edu.nps.moves.mmowgli.components.AppMenuBar;
 import edu.nps.moves.mmowgli.components.Footer;
 import edu.nps.moves.mmowgli.components.Header;
+import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.messaging.MMessage;
 import edu.nps.moves.mmowgli.messaging.WantsMovePhaseUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
@@ -71,7 +73,10 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
     addStyleName("m-mmowgliouterframe");
    // addStyleName("m-redborder");   this is a good debugging border
     
-    addComponent(menubar = new AppMenuBar(true,true,true));  //todo only if gm,gd andor ga
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    if(me.isGameMaster() || me.isAdministrator() || me.isDesigner())
+       addComponent(menubar = new AppMenuBar(me.isGameMaster(),me.isAdministrator(),me.isDesigner()));
+    
     addComponent(header=new Header());
     header.initGui();
     addComponent(mContentFr = new MmowgliContentFrame());
