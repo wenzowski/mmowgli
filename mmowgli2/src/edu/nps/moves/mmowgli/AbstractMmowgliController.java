@@ -20,7 +20,8 @@ import edu.nps.moves.mmowgli.export.ActionPlanExporter;
 import edu.nps.moves.mmowgli.export.CardExporter;
 import edu.nps.moves.mmowgli.export.GameExporter;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.messaging.MessagingManager;
 import edu.nps.moves.mmowgli.messaging.MessagingManager.MMMessageListener;
@@ -34,7 +35,8 @@ import edu.nps.moves.mmowgli.modules.gamemaster.*;
 import edu.nps.moves.mmowgli.modules.maps.LeafletMap;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
 import edu.nps.moves.mmowgli.modules.userprofile.UserProfilePage3;
-import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
+import edu.nps.moves.mmowgli.utility.IDButtonIF;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 /**
  * AbstractMmowgliController.java
@@ -60,17 +62,6 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       initted = true;
     }
   }
-  /* original controller interface 
-  void cardPlayed(Card card);
-  void cardUpdated(Card card);
-  void localCardPlayed(Card card);
-  void loggedIn(Object userId);
-  void loggedOut(Session sess);
-  void onLogin(LoginEvent event); // todo remove?
-  void addNewsListener(NewsListener lis);
-  void removeNewsListener(NewsListener lis);
-  void shutdown();
- */
 
   public void init()
   {
@@ -79,48 +70,40 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
   
   public void setupNavigator(Navigator nav)
   {
-    //this.navigator = nav;
     nav.addProvider(new MyViewProvider());
     nav.addView("", CallToActionPage.class);  // to start with
   }
   
-  public void miscEvent(AppEvent appEvent)
+  public void miscEventTL(AppEvent appEvent)
   {
     MmowgliEvent mEv = appEvent.getEvent();
     Object param = appEvent.getData();
-    //Component source = appEvent.getSource();
     Mmowgli2UI ui = Mmowgli2UI.getAppUI();
     ActionPlan ap;
-    ActionPlanPage2 appg;
+
     switch(mEv) {
       case ACTIONPLANSHOWCLICK:
         if(param instanceof Long)
-          ap = ActionPlan.get((Long)param);
+          ap = ActionPlan.getTL((Long)param);
         else {
           ap = (ActionPlan) param;
-          ap = ActionPlan.merge(ap); // dif session
+          ap = ActionPlan.mergeTL(ap); // dif session
         }
         if(ap == null) {
           System.err.println("ACTIONPLANSHOWCK=LICK with invalid id: "+param);
           break;
         }
-        //todo app.getBackButton(source).setFragment(buildFragment(ACTIONPLANSHOWCLICK,app.getId()),false):
-        appg = new ActionPlanPage2(ap.getId());
-        ui.setFrameContent(appg);
-        appg.initGui();
+        ui.navigateTo(new AppEvent(mEv,ui,param));
         break;
+        
       case CARDCLICK:
-        Card c = DBGet.getCard(param);
+        Card c = DBGet.getCardTL(param);
         if(c == null) {
           System.err.println("CARDCLICK with invalid card id: "+param);
           // I'd like to remove the fragment, probably by emulating the browser button
           break;
         }        
-        //todo app.getBackButton(source).setFragment(buildFragment(CARDCLICK, param), false);
-        CardChainPage page = new CardChainPage(param);
         ui.navigateTo(appEvent);// how about sending along the component
-        //Mmowgli2UI.getAppUI().setFrameContent(page);
-        page.initGui();
         break;
         
       case CARDCHAINPOPUPCLICK:
@@ -138,15 +121,19 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     }    
   }
 
+  @MmowgliCodeEntry
+  @HibernateOpened
+  @HibernateClosed
   public void menuClick(MmowgliEvent mEv, MenuBar menubar)
   {
+    HSess.init();
     Mmowgli2UI ui = Mmowgli2UI.getAppUI();
     switch(mEv) {
       case MENUGAMEMASTERUSERADMIN:
         ui.navigateTo(new AppEvent(MmowgliEvent.MENUGAMEMASTERUSERADMIN,ui,null));    
         break;
       case MENUGAMEMASTERACTIVECOUNTCLICK:
-        helper.handleShowActiveUsersAction(menubar);
+        helper.handleShowActiveUsersActionTL(menubar);
         break;
       case MENUGAMEMASTERACTIVECOUNTBYSERVERCLICK:
         helper.handleShowActiveUsersPerServer(menubar);
@@ -172,10 +159,10 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         helper.handleShowPollingResults(menubar);
         break;
       case MENUGAMEMASTERCARDCOUNTCLICK:
-        helper.handleShowNumberCardsAction(menubar);
+        helper.handleShowNumberCardsActionTL(menubar);
         break;
       case MENUGAMEMASTERTOTALREGISTEREDUSERS:
-        helper.handleShowTotalRegistered(menubar);
+        helper.handleShowTotalRegisteredTL(menubar);
         break;
         
       case MENUGAMEADMINPUBLISHREPORTS:
@@ -198,7 +185,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
         
       case MENUGAMEMASTEROPENREPORTSPAGE:
-        String url = AppMaster.getInstance().getAppUrlString();
+        String url = AppMaster.instance().getAppUrlString();
         if(!url.endsWith("/"))
           url = url+"/";
         BrowserWindowOpener.open(url+"reports");
@@ -218,42 +205,42 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
         
       case MENUGAMEADMINLOGINLIMIT:
-        helper.handleLoginLimitAction();
+        helper.handleLoginLimitActionTL();
         break;
         
       case MENUGAMEADMINSETCARDSREADWRITE:
-        helper.setCards(false,GameEvent.EventType.CARDSREADWRITE);
+        helper.setCardsTL(false,GameEvent.EventType.CARDSREADWRITE);
         break;       
       case MENUGAMEADMINSETCARDSREADONLY:
-        helper.setCards(true,GameEvent.EventType.CARDSREADWRITE);
+        helper.setCardsTL(true,GameEvent.EventType.CARDSREADWRITE);
         break;
         
       case MENUGAMEADMINSETGAMEREADWRITE:
-        helper.setGame(false,GameEvent.EventType.GAMEREADWRITE);
+        helper.setGameTL(false,GameEvent.EventType.GAMEREADWRITE);
         break;
       case MENUGAMEADMINSETGAMEREADONLY:
-        helper.setGame(true,GameEvent.EventType.GAMEREADONLY);
+        helper.setGameTL(true,GameEvent.EventType.GAMEREADONLY);
         break;
         
       case MENUGAMEADMINSETTOPCARDSREADONLY:
-        helper.setTopCards(true,GameEvent.EventType.TOPCARDSREADONLY);
+        helper.setTopCardsTL(true,GameEvent.EventType.TOPCARDSREADONLY);
         break;
       case MENUGAMEADMINSETTOPCARDSREADWRITE:
-        helper.setTopCards(false,GameEvent.EventType.TOPCARDSREADWRITE);
+        helper.setTopCardsTL(false,GameEvent.EventType.TOPCARDSREADWRITE);
         break;
       
       case MENUGAMEADMIN_START_EMAILCONFIRMATION:
-        helper.setEmailConfirmation(true,GameEvent.EventType.GAMEEMAILCONFIRMATIONSTART);
+        helper.setEmailConfirmationTL(true,GameEvent.EventType.GAMEEMAILCONFIRMATIONSTART);
         break;
       case MENUGAMEADMIN_END_EMAILCONFIRMATION:
-        helper.setEmailConfirmation(false,GameEvent.EventType.GAMEEMAILCONFIRMATIONEND);
+        helper.setEmailConfirmationTL(false,GameEvent.EventType.GAMEEMAILCONFIRMATIONEND);
       
       case MENUGAMEADMINMANAGESIGNUPS:
         SignupsTable.showDialog("Manage Signups");
         break;
       
       case MENUGAMEADMINDUMPSIGNUPS:
-        helper.handleDumpSignups();
+        helper.handleDumpSignupsTL();
         break;
         
       case MENUGAMEMASTERADDTOVIPLIST:
@@ -265,14 +252,14 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
       
       case MENUGAMEADMINDUMPEMAILS:
-        helper.handleDumpEmails();
+        helper.handleDumpEmailsTL();
         break;
       case MENUGAMEADMINDUMPGAMEMASTERS:
-        helper.handleDumpGameMasterEmails();
+        helper.handleDumpGameMasterEmailsTL();
         break;
       
       case MENUGAMEMASTERCREATEACTIONPLAN:
-        helper.handleCreateActionPlan();
+        helper.handleCreateActionPlanTL();
         break;
       
       case MENUGAMEMASTERINVITEAUTHORSCLICK:
@@ -282,19 +269,16 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       default:
         MSysOut.println("TODO, AbstractMmowgliController.menuEvent(): "+mEv);
     }
+    HSess.close();
   }
 
-  public void doMessageBroadCast(Window w)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-
+  @HibernateOpened
   public void buttonClick(ClickEvent event)
   {
     if(!(event.getButton() instanceof IDButtonIF))
       throw new RuntimeException("Programming error, AbstractMmowgliController.buttonClick() expets IDButtons");
+    
+    HSess.init();
     
     IDButtonIF butt = (IDButtonIF) event.getButton();
     MmowgliEvent mEv = butt.getEvent();
@@ -303,27 +287,28 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     GameLinks gl;
     switch(mEv) {
       case HOWTOWINACTIONCLICK:
-        HowToWinActionPopup winPopup = new HowToWinActionPopup("How to Win the Action");
+        HowToWinActionPopup winPopup = new HowToWinActionPopup("How to Win the Action");  //No hib
         RegistrationPageBase.openPopupWindow(UI.getCurrent(), winPopup, 650);
         break;
       case IMPROVESCORECLICK:
-        gl = GameLinks.get();
-        BrowserWindowOpener.open(gl.getImproveScoreLink(),PORTALTARGETWINDOWNAME);
+        gl = GameLinks.getTL();
+        BrowserWindowOpener.open(gl.getImproveScoreLink(),PORTALTARGETWINDOWNAME);  //No hib
         break;
       case SIGNOUTCLICK:
         Serializable uid = ui.getSessionGlobals().getUserID();
-        GameEventLogger.logUserLogout(uid);
+        GameEventLogger.logUserLogoutTL(uid);
         MessagingManager mgr = Mmowgli2UI.getGlobals().getMessagingManager();
-        mgr.sendSessionMessage(new MMessagePacket(USER_LOGOUT,""+uid));
-        mgr.unregisterSession();
-        
+        if(mgr != null) {
+          mgr.sendSessionMessage(new MMessagePacket(USER_LOGOUT,""+uid));
+          mgr.unregisterSession();
+        }
       /*  sendToBus(USER_LOGOUT, "" + uid, false);
         
         InterTomcatIO sIO = getSessIO();
         if(sIO != null)
           sIO.kill();
       */  
-        gl = GameLinks.get();
+        gl = GameLinks.getTL();
         Mmowgli2UI.getAppUI().quitAndGoTo(gl.getThanksForPlayingLink());
         break;
       case HOWTOPLAYCLICK:
@@ -332,14 +317,10 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
         
       case MAPCLICK:
-        /*OpenLayersMap olMap = new OpenLayersMap();
-        Mmowgli2UI.getAppUI().setFrameContent(olMap);
-        olMap.initGui();*/
         LeafletMap lMap = new LeafletMap();
         Mmowgli2UI.getAppUI().setFrameContent(lMap);
         lMap.initGui();
-
-   
+  
       case PLAYIDEACLICK:
       case CALLTOACTIONCLICK:
       case SHOWUSERPROFILECLICK:
@@ -348,18 +329,32 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       case LEADERBOARDCLICK:
         ui.navigateTo(new AppEvent(mEv,ui,param));
         break;
+      
+      case RFECLICK:
+        helper.showRfeWindow(param);
+        break;
+        
+      case SEARCHCLICK:
+        helper.handleSearchClick(param);
+        break;
+        
+      case POSTTROUBLECLICK:
+        gl = GameLinks.getTL();
+        BrowserWindowOpener.open(gl.getTroubleLink(),PORTALTARGETWINDOWNAME);
+        break;
         
       default:
         MSysOut.println("TODO, AbstractMmowgliController.buttonClick(): "+mEv);
-    }    
+    } 
+    HSess.close(); // commit by default
   }
-
-  public void handleEvent(MmowgliEvent mEv, Object obj, Component cmp)
+  
+  public void handleEventTL(MmowgliEvent mEv, Object obj, Component cmp)
   {
     Mmowgli2UI ui = Mmowgli2UI.getAppUI();
     switch(mEv) {
       case HANDLE_LOGIN_STARTUP:
-        doStartup((Serializable)obj);
+        doStartupTL((Serializable)obj);
         break;
       case SHOWUSERPROFILECLICK:
         ui.navigateTo(new AppEvent(mEv,ui,obj));
@@ -372,28 +367,16 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     }
   }
   
-  private void doStartup(Serializable userId) // was ApplicationControllerBase.loggedIn()
+  private void doStartupTL(Serializable userId)
   {
-    Mmowgli2UI.getGlobals().setUserID(userId); //    app.globs().setUser(userId);
+    Mmowgli2UI.getGlobals().setUserIDTL(userId); 
     Mmowgli2UI ui = Mmowgli2UI.getAppUI();
-    ui.setRunningApplicationFramework(); //ApplicationFramework windowFramework = app.installFrameworkInMainWindow();
-    //windowFramework.setUser(userId,null);
+    ui.setRunningApplicationFrameworkTL(); 
 
-    // If the user who just logged in is a gamemaster or admin, enable the menus
-    User u = DBGet.getUser(userId);
-
-    if (u.isAdministrator())
-      ui.doAdminMenu(true);
-    if (u.isDesigner())
-      ui.doDesignerMenu(true);
-    if (u.isGameMaster())
-      ui.doGameMasterMenu(true);
-    
-    Game g = Game.get(1L);
+    User u = DBGet.getUserTL(userId);
+    Game g = Game.getTL();
     ui.showOrHideFouoButton(g.isShowFouo());
 
-// not used    u.setOnline(true);
-//    User.save(u);
     goHome(ui); // "Home page"
 
     if(u.isAdministrator() && g.getAdminLoginMessage() != null)
@@ -438,13 +421,18 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     closeButt.addClickListener(new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
         if(Boolean.parseBoolean(cb.getValue().toString()))
           ;
         else {
-          Game.get().setAdminLoginMessage(null);
-          Game.update();
+          HSess.init();
+          Game.getTL().setAdminLoginMessage(null);
+          Game.updateTL();
+          HSess.close();
         }
         UI.getCurrent().removeWindow(dialog);
       }
@@ -459,39 +447,39 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
   
   // MessageReceiver interface for in-line (sessMgr == null) && oob events
   @Override
-  public boolean receiveMessage(MMessagePacket pkt, SingleSessionManager sessMgr)
+  public boolean receiveMessageTL(MMessagePacket pkt)
   {
     MSysOut.println("AbstractMmowgliController receiveMessage(pkt,sessMgr)");
     try {
     switch(pkt.msgType) {
       case GAMEEVENT:
-        return helper.gameEvent_oob(sessMgr, pkt.msgType, pkt.msg); //messageType,message);
+        return helper.gameEvent_oobTL(pkt.msgType, pkt.msg); //messageType,message);
 
       case UPDATED_GAME:
-        return helper.gameUpdated_oob(sessMgr);
+        return helper.gameUpdated_oobTL();
 
       case NEW_CARD:
-        return helper.cardPlayed_oob(sessMgr, Long.parseLong(pkt.msg));
+        return helper.cardPlayed_oobTL(Long.parseLong(pkt.msg));
 
       case NEW_USER:
-        return helper.newUser_oob(sessMgr, Long.parseLong(pkt.msg));
+        return helper.newUser_oobTL(Long.parseLong(pkt.msg));
 
       case NEW_MESSAGE:
-        return helper.newGameMessage_oob(sessMgr, Long.parseLong(pkt.msg));
+        return helper.newGameMessage_oobTL(Long.parseLong(pkt.msg));
 
       case UPDATED_CARD:
-        return helper.cardUpdated_oob(sessMgr, Long.parseLong(pkt.msg));
+        return helper.cardUpdated_oobTL(Long.parseLong(pkt.msg));
 
       case UPDATED_USER:
         // probably a scoring change
-        return helper.userUpdated_oob(sessMgr, Long.parseLong(pkt.msg));
+        return helper.userUpdated_oobTL(Long.parseLong(pkt.msg));
         
       case UPDATED_MOVE:
-        return helper.moveUpdated_oob(sessMgr,  Long.parseLong(pkt.msg));
+        return helper.moveUpdated_oobTL(Long.parseLong(pkt.msg));
       
       case UPDATED_MOVEPHASE:
         MSysOut.println("AbstractMmowglicontroller.receiveMessage() got UPDATED_MOVEPHASE");
-        return helper.movePhaseUpdated_oob(sessMgr, Long.parseLong(pkt.msg));
+        return helper.movePhaseUpdated_oobTL(Long.parseLong(pkt.msg));
         
       case USER_LOGON:
 //        id = Long.parseLong(message);
@@ -505,19 +493,19 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
       case UPDATED_ACTIONPLAN:
       case NEW_ACTIONPLAN:
-        return helper.actionPlanUpdated_oob(sessMgr, Long.parseLong(pkt.msg));
+        return helper.actionPlanUpdated_oobTL(Long.parseLong(pkt.msg));
 
       case UPDATED_CHAT:
-        return helper.chatLogUpdated_oob(sessMgr, Long.parseLong(pkt.msg));
+        return helper.chatLogUpdated_oobTL(Long.parseLong(pkt.msg));
 
       case UPDATED_MEDIA: // normally means only that the caption has been edited
-        return helper.mediaUpdated_oob(sessMgr, Long.parseLong(pkt.msg));
+        return helper.mediaUpdated_oobTL(Long.parseLong(pkt.msg));
      
       case INSTANCEREPORTCOMMAND:
-        helper.doSessionReport(sessMgr,pkt.msg);
+        helper.doSessionReportTL(pkt.msg);
         break;
       case UPDATED_CARDTYPE:
-        CardType ct = (CardType)M.getSession(sessMgr).get(CardType.class, Long.parseLong(pkt.msg));
+        CardType ct = (CardType)HSess.get().get(CardType.class, Long.parseLong(pkt.msg));
         CardTypeManager.updateCardType(ct);
         break;
       }
@@ -525,9 +513,6 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     catch(RuntimeException re) {
       System.err.println("RuntimeException trapped in MmowgliOneApplicationController oob loop: "+re.getClass().getSimpleName()+", "+re.getLocalizedMessage());
       re.printStackTrace();
-      //app.lock.unlock();
-      //SysOut.println("RuntimeException being rethrown");
-      //throw re;
     }
     catch(Throwable t) {
       System.err.println("Throwable trapped in MmowgliOneApplicationController oob loop: "+t.getClass().getSimpleName()+", "+t.getLocalizedMessage());
@@ -535,61 +520,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     }
     return false;  // no push required
   }
-  // This should all be moved to MmowgliLocalMessagingManager
- /* private void sendToBus(char msgt, String msg, boolean delayed)
-  {
-    InterTomcatIO sessIO = getSessIO();
-    if(sessIO != null)
-      if(delayed)
-        sessIO.sendDelayed(msgt, msg);
-      else
-        sessIO.send(msgt, msg);
-    else
-      System.out.println("Can't send message to localbuss, sessIO is null. ("+msgt+"/"+msg);
-  }
 
-  private transient InterTomcatIO _sessIO;
-  
-  private InterTomcatIO getSessIO()
-  {
-    if(_sessIO != null)
-      return _sessIO;
-    initSessIO();
-    return _sessIO; // may be null
-  }
-  private void initSessIO()
-  {
-    try {
-      _sessIO = newInterSessionIO();
-      _sessIO.addReceiver(new MyInterSessionIOReceiver());
-    }
-    catch (IOException ex) {
-      System.err.println("Can't set up multicast: " + ex.getLocalizedMessage());
-    }
-  }
-  
-  class MyInterSessionIOReceiver implements Receiver
-  {
-    @Override
-    public boolean messageReceivedOob(char messageType, String message, UUID uuid, SessionManager sessMgr)
-    {
-      // TODO Auto-generated method stub
-      return false;
-    }
-    @Override
-    public void oobEventBurstComplete(SessionManager sessMgr)
-    {
-      // TODO Auto-generated method stub
-      
-    }    
-  }
- 
-  private static int ioCount = 0;
-  private LocalJmsIO newInterSessionIO() throws IOException
-  {
-    return new LocalJmsIO("AppInstance"+ioCount++);
-  }
- */ 
   public String buildFragment(AppEvent ev)
   {
     return "" + ev.getEvent().ordinal()+"_"+(ev.getData()==null?"":ev.getData().toString());
@@ -600,32 +531,47 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
   {
     View myView=null;
     @Override
+    @MmowgliCodeEntry
+    @HibernateConditionallyOpened
+    @HibernateConditionallyClosed
     public String getViewName(String viewAndParameters)
     {
+      Object key = HSess.checkInit();
+      String retrn = null;
       try {
        AppEvent evt = new AppEvent(viewAndParameters);
-       return handleEvent(evt);
+       retrn = handleEventTL(evt);
       }
       catch(Throwable ex) {
         if(viewAndParameters == null || viewAndParameters.equals(""))
           return ""; // startup
         System.err.println("Bad fragment:"+viewAndParameters);
-        return null;
+        retrn = null;
       }
+      HSess.checkClose(key);
+      return retrn;
     }
 
     @Override
+    @MmowgliCodeEntry
+    @HibernateConditionallyOpened
+    @HibernateConditionallyClosed
     public View getView(String viewName)
     {
-      if(viewName.equals(""))
-        return new CallToActionPage();  // startup
+      Object key = HSess.checkInit();
+      if(viewName.equals("")) {
+        View vw = new CallToActionPage();  // startup
+        HSess.checkClose(key);
+        return vw;
+      }
       View v = myView;
       myView = null;
+      HSess.checkClose(key);
       return v;
     }
     
     // Return null if don't understand
-    private String handleEvent(AppEvent appEvent)
+    private String handleEventTL(AppEvent appEvent)
     {
       MmowgliEvent mEv = appEvent.getEvent();
       Object param = appEvent.getData();
@@ -634,7 +580,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
           myView = new CardChainPage(Long.parseLong(param.toString()));
           break;
         case MAPCLICK:
-          myView = new LeafletMap();//new OpenLayersMap();
+          myView = new LeafletMap();
           break;
         case LEADERBOARDCLICK:
           myView = new Leaderboard();
@@ -663,12 +609,14 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         case MENUGAMEMASTERUSERADMIN:
           myView = new UserAdminPanel();
           break;
+        case ACTIONPLANSHOWCLICK:
+          myView = new ActionPlanPage2(Long.parseLong(param.toString()));
+          break;
+
         default:
           return null;
       }
       return appEvent.getFragmentString();
     }
   }
-  
-
 }
