@@ -70,7 +70,7 @@ public class MiscellaneousMmowgliTimer
     @Override
     public void run()
     {
-      MSysOut.immPrintln("-tick-" + tickFormat.format(new Date()));
+      MSysOut.immPrint("-tick-" + tickFormat.format(new Date()));
     }
   }
 
@@ -116,12 +116,6 @@ public class MiscellaneousMmowgliTimer
       return ""+t+" ";
     }
     
-    // immediate write
-    public static void immPrintln(String s)
-    {
-      MSysOut.immPrint(s,nl);
-    }
-
     // immediate write
     public static void immPrint(String... sa)
     {
