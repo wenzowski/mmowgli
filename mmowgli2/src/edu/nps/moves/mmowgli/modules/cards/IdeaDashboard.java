@@ -45,6 +45,8 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.CardType;
 import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
@@ -63,15 +65,11 @@ public class IdeaDashboard extends AbsoluteLayout implements MmowgliComponent, V
 {
   private static final long serialVersionUID = -2141994999259859713L;
   
- // public static final String IDEADASHBOARD_W    = "985px";
   public static final String IDEADASHBOARD_H    = "900px";
   public static final String IDEADASHBOARD_BGND_W = "985px";
   public static final String IDEADASHBOARD_BGND_H = "841px";
   public static final int    IDEADASHBOARD_HOR_OFFSET  = HEADER_OFFSET_LEFT_MARGIN - 19; // px same as header
   public static final String IDEADASHBOARD_OFFSET_POS  = "top:50px;left:"+IDEADASHBOARD_HOR_OFFSET+"px";
- // public static final String IDEADASHBOARD_TITLE_W          = "490px";
- // public static final String IDEADASHBOARD_TITLE_H          = "82px";
- // public static final String IDEADASHBOARD_TITLE_POS        = "top:5px;left:20px";
   public static final String IDEADASHBOARD_TABCONTENT_POS       = "top:140px;left:41px";
   public static final String IDEADASHBOARD_TABCONTENT_W         = "930px"; //ACTIONPLAN_TABCONTENT_W;
   public static final String IDEADASHBOARD_TABCONTENT_H         = "732px";
@@ -87,10 +85,11 @@ public class IdeaDashboard extends AbsoluteLayout implements MmowgliComponent, V
   
   Button currentTabButton;
   IdeaDashboardTabPanel currentTabPanel;
+  
 //@formatter:off  
+  @HibernateSessionThreadLocalConstructor
   public IdeaDashboard()
   {    
-    //titleLab = new Label();
     innovateTab    = new IdeaDashboardTabInnovate();
     defendTab      = new IdeaDashboardTabDefend();
     superActiveTab = new IdeaDashboardTabSuperActive();
@@ -113,13 +112,7 @@ public class IdeaDashboard extends AbsoluteLayout implements MmowgliComponent, V
     setHeight(IDEADASHBOARD_H);
     MediaLocator medLoc = Mmowgli2UI.getGlobals().getMediaLocator();
     
-//    addComponent(titleLab,IDEADASHBOARD_TITLE_POS);
-//    titleLab.setWidth(IDEADASHBOARD_TITLE_W);
-//    titleLab.setHeight(IDEADASHBOARD_TITLE_H);
-//    titleLab.setValue("Idea Dashboard");
-//    titleLab.addStyleName("m-ideadashboard-title");
-    
-    addComponent(medLoc.getIdeaDashboardTitle(),"top:15px;left:20px"); //IDEADASHBOARD_TITLE_POS);
+    addComponent(medLoc.getIdeaDashboardTitle(),"top:15px;left:20px");
    
     AbsoluteLayout mainAbsLay = new AbsoluteLayout(); // offset it from master
     mainAbsLay.setWidth(APPLICATION_SCREEN_WIDTH);
@@ -153,7 +146,7 @@ public class IdeaDashboard extends AbsoluteLayout implements MmowgliComponent, V
     HorizontalLayout tabHL = new HorizontalLayout();
     tabHL.setSpacing(false);
     
-    String gameTitleLC = Game.get(1L).getTitle().toLowerCase();  
+    String gameTitleLC = Game.getTL().getTitle().toLowerCase();  
     makeBlackLabelOverlays(gameTitleLC);  // put the card type names
     styleBlackTabs(gameTitleLC,tabHL);
     addComponent(tabHL,"top:60px;left:7px");  
@@ -168,8 +161,8 @@ public class IdeaDashboard extends AbsoluteLayout implements MmowgliComponent, V
     recentButt.addClickListener(tabHndlr);
     tabHL.addComponent(recentButt);
     
-    styleWhiteInnovateTab(gameTitleLC, tabHL, tabHndlr, CardType.getPositiveIdeaCardType());
-    styleWhiteDefendTab  (gameTitleLC, tabHL, tabHndlr, CardType.getNegativeIdeaCardType());
+    styleWhiteInnovateTab(gameTitleLC, tabHL, tabHndlr, CardType.getPositiveIdeaCardTypeTL());
+    styleWhiteDefendTab  (gameTitleLC, tabHL, tabHndlr, CardType.getNegativeIdeaCardTypeTL());
      
     superActiveButt.setStyleName("m-ideaDashboardSuperActiveTab");
     superActiveButt.addStyleName("m-ideaDashboardTab4"); // marker for testing
@@ -188,8 +181,8 @@ public class IdeaDashboard extends AbsoluteLayout implements MmowgliComponent, V
     absL.setHeight("60px");
     absL.setWidth("778px");
     
-    String posText = CardType.getPositiveIdeaCardType().getTitle();
-    String negText = CardType.getNegativeIdeaCardType().getTitle();
+    String posText = CardType.getPositiveIdeaCardTypeTL().getTitle();
+    String negText = CardType.getNegativeIdeaCardTypeTL().getTitle();
     
     Label lab;    
     absL.addComponent(lab=new Label(posText),"top:0px;left:210px;");
@@ -254,12 +247,16 @@ public class IdeaDashboard extends AbsoluteLayout implements MmowgliComponent, V
   class TabClickHandler implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
       TabButton b = (TabButton)event.getButton();
       if(b == currentTabButton)
         return;
       
+      HSess.init();
       currentTabButton.addStyleName("m-transparent-background");
       currentTabButton.setCaption(null);
       
@@ -285,6 +282,7 @@ public class IdeaDashboard extends AbsoluteLayout implements MmowgliComponent, V
         superActiveTab.setVisible(true);
         currentTabPanel = superActiveTab;
       }
+      HSess.close();
     }    
   }
  
