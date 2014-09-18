@@ -44,6 +44,17 @@ package edu.nps.moves.mmowgli;
 
 public class MmowgliConstants
 {
+  // Build constants (set by AppMaster, value from edu/nps/moves/mmowgli/buildstamp.properties, which is automatically updated by Eclipse builder
+  public static String MMOWGLI_BUILD_ID = "unset";
+  public static String MMOWGLI_BUILD_PROPERTIES_PATH = "/edu/nps/moves/mmowgli/buildstamp.properties";
+  public static String MMOWGLI_BUILD_ID_KEY = "build.datetime";
+  
+  public static String VAADIN_BUILD_VERSION = "unset";
+  
+  public static double MAP_LAT_DEFAULT = 10.919618;
+  public static double MAP_LON_DEFAULT = 53.613281;
+  public static int    MAP_ZOOM_DEFAULT = 5;
+  
   // Database version matching this code
   public static long DATABASE_VERSION = 20140509; // db which matches this code
 
@@ -68,8 +79,9 @@ public class MmowgliConstants
                                                                     // minutes
   public static Long NO_LOGGEDIN_USER_ID = -1L;
   
-  public static int USER_SESSION_TIMEOUT_IN_SECONDS = 15*60;
-  public static int GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS = 4*60;
+ // Let these be set in webxml
+  //public static int USER_SESSION_TIMEOUT_IN_SECONDS = 15*60;
+ // public static int GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS = 4*60;
   
   // Servlet context constants
   // This is the attribute name in the web app servlet context which holds a
@@ -83,7 +95,9 @@ public class MmowgliConstants
   public static String APPLICATION_SCREEN_WIDTH  = "1000px"; //"992px";  // with varying margins
   public static String HEADER_SCREEN_WIDTH = "1020px"; // for centering header
   public static String APPLICATION_CENTRAL_WIDTH = "960px";
-  public static String SMTP_HOST = "mule.nps.edu"; // "mustang.nps.edu";
+  
+  // Default, typically overridden by web.xml param.
+  public static String SMTP_HOST = "mule.nps.edu";
 
   public static final String PORTALWIKI_URL = "https://portal.mmowgli.nps.edu/game-wiki";
   public static final String PORTALTARGETWINDOWNAME = "_portal";
@@ -119,16 +133,12 @@ public class MmowgliConstants
   public static String WEB_XML_GAME_URL_TOKEN_KEY   = "gameUrlToken";
   public static String WEB_XML_HIBERNATE_SEARCH_KEY = "hibernateSearchIndexPath"; 
   public static String WEB_XML_JMS_KEEPALIVE_KEY    = "jmsKeepAliveIntervalMS"; 
-  /* not used
-  public static String WEB_XML_JMS_LOCALBROKER_KEY  = "jmsLocalBrokerName"; 
-  public static String WEB_XML_JMS_LOCALHANDLE_KEY  = "jmsLocalHandle";  
-  public static String WEB_XML_JMS_LOCALPORT_KEY    = "jmsLocalPort";  
-  public static String WEB_XML_JMS_LOCALTOPIC_KEY   = "jmsLocalTopic";
-  public static String WEB_XML_JMS_LOCALURL_KEY     = "jmsLocalUrl";
-  */  
+
   public static String WEB_XML_JMS_TOPIC_KEY        = "jmsTopic";  
   public static String WEB_XML_JMS_URL_KEY          = "jmsUrl"; 
   public static String WEB_XML_SMTP_HOST_KEY        = "smtpHost";
+  public static String WEB_XML_GAMEMASTER_TMO_KEY   = "gameMasterTimeout";
+  
   public static String WEB_XML_USER_IMAGES_FILESYSTEM_PATH_KEY = "userImagesPath";
   public static String WEB_XML_USER_IMAGES_URL_KEY             = "userImagesUrl";
   public static String WEB_XML_REPORTS_FILESYSTEM_PATH_KEY     = "gameReportsPath";
@@ -141,6 +151,8 @@ public class MmowgliConstants
   // Following get set in ApplicationMaster
   public static String DEPLOYMENT = null;
   public static String DEPLOYMENT_TOKEN = null;
+  public static String GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS = null;
+  
   public static String GAME_URL_TOKEN = null;
   public static String GAME_IMAGES_URL_RAW = null; // may need token
                                                    // replacement, done in
@@ -187,7 +199,6 @@ public class MmowgliConstants
   public static final String CLUSTERMONITORURL = "http://test.mmowgli.nps.edu/ganglia";
   public static final String CLUSTERMONITORTARGETWINDOWNAME = "_cluster0";
   
-
   // Messages to/from ApplicationMaster start with one of these:
   public static final char GAMEEVENT = 'G'; // followed by gameevent ID
   public static final char NEW_CARD = 'C'; // followed by card ID
@@ -292,176 +303,4 @@ public class MmowgliConstants
   public static final String ACTIONDASHBOARD_TABCONTENT_RIGHT_H   = ACTIONPLAN_TABCONTENT_RIGHT_H;
   public static final String ACTIONDASHBOARD_TABCONTENT_LEFT_POS  = ACTIONPLAN_TABCONTENT_LEFT_POS;
   public static final String ACTIONDASHBOARD_TABCONTENT_RIGHT_POS = ACTIONPLAN_TABCONTENT_RIGHT_POS;
-
-/*
-  // Button events from move-one header
-  public static final int LEADERBOARDCLICK = 0;
-  public static final int TAKEACTIONCLICK = 1;
-  public static final int PLAYIDEACLICK = 2;
-  public static final int LEARNMORECLICK = 3;
-  public static final int CALLTOACTIONCLICK = 4;
-  public static final int MAPCLICK = 5;
-  public static final int SEARCHCLICK = 53;
-  public static final int INBOXCLICK = 54;
-  public static final int BLOGFEEDCLICK = 55;
-  public static final int SIGNOUTCLICK = 73;
-  public static final int POSTTROUBLECLICK = 110;
-  public static final int FOUOCLICK = 132;
-
-  public static final int HOWTOPLAYCLICK = 67;
-
-  // Menus
-  public static final int MENUHOMECLICK = 23;
-  public static final int MENUADMINBLAHCLICK = 24; // placeholder
-  public static final int MENUGAMEMASTEREDITCLICK = 25;
-  public static final int MENUGAMESETUPCLICK = 26;
-  public static final int MENUGAMEMASTERACTIONDASHBOARDCLICK = 63;
-  public static final int MENUGAMEMASTERLOGOUTCLICK = 64;
-  // public static final int MENUGAMEMASTERZEROBASICSCORES = 70;
-  public static final int MENUGAMEMASTERUSERPROFILE = 71;
-  public static final int MENUGAMEMASTERCREATEACTIONPLAN = 72;
-  public static final int MENUGAMEMASTERMONITOREVENTS = 75;
-  public static final int MENUGAMEMASTERUSERADMIN = 76;
-  public static final int MENUGAMEADMINLOGINLIMIT = 77;
-  public static final int MENUGAMEMASTERACTIVECOUNTCLICK = 79;
-  public static final int MENUGAMEMASTERACTIVECOUNTBYSERVERCLICK = 97;
-  public static final int MENUGAMEMASTERBROADCAST = 80;
-  public static final int MENUGAMEMASTERCARDCOUNTCLICK = 81;
-  public static final int MENUGAMEMASTERBROADCASTTOGMS = 82;
-  public static final int MENUGAMEMASTERPOSTCOMMENT = 83;
-  public static final int MENUGAMEADMINTESTCLICK = 84;
-  public static final int MENUGAMEMASTERINVITEAUTHORSCLICK = 86;
-  public static final int MENUGAMEMASTERUNLOCKEDITSCLICK = 102;
-  public static final int MENUGAMEMASTERBLOGHEADLINE = 109;
-  public static final int MENUGAMEMASTERTOTALREGISTEREDUSERS = 112;
-  public static final int MENUGAMEMASTERUSERPOLLINGCLICK = 129;
-  public static final int MENUGAMEMASTEROPENREPORTSPAGE = 133;
-  public static final int MENUGAMEADMINDUMPEMAILS = 87;
-  public static final int MENUGAMEADMINDUMPSIGNUPS = 127;
-  public static final int MENUGAMEADMINDUMPGAMEMASTERS = 128;
-  public static final int MENUGAMEADMINCLEANINVITEES = 88;
-  public static final int MENUGAMEADMINSETGAMEREADONLY = 89;
-  public static final int MENUGAMEADMINSETGAMEREADWRITE = 90;
-  public static final int MENUGAMEADMINMANAGESIGNUPS = 139;
-  public static final int MENUGAMEADMINSETSIGNUPRESTRICTED = 98;
-  public static final int MENUGAMEADMINSETSIGNUPOPEN = 99;
-  public static final int MENUGAMEADMINPOSTGAMERECALCULATION = 140;
-
-  public static final int MENUGAMEADMINSETSIGNUPINTERVALRESTRICTED = 100;
-  public static final int MENUGAMEADMINSETSIGNUPINTERVALOPEN = 101;
-  public static final int MENUGAMEADMINSETNONEWSIGNUPS = 113;
-  public static final int MENUGAMEADMINSETALLOWNEWSIGNUPS = 114;
-  public static final int MENUGAMEADMIN_QUERIES_ENABLED = 130;
-  public static final int MENUGAMEADMIN_QUERIES_DISABLED = 131;
-
-  // not used public static final int MENUGAMEADMINZEROONLINEBITS = 91;
-  public static final int MENUGAMEADMINSETCARDSREADONLY = 92;
-  public static final int MENUGAMEADMINSETCARDSREADWRITE = 93;
-  public static final int MENUGAMEADMINTESTEXCEPTION = 94;
-  public static final int MENUGAMEADMINTESTOOBEXCEPTION = 95;
-  public static final int MENUGAMEADMINSETTOPCARDSREADONLY = 110;
-  public static final int MENUGAMEADMINSETTOPCARDSREADWRITE = 111;
-  public static final int MENUGAMEADMINEXPORTACTIONPLANS = 103;
-  public static final int MENUGAMEADMINEXPORTCARDS = 104;
-  public static final int MENUGAMEADMINPUBLISHREPORTS = 117;
-  public static final int MENUGAMEADMINSETLOGINS = 136;
-  public static final int MENUGAMEMASTER_EXPORT_SELECTED_ACTIONPLAN = 137;
-  public static final int MENUGAMEMASTER_EXPORT_SELECTED_CARD = 138;
-
-  public static final int MENUGAMEADMIN_START_CARD_DB_TEST = 105;
-  public static final int MENUGAMEADMIN_END_CARD_DB_TEST = 106;
-  public static final int MENUGAMEADMIN_START_USER_DB_TEST = 107;
-  public static final int MENUGAMEADMIN_END_USER_DB_TEST = 108;
-
-  public static final int MENUGAMEADMIN_START_EMAILCONFIRMATION = 118;
-  public static final int MENUGAMEADMIN_END_EMAILCONFIRMATION = 119;
-  public static final int MENUGAMEADMIN_BUILDGAMECLICK = 120;
-  public static final int MENUGAMEADMIN_BUILDGAMECLICK_READONLY = 141; // next
-                                                                       // 142
-  public static final int MENUGAMEADMIN_EXPORTGAMESETTINGS = 126;
-
-  public static final int MENUGAMEADMIN_ADMIN_LOGIN_ONLY = 134;
-  public static final int MENUGAMEADMIN_ADMIN_LOGIN_ONLY_REMOVE = 135;
-
-  public static final int GAMEADMIN_SHOW_WELCOME_MOCKUP = 121;
-  public static final int GAMEADMIN_SHOW_CALLTOACTION_MOCKUP = 122;
-  public static final int GAMEADMIN_SHOW_TOPCARDS_MOCKUP = 123;
-  public static final int GAMEADMIN_SHOW_SUBCARDS_MOCKUP = 124;
-  public static final int GAMEADMIN_SHOW_ACTIONPLAN_MOCKUP = 125;
-
-  public static final int MENUGAMEMASTERADDTOVIPLIST = 115;
-  public static final int MENUGAMEMASTERVIEWVIPLIST = 116;
-
-  public static final int HANDLE_LOGIN_STARTUP = 142; // next = 143
-  // Moves
-  public static final int GAMESETUPEDITMOVECLICK = 61;
-  // Action Plans
-  public static final int RFECLICK = 74;
-  // Cards
-  public static final int IDEADASHBOARDCLICK = 62;
-  public static final int CARDCLICK = 65;
-  public static final int CARDAUTHORCLICK = 66;
-  public static final int CARDCHAINPOPUPCLICK = 68;
-  public static final int CARDCREATEACTIONPLANCLICK = 96;
-  // User profile
-  public static final int IMPROVESCORECLICK = 56;
-  public static final int SHOWUSERPROFILECLICK = 57;
-  
-  // Action dashboard
-  public static final int ACTIONPLANSHOWCLICK = 69;
-  public static final int HOWTOWINACTIONCLICK = 78;
-  public static final int ACTIONPLANREQUESTCLICK = 85;
-*/
-  // public static final int MENUFILEOPENCLICK = 23;
-  // public static final int MENUNEWFILECLICK = 24;
-  // public static final int MENUNEWFOLDERCLICK = 25;
-  // public static final int MENUNEWPROJECTCLICK = 26;
-  // public static final int MENUFILECLOSECLICK = 27;
-  // public static final int MENUFILECLOSEALLCLICK = 28;
-  // public static final int MENUFILESAVECLICK = 29;
-  // public static final int MENUFILESAVEASCLICK = 30;
-  // public static final int MENUFILESAVEALLCLICK = 31;
-  // public static final int MENUFILEQUITCLICK = 51;
-  // public static final int MENUEDITUNDOCLICK = 32;
-  // public static final int MENUEDITREDOCLICK = 33;
-  // public static final int MENUEDITCUTCLICK = 34;
-  // public static final int MENUEDITCOPYCLICK = 35;
-  // public static final int MENUEDITPASTECLICK = 36;
-  // public static final int MENUFINDREPLACECLICK = 37;
-  // public static final int MENUFINDNEXTCLICK = 38;
-  // public static final int MENUFINDPREVIOUSCLICK = 39;
-  // public static final int MENUVIEWSTATUSCLICK = 40;
-  // public static final int MENUVIEWTOOLBARCLICK = 41;
-  // public static final int MENUVIEWACTUALCLICK = 42;
-  // public static final int MENUVIEWZOOMINCLICK = 43;
-  // public static final int MENUVIEWZOOMOUTCLICK = 44;
-  // public static final int MENUADMINOPENCLICK = 45;
-/*  
-  public static MMessage MMParse(char typ, String s)
-  {
-    return new MMessage(typ, s);
-  }
-
-  public static String MMESSAGE_DELIM = "\t";
-
-  public static class MMessage
-  {
-    public char msgType;
-    public Long id = null;
-
-    public int numTokens = 0;
-    public String[] params = new String[0];
-    public static int FIRST_PARAM = 1;
-
-    public MMessage(char typ, String s) {
-      msgType = typ;
-      params = s.split(MMESSAGE_DELIM);
-      try {
-        id = Long.parseLong(params[0]);
-      }
-      catch (NumberFormatException t) {
-      }
-    }
-  }
-*/
 }
