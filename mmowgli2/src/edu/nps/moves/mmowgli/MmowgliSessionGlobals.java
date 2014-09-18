@@ -6,20 +6,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.hibernate.Session;
-
 import com.vaadin.server.SessionInitEvent;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.UI;
 
 import edu.nps.moves.mmowgli.components.AppMenuBar;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.messaging.MessagingManager;
 import edu.nps.moves.mmowgli.messaging.WantsGameUpdates;
 import edu.nps.moves.mmowgli.modules.scoring.ScoreManager2;
-import edu.nps.moves.mmowgli.utility.M;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -46,10 +42,10 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   private String browserAddress="unk";
   private boolean internetExplorer7 = false;
   private boolean internetExplorer  = false;
+
   private MmowgliController controller;
   private MessagingManager messagingManager;
   private MediaLocator mediaLoc;
-  private AppMaster appMaster;
   private ScoreManager2 scoreManager;
   private Serializable userId=null;
   private Mmowgli2UI firstUI = null;
@@ -70,7 +66,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   {
     event.getSession().setAttribute(MmowgliSessionGlobals.class, this);  // store this for use across the app
     
-    appMaster = (AppMaster)servlet.getServletContext().getAttribute(MmowgliConstants.APPLICATION_MASTER_ATTR_NAME);
+    //appMaster = (AppMaster)servlet.getServletContext().getAttribute(MmowgliConstants.APPLICATION_MASTER_ATTR_NAME);
     
     scoreManager = new ScoreManager2();
   }
@@ -78,7 +74,6 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   public void init(WebBrowser webBr)
   {
     deriveBrowserBooleans(webBr);
-    
     MSysOut.println("Login from "+browserIDString());
   }
   
@@ -95,6 +90,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
         internetExplorer7 = true;
     }
   }
+  
   public String browserIDString()
   {
     return browserApp+" "+browserMajVersion+" "+browserMinVersion+" at "+browserAddress;
@@ -133,7 +129,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   }
 
 
-  public void setUserID(Serializable userId)
+  public void setUserIDTL(Serializable userId)
   {
     this.userId = userId;  
     
@@ -142,13 +138,12 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
       userKey = o;
       linkSessionToUser(webAppContext);
 */
-      User me = User.get(userId, VHib.getVHSession());//DBGet.getUser(o);
+      User me = User.getTL(userId);
       gameAdministrator = me.isAdministrator();
       gameMaster = me.isGameMaster();
       viewOnlyUser = me.isViewOnly();
-
+    
   }
-
   public Serializable getUserID()
   {
     return userId;
@@ -160,29 +155,21 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     return mediaLoc;
   }
 
-
   public String getGameImagesUrl()
   {
-    // TODO 
-    return null;
+    return AppMaster.instance().getGameImagesUrlString();
   }
-
+  
   public UI getFirstUI()
   {
-    // TODO Auto-generated method stub
     return firstUI;
   }
+  
   public void setFirstUI(Mmowgli2UI ui)
   {
     firstUI=ui;
   }
 
-  // maybe put somewhere else since it's global to all sessions on a node
-  public AppMaster getAppMaster()
-  {
-    return appMaster;    
-  }
-  
   public UUID getUserSessionIdentifier()
   {
     return userSessionIdentifier;
@@ -195,12 +182,12 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
 
   public int getSessionCount()
   {
-    return appMaster.getSessionCount();
+    return AppMaster.instance().getSessionCount();
   }
 
   public Object[][] getSessionCountByServer()
   {
-    return appMaster.getSessionCountByServer();
+    return AppMaster.instance().getSessionCountByServer();
   }
 
 
@@ -301,65 +288,19 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
    * Something in the game object was changed
    */
   @Override
-  public boolean gameUpdatedExternally(SingleSessionManager mgr)
+  public boolean gameUpdatedExternallyTL()
   {
-    Session sess= M.getSession(mgr);
+    Mmowgli2UI.getAppUI().setWindowTitle(HSess.get());
 
-    Mmowgli2UI.getAppUI().setWindowTitle(sess);
-    // Duplicate code
-   /* Game game = Game.get(sess);
-    this.gameReadOnly = game.isReadonly();
-    this.cardsReadOnly = game.isCardsReadonly();
-    this.topCardsReadOnly = game.isTopCardsReadonly();
-
-    String windowTitle = Move.getCurrentMove(sess).getCurrentMovePhase().getWindowTitle();
-    boolean needuiupdate = false;
-    Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
-    
-    for(UI ui : uis) {
-      Page pg = ui.getPage();
-      String oldst = ui.getCaption();
-      String newst = windowTitle + (game.isCardsReadonly() ? " (Cards read-only)" : "");
-      if (!oldst.equals(newst)) {
-        ui.getPage().setTitle(newst);
-        needuiupdate = true;
-      }
-      if (this.gameReadOnly) {
-        oldst = ui.getCaption();
-        newst = windowTitle + (game.isReadonly() ? " (Read-only)" : ""); // higher prior than cards
-        if (!oldst.equals(newst)) {
-          ui.getPage().setTitle(newst);
-          needuiupdate = true;
-        }
-      }
-   */   
     Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
     for(UI ui : uis) {
       AppMenuBar menubar = ((Mmowgli2UI)ui).getMenuBar();
       if (menubar != null) { // can be at start
-        menubar.gameUpdatedExternally(mgr);
+        menubar.gameUpdatedExternallyTL();
       }
 
     }
     return true;
-  }
-
-  /**
-   * @return
-   */
-  public String getUserImageFileSystemPath()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /**
-   * @return
-   */
-  public String getUserImagesUrl()
-  {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   public void setMessagingManager(MessagingManager mm)
