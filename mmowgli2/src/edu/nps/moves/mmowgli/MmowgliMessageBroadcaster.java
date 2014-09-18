@@ -9,6 +9,8 @@ import com.vaadin.ui.Button.ClickListener;
 import edu.nps.moves.mmowgli.db.GameEvent;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 
 /**
@@ -24,6 +26,7 @@ import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
  */
 public class MmowgliMessageBroadcaster
 {
+  @HibernateSessionThreadLocalConstructor
   public static void handleGMBroadcastAction()
   {
     _postGameEvent("Broadcast Message to Game Masters",GameEvent.EventType.MESSAGEBROADCASTGM, "Send", true);
@@ -79,22 +82,27 @@ public class MmowgliMessageBroadcaster
     ClickListener lis = new ClickListener()
     {
       @Override
+      @MmowgliCodeEntry
+      @HibernateOpened
+      @HibernateClosed
       public void buttonClick(ClickEvent event)
       {
         if (event.getButton() == bcancelButt)
           ; // nothin
         else {
           // This check is now done in GameEvent.java, but should ideally prompt the user.
+          HSess.init();
           String msg = ta.getValue().toString().trim();
           if (msg.length() > 0) {
             if (msg.length() > 255) // clamp to 255 to avoid db exception
               msg = msg.substring(0, 254);
             Serializable uid = Mmowgli2UI.getGlobals().getUserID();
-            User u = DBGet.getUser(uid);
+            User u = DBGet.getUserTL(uid);
             if (typ == GameEvent.EventType.GAMEMASTERNOTE)
-              GameEventLogger.logGameMasterComment(msg, u);
+              GameEventLogger.logGameMasterCommentTL(msg, u);
             else
-              GameEventLogger.logGameMasterBroadcast(typ, msg, u); // GameEvent.save(new GameEvent(typ,msg));
+              GameEventLogger.logGameMasterBroadcastTL(typ, msg, u); // GameEvent.save(new GameEvent(typ,msg));
+            HSess.close();
           }
         }
         bcastWindow.close();
