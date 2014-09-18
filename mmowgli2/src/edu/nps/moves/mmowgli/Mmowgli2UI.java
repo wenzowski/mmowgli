@@ -49,16 +49,16 @@ import edu.nps.moves.mmowgli.components.AppMenuBar;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.Move;
 import edu.nps.moves.mmowgli.db.MovePhase;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.messaging.MessagingManager;
 import edu.nps.moves.mmowgli.messaging.WantsMovePhaseUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
-import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
+import edu.nps.moves.mmowgli.utility.MediaLocator;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
-//import edu.nps.moves.mmowgliMobile.VMShareTest;
 
 /**
  * Mmowgli2UI.java
@@ -74,30 +74,8 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  */
 
 /*
-Do NOT do any of this stuff here.  This is now an abstract class.  The annotations are in the descendants of this
-class.  If this is enabled, the browser just hangs.
-
-// Watch out for some of the annotations interfering with hbncontainer (see MmowgliMobileUI comments)
-//@Push(PushMode.MANUAL)
-
-// This preserves the UI across page reloads
-@PreserveOnRefresh
-@StyleSheet({"https://fonts.googleapis.com/css?family=Nothing+You+Could+Do", // jason-style-handwriting
-             "https://fonts.googleapis.com/css?family=Varela+Round", // like vagabond
-             "https://fonts.googleapis.com/css?family=Special+Elite",// typewriter
-             "https://fonts.googleapis.com/css?family=Open+Sans:700&subset=latin,latin-ext", // army sci tech
-             "https://fonts.googleapis.com/css?family=Gentium+Book+Basic&subset=latin,latin-ext"})//ditto
-
-// Loading the google code this way (anno) runs into the X-Frame-Options SAMEORIGIN error
-@JavaScript ({
-              "https://platform.twitter.com/widgets.js",
-            // nogo v7  "http://openlayers.org/api/OpenLayers.js",
-            // nogo v7  "http://ol3js.org/en/master/build/ol.js",
-              //"http://maps.google.com/maps/api/js?v=3&output=embed"})  // last one for openstrmap plus google layers
-              //"https://maps.google.com/maps/api/js?v=3&key=AIzaSyBeWoPydbJRnvH0D8DnCCeLDP1VVPURKh0&sensor=false&output=embed"})
-            })
-@Theme("mmowgli2")
-@Widgetset("edu.nps.moves.mmowgli.widgetset.Mmowgli2Widgetset")
+  Do NOT put vaadin annotations here.  The annotations are in the descendants of this
+  class.  If this is enabled, the browser just hangs.
 */
 
 @SuppressWarnings("serial")
@@ -108,7 +86,6 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   private Navigator navigator;
   private UUID uuid;
   private boolean mobiletest = false;
-  //private ICEPush pusher = new ICEPush();
   
   private boolean firstUI = false;
   protected Mmowgli2UI(boolean firstUI)
@@ -117,18 +94,23 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   }
   
   @Override
+  @MmowgliCodeEntry
+  @HibernateOpened
   protected void init(VaadinRequest request)
   {  
     MSysOut.println("Into UI.init()");
+    AppMaster.instance().oneTimeSetAppUrlFromUI();
+    
+    Object sessKey = HSess.checkInit();
     uuid = UUID.randomUUID();
-    //pusher.extend(this);
 
-    setWindowTitle();
+    setWindowTitleTL();
     VerticalLayout layout = new VerticalLayout();
     setContent(layout);
     
     if(mobiletest) {
       layout.addComponent(new Label("Placeholder for main game entry point once Vaadin 7 port is complete."));
+      HSess.checkClose(sessKey);
       return;
     }
   //  System.out.println("VMShareTest="+VMShareTest.test);
@@ -150,51 +132,45 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     }
     
     globals = globs;          
-    setCustomBackground();
+    setCustomBackgroundTL();
     if(firstUI) {      
-      setLoginContent(); 
+      setLoginContentTL(); 
     }
     else {
-      setRunningApplicationFramework();
+      setRunningApplicationFrameworkTL();
     }
     
     globs.getMessagingManager().addMessageListener((AbstractMmowgliController)globs.getController());
-    setPollInterval(5000); // 5 secs. (-1 to disable)
-    
+    //setPollInterval(5000); // 5 secs. (-1 to disable)
+    setPollInterval(-1);
+    HSess.checkClose(sessKey);
     MSysOut.println("Out of UI.init()");
-   }
+  }
   
   @Override
   public void detach()
   {
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     MessagingManager mm = globs.getMessagingManager();
-    if(mm != null)
+    if(mm != null) {
       globs.setMessagingManager(null);
-    mm.unregisterSession();
-    
+      mm.unregisterSession();
+    }
     super.detach();
   }
-
-  public void icePush()
+  
+  public void setWindowTitleTL()
   {
-   // pusher.push();
+    setWindowTitle(HSess.get());
   }
   
-  //todo sessionglobals in mmowgli1
-  public void setWindowTitle()
-  {
-    setWindowTitle(VHib.getVHSession());
-  }
-
   public void setWindowTitle(Session sess)
   {
-    MSysOut.println("************ setWindowTitle(), ui = "+getClass().getSimpleName()+" "+hashCode());
     Game game = Game.get(sess);
     boolean gameReadOnly = game.isReadonly();
     boolean cardsReadOnly = game.isCardsReadonly();
 
-    String title = Move.getCurrentMove().getCurrentMovePhase().getWindowTitle();
+    String title = Move.getCurrentMove(sess).getCurrentMovePhase().getWindowTitle();
     
     ArrayList<UI> uis = new ArrayList<UI>(getSession().getUIs());
     uis.add(this);// Set this one, since we may not be in the list yet
@@ -206,11 +182,10 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
       ;      
     for(UI ui : uis) {
       ui.getPage().setTitle(title);
-    }
-    MSysOut.println("************ setWindowTitle() to "+title);
-    
+    }    
   }
-  public void setLoginContent()
+  
+  public void setLoginContentTL()
   {
     VerticalLayout layout = (VerticalLayout)getContent();
     layout.removeAllComponents();
@@ -219,7 +194,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     layout.setComponentAlignment(regpg,  Alignment.TOP_CENTER);    
   }
   
-  public void setRunningApplicationFramework()
+  public void setRunningApplicationFrameworkTL()
   {
     VerticalLayout layout = (VerticalLayout)getContent();
     layout.removeAllComponents();
@@ -289,9 +264,9 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   ";background-attachment:fixed"+
   ";background-position:top center;}";
 
-  private void setCustomBackground()
+  private void setCustomBackgroundTL()
   {
-    String bkgUrl = Game.get().getBackgroundImageLink();
+    String bkgUrl = Game.getTL().getBackgroundImageLink();
     if (bkgUrl != null) {
       CSSInject css = new CSSInject(this);
       css.setStyles(css1 + bkgUrl + css2);
@@ -319,56 +294,38 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     outerFr.showOrHideFouoButton(show);    
   }
 
-  public void doAdminMenu(boolean b)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  public void doDesignerMenu(boolean b)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  public void doGameMasterMenu(boolean b)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
 // called from message receiver in controller, header might need update
-  public boolean refreshUser_oob(Object uId, SingleSessionManager sessMgr)
+  public boolean refreshUser_oobTL(Object uId)
   {
     if(outerFr != null)
-      return outerFr.refreshUser_oob(uId, sessMgr); 
+      return outerFr.refreshUser_oobTL(uId); 
     return false;
   }
 
-  public void gameEvent_oob(SingleSessionManager sessMgr, char typ, String message)
+  public boolean gameEvent_oobTL(char typ, String message)
   {
 	  if(outerFr != null)  // might not be ready yet
-      outerFr.gameEvent_oob(sessMgr, typ, message);    
+      return outerFr.gameEvent_oobTL(typ, message); 
+	  return false;
   }
   
   @Override
-  public boolean moveUpdatedOob(SessionManager smgr, Serializable mvId)
+  public boolean moveUpdatedOobTL(Serializable mvId)
   {
     if(outerFr != null)
-      return outerFr.moveUpdatedOob(smgr, mvId);
+      return outerFr.moveUpdatedOobTL(mvId);
     return false;
   }
   
   @Override
-  public boolean movePhaseUpdatedOob(SessionManager sessMgr, Serializable pId)
+  public boolean movePhaseUpdatedOobTL(Serializable pId)
   {
     MSysOut.println("Mmowgli2UI.movePhaseUpdated_oob.handle() UI = "+getClass().getSimpleName()+" "+hashCode());
 
     if(outerFr != null)
-      outerFr.movePhaseUpdatedOob(sessMgr, pId);  // maybe a nop
+      outerFr.movePhaseUpdatedOobTL(pId);  // maybe a nop
 
-    Session sess = M.getSession(sessMgr);
-    MovePhase mp = (MovePhase)sess.get(MovePhase.class, (Serializable)pId);
+    MovePhase mp = (MovePhase)HSess.get().get(MovePhase.class, (Serializable)pId);
     if(mp == null) {
       mp = ComeBackWhenYouveGotIt.fetchMovePhaseWhenPossible((Long)pId);
     }
@@ -376,7 +333,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
       System.err.println("ERROR: Mmowgli2UI.movePhaseUpdatedOob: MovePhase matching id "+pId+" not found in db.");
     }
     // Just wanted to make sure we could get it for the following
-    setWindowTitle(sess);;
+    setWindowTitle(HSess.get());
     return true; // may need update, assume so.
   }
 
