@@ -33,7 +33,6 @@
 */
 package edu.nps.moves.mmowgli.messaging;
 
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 
 /**
  * WantsGameUpdates.java
@@ -48,5 +47,5 @@ import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
  */
 public interface WantsGameUpdates
 { 
-  public boolean gameUpdatedExternally(SingleSessionManager session);
+  public boolean gameUpdatedExternallyTL();
 }

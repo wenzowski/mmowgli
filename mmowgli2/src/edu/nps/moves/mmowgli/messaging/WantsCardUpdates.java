@@ -35,8 +35,6 @@ package edu.nps.moves.mmowgli.messaging;
 
 import java.io.Serializable;
 
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
-
 /**
  * WantsCardUpdates.java
  * Created on Feb 10, 2011
@@ -50,6 +48,6 @@ import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
  */
 public interface WantsCardUpdates
 { 
-  public boolean cardPlayed_oob(SingleSessionManager mgr, Serializable cardId);  // return true if need ui update
-  public boolean cardUpdated_oob(SingleSessionManager mgr, Serializable cardId);
+  public boolean cardPlayed_oobTL(Serializable cardId);  // return true if need ui update
+  public boolean cardUpdated_oobTL(Serializable cardId);
 }
