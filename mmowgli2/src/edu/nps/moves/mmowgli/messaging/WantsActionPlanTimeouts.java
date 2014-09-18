@@ -35,8 +35,6 @@ package edu.nps.moves.mmowgli.messaging;
 
 import java.io.Serializable;
 
-import edu.nps.moves.mmowgli.hibernate.MSessionManager;
-
 /**
  * WantsActionPlanTimeouts.java
  * Created on Apr 22, 2011
@@ -50,6 +48,6 @@ import edu.nps.moves.mmowgli.hibernate.MSessionManager;
  */
 public interface WantsActionPlanTimeouts
 {
-  public boolean actionPlanEditTimeoutEvent(MSessionManager mgr, Serializable apId);
-  public boolean actionPlanEditTimeoutWarningEvent(MSessionManager mgr, Serializable apId);
+  public boolean actionPlanEditTimeoutEvent(Serializable apId);
+  public boolean actionPlanEditTimeoutWarningEvent(Serializable apId);
 }

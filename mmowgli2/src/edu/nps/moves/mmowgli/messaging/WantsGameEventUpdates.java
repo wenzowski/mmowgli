@@ -33,8 +33,6 @@
 */
 package edu.nps.moves.mmowgli.messaging;
 
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-
 /**
  * WantsGameEventUpdates.java
  * Created on May 3, 2011
@@ -48,5 +46,5 @@ import edu.nps.moves.mmowgli.hibernate.SessionManager;
  */
 public interface WantsGameEventUpdates
 {
-  public boolean gameEventLoggedOob(SessionManager sessMgr, Object evId);  // return true if need ui update
+  public boolean gameEventLoggedOobTL(Object evId);  // return true if need ui update
 }

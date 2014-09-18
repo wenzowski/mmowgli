@@ -35,8 +35,6 @@ package edu.nps.moves.mmowgli.messaging;
 
 import java.io.Serializable;
 
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-
 /**
  * WantsActionPlanUpdates.java
  * Created on Mar 25, 2011
@@ -50,5 +48,5 @@ import edu.nps.moves.mmowgli.hibernate.SessionManager;
  */
 public interface WantsMoveUpdates
 {
-  public boolean moveUpdatedOob(SessionManager sessMgr, Serializable apId);
+  public boolean moveUpdatedOobTL(Serializable apId);
 }

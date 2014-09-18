@@ -35,8 +35,6 @@ package edu.nps.moves.mmowgli.messaging;
 
 import java.io.Serializable;
 
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
-
 /**
  * WantsUserUpdates.java
  * Created on Mar 4, 2011
@@ -50,5 +48,5 @@ import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
  */
 public interface WantsUserUpdates
 {
-  public boolean userUpdated_oob(SingleSessionManager mgr, Serializable uId);
+  public boolean userUpdated_oobTL(Serializable uId);
 }

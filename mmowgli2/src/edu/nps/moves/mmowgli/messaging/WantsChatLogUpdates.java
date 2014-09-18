@@ -35,8 +35,6 @@ package edu.nps.moves.mmowgli.messaging;
 
 import java.io.Serializable;
 
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
-
 /**
  * WantsChatLogUpdates.java
  * Created on Apr 13, 2011
@@ -50,5 +48,5 @@ import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
  */
 public interface WantsChatLogUpdates
 { 
-  public boolean logUpdated_oob(SingleSessionManager mgr, Serializable chatLogId);  // return true if need gui update
+  public boolean logUpdated_oobTL(Serializable chatLogId);  // return true if need gui update
 }
