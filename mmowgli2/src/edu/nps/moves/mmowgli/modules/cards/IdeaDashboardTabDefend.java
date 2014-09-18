@@ -39,6 +39,7 @@ import com.vaadin.ui.Label;
 
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
  * ActionPlanPageTabImages.java
@@ -57,6 +58,8 @@ public class IdeaDashboardTabDefend extends IdeaDashboardTabPanel
   private static final long serialVersionUID = 3579313668272173564L;
   
   private boolean initted = false;
+  
+  @HibernateSessionThreadLocalConstructor
   public IdeaDashboardTabDefend()
   {
     super();
@@ -65,7 +68,7 @@ public class IdeaDashboardTabDefend extends IdeaDashboardTabPanel
   @Override
   public void initGui()
   {
-    String defendCardName = CardType.getNegativeIdeaCardType().getTitle();
+    String defendCardName = CardType.getNegativeIdeaCardTypeTL().getTitle();
     Label leftLabel = new Label(
         "This is a list of all "+defendCardName+" cards that have been played.");
     getLeftLayout().addComponent(leftLabel, "top:0px;left:0px"); 
@@ -89,7 +92,7 @@ public class IdeaDashboardTabDefend extends IdeaDashboardTabPanel
     super.setVisible(visible);
     if(visible)
       if(!initted) {
-        buildCardClassTable(CardTypeManager.getNegativeIdeaCardType()); // getting class instead of type since the root idea cards can change move to move
+        buildCardClassTable(CardTypeManager.getNegativeIdeaCardTypeTL()); // getting class instead of type since the root idea cards can change move to move
         initted=true;
       }
   }
