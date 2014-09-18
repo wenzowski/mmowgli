@@ -42,8 +42,6 @@ import com.vaadin.ui.VerticalLayout;
 import edu.nps.moves.mmowgli.components.AppMenuBar;
 import edu.nps.moves.mmowgli.components.Footer;
 import edu.nps.moves.mmowgli.components.Header;
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 import edu.nps.moves.mmowgli.messaging.MMessage;
 import edu.nps.moves.mmowgli.messaging.WantsMovePhaseUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
@@ -61,7 +59,6 @@ import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
 public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdates, WantsMovePhaseUpdates
 {
   private static final long serialVersionUID = 6619931431041760684L;
- // private AppMenuBar menuBar;
   private Header header;
   private Footer footer;
   private MmowgliContentFrame mContentFr;
@@ -70,7 +67,7 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
   public MmowgliOuterFrame()
   {
     setSizeUndefined();
-    setWidth("1040px"); // with padding"990px"); //MMOWGLI_FRAME_WIDTH);
+    setWidth("1040px");
     addStyleName("m-mmowgliouterframe");
    // addStyleName("m-redborder");   this is a good debugging border
     
@@ -102,32 +99,30 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
     return menubar;
   }
 
-  public boolean refreshUser_oob(Object uId, SingleSessionManager sessMgr)
+  public boolean refreshUser_oobTL(Object uId)
   {
-    return header.refreshUser(uId, sessMgr);
+    return header.refreshUserTL(uId);
   }
 
-  public void gameEvent_oob(SingleSessionManager sessMgr, char typ, String message)
+  public boolean gameEvent_oobTL(char typ, String message)
   {
     MMessage MSG = MMessage.MMParse(typ, message);
-    header.gameEventLoggedOob(sessMgr, MSG.id) ;  
+    return header.gameEventLoggedOobTL(MSG.id) ;  
   }
-
-  
+ 
   public void showOrHideFouoButton(boolean show)
   {
     //header.showOrHideFouoButton(show);
-    footer.showHideFouoButton(show);
-    
+    footer.showHideFouoButton(show);    
   }
 
   @Override
-  public boolean moveUpdatedOob(SessionManager sessMgr, Serializable mvId)
+  public boolean moveUpdatedOobTL(Serializable mvId)
   {
-    return header.moveUpdatedOob(sessMgr, mvId);
+    return header.moveUpdatedOobTL(mvId);
   }
 
-  public boolean movePhaseUpdatedOob(SessionManager sessMgr, Serializable pId)
+  public boolean movePhaseUpdatedOobTL(Serializable pId)
   {
     return false; // header doesn't use it
   }
