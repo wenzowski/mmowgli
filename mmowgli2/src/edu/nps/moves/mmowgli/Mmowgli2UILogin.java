@@ -1,6 +1,8 @@
 package edu.nps.moves.mmowgli;
 
 import com.vaadin.annotations.*;
+import com.vaadin.shared.communication.PushMode;
+import com.vaadin.shared.ui.ui.Transport;
 
 /**
  * Mmowgli2UILogin.java
@@ -14,8 +16,7 @@ import com.vaadin.annotations.*;
  * @version $Id$
  */
 
-//Watch out for some of the annotations interfering with hbncontainer (see MmowgliMobileUI comments)
-//@Push(PushMode.MANUAL)
+@Push(value=PushMode.MANUAL,transport=Transport.STREAMING)
 
 //This preserves the UI across page reloads
 @PreserveOnRefresh
