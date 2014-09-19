@@ -39,6 +39,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.Game;
@@ -233,7 +234,7 @@ public class SendMessageWindow extends Window
         String msg = ta.getValue().toString();
         if(msg.length()>0) { 
           MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-          MailManager mmgr = globs.getAppMaster().getMailManager();
+          MailManager mmgr = AppMaster.instance().getMailManager();
           User me = DBGet.getUserTL(globs.getUserID());
           String subj = subjTf.getValue().toString().trim();
           String troubleList = null;
@@ -275,7 +276,7 @@ public class SendMessageWindow extends Window
           HSess.init();
           String subj = subjTf.getValue().toString().trim();
           for(String recpt : emails) {
-            MailManager mgr = Mmowgli2UI.getGlobals().getAppMaster().getMailManager();
+            MailManager mgr = AppMaster.instance().getMailManager();
             String retAddr = mgr.buildMmowgliReturnAddressTL();
             mgr.getMailer().send(recpt, retAddr, subj, msg, true);
           }
