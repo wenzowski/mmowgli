@@ -44,7 +44,6 @@ import org.apache.activemq.ActiveMQTopicPublisher;
 
 import edu.nps.moves.mmowgli.MmowgliConstants;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
-import edu.nps.moves.mmowgli.utility.SysOut;
 
 /**
  * JmsIo.java Created on Apr 24, 2011
@@ -114,7 +113,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
     String jmsTopic = JMS_INTERNODE_TOPIC;
 
     if (jmsUrl == null || jmsTopic == null) {
-      SysOut.println("JmsIO2: No JMS server URL = "+jmsUrl + " jmsTopic = " + jmsTopic + ". Not performing any between-tomcat-servers event messaging");
+      MSysOut.println("JmsIO2: No JMS server URL = "+jmsUrl + " jmsTopic = " + jmsTopic + ". Not performing any between-tomcat-servers event messaging");
     }
     else { // appropriate constants found, set up JMS
       try {
@@ -125,17 +124,17 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
         // to talk to JMS). The below works well enough for us. We use
         // "topic connections"
         // which allow publish/subscribe semantics.
-        SysOut.println("JMSIO2: Getting external connection factory at "+jmsUrl);
+        MSysOut.println("JMSIO2: Getting external connection factory at "+jmsUrl);
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(jmsUrl);
         /*new*/connectionFactory.setAlwaysSessionAsync(false);
-        SysOut.println("JMSIO2: Creating external topic connection");
+        MSysOut.println("JMSIO2: Creating external topic connection");
         Connection jmsTopicConnection = connectionFactory.createTopicConnection();
-        SysOut.println("JMSIO2: Starting external topic connecton");
+        MSysOut.println("JMSIO2: Starting external topic connecton");
         jmsTopicConnection.start();
 
         // A topic session allows publish/subscribe, vs a queue connection which
         // does point-to-point messaging.
-        SysOut.println("JMSIO2: Creating external non-transacted, auto-ack topic session.");
+        MSysOut.println("JMSIO2: Creating external non-transacted, auto-ack topic session.");
         /*new -- only one session on this connection*/
         jmsExternalSession = (TopicSession) jmsTopicConnection.createSession(
             false, // transacted  or not
@@ -143,7 +142,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
 
         // If the topic does not exist, it is created on the broker. If it does
         // exist, we get a reference to that.
-        SysOut.println("JMSIO2: Creating external topic: " + JMS_INTERNODE_TOPIC);
+        MSysOut.println("JMSIO2: Creating external topic: " + JMS_INTERNODE_TOPIC);
         jmsExternalTopic = jmsExternalSession.createTopic(JMS_INTERNODE_TOPIC);
 
         // Create a topic publisher. This gives us a channel to send messages to
@@ -151,58 +150,31 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
         jmsExternalPublisher = (ActiveMQTopicPublisher)jmsExternalSession.createPublisher(jmsExternalTopic);
       //todo resolve  jmsExternalPublisher.setTimeToLive(MESSAGE_TTL);
         jmsExternalPublisher.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-      //  SysOut.println("   JMSIO2: Created external topic " + jmsExternalTopic + " with TTL " + MESSAGE_TTL + " for publishing");
-        SysOut.println("   JMSIO2: Created external topic " + jmsExternalTopic + " with deliver mode non-persistent for publishing");
+      //  MSysOut.println("   JMSIO2: Created external topic " + jmsExternalTopic + " with TTL " + MESSAGE_TTL + " for publishing");
+        MSysOut.println("   JMSIO2: Created external topic " + jmsExternalTopic + " with deliver mode non-persistent for publishing");
         // Create a topic subscriber. (This will receive messages published only
         // since
         // it was created; you don't have to worry about getting pre-creation
         // messages.)
-        SysOut.println("JMSIO2: Creating external subscriber (consumer)");
+        MSysOut.println("JMSIO2: Creating external subscriber (consumer)");
         jmsExternalConsumer = jmsExternalSession.createSubscriber(jmsExternalTopic);
-        SysOut.println("  JMSIO2: Created external consumer for topic: " + JMS_INTERNODE_TOPIC);
+        MSysOut.println("  JMSIO2: Created external consumer for topic: " + JMS_INTERNODE_TOPIC);
 
         // We receive messages async.
         jmsExternalConsumer.setMessageListener(this);
 
-        SysOut.println("JmsIO2: External JMS Server connection established for inter-tomcat comms. Server ID = " + tomcatServerIdentifier);
+        MSysOut.println("JmsIO2: External JMS Server connection established for inter-tomcat comms. Server ID = " + tomcatServerIdentifier);
       }
       catch (Exception e) {
-        SysOut.println("JMSIO2: Exception: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
-        SysOut.println("JMSIO2: Cannot create external JMS session; JMS server may be down. ");
-        SysOut.println("JMSIO2: There will be no inter-cluster communication");
+        MSysOut.println("JMSIO2: Exception: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+        MSysOut.println("JMSIO2: Cannot create external JMS session; JMS server may be down. ");
+        MSysOut.println("JMSIO2: There will be no inter-cluster communication");
         jmsExternalPublisher = null;
         jmsExternalConsumer = null;
-      }
-      
-/*      try {
-        subscribeToLocalJMS();
-      }
-      catch(JMSException e) {
-        // This is fatal
-        throw new RuntimeException("LocalJmsIO: Cannot create a local JMS connection, exception =" +
-                                    e.getClass().getSimpleName() + " " + e.getLocalizedMessage());
-      } */
+      }      
     }
   }
-/*
-  private void subscribeToLocalJMS() throws JMSException
-  {
-    Broadcaster.register(this);
-    ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(JMS_LOCAL_HANDLE);
-    connectionFactory.setAlwaysSessionAsync(false);
-    Connection jmsTopicConnection = connectionFactory.createTopicConnection();
-    jmsTopicConnection.start();
-    //new -- only one session on this connection
-    jmsLocalSession = (TopicSession) jmsTopicConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    jmsLocalTopic = jmsLocalSession.createTopic(JMS_LOCAL_TOPIC);
 
-    jmsLocalPublisher = jmsLocalSession.createPublisher(jmsLocalTopic);
-    jmsLocalPublisher.setTimeToLive(LocalJmsIO.LOC_MESSAGE_TTL);
-    jmsLocalConsumer = jmsLocalSession.createSubscriber(jmsLocalTopic);
-    jmsLocalConsumer.setMessageListener(new LocalJmsListener());
-    SysOut.println("Local JMS connection setup in JmsIO2, handle = "+JMS_LOCAL_HANDLE+", topic = "+JMS_LOCAL_TOPIC);
-  }
-*/
   /**
    * Sends out a locally-generated message to the external JMS side.
    * 
@@ -238,7 +210,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
           JMSMessageUtil.dump("JmsIO: Pub: ",jmsMessage);        
         else {
           //char mTyp = JMSMessageUtil.getType(jmsMessage);
-          //doSysOut("P"+mTyp);
+          //doMSysOut("P"+mTyp);
         }
         return true; // good send if we got here
       }
