@@ -18,12 +18,12 @@ import edu.nps.moves.mmowgliMobile.data.*;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public abstract class MessageRenderer
+public abstract class EntryRenderer
 {
-  abstract public void setMessage(MessageView mView, Message msg, MessageHierarchyView messageList, CssLayout layout);
+  abstract public void setMessage(FullEntryView mView, ListEntry msg, ListView messageList, CssLayout layout);
  
   protected SimpleDateFormat formatter = new SimpleDateFormat("M/d/yy hh:mm");
-  protected Serializable getPojoId(Message msg)
+  protected Serializable getPojoId(ListEntry msg)
   {
     if(msg instanceof WrappedCard)
       return ((WrappedCard)msg).getCard().getId();

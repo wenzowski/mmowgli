@@ -109,7 +109,7 @@ public class FolderHierarchyView extends NavigationView {
 
                         @Override
                         public void buttonClick(NavigationButtonClickEvent event) {
-                            nav.navigateTo(new MessageHierarchyView(nav, f));
+                            nav.navigateTo(new ListView(nav, f));
                         }
                     });
 

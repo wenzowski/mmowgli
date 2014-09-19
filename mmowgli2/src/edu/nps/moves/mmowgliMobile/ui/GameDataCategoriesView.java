@@ -14,12 +14,12 @@ import com.vaadin.ui.*;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
 import edu.nps.moves.mmowgliMobile.data.*;
-import edu.nps.moves.mmowgliMobile.data.Message;
+import edu.nps.moves.mmowgliMobile.data.ListEntry;
 
 /**
  * Displays accounts, mailboxes, message list hierarchically
  */
-public class MailboxHierarchyView extends NavigationView {
+public class GameDataCategoriesView extends NavigationView {
 
     private static final long serialVersionUID = 1L;
 
@@ -76,7 +76,7 @@ public class MailboxHierarchyView extends NavigationView {
         }, new Date(), 10000);
     }
 */
-    public MailboxHierarchyView(final MmowgliMobileNavManager nav) {
+    public GameDataCategoriesView(final MmowgliMobileNavManager nav) {
         setCaption(Game.get(MobileVHib.getVHSession()).getTitle());
         setWidth("100%");
         setHeight("100%");
@@ -150,7 +150,7 @@ public class MailboxHierarchyView extends NavigationView {
       public void buttonClick(NavigationButtonClickEvent event)
       {
         Folder f = new Folder("Action Plans", new AllActionPlansContainer<Object>(),ActionPlan.class);
-        nav.navigateTo(new MessageHierarchyView(nav, f));    
+        nav.navigateTo(new ListView(nav, f));    
       }
     });
     
@@ -164,7 +164,7 @@ public class MailboxHierarchyView extends NavigationView {
     public void buttonClick(NavigationButtonClickEvent event)
     {
       Folder f = new Folder("Players", new AllUsersContainer<Object>(),User.class);
-      nav.navigateTo(new MessageHierarchyView(nav, f));      
+      nav.navigateTo(new ListView(nav, f));      
     }
   });
     
@@ -222,9 +222,9 @@ public class MailboxHierarchyView extends NavigationView {
             int newMessages = 0;
             for (Folder child : entry.getKey().getFolders()) {
                 for (AbstractPojo p : child.getChildren()) {
-                    if (p instanceof Message) {
-                        Message msg = (Message) p;
-                        newMessages += msg.getStatus() == MessageStatus.NEW ? 1
+                    if (p instanceof ListEntry) {
+                        ListEntry msg = (ListEntry) p;
+                        newMessages += msg.getStatus() == EntryStatus.NEW ? 1
                                 : 0;
                     }
                 }

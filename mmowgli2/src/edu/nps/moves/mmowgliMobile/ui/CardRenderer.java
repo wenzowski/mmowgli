@@ -25,12 +25,12 @@ import edu.nps.moves.mmowgliMobile.data.*;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class CardRenderer extends MessageRenderer implements ClickListener
+public class CardRenderer extends EntryRenderer implements ClickListener
 {
   private static final long serialVersionUID = -8682226465281882831L;
   private SimpleDateFormat formatter = new SimpleDateFormat("M/d/yy hh:mm");
 
-  public void setMessage(MessageView mView, Message message, MessageHierarchyView messageList, CssLayout layout)
+  public void setMessage(FullEntryView mView, ListEntry message, ListView messageList, CssLayout layout)
   {
     WrappedCard wc = (WrappedCard) message;
     Card c = wc.getCard();
@@ -189,7 +189,7 @@ public class CardRenderer extends MessageRenderer implements ClickListener
      * nav.navigateTo(new MessageHierarchyView(nav, new Folder("Expand",expandCntnr), null)); } }); } else btn.setEnabled(false);
      */
     if (message instanceof WrappedCard) {
-      layout.addComponent(makeChildGroupButton("Expand", (WrappedCard) message, CardType.getExpandType(), messageList));
+      layout.addComponent(makeChildGroupButton("Expand", (WrappedCard) message, CardType.getExpandType(MobileVHib.getVHSession()), messageList));
       /*
        * btn = new NavigationButton("Counter"); btn.addStyleName("pill"); btn.addClickListener(new NavigationButton.NavigationButtonClickListener() {
        * 
@@ -197,7 +197,7 @@ public class CardRenderer extends MessageRenderer implements ClickListener
        * ((WrappedCard)msg).getCard(); Container cntr = new ChildCardsByTypeContainer<Card>(parent,CardType.getCounterType()); nav.navigateTo(new
        * MessageHierarchyView(nav, new Folder("Counter",cntr), null)); } });
        */
-      layout.addComponent(makeChildGroupButton("Counter", (WrappedCard) message, CardType.getCounterType(), messageList));
+      layout.addComponent(makeChildGroupButton("Counter", (WrappedCard) message, CardType.getCounterType(MobileVHib.getVHSession()), messageList));
       /*
        * btn = new NavigationButton("Adapt"); btn.addStyleName("pill"); btn.addClickListener(new NavigationButton.NavigationButtonClickListener() {
        * 
@@ -205,7 +205,7 @@ public class CardRenderer extends MessageRenderer implements ClickListener
        * ((WrappedCard)msg).getCard(); Container cntr = new ChildCardsByTypeContainer<Card>(parent,CardType.getAdaptType()); nav.navigateTo(new
        * MessageHierarchyView(nav, new Folder("Adapt",cntr), null)); } });
        */
-      layout.addComponent(makeChildGroupButton("Adapt", (WrappedCard) message, CardType.getAdaptType(), messageList));
+      layout.addComponent(makeChildGroupButton("Adapt", (WrappedCard) message, CardType.getAdaptType(MobileVHib.getVHSession()), messageList));
       /*
        * btn = new NavigationButton("Explore"); btn.addStyleName("pill"); btn.addClickListener(new NavigationButton.NavigationButtonClickListener() {
        * 
@@ -213,7 +213,7 @@ public class CardRenderer extends MessageRenderer implements ClickListener
        * ((WrappedCard)msg).getCard(); Container cntr = new ChildCardsByTypeContainer<Card>(parent,CardType.getExploreType()); nav.navigateTo(new
        * MessageHierarchyView(nav, new Folder("Explore",cntr), null)); } });
        */
-      layout.addComponent(makeChildGroupButton("Explore", (WrappedCard) message, CardType.getExploreType(), messageList));
+      layout.addComponent(makeChildGroupButton("Explore", (WrappedCard) message, CardType.getExploreType(MobileVHib.getVHSession()), messageList));
     }
 
   }
@@ -231,7 +231,7 @@ public class CardRenderer extends MessageRenderer implements ClickListener
   }
 
   @SuppressWarnings("serial")
-  private Component makeChildGroupButton(final String title, WrappedCard card, CardType typ, final MessageHierarchyView currentMessageList)
+  private Component makeChildGroupButton(final String title, WrappedCard card, CardType typ, final ListView currentMessageList)
   {
     final NavigationButton btn = new NavigationButton(); //title);
     //btn.addStyleName("pill");
@@ -245,7 +245,8 @@ public class CardRenderer extends MessageRenderer implements ClickListener
           NavigationManager nav = currentMessageList.getNavigationManager();
           if(nav == null)
             nav = currentMessageList.getNavigationManager();
-          nav.navigateTo(new MessageHierarchyView((MmowgliMobileNavManager)nav, new Folder(title+"s on card "+parent.getId(), container, Card.class)));
+          String par = parent==null?"?":(""+parent.getId());
+          nav.navigateTo(new ListView((MmowgliMobileNavManager)nav, new Folder(title+"s on card "+par, container, Card.class)));
         }
       });
       btn.setDescription(""+container.size());

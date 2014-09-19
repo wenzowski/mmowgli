@@ -8,7 +8,7 @@ import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgliMobile.data.*;
-import edu.nps.moves.mmowgliMobile.data.Message;
+import edu.nps.moves.mmowgliMobile.data.ListEntry;
 
 /**
  * MessageListRenderer.java Created on Feb 26, 2014
@@ -18,19 +18,19 @@ import edu.nps.moves.mmowgliMobile.data.Message;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public abstract class MessageListRenderer
+public abstract class ListEntryRenderer
 {
   public final String NORMAL_STYLE_NAME = "m-messageList-normal";
   public final String ITALIC_STYLE_NAME = "m-messageList-italics";
   public final String BOLD_STYLE_NAME = "m-messageList-bold";
   public final String ITALIC_BOLD_STYLE_NAME = "m-messageList-italic-bold";
   
-  abstract public void setMessage(Message msg, MessageHierarchyView messageList, CssLayout layout);
+  abstract public void renderEntry(ListEntry msg, ListView messageList, CssLayout layout);
 
   protected SimpleDateFormat formatter = new SimpleDateFormat("M/d/yy hh:mm");
   protected StringBuilder sb = new StringBuilder();
   
-  protected Serializable getPojoId(Message msg)
+  protected Serializable getPojoId(ListEntry msg)
   {
     if (msg instanceof WrappedCard)
       return ((WrappedCard) msg).getCard().getId();
@@ -51,6 +51,10 @@ public abstract class MessageListRenderer
     sb.append("</span>");   
   }
   
+  protected void styledText(String style, StringBuilder sb, Object ... strs)
+  {
+    _text(style,sb,strs);
+  }
   protected void italicText(StringBuilder sb, Object ... strs)
   {
     _text(ITALIC_STYLE_NAME,sb,strs);
@@ -71,34 +75,34 @@ public abstract class MessageListRenderer
   {
     normalText(sb,strs);
   }
-  private static UserListRenderer u_rend = null;
-  private static ActionPlanListRenderer ap_rend = null;
-  private static CardListRenderer c_rend = null;
+  private static UserListEntryRenderer u_rend = null;
+  private static ActionPlanListEntryRenderer ap_rend = null;
+  private static CardListEntryRenderer c_rend = null;
 
-  public static UserListRenderer u()
+  public static UserListEntryRenderer u()
   {
     if (u_rend == null)
-      u_rend = new UserListRenderer();
+      u_rend = new UserListEntryRenderer();
     return u_rend;
   }
-  public static ActionPlanListRenderer ap()
+  public static ActionPlanListEntryRenderer ap()
   {
     if(ap_rend == null)
-      ap_rend = new ActionPlanListRenderer();
+      ap_rend = new ActionPlanListEntryRenderer();
     return ap_rend;
   }
-  public static CardListRenderer c()
+  public static CardListEntryRenderer c()
   {
     if(c_rend == null)
-      c_rend = new CardListRenderer();
+      c_rend = new CardListEntryRenderer();
     return c_rend;
   }
   
-  public static class CardListRenderer extends MessageListRenderer
+  public static class CardListEntryRenderer extends ListEntryRenderer
   {
-    private CardListRenderer(){}
+    private CardListEntryRenderer(){}
     @Override
-    public void setMessage(Message message, MessageHierarchyView messageList, CssLayout layout)
+    public void renderEntry(ListEntry message, ListView messageList, CssLayout layout)
     {
       WrappedCard wc = (WrappedCard) message;
       Card c = wc.getCard();
@@ -115,13 +119,13 @@ public abstract class MessageListRenderer
     }
   }
 
-  public static class ActionPlanListRenderer extends MessageListRenderer
+  public static class ActionPlanListEntryRenderer extends ListEntryRenderer
   {
-    private ActionPlanListRenderer(){}
+    private ActionPlanListEntryRenderer(){}
     @Override
-    public void setMessage(Message msg, MessageHierarchyView messageList, CssLayout layout)
+    public void renderEntry(ListEntry entry, ListView messageList, CssLayout layout)
     {
-      WrappedActionPlan wap = (WrappedActionPlan) msg;
+      WrappedActionPlan wap = (WrappedActionPlan) entry;
       ActionPlan ap = wap.getActionPlan();
       layout.removeAllComponents();      
       sb.setLength(0);
@@ -130,7 +134,8 @@ public abstract class MessageListRenderer
       sb.append(". ");
       normalText(sb,formatter.format(ap.getCreationDate()));
       sb.append(", ");
-      italicBoldText(sb,ap.getQuickAuthorList());
+      String s = ap.getQuickAuthorList().replaceAll(",",", "); // add space
+      styledText("m-actionplan-text-authors",sb,s);// italicBoldText(sb,s);
       sb.append(". ");
       normalText(sb,ap.getTitle());
       
@@ -138,11 +143,11 @@ public abstract class MessageListRenderer
     }
   }
 
-  public static class UserListRenderer extends MessageListRenderer
+  public static class UserListEntryRenderer extends ListEntryRenderer
   {
-    private UserListRenderer(){}
+    private UserListEntryRenderer(){}
     @Override
-    public void setMessage(Message msg, MessageHierarchyView messageList, CssLayout layout)
+    public void renderEntry(ListEntry msg, ListView messageList, CssLayout layout)
     {
       WrappedUser wu = (WrappedUser) msg;
       User u = wu.getUser();

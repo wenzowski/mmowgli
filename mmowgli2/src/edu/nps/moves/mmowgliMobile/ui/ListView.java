@@ -16,9 +16,9 @@ import com.vaadin.ui.Table.ColumnHeaderMode;
 
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgliMobile.data.*;
-import edu.nps.moves.mmowgliMobile.data.Message;
+import edu.nps.moves.mmowgliMobile.data.ListEntry;
 
-public class MessageHierarchyView extends NavigationView implements LayoutClickListener
+public class ListView extends NavigationView implements LayoutClickListener
 {
   private static final long serialVersionUID = -6279802809551568787L;
 
@@ -33,52 +33,49 @@ public class MessageHierarchyView extends NavigationView implements LayoutClickL
   {
     private static final long serialVersionUID = 1L;
 
-    private final Message message;
+    private final ListEntry message;
 
     private static final String STYLENAME = "message-button";
 
-    public MessageButton(Message message, MessageListRenderer renderer)
+    public MessageButton(ListEntry message, ListEntryRenderer renderer)
     {
       this.message = message;
 
       setWidth("100%");
       setStyleName(STYLENAME);
-      renderer.setMessage(message, MessageHierarchyView.this, this);
+      renderer.renderEntry(message, ListView.this, this);
     }
 
-    public Message getMessage()
+    public ListEntry getMessage()
     {
       return message;
     }
   }
 
-  private MessageListRenderer renderer;
+  private ListEntryRenderer renderer;
 
   private void setRenderer()
   {
     Class<?> cls = folder.getPojoClass();
     if (cls == Card.class)
-      renderer = MessageListRenderer.c();
+      renderer = ListEntryRenderer.c();
     else if (cls == ActionPlan.class)
-      renderer = MessageListRenderer.ap();
+      renderer = ListEntryRenderer.ap();
     else
       // if(cls == User.class)
-      renderer = MessageListRenderer.u();
+      renderer = ListEntryRenderer.u();
   }
 
   @SuppressWarnings("serial")
-  public MessageHierarchyView(final MmowgliMobileNavManager nav, final Folder folder)
+  public ListView(final MmowgliMobileNavManager nav, final Folder folder)
   {
     if(folder.getPojoClass() == Card.class) {
-      System.out.println("blah card");
       addStyleName("m-card-list");
       }
     else if(folder.getPojoClass() == ActionPlan.class) {
-      System.out.println("blah ap");
       addStyleName("m-actionplan-list");
     }
     else if(folder.getPojoClass() == User.class){
-      System.out.println("blah user");
       addStyleName("m-user-list");
     }
     else {
@@ -108,25 +105,25 @@ public class MessageHierarchyView extends NavigationView implements LayoutClickL
       {
         Class<?> cls = folder.getPojoClass();
         if (cls == Card.class) {
-          final Message m = new WrappedCard(Card.get((Serializable) itemId, MobileVHib.getVHSession()));
+          final ListEntry m = new WrappedCard(Card.get((Serializable) itemId, MobileVHib.getVHSession()));
           m.setParent(folder);
           MessageButton btn = new MessageButton(m, renderer);
-          btn.addLayoutClickListener(MessageHierarchyView.this);
+          btn.addLayoutClickListener(ListView.this);
           return btn;
         }
         if (cls == ActionPlan.class) {
-          final Message m = new WrappedActionPlan(ActionPlan.get((Serializable) itemId, MobileVHib.getVHSession()));
+          final ListEntry m = new WrappedActionPlan(ActionPlan.get((Serializable) itemId, MobileVHib.getVHSession()));
           m.setParent(folder);
           MessageButton btn = new MessageButton(m, renderer);
-          btn.addLayoutClickListener(MessageHierarchyView.this);
+          btn.addLayoutClickListener(ListView.this);
           return btn;
 
         }
         if (cls == User.class) {
-          final Message m = new WrappedUser(User.get((Serializable) itemId, MobileVHib.getVHSession()));
+          final ListEntry m = new WrappedUser(User.get((Serializable) itemId, MobileVHib.getVHSession()));
           m.setParent(folder);
           MessageButton btn = new MessageButton(m, renderer);
-          btn.addLayoutClickListener(MessageHierarchyView.this);
+          btn.addLayoutClickListener(ListView.this);
           return btn;
 
         }
@@ -141,13 +138,13 @@ public class MessageHierarchyView extends NavigationView implements LayoutClickL
       public void itemClick(ItemClickEvent event)
       {
         Class<?> cls = folder.getPojoClass();
-        Message msg;
+        ListEntry msg;
         if (cls == Card.class)
           msg = new WrappedCard(Card.get((Serializable) event.getItemId(), MobileVHib.getVHSession()));
         else if (cls == ActionPlan.class)
           msg = new WrappedActionPlan(ActionPlan.get((Serializable) event.getItemId(), MobileVHib.getVHSession()));
-        // else if (cls == User.class) {
-        msg = new WrappedUser(User.get((Serializable) event.getItemId(), MobileVHib.getVHSession()));
+        else //if (cls == User.class) {
+          msg = new WrappedUser(User.get((Serializable) event.getItemId(), MobileVHib.getVHSession()));
 
         msg.setParent(folder);
         messageClicked(msg, null);
@@ -177,9 +174,9 @@ public class MessageHierarchyView extends NavigationView implements LayoutClickL
   {
     int newMessages = 0;
     for (AbstractPojo child : folder.getChildren()) {
-      if (child instanceof Message) {
-        Message msg = (Message) child;
-        newMessages += msg.getStatus() == MessageStatus.NEW ? 1 : 0;
+      if (child instanceof ListEntry) {
+        ListEntry msg = (ListEntry) child;
+        newMessages += msg.getStatus() == EntryStatus.NEW ? 1 : 0;
       }
     }
 
@@ -198,23 +195,23 @@ public class MessageHierarchyView extends NavigationView implements LayoutClickL
     }
   }
 
-  List<Message> selected = new ArrayList<Message>();
+  List<ListEntry> selected = new ArrayList<ListEntry>();
 
   @Override
   public void layoutClick(LayoutClickEvent event)
   {
     MessageButton btn = (MessageButton) event.getSource();
-    Message msg = btn.getMessage();
+    ListEntry msg = btn.getMessage();
     messageClicked(msg, btn);
   }
 
-  private void messageClicked(Message msg, MessageButton btn)
+  private void messageClicked(ListEntry msg, MessageButton btn)
   {
      table.select(getMessageTableId(msg));
      setMessage(msg);
   }
 
-  private Serializable getMessageTableId(Message msg)
+  private Serializable getMessageTableId(ListEntry msg)
   {
     if (msg instanceof WrappedCard)
       return ((WrappedCard) msg).getCard().getId();
@@ -225,7 +222,7 @@ public class MessageHierarchyView extends NavigationView implements LayoutClickL
     return null;
   }
 
-  private void setMessage(final Message message)
+  private void setMessage(final ListEntry message)
   {
     // This doesn't work with the breadcrumbs
     /*
@@ -234,7 +231,7 @@ public class MessageHierarchyView extends NavigationView implements LayoutClickL
      */
 
     NavigationManager nav = getNavigationManager();
-    MessageView mv = new MessageView(true, (MmowgliMobileNavManager) nav);
+    FullEntryView mv = new FullEntryView(true, (MmowgliMobileNavManager) nav);
     mv.setMessage(message, this);
     nav.navigateTo(mv);
   }

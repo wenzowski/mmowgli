@@ -19,9 +19,9 @@ import edu.nps.moves.mmowgliMobile.data.*;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class UserRenderer extends MessageRenderer
+public class UserRenderer extends EntryRenderer
 {
-  public void setMessage(MessageView mView, Message message, MessageHierarchyView messageList, CssLayout layout)
+  public void setMessage(FullEntryView mView, ListEntry message, ListView messageList, CssLayout layout)
   {
     WrappedUser wu = (WrappedUser) message;
     User u = wu.getUser();
