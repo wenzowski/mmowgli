@@ -17,7 +17,7 @@ import edu.nps.moves.mmowgliMobile.data.*;
  * A navigation view to display a single message.
  * 
  */
-public class MessageView extends NavigationView implements ClickListener
+public class FullEntryView extends NavigationView implements ClickListener
 {
   private static final long serialVersionUID = -1101712454186250982L;
 
@@ -43,16 +43,16 @@ public class MessageView extends NavigationView implements ClickListener
     @Override
     public boolean equals(Object obj)
     {
-      if(!(obj instanceof MessageView))
+      if(!(obj instanceof FullEntryView))
         return false;
-      if(((MessageView)obj).getMessage() == null)
+      if(((FullEntryView)obj).getMessage() == null)
         return false;
       if(getMessage() == null)
         return false;
-      return ((MessageView)obj).getMessage().equals(getMessage());
+      return ((FullEntryView)obj).getMessage().equals(getMessage());
     }
 
-    public MessageView(boolean smartphone, MmowgliMobileNavManager nav)
+    public FullEntryView(boolean smartphone, MmowgliMobileNavManager nav)
     {
         this.smartphone = smartphone;
         setContent(layout);
@@ -75,7 +75,7 @@ public class MessageView extends NavigationView implements ClickListener
 
         setMessage(null, null);
     }
-    public MessageView(Message m, MessageHierarchyView mlist)
+    public FullEntryView(ListEntry m, ListView mlist)
     {
       this(true,(MmowgliMobileNavManager)mlist.getNavigationManager());
       setMessage(m,mlist);
@@ -96,16 +96,16 @@ public class MessageView extends NavigationView implements ClickListener
                 content.setSpacing(true);
                 pop.setContent(content);
                 pop.setWidth("300px");
-                Button reply = new Button("Reply", MessageView.this);
+                Button reply = new Button("Reply", FullEntryView.this);
                 reply.addStyleName("reply");
                 reply.setWidth("100%");
-                Button replyAll = new Button("Reply All", MessageView.this);
+                Button replyAll = new Button("Reply All", FullEntryView.this);
                 replyAll.addStyleName("white");
                 replyAll.setWidth("100%");
-                Button forward = new Button("Forward", MessageView.this);
+                Button forward = new Button("Forward", FullEntryView.this);
                 forward.addStyleName("white");
                 forward.setWidth("100%");
-                Button print = new Button("Print", MessageView.this);
+                Button print = new Button("Print", FullEntryView.this);
                 print.addStyleName("white");
                 print.setWidth("100%");
                 pop.addComponent(reply);
@@ -163,14 +163,14 @@ public class MessageView extends NavigationView implements ClickListener
         return nextButton;
     }
 
-    private Message message;
-    private MessageHierarchyView currentMessageList;
+    private ListEntry message;
+    private ListView currentMessageList;
 
-    public Message getMessage() {
+    public ListEntry getMessage() {
         return message;
     }
 
-    private MessageRenderer getRenderer(Message msg)
+    private EntryRenderer getRenderer(ListEntry msg)
     {
       if(msg instanceof WrappedCard)
         return new CardRenderer();
@@ -180,9 +180,9 @@ public class MessageView extends NavigationView implements ClickListener
         return new UserRenderer();
     }
     
-  private MessageRenderer renderer;
+  private EntryRenderer renderer;
 
-  public void setMessage(final Message msg, MessageHierarchyView messageList)
+  public void setMessage(final ListEntry msg, ListView messageList)
   {
     message = msg;
     currentMessageList = messageList;
@@ -223,7 +223,7 @@ public class MessageView extends NavigationView implements ClickListener
             List<AbstractPojo> messagesAndFolders = folder.getChildren();
             int index = messagesAndFolders.indexOf(message);
             if (index < messagesAndFolders.size() - 1) {
-                Message msg = (Message) messagesAndFolders.get(index + 1);
+                ListEntry msg = (ListEntry) messagesAndFolders.get(index + 1);
                 currentMessageList.selectMessage(getPojoId(msg)); //((WrappedCard)msg).getId());
                 setMessage(msg, currentMessageList);
             }
@@ -235,7 +235,7 @@ public class MessageView extends NavigationView implements ClickListener
             List<AbstractPojo> messagesAndFolders = folder.getChildren();
             int index = messagesAndFolders.indexOf(message);
             if (index > 0) {
-                Message msg = (Message) messagesAndFolders.get(index - 1);
+                ListEntry msg = (ListEntry) messagesAndFolders.get(index - 1);
                 currentMessageList.selectMessage(getPojoId(msg)); //((WrappedCard)msg).getId());
                 setMessage(msg, currentMessageList);
             }
@@ -249,7 +249,7 @@ public class MessageView extends NavigationView implements ClickListener
         Notification.show("Not implemented");
 
     }
-    private Serializable getPojoId(Message msg)
+    private Serializable getPojoId(ListEntry msg)
     {
       if(msg instanceof WrappedCard)
         return ((WrappedCard)msg).getCard().getId();
@@ -320,7 +320,7 @@ public class MessageView extends NavigationView implements ClickListener
       }
     }
   }
-private String getTypeName(Message m)
+private String getTypeName(ListEntry m)
 {
   if(m instanceof WrappedCard)
     return "cards";

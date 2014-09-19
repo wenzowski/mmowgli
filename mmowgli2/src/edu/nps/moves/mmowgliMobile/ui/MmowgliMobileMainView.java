@@ -1,6 +1,6 @@
 package edu.nps.moves.mmowgliMobile.ui;
 
-import edu.nps.moves.mmowgliMobile.data.Message;
+import edu.nps.moves.mmowgliMobile.data.ListEntry;
 
 /**
  * Main view for smartphones.
@@ -10,11 +10,11 @@ import edu.nps.moves.mmowgliMobile.data.Message;
  * 
  */
 @SuppressWarnings("serial")
-public class SmartphoneMainView extends MmowgliMobileNavManager implements MainView
+public class MmowgliMobileMainView extends MmowgliMobileNavManager implements MainView
 {
-  private final MessageView messageView = new MessageView(true, this);
+  private final FullEntryView messageView = new FullEntryView(true, this);
 
-  public SmartphoneMainView()
+  public MmowgliMobileMainView()
   {
     setWidth("100%"); // to support wider horizontal view
     addStyleName("phone");
@@ -22,7 +22,7 @@ public class SmartphoneMainView extends MmowgliMobileNavManager implements MainV
   }
 
   @Override
-  public void setMessage(Message message, MessageHierarchyView messageList)
+  public void setMessage(ListEntry message, ListView messageList)
   {
     // jmb move down....messageView.setMessage(message, messageList);
     // Navigation panel does not override previous component. As the

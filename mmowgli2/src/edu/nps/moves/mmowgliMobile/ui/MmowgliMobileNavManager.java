@@ -9,7 +9,7 @@ public class MmowgliMobileNavManager extends NavigationManager
 {
   private static final long serialVersionUID = 1L;
 
-  private MailboxHierarchyView mailboxHierarchyView;
+  private GameDataCategoriesView mailboxHierarchyView;
 
   public MmowgliMobileNavManager()
   {
@@ -26,7 +26,7 @@ public class MmowgliMobileNavManager extends NavigationManager
 
   public void navigateHome()
   {
-    mailboxHierarchyView = new MailboxHierarchyView(this);
+    mailboxHierarchyView = new GameDataCategoriesView(this);
     navigateTo(mailboxHierarchyView);
   }
 }

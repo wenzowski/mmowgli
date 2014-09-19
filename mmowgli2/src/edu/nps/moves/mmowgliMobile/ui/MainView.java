@@ -1,11 +1,11 @@
 package edu.nps.moves.mmowgliMobile.ui;
 
-import edu.nps.moves.mmowgliMobile.data.Message;
+import edu.nps.moves.mmowgliMobile.data.ListEntry;
 
 public interface MainView {
 
-    public void setMessage(Message message,
-            MessageHierarchyView messageHierarchyView);
+    public void setMessage(ListEntry message,
+            ListView messageHierarchyView);
 
     public void updateNewMessages();
 

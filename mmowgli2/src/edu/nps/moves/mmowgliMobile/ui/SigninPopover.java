@@ -1,5 +1,6 @@
 package edu.nps.moves.mmowgliMobile.ui;
 
+import org.hibernate.Session;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 
 import com.vaadin.addon.touchkit.ui.NavigationView;
@@ -108,11 +109,12 @@ public class SigninPopover extends Popover implements Button.ClickListener
   
   private String tryLogin()
   {
-    User u = User.getUserWithUserName(enteredName);
+    Session sess = VHibPii.getASession();
+    User u = User.getUserWithUserName(sess,enteredName);
     if(u != null) {
       StrongPasswordEncryptor pwEncryptor = new StrongPasswordEncryptor();
       try {
-        UserPii upii = VHibPii.getUserPii(u.getId()); 
+        UserPii upii = VHibPii.getUserPii(u.getId(),sess,true); 
         if(pwEncryptor.checkPassword(enteredPW,upii.getPassword())) {
           if(!u.isAccountDisabled())
             return null; // success

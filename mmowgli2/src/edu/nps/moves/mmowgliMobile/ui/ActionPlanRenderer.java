@@ -4,7 +4,7 @@ import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.db.ActionPlan;
-import edu.nps.moves.mmowgliMobile.data.Message;
+import edu.nps.moves.mmowgliMobile.data.ListEntry;
 import edu.nps.moves.mmowgliMobile.data.WrappedActionPlan;
 
 /**
@@ -18,7 +18,7 @@ import edu.nps.moves.mmowgliMobile.data.WrappedActionPlan;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class ActionPlanRenderer extends MessageRenderer
+public class ActionPlanRenderer extends EntryRenderer
 {
   private Component makeLabel(String s)
   {
@@ -35,6 +35,7 @@ public class ActionPlanRenderer extends MessageRenderer
   }
   private Component makeAuthors(String s)
   {
+    s = s.replaceAll(",",", ");  // add a space
     Label lab = new Label(s);
     lab.addStyleName("m-actionplan-text-authors");
     return lab;  
@@ -45,7 +46,7 @@ public class ActionPlanRenderer extends MessageRenderer
     lab.addStyleName("m-actionplan-hr");
     return lab;
   }
-  public void setMessage(MessageView mView, Message message, MessageHierarchyView messageList, CssLayout layout)
+  public void setMessage(FullEntryView mView, ListEntry message, ListView messageList, CssLayout layout)
   {
     WrappedActionPlan wap = (WrappedActionPlan) message;
     ActionPlan ap = wap.getActionPlan();
