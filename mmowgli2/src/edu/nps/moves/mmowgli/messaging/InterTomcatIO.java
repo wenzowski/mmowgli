@@ -33,7 +33,6 @@
 */
 package edu.nps.moves.mmowgli.messaging;
 
-import edu.nps.moves.mmowgli.hibernate.SessionManager;
 
 /**
  * InterTomcatIO.java
@@ -61,7 +60,7 @@ public interface InterTomcatIO
     /**
      * @return true if need to resend because db is lagging
      */
-    public boolean handleIncomingTomcatMessageOob(MMessagePacket packet, SessionManager sessMgr);
-    public void    handleIncomingTomcatMessageEventBurstCompleteOob(SessionManager sessMgr);
+    public boolean handleIncomingTomcatMessageTL(MMessagePacket packet);
+    public void    handleIncomingTomcatMessageEventBurstCompleteTL();
   }
 }
