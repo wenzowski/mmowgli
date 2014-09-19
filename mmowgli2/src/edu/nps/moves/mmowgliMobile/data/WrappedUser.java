@@ -13,7 +13,7 @@ import edu.nps.moves.mmowgli.db.User;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class WrappedUser extends Message
+public class WrappedUser extends ListEntry
 {
   private static final long serialVersionUID = 2917669864501606058L;
   

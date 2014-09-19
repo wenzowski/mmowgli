@@ -29,9 +29,9 @@ public class AllUsersContainer<T> extends HbnContainer<T>
   }
 
   @Override
-  protected Criteria getBaseCriteria()
+  protected Criteria getBaseCriteriaTL()
   {
-    Criteria crit = super.getBaseCriteria();   // gets all users
+    Criteria crit = super.getBaseCriteriaTL();   // gets all users
     crit.addOrder(Order.asc("userName"));   // alphabetical
     
  //   if(me.isGameMaster() || me.isAdministrator())

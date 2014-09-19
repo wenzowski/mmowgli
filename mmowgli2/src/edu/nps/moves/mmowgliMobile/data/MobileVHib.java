@@ -20,7 +20,7 @@ import edu.nps.moves.mmowgli.hibernate.*;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public final class MobileVHib extends AbstractVHib implements SessionManager
+public final class MobileVHib extends AbstractVHib// implements SessionManager
 {
   private static MobileVHib me = null;
   public static MobileVHib instance()
@@ -52,7 +52,7 @@ public final class MobileVHib extends AbstractVHib implements SessionManager
     return sf;
   }
   
-  @Override
+ // @Override
   public Session getSession()
   {
     //return MobileVHib.getVHSession();

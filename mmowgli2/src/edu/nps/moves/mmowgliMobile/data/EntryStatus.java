@@ -8,7 +8,7 @@ package edu.nps.moves.mmowgliMobile.data;
  * read.
  * 
  */
-public enum MessageStatus {
+public enum EntryStatus {
     /**
      * Message has just arrived in the inbox and waiting to be read
      */

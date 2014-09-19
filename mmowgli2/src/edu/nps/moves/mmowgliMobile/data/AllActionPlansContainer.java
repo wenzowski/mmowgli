@@ -29,9 +29,9 @@ public class AllActionPlansContainer<T> extends HbnContainer<T>
   }
 
   @Override
-  protected Criteria getBaseCriteria()
+  protected Criteria getBaseCriteriaTL()
   {
-    Criteria crit = super.getBaseCriteria();   // gets all aps
+    Criteria crit = super.getBaseCriteriaTL();   // gets all aps
     crit.addOrder(Order.asc("creationDate"));   // oldest first
     
  //   if(me.isGameMaster() || me.isAdministrator())

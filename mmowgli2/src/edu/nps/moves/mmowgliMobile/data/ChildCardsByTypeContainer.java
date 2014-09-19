@@ -34,9 +34,9 @@ public class ChildCardsByTypeContainer<T> extends HbnContainer<T> implements Car
   }
 
   @Override
-  protected Criteria getBaseCriteria()
+  protected Criteria getBaseCriteriaTL()
   {
-    Criteria crit = super.getBaseCriteria();   // gets all cards
+    Criteria crit = super.getBaseCriteriaTL();   // gets all cards
     crit.createAlias("parentCard","PARENT");   // who have parent cards
     crit.createAlias("cardType","CTYPE");
     crit.add(Restrictions.eq("PARENT.id",myParent.getId()));  // whose parent is me
