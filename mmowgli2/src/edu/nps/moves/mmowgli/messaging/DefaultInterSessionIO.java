@@ -37,8 +37,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashSet;
 
-import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
-import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -55,7 +54,6 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 public abstract class DefaultInterSessionIO extends InterSessionIOBase
 {
   protected HashSet<InterTomcatReceiver> receivers;
-  protected SingleSessionManager sessMgr;
   
   public DefaultInterSessionIO()
   {
@@ -100,19 +98,17 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
   /** this routine used to be synched, but JMS message delivery is single-thread */
   public void deliverToReceivers(MMessagePacket packet, HashSet<InterTomcatReceiver> receivers, boolean more)
   {
-    if (VHib.getSessionFactory() == null)//HibernateContainers.sessionFactory == null)
+    if (HSess.getSessionFactory() == null)//HibernateContainers.sessionFactory == null)
       return; // we haven't gotten started yet
 
-    if (sessMgr == null)
-      sessMgr = new SingleSessionManager();
+    HSess.init();
 
-   // HibernateContainers.oobThread = Thread.currentThread();
-    VHib.setOobThread(Thread.currentThread());
     for (InterTomcatReceiver rcvr : receivers) {
       // Attempt to keep thread alive
       try {
-        rcvr.handleIncomingTomcatMessageOob(packet, sessMgr);
-      } catch (Throwable t) {
+        rcvr.handleIncomingTomcatMessageTL(packet);
+      }
+      catch (Throwable t) {
         StringBuilder sb = new StringBuilder();
         sb.append(">>>>>>>>>>>>>\n");
         sb.append("Throwable trapped in DefaultInterSessionIO, throwing receiver: ");
@@ -135,10 +131,9 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
     
     if (!more) {
       for (InterTomcatReceiver rcvr : receivers)
-       rcvr.handleIncomingTomcatMessageEventBurstCompleteOob(sessMgr);
-    
-      sessMgr.endSession();
-    }  
+       rcvr.handleIncomingTomcatMessageEventBurstCompleteTL();
+    } 
+    HSess.close();
   }
   
   /**
@@ -148,8 +143,9 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
   public void kill()
   {
     super.kill();
-    if(sessMgr != null)
-      sessMgr.endSession();
+    
+    if(HSess.get() != null)
+      HSess.close();
   }
 
   protected void doSysOut(String s)
