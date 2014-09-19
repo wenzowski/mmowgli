@@ -20,24 +20,26 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.shared.communication.PushMode;
+import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.UI;
 
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
-import edu.nps.moves.mmowgliMobile.ui.SigninPopover;
-import edu.nps.moves.mmowgliMobile.ui.SmartphoneMainView;
+import edu.nps.moves.mmowgliMobile.ui.MmowgliMobileMainView;
 
 //One or more of the following interferes with the session interceptor design of the hibernate container
-//@Push(PushMode.AUTOMATIC)
+//@Push(value=PushMode.AUTOMATIC,transport=Transport.STREAMING)
 //@PreserveOnRefresh
 
 @SuppressWarnings("serial")
 @Theme("mmowglimobile")
+//@Theme("touchkit")
 @Title("mmowgli")
 @Widgetset("edu.nps.moves.mmowgliMobile.gwt.MmowgliMobileWidgetSet")
 
 public class MmowgliMobileUI extends UI
 {
-  private SigninPopover signinPopover = new SigninPopover();
+ // private SigninPopover signinPopover = new SigninPopover();
  
   public MmowgliMobileUI()
   {
@@ -47,7 +49,7 @@ public class MmowgliMobileUI extends UI
   protected void init(VaadinRequest request)
   {
     MSysOut.println("MM mmowgli mobile UI init");
-    setContent(new SmartphoneMainView());
+    setContent(new MmowgliMobileMainView());
     setImmediate(true);
  /* this adds signin:    
     if(signinPopover != null) {
