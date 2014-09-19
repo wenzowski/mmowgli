@@ -33,12 +33,15 @@
 		  <include name="vaadin-server.jar" />
 		  <include name="vaadin-themes.jar" />
 		  <include name="vaadin-client-compiled.jar" />
+		  <include name="vaadin-push.jar" />
 		</fileset>
 	  </unzip>
       <delete dir="WebContent/VAADIN/themes/chameleon"/>
 	  <delete dir="WebContent/VAADIN/themes/liferay"/>
 	  <delete dir="WebContent/VAADIN/themes/reindeer-tests"/>
-	  <delete dir="WebContent/VAADIN/themes/runo"/>
+	  <!--<delete dir="WebContent/VAADIN/themes/runo"/>   touchkit icons from here?  -->
+	  <delete dir="WebContent/Vaadin/themes/valo"/>
+	  <delete dir="WebContent/Vaadin/themes/tests-valo"/>
 	  <delete dir="WebContent/VAADIN/themes/tests-book"/>
 	  <delete dir="WebContent/VAADIN/themes/tests-calendar"/>
 	  <delete dir="WebContent/VAADIN/themes/tests-components"/>
