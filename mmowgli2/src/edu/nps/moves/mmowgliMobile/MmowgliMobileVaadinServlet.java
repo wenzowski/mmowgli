@@ -46,6 +46,8 @@ import com.vaadin.addon.touchkit.settings.TouchKitSettings;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.*;
 
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+
 /**
  * Mmowgli2VaadinServlet.java
  * Created on Jan 22, 2014
@@ -73,7 +75,7 @@ public class MmowgliMobileVaadinServlet extends TouchKitServlet implements Sessi
   // These are to learn about operation and lifecycle, etc.
   public MmowgliMobileVaadinServlet()
   {
-    System.out.println("MmowgliMobileVaadinServlet().....");
+    MSysOut.println("MmowgliMobileVaadinServlet().....");
   }
 
   @Override
@@ -117,7 +119,7 @@ public class MmowgliMobileVaadinServlet extends TouchKitServlet implements Sessi
      */
     //Adding a custom icon
     String contextPath = context.getContextPath();
-    System.out.println("Mobile: contextPath: "+contextPath);
+    MSysOut.println("Mobile: contextPath: "+contextPath);
     //s.getApplicationIcons().addApplicationIcon(contextPath + "/VAADIN/themes/mobilemail/apple-touch-icon.png");
     s.getApplicationIcons().addApplicationIcon(contextPath + "/VAADIN/themes/mmowglimobile/mmowgli/mmowgli_w_dots_114x114.png");
 
@@ -219,6 +221,7 @@ public class MmowgliMobileVaadinServlet extends TouchKitServlet implements Sessi
     return super.getInitParameter(name);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Enumeration<String> getInitParameterNames()
   {

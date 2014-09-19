@@ -57,7 +57,7 @@ import edu.nps.moves.mmowgliMobile.data.MobileVHib;
  *          which have to do the session management manually (see
  *          SingleSessionManager).
  */
-@WebFilter(urlPatterns = { "/handheld/*" }, dispatcherTypes = { DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ERROR })
+// @WebFilter(urlPatterns = { "/handheld/*" }, dispatcherTypes = { DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ERROR })
 public class MobileSessionInterceptor implements Filter
 {
   private MobileVHib vHib;
