@@ -13,7 +13,7 @@ import edu.nps.moves.mmowgli.db.Card;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class WrappedCard extends Message
+public class WrappedCard extends ListEntry
 {
   private static final long serialVersionUID = 2917669864501606058L;
   

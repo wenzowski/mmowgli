@@ -33,9 +33,9 @@ public class CardsByTypeContainer<T> extends HbnContainer<T> implements CardType
   }
 
   @Override
-  protected Criteria getBaseCriteria()
+  protected Criteria getBaseCriteriaTL()
   {
-    Criteria crit = super.getBaseCriteria();   // gets all cards
+    Criteria crit = super.getBaseCriteriaTL();   // gets all cards
     crit.createAlias("cardType","CTYPE");
     crit.add(Restrictions.eq("CTYPE.id",typ.getId()));
     crit.addOrder(Order.desc("creationDate"));   // newest first

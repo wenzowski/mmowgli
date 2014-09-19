@@ -4,44 +4,46 @@ import java.util.*;
 
 import edu.nps.moves.mmowgli.db.*;
 
-public class Message extends AbstractPojo {
+public class ListEntry extends AbstractPojo {
 
     private static final long serialVersionUID = 1L;
 
     private Date timestamp = new Date();
 
-    private List<MessageField> fields;
+    private List<ListEntryField> fields;
 
     /**
      * The status of the message, by default it is set as undefined
      */
-    private MessageStatus status = MessageStatus.UNDEFINED;
+    private EntryStatus status = EntryStatus.UNDEFINED;
 
-    public Message (ActionPlan ap)
+    public ListEntry (ActionPlan ap)
     {
       setFields(Arrays.asList(
-          new MessageField("From", ap.getTitle()),
-          new MessageField("To", "blah ap to"),
-          new MessageField("Subject", "blah ap subject"),
-          new MessageField("Body", "blah ap body")));
+          new ListEntryField("From", ap.getTitle()),
+          new ListEntryField("To", "blah ap to"),
+          new ListEntryField("Subject", "blah ap subject"),
+          new ListEntryField("Body", "blah ap body")));
           this.timestamp = ap.getCreationDate();      
     }
-    public Message (Card card)
+    public ListEntry (Card card)
     {
       setFields(Arrays.asList(
-          new MessageField("From", card.getAuthorName()),
-          new MessageField("To", "blah card to"),
-          new MessageField("Subject", card.getCardType().getTitle()),
-          new MessageField("Body", card.getText())));
+          new ListEntryField("From", card.getAuthorName()),
+          new ListEntryField("To", "blah card to"),
+          new ListEntryField("Subject", card.getCardType().getTitle()),
+          new ListEntryField("Body", card.getText())));
       this.timestamp = card.getCreationDate();
     }
-    public Message (User user)
+    public ListEntry (User user)
     {
+      if(user == null)
+        System.out.println("bp");
       setFields(Arrays.asList(
-          new MessageField("From", user.getUserName()),
-          new MessageField("To", "blah user to"),
-          new MessageField("Subject", "blah user subject"),
-          new MessageField("Body", "blah user body")));
+          new ListEntryField("From", user.getUserName()),
+          new ListEntryField("To", "blah user to"),
+          new ListEntryField("Subject", "blah user subject"),
+          new ListEntryField("Body", "blah user body")));
          this.timestamp = user.getRegisterDate();      
     }
     /**
@@ -54,10 +56,10 @@ public class Message extends AbstractPojo {
      * @param subject
      *            The subject of the email
      */
-    public Message(String from, String to, String subject) {
-        setFields(Arrays.asList(new MessageField("From", from),
-                new MessageField("To", to),
-                new MessageField("Subject", subject)));
+    public ListEntry(String from, String to, String subject) {
+        setFields(Arrays.asList(new ListEntryField("From", from),
+                new ListEntryField("To", to),
+                new ListEntryField("Subject", subject)));
     }
 
     /**
@@ -72,17 +74,17 @@ public class Message extends AbstractPojo {
      * @param content
      *            The body part of the email
      */
-    public Message(String from, String to, String subject, String content) {
-        setFields(Arrays.asList(new MessageField("From", from),
-                new MessageField("To", to),
-                new MessageField("Subject", subject), new MessageField("Body",
+    public ListEntry(String from, String to, String subject, String content) {
+        setFields(Arrays.asList(new ListEntryField("From", from),
+                new ListEntryField("To", to),
+                new ListEntryField("Subject", subject), new ListEntryField("Body",
                         content)));
     }
 
     /**
      * @return the fields
      */
-    public List<MessageField> getFields() {
+    public List<ListEntryField> getFields() {
         return fields;
     }
 
@@ -90,14 +92,14 @@ public class Message extends AbstractPojo {
      * @param fields
      *            the fields to set
      */
-    public void setFields(List<MessageField> fields) {
+    public void setFields(List<ListEntryField> fields) {
         this.fields = fields;
     }
 
     /**
      * @return the status
      */
-    public MessageStatus getStatus() {
+    public EntryStatus getStatus() {
         return status;
     }
 
@@ -105,7 +107,7 @@ public class Message extends AbstractPojo {
      * @param status
      *            the status to set
      */
-    public void setStatus(MessageStatus status) {
+    public void setStatus(EntryStatus status) {
         this.status = status;
     }
 
@@ -130,9 +132,9 @@ public class Message extends AbstractPojo {
      * @param field
      *            The field caption to match
      */
-    public MessageField getMessageField(String field) {
+    public ListEntryField getMessageField(String field) {
         if (field != null) {
-            for (MessageField f : fields) {
+            for (ListEntryField f : fields) {
                 if (f.getCaption().toLowerCase().equals(field.toLowerCase())) {
                     return f;
                 }

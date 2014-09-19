@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * A field in a message
  */
-public class MessageField implements Serializable {
+public class ListEntryField implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -16,7 +16,7 @@ public class MessageField implements Serializable {
     /**
      * Constructor
      */
-    public MessageField() {
+    public ListEntryField() {
         this("");
     }
 
@@ -26,7 +26,7 @@ public class MessageField implements Serializable {
      * @param caption
      *            The caption of the field
      */
-    public MessageField(String caption) {
+    public ListEntryField(String caption) {
         this(caption, null);
     }
 
@@ -36,7 +36,7 @@ public class MessageField implements Serializable {
      * @param caption
      * @param value
      */
-    public MessageField(String caption, String value) {
+    public ListEntryField(String caption, String value) {
         this.caption = caption;
         this.value = value;
     }

@@ -32,9 +32,9 @@ public class ActionPlansByUserContainer<T> extends HbnContainer<T>
   }
 
   @Override
-  protected Criteria getBaseCriteria()
+  protected Criteria getBaseCriteriaTL()
   {
-    Criteria crit = super.getBaseCriteria();   // gets all aps
+    Criteria crit = super.getBaseCriteriaTL();   // gets all aps
     crit.add(Restrictions.ilike("quickAuthorList", srchString));
     crit.addOrder(Order.asc("creationDate"));   // oldest first
     

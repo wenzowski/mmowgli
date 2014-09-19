@@ -31,9 +31,9 @@ public class CardsByUserContainer<T> extends HbnContainer<T>
   }
   
   @Override
-  protected Criteria getBaseCriteria()
+  protected Criteria getBaseCriteriaTL()
   {
-    Criteria crit = super.getBaseCriteria();   // gets all cards
+    Criteria crit = super.getBaseCriteriaTL();   // gets all cards
     crit.add(Restrictions.eq("author",user));
     crit.addOrder(Order.desc("creationDate"));   // newest first
     
