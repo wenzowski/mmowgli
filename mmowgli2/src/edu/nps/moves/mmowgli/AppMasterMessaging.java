@@ -38,26 +38,20 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 import java.util.HashMap;
 import java.util.Set;
 
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-
 import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.components.BadgeManager;
 import edu.nps.moves.mmowgli.components.KeepAliveManager;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.*;
-import edu.nps.moves.mmowgli.messaging.Broadcaster;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.SearchManager;
+import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.messaging.Broadcaster.BroadcastListener;
-import edu.nps.moves.mmowgli.messaging.InterTomcatIO;
 import edu.nps.moves.mmowgli.messaging.InterTomcatIO.InterTomcatReceiver;
-import edu.nps.moves.mmowgli.messaging.JmsIO2;
 import edu.nps.moves.mmowgli.messaging.JmsIO2.FirstListener;
-import edu.nps.moves.mmowgli.messaging.MMessage;
-import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
-import edu.nps.moves.mmowgli.utility.M;
 import edu.nps.moves.mmowgli.utility.MThreadManager;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -76,7 +70,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, BroadcastListener
 {
   private AppMaster appMaster;
-  private JmsIO2         _jmsIO;
+  private JmsIO2     _jmsIO;
   private static int sequenceCount = 0;
   private int mysequence = -1;
   
@@ -117,9 +111,8 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   public boolean doPreviewMessage(MMessagePacket pkt)
   {
     MSysOut.println("AppMasterMessaging.doPreviewMessage()...got external message");
-    Session sess = VHib.getSessionFactory().openSession();
-    Transaction tx = sess.beginTransaction();
-    tx.setTimeout(HIBERNATE_TRANSACTION_TIMEOUT_IN_SECONDS);
+    HSess.init();
+    HSess.get().getTransaction().setTimeout(HIBERNATE_TRANSACTION_TIMEOUT_IN_SECONDS);
     MMessage msg;
     Object srcobj=null;
 
@@ -127,23 +120,23 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
       case NEW_CARD:
       case UPDATED_CARD:
         msg = MMessage.MMParse(pkt.msgType,pkt.msg);
-        Card c = Card.get(msg.id,sess);
+        Card c = Card.getTL(msg.id);
         if(c != null)
-          sess.refresh(c);
+          HSess.get().refresh(c);
         else
           c = ComeBackWhenYouveGotIt.fetchCardWhenPossible(msg.id);
-        srcobj = DBGet.getCardFresh(msg.id,sess); // updates cache
+        srcobj = DBGet.getCardFreshTL(msg.id); // updates cache
         break;
 
       case NEW_USER:
       case UPDATED_USER:
         msg = MMessage.MMParse(pkt.msgType,pkt.msg);
-        User u = User.get(msg.id,sess);
+        User u = User.getTL(msg.id);
         if(u != null)
-          sess.refresh(u);
+          HSess.get().refresh(u);
         else
           u = ComeBackWhenYouveGotIt.fetchUserWhenPossible(msg.id);
-        srcobj = DBGet.getUserFresh(msg.id,sess);// updates cache
+        srcobj = DBGet.getUserFreshTL(msg.id);// updates cache
         break;
 /*test
       case GAMEEVENT:
@@ -154,8 +147,8 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
         break;
 */
       case UPDATED_ACTIONPLAN:
-        srcobj = ActionPlan.get(MMessage.MMParse(pkt.msgType,pkt.msg).id,sess);
-        sess.refresh(srcobj);
+        srcobj = ActionPlan.getTL(MMessage.MMParse(pkt.msgType,pkt.msg));
+        HSess.get().refresh(srcobj);
         break;
       default:
     }
@@ -164,10 +157,9 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
     // object types that are annotated as @Indexed. We sort out which objects to index on the
     // receiving end and ignore the rest.
     if(srcobj != null)
-      SearchManager.indexHibernateObject(srcobj, sess);
+      SearchManager.indexHibernateObject(srcobj,HSess.get());
 
-    tx.commit();
-    sess.close();
+    HSess.close();
 
     return false;  // not consumed, keep going
   }
@@ -197,7 +189,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   {
     // We want to let everyone know we've been updated
     InterTomcatIO sessIO = getInterTomcatIO();
-    String msgStr = AppMaster.getInstance().getServerName()+"\t"+sessCount;
+    String msgStr = AppMaster.instance().getServerName()+"\t"+sessCount;
     if (sessIO != null)
       sessIO.sendDelayed(UPDATE_SESSION_COUNT, msgStr, ""); // let this thread return
 
@@ -238,21 +230,21 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   // edu.nps.moves.mmowgli.messaging.InterTomcatIO.Receiver
   // Handler of messages off the JmsIO2 object, which is receiving msgs from other custer nodes
   @Override 
-  public boolean handleIncomingTomcatMessageOob(MMessagePacket pkt, SessionManager sessMgr)
+  public boolean handleIncomingTomcatMessageTL(MMessagePacket pkt)
   {
     MSysOut.println("AppMasterMessaging/JMSIO2.handleIncomingTomcatMessageOob()");
     
     if(getMcache() != null)
-      mcache.handleIncomingTomcatMessageOob(pkt, sessMgr);
+      mcache.handleIncomingTomcatMessageTL(pkt);
 
     if(getBadgeManager() != null)
-      badgeMgr.messageReceivedOob(pkt, sessMgr);
+      badgeMgr.messageReceivedTL(pkt);
 
     switch (pkt.msgType) {
       case JMSKEEPALIVE:
         KeepAliveManager kmgr = appMaster.getKeepAliveManager();
         if(kmgr != null)
-          kmgr.receivedKeepAlive(pkt.msg, sessMgr);
+          kmgr.receivedKeepAlive(pkt.msg);
         break;
       case UPDATE_SESSION_COUNT:
         handleSessionCountMsg(pkt.msg);
@@ -265,7 +257,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
     // We also pass the message to the SearchManager, which can cause Lucene/Hibernate Search, to index specific
     // object types that are annotated as @Indexed. We sort out which objects to index on the
     // receiving end and ignore the rest.
-    SearchManager.indexObjectFromMessage(pkt.msgType, pkt.msg, M.getSession(sessMgr));
+    SearchManager.indexObjectFromMessageTL(pkt.msgType, pkt.msg);
 
     return false; // don't want a retry    
   }
@@ -273,7 +265,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   // edu.nps.moves.mmowgli.messaging.InterTomcatIO.Receiver
   // Handler of messages off the JmsIO2 object, which is receiving msgs from other custer nodes
   @Override
-  public void handleIncomingTomcatMessageEventBurstCompleteOob(SessionManager sessMgr)
+  public void handleIncomingTomcatMessageEventBurstCompleteTL()
   { 
   }
 
@@ -295,9 +287,14 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
     MSysOut.println("AppMasterMessaging.incomingDatabaseEvent()");
     if(getMcache() != null) {
       /* We're in the hibernate thread here.  Have to let it complete before we can look up the object */
-      MThreadManager.run( new Runnable(){public void run(){
-        mcache.handleIncomingTomcatMessageOob(mMessagePacket, null);
-      }});
+      MThreadManager.run( new Runnable(){
+        public void run()
+        {
+          HSess.init();
+          mcache.handleIncomingTomcatMessageTL(mMessagePacket);
+          HSess.close();
+        }
+      });
     }
     // This guy, however, gets run "inline" if appropriate
     Broadcaster.broadcast(mMessagePacket);    
