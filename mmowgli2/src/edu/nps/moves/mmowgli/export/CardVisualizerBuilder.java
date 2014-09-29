@@ -35,18 +35,17 @@ package edu.nps.moves.mmowgli.export;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import javax.json.*;
+import javax.json.stream.JsonGenerator;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import edu.nps.moves.mmowgli.AppMaster;
-import edu.nps.moves.mmowgli.db.Card;
-import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 //import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
@@ -76,11 +75,13 @@ public class CardVisualizerBuilder
   public static String VISUALIZER_D3JS_FILE_NAME  = VISUALIZER_D3JS_CLASS_NAME;
   public static String VISUALIZER_JSON_FILE_NAME  = "allUnhiddenCards.json";
   
-  public static String fileSeparator;
-  
+  public static String fileSeparator; 
   static {
     fileSeparator = System.getProperty("file.separator");   
-  }
+  }  
+  private final int LONGDATE = 0;
+  private final int STRINGDATE = 1;
+  private final String DELIM = "\t";
   
   @HibernateSessionThreadLocalConstructor  
   public CardVisualizerBuilder()
@@ -88,7 +89,7 @@ public class CardVisualizerBuilder
   }
   
   public void build()
-  {
+  {    
     String path = BaseExporter.getReportsDirectory();
     String jsonFilePath     = path+fileSeparator+VISUALIZER_JSON_FILE_NAME;
     String htmlFilePath     = path+fileSeparator+VISUALIZER_HTML_FILE_NAME;
@@ -133,7 +134,8 @@ public class CardVisualizerBuilder
       
       // JSON file
       File jsonTemp = new File(jsonFileTempPath);
-      JsonObject jObj = buildJsonTree();
+      Game g = Game.getTL();
+      JsonObject jObj = buildJsonTree(g.isShowPriorMovesCards() ? null : g.getCurrentMove());
       FileWriter fw = new FileWriter(jsonTemp);   
       writeCardJson(fw, jObj); 
       fw.close();      
@@ -149,17 +151,35 @@ public class CardVisualizerBuilder
       jsonTemp.renameTo(jsonFinal);
       d3jsTemp.renameTo(d3jsFinal);
     }
-    catch(Exception ex) {
+    catch(IOException ex) {
       System.err.println("ouch! "+ex.getLocalizedMessage());
     }
   }
   
- private static SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd HH:mm z");
+  private static SimpleDateFormat dateFormatter = new SimpleDateFormat("MM/dd HH:mm z");
+  TreeSet<String> cardDays = new TreeSet<String>();
+  TreeSet<String> rootDays = new TreeSet<String>();
   
   @SuppressWarnings("unchecked")
-  public JsonObject buildJsonTree()
+  public JsonObject buildJsonTree(Move roundToShow) // null if all
   {
+    cardDays.clear();
+    rootDays.clear();
     Session sess = HSess.get();
+    
+    // Scan all cards to get master, ordered list of game days, i.e., days when cards were played ; same for only root cards
+    Criteria crit = sess.createCriteria(Card.class);
+    crit.add(Restrictions.ne("hidden",true));
+    List<Card> lis = crit.list();
+    
+    for(Card cd : lis) {
+      String ds = mangleCardDate(cd);
+      cardDays.add(ds);
+      if(cd.getParentCard() == null) {
+        rootDays.add(ds);
+      }       
+    }
+    
     JsonObjectBuilder treeBuilder = null;
     JsonArrayBuilder rootArray = null;
     try {
@@ -168,15 +188,23 @@ public class CardVisualizerBuilder
       treeBuilder.add("text", "Click on a card to zoom in, center to zoom out.");
       treeBuilder.add("color", "white");
       treeBuilder.add("value","1");
-      
+      treeBuilder.add("cardGameDays",    createGameDaysArray(cardDays,STRINGDATE));
+      treeBuilder.add("cardGameDaysLong",createGameDaysArray(cardDays,LONGDATE));
+      treeBuilder.add("rootGameDays",    createGameDaysArray(rootDays,STRINGDATE));
+      treeBuilder.add("rootGameDaysLong",createGameDaysArray(rootDays,LONGDATE));
+
       rootArray = Json.createArrayBuilder();
       
-      Criteria crit = sess.createCriteria(Card.class);
+      crit = sess.createCriteria(Card.class);
       crit.add(Restrictions.isNull("parentCard"));  // Gets only the top level
-
-      List<Card> lis = crit.list();
+      crit.add(Restrictions.ne("hidden",true));
+      
+      CardIncludeFilter filter = roundToShow==null ? new AllNonHiddenCards() : new CardsInSingleMove(roundToShow);
+      
+      lis = crit.list();
       for(Card c : lis) {
-        addCard(c,rootArray);
+        int rootDayIndex = getRootDayIndex(c);
+        addCard(c,rootArray,filter,rootDayIndex);
       }      
     }
     catch (Throwable ex) {
@@ -187,17 +215,54 @@ public class CardVisualizerBuilder
     return treeBuilder==null ? null : treeBuilder.build();
    }
   
+  public JsonArrayBuilder createGameDaysArray(TreeSet<String> set, int stringOrLong)
+  {
+    JsonArrayBuilder ret = Json.createArrayBuilder();
+    Iterator<String> itr = set.iterator();
+    while(itr.hasNext()) {
+      String s = itr.next();
+      String[] sa = s.split(DELIM);
+      ret.add(sa[stringOrLong]);
+    }
+    return ret;
+  }
+  SimpleDateFormat sdf = new SimpleDateFormat("EEE M/d ''yy");
+  
+  @SuppressWarnings("deprecation")
+  private String mangleCardDate(Card c)
+  {
+    Date d = c.getCreationDate();
+    d = new Date(d.getYear(),d.getMonth(),d.getDate()); // removes the time  
+    return ""+d.getTime()+DELIM+sdf.format(d);
+
+  }
+  
   public void writeCardJson(Writer wrtr, JsonObject obj)
   {
-    JsonWriter jw = Json.createWriter(wrtr);
+    Map<String, Object> props = new HashMap<>(1);
+    props.put(JsonGenerator.PRETTY_PRINTING, true);
+    JsonWriterFactory fact = Json.createWriterFactory(props);
+    JsonWriter jw = fact.createWriter(wrtr);
     jw.writeObject(obj);
     jw.close();
   }
   
-  private void addCard(Card c, JsonArrayBuilder arr)
+  private int getDayIndex(Card c)
   {
-    if(c.isHidden())
-      return;
+    String s = mangleCardDate(c);    
+    return cardDays.headSet(s).size();
+  }
+  
+  private int getRootDayIndex(Card c)
+  {
+    String s = mangleCardDate(c);    
+    return rootDays.headSet(s).size();
+    
+  }
+  private void addCard(Card c, JsonArrayBuilder arr, CardIncludeFilter filter, int rootDayIndex)
+  {
+//    if(c.isHidden())
+//     return;
     JsonObjectBuilder jsonObj = Json.createObjectBuilder();
     jsonObj
         .add("type", c.getCardType().getTitle())
@@ -209,11 +274,13 @@ public class CardVisualizerBuilder
         .add("date",dateFormatter.format(c.getCreationDate()))
         .add("superinteresting",Boolean.toString(CardMarkingManager.isSuperInteresting(c)))
         .add("hidden",""+c.isHidden())
-        .add("value",getValueString(c));
+        .add("value",getValueString(c))   
+        .add("gameDay", getDayIndex(c))
+        .add("rootDay", rootDayIndex);
     
     JsonArrayBuilder childArr = Json.createArrayBuilder();   
     for(Card ch : c.getFollowOns()) {  
-      addCard(ch,childArr); //recurse
+      addCard(ch,childArr,filter,rootDayIndex); //recurse
     }
     jsonObj.add("children", childArr);
     arr.add(jsonObj);
@@ -229,4 +296,32 @@ public class CardVisualizerBuilder
   {
     return "5"; //todo
   } 
+  
+  interface CardIncludeFilter
+  {
+    public boolean accept(Card c);
+  }
+
+  class AllNonHiddenCards implements CardIncludeFilter
+  {
+    @Override
+    public boolean accept(Card c) { return !c.isHidden(); }
+  }
+
+  class CardsInSingleMove implements CardIncludeFilter
+  {
+    Move m;
+    long id;
+    public CardsInSingleMove(Move m)
+    {
+      this.m = m;
+      this.id = m.getId();
+    }
+    @Override
+    public boolean accept(Card c)
+    {
+      return !c.isHidden() && (c.getCreatedInMove().getId() == id);
+    }
+  }
+
 }
