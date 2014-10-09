@@ -1,6 +1,8 @@
 package edu.nps.moves.mmowgli;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.MMOWGLI_BUILD_ID;
 import static edu.nps.moves.mmowgli.MmowgliConstants.NO_LOGGEDIN_USER_ID;
+import static edu.nps.moves.mmowgli.MmowgliConstants.VAADIN_BUILD_VERSION;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -13,6 +15,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
+import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.Position;
@@ -324,8 +327,9 @@ public class AbstractMmowgliControllerHelper
       
       if(badBoyId.equals(meId)) {
         // Aiy chihuahua! I've been bumped!
+        GameLinks gl = GameLinks.getTL();
         showNotifInAllBrowserWindows("We're sorry, but your mmowgli account has been locked out and you will now be logged off. "+
-            "Send a trouble report or contact mmowgli-trouble@movesinstitute.org for clarification.","IMPORTANT!!", "m-yellow-notification");
+            "Send a trouble report or contact "+gl.getTroubleMailto()+" for clarification.","IMPORTANT!!", "m-yellow-notification");
         doLogOutIn8Seconds();
         return true; // show notifications
       }
@@ -375,11 +379,8 @@ public class AbstractMmowgliControllerHelper
   {
     StringBuilder sb = new StringBuilder();
     sb.append("<br/>");
-   // sb.append("<div style='width:400px'>");
     sb.append(content);
-   // sb.append("</div>");
     filterContent(sb);
-    //Notification notif = new Notification("<center>" + title + "</center>", sb.toString(), Notification.Type.ERROR_MESSAGE);
     Notification notif = new Notification(title, sb.toString(), Notification.Type.ERROR_MESSAGE);
     notif.setHtmlContentAllowed(true);
     notif.setPosition(Position.MIDDLE_CENTER);
@@ -521,7 +522,7 @@ public class AbstractMmowgliControllerHelper
     hl.setComponentAlignment(countTf, Alignment.MIDDLE_LEFT);
     layout.addComponent(hl);
 
-    layout.addComponent(lab=new Label("* Count incremented on login, decremented on timeout or logout."));
+    layout.addComponent(new Label("* Count incremented on login, decremented on timeout or logout."));
 
     hl = new HorizontalLayout();
     hl.setSpacing(true);
@@ -576,6 +577,7 @@ public class AbstractMmowgliControllerHelper
     final Button bcancelButt = new Button("Cancel");
     buttHl.addComponent(bcancelButt);
     Button bokButt = new Button(buttName);
+    bokButt.setClickShortcut(ShortcutAction.KeyCode.ENTER, null);
     buttHl.addComponent(bokButt);
     layout.addComponent(buttHl);
     layout.setComponentAlignment(buttHl, Alignment.TOP_RIGHT);
@@ -1181,5 +1183,17 @@ public class AbstractMmowgliControllerHelper
     RfeDialog dial = new RfeDialog(param);
     UI.getCurrent().addWindow(dial);
     dial.center();
+  }
+
+  
+  public void handleAboutMmowgli(MenuBar menubar)
+  {
+    Notification notif = new Notification("<center><span style='color:#777'>Mmowgli</span></center>",
+                    "<center>Build "+MMOWGLI_BUILD_ID+
+                    "<br/>Vaadin "+VAADIN_BUILD_VERSION+
+                    "<br/><br/><span style='color:#777;font-size:70%'>Click to close</span></center>");
+    notif.setHtmlContentAllowed(true);
+    notif.setDelayMsec(-1);  // user must click
+    notif.show(Page.getCurrent());   
   }
 }
