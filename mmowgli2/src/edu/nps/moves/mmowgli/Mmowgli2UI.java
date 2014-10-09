@@ -60,6 +60,7 @@ import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 /**
  * Mmowgli2UI.java
  * Created on Jan 22, 2014
@@ -85,12 +86,12 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   private MmowgliSessionGlobals globals;
   private Navigator navigator;
   private UUID uuid;
-  private boolean mobiletest = false;
   
   private boolean firstUI = false;
   protected Mmowgli2UI(boolean firstUI)
   {
     this.firstUI = firstUI;
+    getPushConfiguration().setTransport(PUSHTRANSPORT);
   }
   
   @Override
@@ -107,15 +108,10 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     setWindowTitleTL();
     VerticalLayout layout = new VerticalLayout();
     setContent(layout);
-    
-    if(mobiletest) {
-      layout.addComponent(new Label("Placeholder for main game entry point once Vaadin 7 port is complete."));
-      HSess.checkClose(sessKey);
-      return;
-    }
-  //  System.out.println("VMShareTest="+VMShareTest.test);
-  //  System.out.println("VMShareTest now changed to Mmowgli2UI");
-  //  VMShareTest.test = "Mmowgli2UI";
+
+    //  System.out.println("VMShareTest="+VMShareTest.test);
+    //  System.out.println("VMShareTest now changed to Mmowgli2UI");
+    //  VMShareTest.test = "Mmowgli2UI";
       
     MmowgliSessionGlobals globs = getSession().getAttribute(MmowgliSessionGlobals.class);
     if(!globs.initted) {
