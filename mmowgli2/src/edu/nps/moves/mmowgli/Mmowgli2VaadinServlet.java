@@ -33,14 +33,11 @@
  */
 package edu.nps.moves.mmowgli;
 
-import java.io.IOException;
-import java.util.Enumeration;
+import java.util.logging.LogManager;
 
-import javax.servlet.*;
-import javax.servlet.annotation.WebInitParam;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.*;
@@ -73,6 +70,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  *   largeIcon      default ""
  *   description    default ""
  *   displayName    default ""
+ *   some done in web.xml
  */
 /*
  * @VaadinServletConfiguration possibilities:
@@ -82,42 +80,55 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  *  closeIdleSessions Whether a session should be closed when all its open UIs have been idle for longer than its configured maximum inactivity time. The default value is false.
  *  ui
  *  legacyPropertyToString
- */
-
-@SuppressWarnings("serial")
-// the "/" means only urls at the context root (Mmowgli2/) come here,  default is /*
-@WebServlet(value = "/*", asyncSupported = true, loadOnStartup=1,
-            initParams = {@WebInitParam(name="org.atmosphere.useWebSocketAndServlet3",  value="true")})
-                       //{@WebInitParam(name="org.atmosphere.useNative",  value="true")})
-                       //@WebInitParam(name="org.atmosphere.cpr.AtmosphereInterceptor",value="edu.nps.moves.mmowgli.MmowgliAtmosphereInterceptor")
+ *  
+ *  Some notes:
+ *    initParams = {@WebInitParam(name="org.atmosphere.useWebSocketAndServlet3",  value="true")} )
+                 //{@WebInitParam(name="org.atmosphere.useNative",  value="true")})
+                 //@WebInitParam(name="org.atmosphere.cpr.AtmosphereInterceptor",value="edu.nps.moves.mmowgli.MmowgliAtmosphereInterceptor")
 // AsyncSupported not being recognized? see http://stackoverflow.com/questions/7749350/illegalstateexception-not-supported-on-asynccontext-startasyncreq-res
 // Atmosphere parameters are listed in org.atmosphere.cpr.ApplicationConfig
 // Streaming plus tomcat 7, see https://vaadin.com/wiki/-/wiki/Main/Working%20around%20push%20issues
+*/
 
-// Settings in web.xml override those listed here
+@SuppressWarnings("serial")
+
+@WebServlet(value = "/*", loadOnStartup=1, asyncSupported=true)// the "/" means only urls at the context root (Mmowgli2/) come here,  default is /*
+@VaadinServletConfiguration(heartbeatInterval=300, closeIdleSessions=true, ui = Mmowgli2UILogin.class, productionMode = false)
+
+// Settings in web.xml (are supposed to) override those listed here
+
 public class Mmowgli2VaadinServlet extends VaadinServlet implements SessionInitListener, SessionDestroyListener
 {
   private AppMaster appMaster;
   private int sessionCount = 0;
 
   
-  // Both the constructor and the servletInitialized method get called first only on first browser access
+  // Both the constructor and the servletInitialized method get called first only on first browser access, unless load-on-startup=true
   public Mmowgli2VaadinServlet()
   {
     MSysOut.println("Mmowgli2VaadinServlet().....");
   }
-  
+  private void initLogging()
+  {
+    try {
+      LogManager.getLogManager().readConfiguration(getClass().getResourceAsStream("/logging.properties"));
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+System.out.println("bp");
+  }
   @Override
   protected void servletInitialized() throws ServletException
   {
     super.servletInitialized();
     
     getService().addSessionInitListener(this);
-
+    initLogging();
     ServletContext context = getServletContext();
     MSysOut.println("Mmowgli: contextPath: "+context.getContextPath());
-    appMaster = AppMaster.instance(context);// Initialize app master, global across on user sessions on this cluster node
-   
+    appMaster = AppMaster.instance(this,context);// Initialize app master, global across on user sessions on this cluster node
+
     context.setAttribute(MmowgliConstants.APPLICATION_MASTER_ATTR_NAME, appMaster);
     appMaster.init(context);
     
@@ -151,7 +162,10 @@ public class Mmowgli2VaadinServlet extends VaadinServlet implements SessionInitL
     //MSysOut.println("JMETERdebug: Session destroyed, id = "+event.getSession().hashCode());    
     if(appMaster != null) { // might be with error on startup
       appMaster.doSessionCountUpdate(--sessionCount);
-      appMaster.logSessionEnd(event.getSession().hashCode());
+
+      MmowgliSessionGlobals globs = event.getSession().getAttribute(MmowgliSessionGlobals.class);  // store this for use across the app
+      if(globs != null)
+        appMaster.logSessionEnd(globs.getUserID());
     }   
   }
   

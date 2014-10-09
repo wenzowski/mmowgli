@@ -16,7 +16,8 @@ import com.vaadin.shared.ui.ui.Transport;
  * @version $Id$
  */
 
-@Push(value=PushMode.MANUAL,transport=Transport.STREAMING)
+//The following is done in web.xml to allow different values for different deployments
+@Push(value=PushMode.MANUAL,transport=Transport.LONG_POLLING) //potentially overridden in  web.xm
 
 //This preserves the UI across page reloads
 @PreserveOnRefresh
