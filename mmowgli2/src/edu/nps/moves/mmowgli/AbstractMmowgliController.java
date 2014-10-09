@@ -132,6 +132,9 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       case MENUGAMEMASTERUSERADMIN:
         ui.navigateTo(new AppEvent(MmowgliEvent.MENUGAMEMASTERUSERADMIN,ui,null));    
         break;
+      case MENUGAMEMASTERABOUTMMOWGLI:
+        helper.handleAboutMmowgli(menubar);
+        break;
       case MENUGAMEMASTERACTIVECOUNTCLICK:
         helper.handleShowActiveUsersActionTL(menubar);
         break;
@@ -185,10 +188,10 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
         
       case MENUGAMEMASTEROPENREPORTSPAGE:
-        String url = AppMaster.instance().getAppUrlString();
-        if(!url.endsWith("/"))
-          url = url+"/";
-        BrowserWindowOpener.open(url+"reports");
+        String url = AppMaster.instance().getReportsUrl();
+        //if(!url.endsWith("/"))
+       //   url = url+"/";
+        BrowserWindowOpener.open(url); //+"reports");
         break;
         
       case MENUGAMEADMIN_EXPORTGAMESETTINGS:
@@ -319,7 +322,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       case MAPCLICK:
         LeafletMap lMap = new LeafletMap();
         Mmowgli2UI.getAppUI().setFrameContent(lMap);
-        lMap.initGui();
+        lMap.initGuiTL();
   
       case PLAYIDEACLICK:
       case CALLTOACTIONCLICK:
@@ -427,7 +430,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       public void buttonClick(ClickEvent event)
       {
         if(Boolean.parseBoolean(cb.getValue().toString()))
-          ;
+          ; // do nothing
         else {
           HSess.init();
           Game.getTL().setAdminLoginMessage(null);
