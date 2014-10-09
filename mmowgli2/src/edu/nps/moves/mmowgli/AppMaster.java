@@ -35,8 +35,7 @@ package edu.nps.moves.mmowgli;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -50,7 +49,9 @@ import javax.servlet.ServletContext;
 import org.hibernate.Session;
 
 import com.vaadin.server.Page;
+import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.Version;
+import com.vaadin.shared.ui.ui.Transport;
 
 import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.components.BadgeManager;
@@ -78,6 +79,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 public class AppMaster
 {
   private ServletContext servletContext;
+  
   private InstancePollerThread instancePollerThread;
   private MiscellaneousMmowgliTimer miscTimer;
   private BadgeManager badgeManager;
@@ -104,10 +106,10 @@ public class AppMaster
   
   private static AppMaster myInstance = null;
 
-  public static AppMaster instance(ServletContext context)
+  public static AppMaster instance(VaadinServlet servlet, ServletContext context)
   {
     if (myInstance == null)
-      myInstance = new AppMaster(context);
+      myInstance = new AppMaster(servlet,context);
     return myInstance;
   }
 
@@ -118,12 +120,13 @@ public class AppMaster
     return myInstance;
   }
 
-  private AppMaster(ServletContext context)
+  private AppMaster(VaadinServlet vservlet, ServletContext context)
   {
     System.out.print("Running Vaadin ");
     System.out.println(Version.getFullVersion());
 
     servletContext = context;
+    
     setConstants();
 
     appMasterMessaging = new AppMasterMessaging(this);
@@ -149,49 +152,72 @@ public class AppMaster
     miscTimer = new MiscellaneousMmowgliTimer();
   }
 
+  private String getInitParameter(String s)
+  {
+    String ret = servletContext.getInitParameter(s);
+    MSysOut.println("Web.xml key "+s+" returns "+ret);
+    return ret;
+  }
+  
+  private void tweekPushTransport()
+  {
+    String transportstr = getInitParameter(WEB_XML_PUSH_TRANSPORT_KEY);
+    if (transportstr != null) {
+      try {
+        PUSHTRANSPORT = Enum.valueOf(Transport.class, transportstr.toUpperCase());
+      }
+      catch (IllegalArgumentException ex) {
+        for (Transport tr : Transport.values()) {
+          if (tr.getIdentifier().equalsIgnoreCase(transportstr)) {
+            PUSHTRANSPORT = tr;
+            return;
+          }
+        }
+        System.err.println("************Bad value for config-parameter 'transport'=" + transportstr + "************************");
+      }
+    }
+  }
+  
   private void setConstants()
   {
-    JMS_INTERNODE_URL = servletContext.getInitParameter(WEB_XML_JMS_URL_KEY);
-    JMS_INTERNODE_TOPIC = servletContext.getInitParameter(WEB_XML_JMS_TOPIC_KEY);
-    GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS = servletContext.getInitParameter(WEB_XML_GAMEMASTER_TMO_KEY);
-
-    String s = servletContext.getInitParameter(WEB_XML_SMTP_HOST_KEY);
-    if (s != null && s.length() > 0)
-      MmowgliConstants.SMTP_HOST = s;
-    DEPLOYMENT_TOKEN = servletContext.getInitParameter(WEB_XML_DEPLOYMENT_TOKEN_KEY);
-    GAME_URL_TOKEN = servletContext.getInitParameter(WEB_XML_GAME_URL_TOKEN_KEY);
-
-    DEPLOYMENT = servletContext.getInitParameter(WEB_XML_DEPLOYMENT_KEY);
-    GAME_IMAGES_URL_RAW = servletContext.getInitParameter(WEB_XML_GAME_IMAGES_URL_KEY);
-    USER_IMAGES_URL_RAW = servletContext.getInitParameter(WEB_XML_USER_IMAGES_URL_KEY);
-    USER_IMAGES_FILESYSTEM_PATH_RAW = servletContext.getInitParameter(WEB_XML_USER_IMAGES_FILESYSTEM_PATH_KEY);
-
-    setClamScanConstants(servletContext);
-
-    REPORTS_FILESYSTEM_PATH_RAW = servletContext.getInitParameter(WEB_XML_REPORTS_FILESYSTEM_PATH_KEY);
-
-    String reportPath = REPORTS_FILESYSTEM_PATH_RAW;
-    REPORTS_FILESYSTEM_PATH = reportPath.replace(DEPLOYMENT_TOKEN, DEPLOYMENT);
-
-    String userImageFileSystemPath = USER_IMAGES_FILESYSTEM_PATH_RAW;
-    USER_IMAGES_FILESYSTEM_PATH = userImageFileSystemPath.replace(DEPLOYMENT_TOKEN, DEPLOYMENT);
-
-    REPORT_TO_IMAGE_URL_PREFIX = servletContext.getInitParameter(WEB_XML_REPORTS_TO_IMAGES_RELATIVE_PATH_PREFIX);
-
-    gameImagesUrlString = GAME_IMAGES_URL_RAW;
-    gameImagesUrlString = gameImagesUrlString.replace(DEPLOYMENT_TOKEN, DEPLOYMENT);
-    gameImagesUrlString = gameImagesUrlString.replace(GAME_URL_TOKEN, appUrlString);
-
-    userImagesFileSystemPath = USER_IMAGES_FILESYSTEM_PATH_RAW;
-    userImagesFileSystemPath = userImagesFileSystemPath.replace(DEPLOYMENT_TOKEN, DEPLOYMENT);
-    userImagesFileSystemPath = userImagesFileSystemPath.replace(GAME_URL_TOKEN, appUrlString);
-
-    userImagesUrlString = USER_IMAGES_URL_RAW;
-    userImagesUrlString = userImagesUrlString.replace(DEPLOYMENT_TOKEN, DEPLOYMENT);
-
     VAADIN_BUILD_VERSION = Version.getFullVersion(); // 7.3.0
     
-    try {
+    String s = getInitParameter(WEB_XML_SMTP_HOST_KEY);
+    if (s != null && s.length() > 0)
+      MmowgliConstants.SMTP_HOST = s;
+
+  //@formatter:off
+    JMS_INTERNODE_URL               = getInitParameter(WEB_XML_JMS_URL_KEY);
+    JMS_INTERNODE_TOPIC             = getInitParameter(WEB_XML_JMS_TOPIC_KEY);
+    GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS
+                                    = getInitParameter(WEB_XML_GAMEMASTER_TMO_KEY);
+
+    DEPLOYMENT_TOKEN                = getInitParameter(WEB_XML_DEPLOYMENT_TOKEN_KEY);
+    GAME_URL_TOKEN                  = getInitParameter(WEB_XML_GAME_URL_TOKEN_KEY);
+    DEPLOYMENT                      = getInitParameter(WEB_XML_DEPLOYMENT_KEY);
+    GAME_IMAGES_URL_RAW             = getInitParameter(WEB_XML_GAME_IMAGES_URL_KEY);
+    USER_IMAGES_URL_RAW             = getInitParameter(WEB_XML_USER_IMAGES_URL_KEY);
+    USER_IMAGES_FILESYSTEM_PATH_RAW = getInitParameter(WEB_XML_USER_IMAGES_FILESYSTEM_PATH_KEY);
+
+    REPORTS_FILESYSTEM_PATH_RAW     = getInitParameter(WEB_XML_REPORTS_FILESYSTEM_PATH_KEY);
+    REPORTS_URL_RAW                 = getInitParameter(WEB_XML_REPORTS_URL_KEY);
+    
+    REPORT_TO_IMAGE_URL_PREFIX      = getInitParameter(WEB_XML_REPORTS_TO_IMAGES_RELATIVE_PATH_PREFIX);
+  //@formatter:on
+    
+    REPORTS_FILESYSTEM_PATH = replaceTokens(REPORTS_FILESYSTEM_PATH_RAW);
+    new File(REPORTS_FILESYSTEM_PATH).mkdirs();
+     
+    
+    userImagesFileSystemPath = replaceTokens(USER_IMAGES_FILESYSTEM_PATH_RAW);
+    
+    computeUrls();
+    
+    tweekPushTransport();
+    
+    setClamScanConstants(servletContext);
+    
+     try {
       InputStream is = getClass().getResourceAsStream(MMOWGLI_BUILD_PROPERTIES_PATH);
       Properties prop = new Properties();
       prop.load(is);
@@ -201,7 +227,21 @@ public class AppMaster
       System.err.println("Build id could not be retrieved: " + ioe.getLocalizedMessage());
     }
   }
-
+  
+  // This is also done later, because the appUrlString can't be gotten in V7 until page is opened.
+  private void computeUrls()
+  {
+    REPORTS_URL = replaceTokens(REPORTS_URL_RAW);   
+    gameImagesUrlString = replaceTokens(GAME_IMAGES_URL_RAW);
+    userImagesUrlString = replaceTokens(USER_IMAGES_URL_RAW);
+  }
+  
+  private String replaceTokens(String s)
+  {
+    String ret = s.replace(DEPLOYMENT_TOKEN,  DEPLOYMENT);
+    return ret.replace(GAME_URL_TOKEN, appUrlString);
+  }
+  
   public MailManager getMailManager()
   {
     return mailManager;
@@ -221,13 +261,14 @@ public class AppMaster
   {
     if(appUrlString == null || appUrlString.length()<=0) {
       try {
-
         URL url = Page.getCurrent().getLocation().toURL();
         url = new URL(url.getProtocol(),url.getHost(),url.getFile());  //lose any query bit
         appUrl = url;
         appUrlString = url.toString();
         if(appUrlString.endsWith("/"))
           appUrlString = appUrlString.substring(0, appUrlString.length()-1);
+        
+        computeUrls();
       }
       catch(MalformedURLException ex) {
         System.err.println("Can't form App URL in AppMaster.oneTimeSetAppUrlFromUI()");
@@ -263,7 +304,7 @@ public class AppMaster
    */
   public void handleBadgeManager()
   {
-    String masterCluster = servletContext.getInitParameter(WEB_XML_DB_CLUSTERMASTER_KEY);
+    String masterCluster = getInitParameter(WEB_XML_DB_CLUSTERMASTER_KEY);
     String myClusterNode = getServerName();
     if (myClusterNode.contains(masterCluster)) { // servername may be long, db entry can be a unique portion of is, like web1
       badgeManager = new BadgeManager(this);
@@ -275,7 +316,7 @@ public class AppMaster
   public void handleAutomaticReportGeneration()
   {
     MSysOut.println("Check for automatic report generator launch");
-    String masterCluster = servletContext.getInitParameter(WEB_XML_DB_CLUSTERMASTER_KEY);
+    String masterCluster = getInitParameter(WEB_XML_DB_CLUSTERMASTER_KEY);
     String myClusterNode = getServerName();
     MSysOut.println("  master (from web.xml) is " + masterCluster);
     MSysOut.println("  this one (from InetAddress.getLocalHost().getAddress() is " + myClusterNode);
@@ -404,10 +445,9 @@ public class AppMaster
     return miscTimer;
   }
 
-  public void logSessionEnd(int sessionId)
+  public void logSessionEnd(Serializable uId)
   {
-    // TODO Auto-generated method stub
-
+    GameEventLogger.logSessionEndTL(uId);
   }
 
   /*
@@ -537,12 +577,6 @@ public class AppMaster
       reportGenerator.poke();
   }
 
-  public String browserAddress()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
   public static String getAlternateVideoUrlTL()
   {
     return getAlternateVideoUrl(HSess.get());
@@ -630,5 +664,10 @@ public class AppMaster
   public void sendToOtherNodes(MMessagePacket mMessagePacket)
   {
     appMasterMessaging.handleIncomingSessionMessage(mMessagePacket);
+  }
+
+  public String getReportsUrl()
+  {
+    return REPORTS_URL;
   }
 }
