@@ -128,7 +128,10 @@ public enum MmowgliEvent
   // Action dashboard
   ACTIONPLANSHOWCLICK,
   HOWTOWINACTIONCLICK,
-  ACTIONPLANREQUESTCLICK;
+  ACTIONPLANREQUESTCLICK,
+  
+  //Recent adds
+  MENUGAMEMASTERABOUTMMOWGLI;
   
   public static final MmowgliEvent values[] = values();
 }

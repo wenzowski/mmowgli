@@ -33,6 +33,8 @@
  */
 package edu.nps.moves.mmowgli;
 
+import com.vaadin.shared.ui.ui.Transport;
+
 /**
  * MmowgliConstants.java Created on Jan 22, 2014
  * 
@@ -142,10 +144,13 @@ public class MmowgliConstants
   public static String WEB_XML_USER_IMAGES_FILESYSTEM_PATH_KEY = "userImagesPath";
   public static String WEB_XML_USER_IMAGES_URL_KEY             = "userImagesUrl";
   public static String WEB_XML_REPORTS_FILESYSTEM_PATH_KEY     = "gameReportsPath";
+  public static String WEB_XML_REPORTS_URL_KEY                 = "gameReportsUrl";
   public static String WEB_XML_REPORTS_TO_IMAGES_RELATIVE_PATH_PREFIX = "reports2ImagesPrefix"; 
   
   public static String WEB_XML_CLAMSCAN_VIRUS_SCANNER_PATH     = "clamScanPath";
-  public static String WEB_XML_CLAMSCAN_ARGUMENT               = "clamScanArgument";  
+  public static String WEB_XML_CLAMSCAN_ARGUMENT               = "clamScanArgument";
+  
+  public static String WEB_XML_PUSH_TRANSPORT_KEY = "transport";
 //@formatter:on
 
   // Following get set in ApplicationMaster
@@ -161,9 +166,10 @@ public class MmowgliConstants
   public static String USER_IMAGES_FILESYSTEM_PATH = null; // after replacement
   public static String USER_IMAGES_URL_RAW = null; // ditto
   public static String REPORTS_FILESYSTEM_PATH_RAW = null;
-  public static String REPORTS_FILESYSTEM_PATH = null; // Report Generator hangs
-                                                       // on this until non-null
-
+  public static String REPORTS_FILESYSTEM_PATH = null; // Report Generator hangs on this until non-null
+  public static String REPORTS_URL_RAW = null;
+  public static String REPORTS_URL = null;
+  
   public static String REPORT_TO_IMAGE_URL_PREFIX = null;
   public static String IMAGE_TO_REPORT_FILESYSTEM_REL_PATH = null;
 
@@ -176,6 +182,8 @@ public class MmowgliConstants
 
   public static boolean FULL_MESSAGE_LOG = false;
 
+  public static Transport PUSHTRANSPORT = Transport.LONG_POLLING;
+  
   /**
    * URL of the Java Messaging Server (JMS) broker running in the private
    * cluster

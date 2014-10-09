@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
+import javax.servlet.ServletContext;
+
 import com.vaadin.server.SessionInitEvent;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.UI;
@@ -62,6 +64,8 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
 
   private HashMap<Object,Object> panelState = new HashMap<Object,Object>();
   
+  private ServletContext servletContext;
+  
   public MmowgliSessionGlobals(SessionInitEvent event, Mmowgli2VaadinServlet servlet)
   {
     event.getSession().setAttribute(MmowgliSessionGlobals.class, this);  // store this for use across the app
@@ -69,6 +73,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     //appMaster = (AppMaster)servlet.getServletContext().getAttribute(MmowgliConstants.APPLICATION_MASTER_ATTR_NAME);
     
     scoreManager = new ScoreManager2();
+    servletContext = servlet.getServletContext();
   }
   
   public void init(WebBrowser webBr)
@@ -90,7 +95,11 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
         internetExplorer7 = true;
     }
   }
-  
+  public String getBrowserAddress()
+  {
+    return browserAddress;
+  }
+
   public String browserIDString()
   {
     return browserApp+" "+browserMajVersion+" "+browserMinVersion+" at "+browserAddress;
@@ -311,6 +320,11 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   public MessagingManager getMessagingManager()
   {
     return messagingManager;   
+  }
+
+  public ServletContext getServletContext()
+  {
+    return servletContext;
   }
 
 }
