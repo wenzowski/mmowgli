@@ -33,7 +33,8 @@
  */
 package edu.nps.moves.mmowgli.db;
 
-import static edu.nps.moves.mmowgli.hibernate.DbUtils.*;
+import static edu.nps.moves.mmowgli.hibernate.DbUtils.forceUpdateEvent;
+import static edu.nps.moves.mmowgli.hibernate.DbUtils.len255;
 
 import java.io.Serializable;
 import java.util.*;
@@ -65,6 +66,7 @@ import edu.nps.moves.mmowgli.hibernate.HSess;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
+@SuppressWarnings("deprecation")
 @Entity
 @Indexed(index="mmowgli")
 public class Card implements Serializable
