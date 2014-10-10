@@ -175,7 +175,7 @@ public class GameEventLogger
     sb.append(" from ");
     sb.append(u.getLocation());
     sb.append(" / ");
-    String browAddr = AppMaster.instance().browserAddress();
+    String browAddr = Mmowgli2UI.getGlobals().getBrowserAddress();
     sb.append(browAddr==null?"null":browAddr);
     
     if(typ == GameEvent.EventType.USERLOGIN && u.isViewOnly())  // guest
@@ -246,14 +246,14 @@ public class GameEventLogger
     GameEvent.saveTL(ev);    
   }
   
-//  public static void logSessionEnd(Object uId, SingleSessionManager sessMgr)
-//  {
-//    Session sess = M.getSession(sessMgr);
-//    User u = DBGet.getUser(uId,sess);
-//    GameEvent ev = new GameEvent(GameEvent.EventType.SESSIONEND," "+svrName+" / user "+u.getId()+" / "+u.getLocation());
-//    Sess.sessOobSave(sess, ev);
-//    sessMgr.setNeedsCommit(true);
-//  }
+  public static void logSessionEndTL(Object uId)
+  {
+     if(uId != null) {
+       User u = DBGet.getUserTL(uId);
+       GameEvent ev = new GameEvent(GameEvent.EventType.SESSIONEND," "+svrName+" / user "+u.getId()+" / "+u.getLocation());
+       GameEvent.saveTL(ev);
+    }
+  }
 
   public static void logRegistrationAttemptTL(String email)
   {
@@ -352,12 +352,11 @@ public class GameEventLogger
     GameEvent.saveTL(ev);
   }
 
-  /**
-   * @param user
-   */
   public static void logUserPasswordChangedTL(User user)
   {
-    // TODO 
-    
+    StringBuilder sb = new StringBuilder(user.getUserName());
+    sb.append(" changed his/her password");
+    GameEvent ev = new GameEvent(GameEvent.EventType.USERPASSWORDCHANGED,sb.toString());
+    GameEvent.saveTL(ev);    
   }
 }
