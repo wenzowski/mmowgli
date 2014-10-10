@@ -55,6 +55,7 @@ import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.service.ServiceRegistry;
 
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import edu.nps.moves.mmowgli.utility.SysOut;
 
 /**
  * Class to initialize, configure and manage single SessionFactory instance.  Global across all users sessions and servlets in the same context.  That
@@ -123,7 +124,7 @@ public abstract class AbstractVHib// implements SessionManager
     initted1=true;
 //@formatter:off    
     hib_fs_local_path       = ctx.getInitParameter(WEB_XML_HIBERNATE_SEARCH_KEY);
-    
+    MSysOut.println(hib_fs_local_path+" read from web.xml param "+WEB_XML_HIBERNATE_SEARCH_KEY);
     String dbUrl            = ctx.getInitParameter(WEB_XML_DB_URL_KEY);
     String dbName           = ctx.getInitParameter(WEB_XML_DB_NAME_KEY);
     String dbUser           = ctx.getInitParameter(WEB_XML_DB_USER_KEY);
@@ -184,11 +185,14 @@ public abstract class AbstractVHib// implements SessionManager
       cnf.setProperty(CURRENT_SESSION_CONTEXT_CLASS, DB_CURRENT_SESSION_CONTEXT_CLASS); // "thread");
     }
     catch(Throwable t) {
-      commonInitCatch(t);
-        
-      }
+      commonInitCatch(t);       
     }
-
+  }
+  protected Configuration getConfiguration()
+  {
+    return cnf;
+  }
+  
   protected void init2()
   {
     if (initted2)
@@ -260,6 +264,7 @@ public abstract class AbstractVHib// implements SessionManager
     cnf.setProperty(HIB_FS_SEARCH_INDEXBASE_PROPERTY, hib_fs_local_path); // "/tmp/mmowgliLucene/blah";
     cnf.setProperty(HIB_SEARCH_ANALYZER, HIB_ANALYZER);
     cnf.setProperty("hibernate.search.lucene_version",org.apache.lucene.util.Version.LUCENE_36.toString());    
+    SysOut.println(HIB_FS_SEARCH_INDEXBASE_PROPERTY+" set to "+hib_fs_local_path);
   }
  
   protected Session _getVHSession()
