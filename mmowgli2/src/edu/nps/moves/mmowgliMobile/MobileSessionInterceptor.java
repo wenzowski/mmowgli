@@ -36,7 +36,6 @@ package edu.nps.moves.mmowgliMobile;
 import java.io.IOException;
 
 import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
 
 import org.hibernate.Session;
 import org.hibernate.StaleObjectStateException;
@@ -60,8 +59,6 @@ import edu.nps.moves.mmowgliMobile.data.MobileVHib;
 // @WebFilter(urlPatterns = { "/handheld/*" }, dispatcherTypes = { DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ERROR })
 public class MobileSessionInterceptor implements Filter
 {
-  private MobileVHib vHib;
-
   @Override
   public void init(FilterConfig filterConfig) throws ServletException
   {
