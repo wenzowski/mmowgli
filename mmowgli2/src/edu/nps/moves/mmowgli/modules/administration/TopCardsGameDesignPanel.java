@@ -441,6 +441,7 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
   @SuppressWarnings("serial")
   class TypeLine extends Label
   {
+    /* This class generates the "LegacyPropertyToString" error in cat.out.  It's not our fault.  It's internal Vaadin.*/
     private CardType typ;
 
     public TypeLine(CardType typ)
