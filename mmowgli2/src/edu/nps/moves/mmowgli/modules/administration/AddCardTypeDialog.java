@@ -47,7 +47,7 @@ import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
-import edu.nps.moves.mmowgli.utility.CardStyler;
+import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 
 /**
  * AddCardTypeDialog.java
