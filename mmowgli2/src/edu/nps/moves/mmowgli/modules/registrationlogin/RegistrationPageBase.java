@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 1995-2010 held by the author(s).  All rights reserved.
+* Copyright (c) 1995-2014 held by the author(s).  All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions
@@ -50,6 +50,7 @@ import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
 import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.components.VideoWithRightTextPanel;
 import edu.nps.moves.mmowgli.db.*;
@@ -168,11 +169,10 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       lab.setHeight("1px");
       signupVL.setExpandRatio(lab, 1.0f);
 
-      signupVL.addComponent(lab=new Label(phase.getSignupButtonSubText()));
+      signupVL.addComponent(lab=new HtmlLabel(phase.getSignupButtonSubText()));
       signupButt.setDescription(phase.getSignupButtonToolTip());
       lab.setDescription(phase.getSignupButtonToolTip());
       lab.setEnabled(phase.isSignupButtonEnabled());
-      lab.setContentMode(ContentMode.HTML);
       signupVL.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
 
       bottomHLayout.addComponent(signupVL);
@@ -220,14 +220,12 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       else
         newButtVL.addComponent(lab = new Label("You can get started in 2 minutes..."));
 */
-      newButtVL.addComponent(lab = new Label(phase.getNewButtonSubText()));
-      lab.setContentMode(ContentMode.HTML);
+      newButtVL.addComponent(lab = new HtmlLabel(phase.getNewButtonSubText()));
       newButtVL.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
       lab.setEnabled(phase.isNewButtonEnabled());
-
       imNewButt.setDescription(phase.getNewButtonToolTip());
       lab.setDescription(phase.getNewButtonToolTip());
-      lab.setContentMode(ContentMode.HTML);
+
       newButtVL.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
 
       bottomHLayout.addComponent(newButtVL);
@@ -258,8 +256,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       lab.setHeight("1px");
       rightButtVL.setExpandRatio(lab, 1.0f);
 
-      rightButtVL.addComponent(lab = new Label(phase.getLoginButtonSubText()));
-      lab.setContentMode(ContentMode.HTML);
+      rightButtVL.addComponent(lab = new HtmlLabel(phase.getLoginButtonSubText()));
       lab.setEnabled(phase.isLoginButtonEnabled());
       rightButtVL.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
 
@@ -294,8 +291,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       lab.setHeight("1px");
       guestButtVL.setExpandRatio(lab, 1.0f);
 
-      guestButtVL.addComponent(lab = new Label(phase.getGuestButtonSubText()));
-      lab.setContentMode(ContentMode.HTML);
+      guestButtVL.addComponent(lab = new HtmlLabel(phase.getGuestButtonSubText()));
       guestButtVL.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
 
       guestButt.setDescription(phase.getGuestButtonToolTip());
@@ -595,16 +591,14 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
           "to confirm your registration and unlock your mmowgli user account.");
       vLay.addComponent(message);
 
-      message = new Label(
+      message = new HtmlLabel(
           "Press the <b>Am I confirmed yet?</b> button "+
           "to play if ready.");
       vLay.addComponent(message);
-      message.setContentMode(ContentMode.HTML);
 
-      message = new Label(
+      message = new HtmlLabel(
           "Alternatively, press <b>Quit -- I'll come back later</b> to login at a future time.");
       vLay.addComponent(message);
-      message.setContentMode(ContentMode.HTML);
 
       GridLayout grid = new GridLayout();
       vLay.addComponent(grid);
@@ -728,7 +722,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       User u = DBGet.getUserTL(uid); //app.getUser());
       if(u != null) // why should it be?
         if(u.getUserName() != null) // why should it be?
-          if(u.getUserName().toLowerCase().startsWith("gm_"))
+          if(u.isGameMaster())//getUserName().toLowerCase().startsWith("gm_"))
         		return;
     }
 
