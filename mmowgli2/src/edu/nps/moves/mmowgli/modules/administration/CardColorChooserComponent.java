@@ -51,7 +51,7 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.CardType;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
-import edu.nps.moves.mmowgli.utility.CardStyler;
+import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
@@ -196,8 +196,9 @@ public class CardColorChooserComponent extends HorizontalLayout
       pan.setWidth("100%");
       pan.setHeight("100%");
       setContent(pan);//      getContent().addComponent(pan);
-
-      VerticalLayout layout = (VerticalLayout)pan.getContent();       
+      
+      VerticalLayout layout = new VerticalLayout();
+      pan.setContent(layout);      
       layout.setMargin(true);
       layout.setSpacing(true);
       layout.setSizeUndefined();
@@ -240,7 +241,7 @@ public class CardColorChooserComponent extends HorizontalLayout
         lab = new Label("sample text");
         headAL.addComponent(lab,"top:25px;left:25px;");
         lab.addStyleName("m-font-21-bold");
-        lab.addStyleName(CardStyler.getCardInverseTextColorStyle(color));
+        lab.addStyleName(CardStyler.getCardTextColorOverBaseStyle(color));
         vl.addComponent(headAL);
         
         Embedded parent = new Embedded(null,medloc.getCardParentImageFromStyleName(color));
