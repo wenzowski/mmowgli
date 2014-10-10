@@ -54,54 +54,106 @@ import edu.nps.moves.mmowgli.db.CardType;
 public class CardStyler
 {
   private static HashMap<String, CardStyle> styleMap;
-  
+//@formatter:off  
   static {
     styleMap = new HashMap<String,CardStyle>();
     styleMap.put("m-purple", new CardStyle(
         "innovatePurpleHeader.png",         "innovatePurpleBig.png",          "innovatePurpleSummary.png",
         "innovatePurpleSummaryMultiple.png","innovatePurpleParent145w95h.png","innovateDotPurple.png",
-        "#662D91","m-whitetext","#FFFFFF"));
+        //"#662D91","m-white-text","#FFFFFF","m-black-text"));
+        "#662D91",
+        "m-white-text","#FFFFFF","m-purple-text","#662D91"));
+        
+    //baseColor
+    //textColorOverBaseStyle textColorOverBase textColorOverWhiteStyle textColorOverWhite
+
     styleMap.put("m-green",  new CardStyle(
         "defendGreenHeader.png",            "defendGreenBig.png",             "defendGreenSummary.png",
         "defendGreenSummaryMultiple.png",   "defendGreenParent145w95h.png",   "defendDotGreen.png",
-        "#00A651","m-whitetext","#FFFFFF"));
+        //"#00A651","m-white-text","#FFFFFF","m-black-text"));
+        "#00A651",
+        "m-white-text","#FFFFFF","m-green-text","#24AB51"));
+        
     styleMap.put("m-orange", new CardStyle(
         "expandOrangeHeader.png",           "expandOrangeBig.png",            "expandOrangeSummary.png",
         "expandOrangeSummaryMultiple.png",  "expandOrangeParent145w95h.png",  "expandDotOrange.png",
-        "#F26522","m-whitetext","#FFFFFF"));
+        //"#F26522","m-white-text","#FFFFFF","m-black-text"));
+        "#F26522",
+        "m-white-text","#FFFFFF","m-orange-text","#EB642D"));
+    
     styleMap.put("m-red",    new CardStyle(
         "counterRedHeader.png",             "counterRedBig.png",              "counterRedSummary.png",
         "counterRedSummaryMultiple.png",    "counterRedParent145w95h.png",    "counterDotRed.png",
-        "#B61861","m-whitetext","#FFFFFF"));
+        //"#B61861","m-white-text","#FFFFFF","m-black-text"));
+        "#B61861",
+        "m-white-text","#FFFFFF","m-red-text","#B20062"));
+    
+    
     styleMap.put("m-blue",   new CardStyle(
         "adaptBlueHeader.png",              "adaptBlueBig.png",               "adaptBlueSummary.png", 
         "adaptBlueSummaryMultiple.png",     "adaptBlueParent145w95h.png",     "adaptDotBlue.png",
-        "#0F75BC","m-whitetext","#FFFFFF"));
+        //"#0F75BC","m-white-text","#FFFFFF","m-black-text"));
+        "#0F75BC",
+        "m-white-text","#FFFFFF","m-blue-text","#2775BD"));
+    
     styleMap.put("m-lime",   new CardStyle(
         "exploreLimeHeader.png",            "exploreLimeBig.png",             "exploreLimeSummary.png",
         "exploreLimeSummaryMultiple.png",   "exploreLimeParent145w95h.png",   "exploreDotLime.png",
-        "#8CC63F","m-whitetext","#FFFFFF"));
+        //"#8CC63F","m-white-text","#FFFFFF","m-black-text"));
+        "#8CC63F",
+        "m-white-text","#FFFFFF","m-lime-text","#90CB41"));
 
     styleMap.put("m-darkred",   new CardStyle(
         "header_darkred.png",               "cardbig_darkred.png",       "cardSummary_darkred.png",
         "summaryMultiple_darkred.png",      "parent145w95h_darkred.png", "carddot_darkred.png",
-        "#AB0000","m-whitetext","#FFFFFF"));
+        // "#AB0000","m-white-text","#FFFFFF","m-black-text"));
+        "#AB0000",
+        "m-white-text","#FFFFFF","m-darkred-text","#AB0000"));
+    
     styleMap.put("m-armyblack", new CardStyle(
         "header_armyblack.png",             "cardbig_armyblack.png",       "cardSummary_armyblack.png",
         "summaryMultiple_armyblack.png",    "parent145w95h_armyblack.png", "carddot_armyblack.png",
-        "#000000","m-armygold-text","#FFFFFF"));  // text opposite color
+        //"#000000","m-armygold-text","#FFFFFF","m-black-text"));
+        "#000000",
+        "m-armygold-text","#FCC702","m-armyblack-text","#000000"));
+    
     styleMap.put("m-armygold",  new CardStyle(
         "header_armygold.png",              "cardbig_armygold.png",       "cardSummary_armygold.png",
         "summaryMultiple_armygold.png",     "parent145w95h_armygold.png", "carddot_armygold.png",
-        "#FCC702","m-armyblack-text","#FFFFFF"));  // text opposite color
+        //"#FCC702","m-armyblack-text","#FFFFFF","m-black-text"));
+        "#FCC702",
+        "m-armyblack-text","#000000","m-armygold-text","#FCC702"));
+
+    //baseColor
+    //textColorOverBaseStyle textColorOverBase textColorOverWhiteStyle textColorOverWhite
+
     styleMap.put("m-navyblue",  new CardStyle(
         "header_navyblue.png",              "cardbig_navyblue.png",       "cardSummary_navyblue.png",
         "summaryMultiple_navyblue.png",     "parent145w95h_navyblue.png", "carddot_navyblue.png",
-        "#032E57","m-whitetext","#FFFFFF"));
+        //"#032E57","m-white-text","#FFFFFF","m-black-text"));
+        "#032E57",
+        "m-white-text","#FFFFFF","m-navyblue-text","#032E57"));
+    
     styleMap.put("m-navygold",  new CardStyle(
         "header_navygold.png",              "cardbig_navygold.png",       "cardSummary_navygold.png",
         "summaryMultiple_navygold.png",     "parent145w95h_navygold.png", "carddot_navygold.png",
-        "#FCBB38","m-lemonchiffon4text","#8B8970"));
+        //"#FCBB38","m-lemonchiffon4text","#8B8970","m-black-text"));
+        "#FCBB38",
+        "m-lemonchiffon4text","#8B8970","m-navygold-text","#fcbb38"));
+    
+    styleMap.put("m-whitecard",  new CardStyle(
+        "header_white.png",                 "cardbig_white.png",          "cardSummary_white.png",
+        "summaryMultiple_white.png",        "parent145w95h_white.png",    "carddot_white.png",
+        //"#FFFFFF","m-whitecard-text","FFFFFF","m-black-text"));
+        "#FFFFFF",
+        "m-blackcard-text","#58595B","m-blackcard-text","#58595B"));
+    
+    styleMap.put("m-blackcard", new CardStyle(
+        "header_armyblack.png",             "cardbig_armyblack.png",       "cardSummary_armyblack.png",
+        "summaryMultiple_armyblack.png",    "parent145w95h_armyblack.png", "carddot_armyblack.png",
+        //"#373737","m-blackcard-text","#373737","m-black-text"));
+        "#373737",
+        "m-white-text","#FFFFFF","m-black=text","#000000"));
   }
   
   public static String TOP_POSITIVE_STYLE_DEFAULT = "m-purple";
@@ -120,8 +172,10 @@ public class CardStyler
                       String parent145w95hImage,
                       String dotImage,
                       String baseColor,
-                      String inverseTextColorStyle,
-                      String inverseTextColor)
+                      String textColorOverBaseStyle,
+                      String textColorOverBase,
+                      String textColorOverWhiteStyle,
+                      String textColorOverWhite)
     {
       this.listHeaderBackgroundImage = listHeaderBackgroundImage;
       this.cardBigImage = cardBigImage;
@@ -130,8 +184,10 @@ public class CardStyler
       this.parent145w95hImage = parent145w95hImage;
       this.dotImage = dotImage;
       this.baseColor = baseColor;
-      this.inverseTextColorStyle = inverseTextColorStyle;
-      this.inverseTextColor = inverseTextColor;
+      this.textColorOverBaseStyle = textColorOverBaseStyle;
+      this.textColorOverBase = textColorOverBase;
+      this.textColorOverWhiteStyle = textColorOverWhiteStyle;
+      this.textColorOverWhite = textColorOverWhite;
     }
     String listHeaderBackgroundImage;
     String cardBigImage;
@@ -140,8 +196,10 @@ public class CardStyler
     String parent145w95hImage;
     String dotImage;
     String baseColor;
-    String inverseTextColorStyle;
-    String inverseTextColor;
+    String textColorOverBaseStyle;
+    String textColorOverBase;
+    String textColorOverWhiteStyle;
+    String textColorOverWhite;
   }
   
   public static Color makeColor(String rgbinhex)
@@ -192,16 +250,17 @@ public class CardStyler
     return cs;    
   }
   
-  public static String getCardHeaderImage(CardType ct)         {return getCardStyle(ct).listHeaderBackgroundImage;}  
-  public static String getCardBigImage(CardType ct)            {return getCardStyle(ct).cardBigImage;}
-  public static String getCardSummaryImage(CardType ct)        {return getCardStyle(ct).summaryImage;}
-  public static String getCardSummaryMultipleImage(CardType ct){return getCardStyle(ct).summaryMultipleImage;}
-  public static String getCardParentImage(CardType ct)         {return getCardStyle(ct).parent145w95hImage;}
-  public static String getCardDot(CardType ct)                 {return getCardStyle(ct).dotImage;}
-  public static String getCardBaseColor(CardType ct)           {return getCardStyle(ct).baseColor;}
-  public static String getCardInverseTextColorStyle(CardType ct) {return getCardStyle(ct).inverseTextColorStyle;}
-  public static String getCardInverseTextColor(CardType ct)    {return getCardStyle(ct).inverseTextColor;}
-
+  public static String getCardHeaderImage            (CardType ct) {return getCardStyle(ct).listHeaderBackgroundImage;}  
+  public static String getCardBigImage               (CardType ct) {return getCardStyle(ct).cardBigImage;}
+  public static String getCardSummaryImage           (CardType ct) {return getCardStyle(ct).summaryImage;}
+  public static String getCardSummaryMultipleImage   (CardType ct) {return getCardStyle(ct).summaryMultipleImage;}
+  public static String getCardParentImage            (CardType ct) {return getCardStyle(ct).parent145w95hImage;}
+  public static String getCardDot                    (CardType ct) {return getCardStyle(ct).dotImage;}
+  public static String getCardBaseColor              (CardType ct) {return getCardStyle(ct).baseColor;}
+  public static String getCardTextColorOverBaseStyle (CardType ct) {return getCardStyle(ct).textColorOverBaseStyle;}
+  public static String getCardTextColorOverBase      (CardType ct) {return getCardStyle(ct).textColorOverBase;}
+  public static String getCardTextColorOverWhiteStyle(CardType ct) {return getCardStyle(ct).textColorOverWhiteStyle;}
+  
   public static String getCardBaseStyle(CardType ct)
   {
     String sty = ct.getCssColorStyle();
@@ -210,24 +269,20 @@ public class CardStyler
     return sty;
   }
   
-  public static String getCardTextColorStyle(CardType ct)
-  {
-    return getCardBaseStyle(ct)+"-text";
-  }
-  
-  public static String getCardDot         (String styleName)         {return getCardStyle(styleName).dotImage;}
-  public static String getCardBigImage    (String styleName)         {return getCardStyle(styleName).cardBigImage;}
-  public static String getCardParentImage (String styleName)         {return getCardStyle(styleName).parent145w95hImage;}
-  public static String getCardSummaryImage(String styleName)         {return getCardStyle(styleName).summaryImage;}
-  public static String getCardSummaryMultipleImage(String styleName) {return getCardStyle(styleName).summaryMultipleImage;}
-  public static String getCardHeaderImage (String styleName)         {return getCardStyle(styleName).listHeaderBackgroundImage;}
-  public static String getCardBaseColor   (String styleName)         {return getCardStyle(styleName).baseColor;}
-  public static String getCardInverseTextColorStyle(String styleName){return getCardStyle(styleName).inverseTextColorStyle;}
-  public static String getCardInverseTextColor(String styleName)     {return getCardStyle(styleName).inverseTextColor;}
+  public static String getCardDot                    (String styleName) {return getCardStyle(styleName).dotImage;}
+  public static String getCardBigImage               (String styleName) {return getCardStyle(styleName).cardBigImage;}
+  public static String getCardParentImage            (String styleName) {return getCardStyle(styleName).parent145w95hImage;}
+  public static String getCardSummaryImage           (String styleName) {return getCardStyle(styleName).summaryImage;}
+  public static String getCardSummaryMultipleImage   (String styleName) {return getCardStyle(styleName).summaryMultipleImage;}
+  public static String getCardHeaderImage            (String styleName) {return getCardStyle(styleName).listHeaderBackgroundImage;}
+  public static String getCardBaseColor              (String styleName) {return getCardStyle(styleName).baseColor;}
+  public static String getCardTextColorOverBaseStyle (String styleName) {return getCardStyle(styleName).textColorOverBaseStyle;}
+  public static String getCardTextColorOverBase      (String styleName) {return getCardStyle(styleName).textColorOverBase;}
+  public static String getCardTextColorOverWhiteStyle(String styleName) {return getCardStyle(styleName).textColorOverWhiteStyle;}
   
   public static Set<String> getCardStyles()
   {
     return new HashSet<String>(styleMap.keySet());
   }
-
+//@formatter:on
 }
