@@ -57,7 +57,7 @@ import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
-import edu.nps.moves.mmowgli.utility.CardStyler;
+import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 /**
  * CardSummary.java
  * Created on Jan 24, 2011
@@ -236,7 +236,7 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
     star    = new NativeButton();
     dateFormatter = new SimpleDateFormat("MM/dd HH:mm z");
     
-    textColorStyleStr = CardStyler.getCardTextColorStyle(card.getCardType());
+    textColorStyleStr = CardStyler.getCardTextColorOverWhiteStyle(card.getCardType());
   }
   
   public void initGui()
