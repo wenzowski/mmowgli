@@ -1,10 +1,10 @@
 /*
-* Copyright (c) 1995-2010 held by the author(s).  All rights reserved.
-*  
+* Copyright (c) 1995-2014 held by the author(s).  All rights reserved.
+*
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions
 * are met:
-*  
+*
 *  * Redistributions of source code must retain the above copyright
 *       notice, this list of conditions and the following disclaimer.
 *  * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
 *       nor the names of its contributors may be used to endorse or
 *       promote products derived from this software without specific
 *       prior written permission.
-*  
+*
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -108,7 +108,7 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
         sendEmailButt.addStyleName("m-userProfile3-sendmail-button");
         Label sp;
         VerticalLayout vl =getRightLayout();
-         
+   
         vl.setSizeUndefined();
         vl.setWidth("100%");
         vl.addComponent(sp = new Label());
@@ -118,7 +118,7 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
         vl.addComponent(sp = new Label());
         sp.setHeight("1px");
         vl.setExpandRatio(sp, 1.0f);
-        
+
         sendEmailButt.addClickListener(new ClickListener()
         {
           private static final long serialVersionUID = 1L;
@@ -129,13 +129,13 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
           public void buttonClick(ClickEvent event)
           {
             HSess.init();
-            
+
             User u = DBGet.getUserTL(uid);
             if (u.isOkEmail() || u.isOkGameMessages())  // redundant here
               new SendMessageWindow(u,imAdminOrGameMaster);
             else
               Notification.show("Sorry", "Player " + u.getUserName() + " does not receive mail.", Notification.Type.WARNING_MESSAGE);
-            
+
             HSess.close();
           }
         });
@@ -185,6 +185,7 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
   {
     addOneMessageCommon(msg,idx,total,position,null);
   }
+
   private void addOneMessage_oobTL(Message msg, int idx, int total, Integer position)
   {
     addOneMessageCommon(msg,idx,total,position,HSess.get());
@@ -199,15 +200,15 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
 
     comment.initGui(sess);
     comment.setWidth("658px"); //"665px"); // same as above
-    
-    handleVisible(comment);    
+
+    handleVisible(comment);
   }
-  
+
   private void adjustTotals(ActionPlanComment apc, int newtotal)
   {
     apc.setTotal(newtotal);
   }
-  
+
   @Override
   public boolean messageCreated_oobTL(Serializable uId)
   {
@@ -219,16 +220,16 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
     int newtotal = oldtotal+1;
     for(int i=0;i<oldtotal;i++)
       adjustTotals((ActionPlanComment)panelVL.getComponent(i),newtotal);
-    
+
     addOneMessage_oobTL(msg,newtotal,newtotal,0);
     return true;
-  } 
-  
+  }
+
   @Override
   public void itemClick(ItemClickEvent event)
   {
-  } 
-  
+  }
+
   private void handleVisible(ActionPlanComment apc)
   {
     apc.setVisible(showingHiddenMsgs || !apc.getMessageObject().isHidden());
@@ -237,10 +238,10 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
   {
     Iterator<Component> itr = panelVL.iterator();
     while(itr.hasNext()) {
-      handleVisible((ActionPlanComment)itr.next());      
-    }  
+      handleVisible((ActionPlanComment)itr.next());
+    }
   }
-  
+
   @SuppressWarnings("serial")
   class ViewAllListener implements ClickListener
   {
@@ -249,9 +250,9 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
     {
       showingHiddenMsgs = true;
       showMsgs();
-    }    
+    }
   }
-  
+
   @SuppressWarnings("serial")
   class ViewUnhiddenOnlyListener implements ClickListener
   {
@@ -260,6 +261,6 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
     {
       showingHiddenMsgs = false;
       showMsgs();
-    }    
+    }
   }
 }
