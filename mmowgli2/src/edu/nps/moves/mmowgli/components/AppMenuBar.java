@@ -115,6 +115,9 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
   {
     MenuBar.MenuItem ret = menubar.addItem("Game Master", null);
     ret.setIcon(FontAwesome.GAVEL);
+    ret.addItem("About this Mmowgli", new MCommand(MENUGAMEMASTERABOUTMMOWGLI)).setIcon(FontAwesome.INFO_CIRCLE);
+    ret.addSeparator();
+    
     ret.addItem("Monitor Game Master Events Log", new MCommand(MENUGAMEMASTERMONITOREVENTS));
     ret.addItem("Post comment to Game Master Event Log", new MCommand(MENUGAMEMASTERPOSTCOMMENT)).setIcon(FontAwesome.COMMENT_O);
     ret.addSeparator();
