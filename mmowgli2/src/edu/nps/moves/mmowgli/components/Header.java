@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 1995-2010 held by the author(s).  All rights reserved.
- *  
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *  
+ *
  *  * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *  * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
  *       nor the names of its contributors may be used to endorse or
  *       promote products derived from this software without specific
  *       prior written permission.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -108,7 +108,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   private static String signout_tt     = "Thanks for playing!";
   
   private static String w_implPoints = "50px";
-  private static String h_implPoints = "14px"; 
+  private static String h_implPoints = "14px";
   private static String w_explPoints = "65px";
   private static String h_explPoints = "22px";
   private static String w_movenum = "300px";
@@ -198,12 +198,12 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
       embedded = new Embedded(null,mediaLoc.getImage("scoretext200w50h.png"));
       addComponent(embedded, "top:52px;left:63px");
       addComponent(explorPtsLab,"top:55px;left:260px");
-      addComponent(implPtsLab,"top:79px;left:247px"); 
+      addComponent(implPtsLab,"top:79px;left:247px");
     }
     else {
       embedded = new Embedded(null,mediaLoc.getImage("scoretextoneline200w50h.png"));
       addComponent(embedded, "top:52px;left:73px");
-      addComponent(explorPtsLab,"top:65px;left:205px"); 
+      addComponent(explorPtsLab,"top:65px;left:205px");
     }
     
     Resource res = mediaLoc.getHeaderBanner(g);
@@ -228,7 +228,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     buttHL.addComponent(leaderBoardButt);
     buttHL.setComponentAlignment(leaderBoardButt, Alignment.MIDDLE_CENTER);
     addDivider(buttHL,buttonChars);
-    
+
     // Hack
     if(armyHack) { //Hack
       Link resourceLink = makeSmallLink("Resources", "", "http://futures.armyscitech.com/resources/");
@@ -271,8 +271,8 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
       @Override
       public void click(com.vaadin.event.MouseEvents.ClickEvent event)
       {
-        userNameButt.buttonClick(new ClickEvent(userNameButt));       
-      }          
+        userNameButt.buttonClick(new ClickEvent(userNameButt));
+      }
     });
     userNameButt.setDescription(user_profile_tt);
     addComponent(userNameButt, HEADER_USERNAME_POS);
@@ -320,10 +320,10 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
         HSess.close();
       }      
     });
-    addComponent(searchField,"top:107px;left:74px"); //"top:110px;left:74px");       
-    addComponent(signOutButt, "top:25px;left:250px"); //"top:18px;left:250px");    
+    addComponent(searchField,"top:107px;left:74px"); //"top:110px;left:74px");
+    addComponent(signOutButt, "top:25px;left:250px"); //"top:18px;left:250px");
     addComponent(searchButt, "top:105px;left:30px"); //"top:100px;left:180px");
-    
+
     MessageUrl mu = MessageUrl.getLastTL();
     if(mu != null)
       decorateBlogHeadlinesLink(mu);
@@ -481,7 +481,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     butt.addStyleName("m-playIdeaButton");
     butt.setDescription("Review and play idea cards");
     butt.setId(PLAY_AN_IDEA_BLUE_BUTTON);
-    return butt; 
+    return butt;
   }
     
   private IDNativeButton makeTakeActionButt()
@@ -507,7 +507,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     takeActionButt.setDescription(enable?"Review and update Action Plans":"Action Plans not enabled in this move");
     takeActionButt.enableAction(enable);
   }
-    
+
   private IDNativeButton makeBigButt(String text, MmowgliEvent mEv)
   {
     IDNativeButton butt = makeButt(text, mEv);
@@ -549,7 +549,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   {
     blogHeadlinesLink.setCaption(mu.getText());
     blogHeadlinesLink.setResource(new ExternalResource(mu.getUrl()));
-    blogHeadlinesLink.setDescription(mu.getTooltip());    
+    blogHeadlinesLink.setDescription(mu.getTooltip());
   }
   
   public boolean gameEventLoggedOobTL(Object evId)
