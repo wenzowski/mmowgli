@@ -47,10 +47,10 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.messaging.WantsMessageUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsUserUpdates;
-import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * UserProfilePageStyled.java
@@ -101,6 +101,9 @@ public class UserProfilePage3 extends AbsoluteLayout implements MmowgliComponent
   
   @Override
   public void initGui()
+  {
+  }
+  public void initGuiTL()
   {
     setWidth(APPLICATION_SCREEN_WIDTH);
     setHeight("1215px"); //"1000px");
@@ -232,6 +235,8 @@ public class UserProfilePage3 extends AbsoluteLayout implements MmowgliComponent
   @Override
   public void enter(ViewChangeEvent event)
   {
-    initGui();
+    Object key = HSess.checkInit();
+    initGuiTL();
+    HSess.checkClose(key);
   }
 }
