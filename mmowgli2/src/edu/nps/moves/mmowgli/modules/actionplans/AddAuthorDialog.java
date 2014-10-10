@@ -43,7 +43,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.AppMaster;
-import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
 import edu.nps.moves.mmowgli.db.User;
 
