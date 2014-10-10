@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 1995-2010 held by the author(s).  All rights reserved.
- *  
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *  
+ *
  *  * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *  * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
  *       nor the names of its contributors may be used to endorse or
  *       promote products derived from this software without specific
  *       prior written permission.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -75,14 +75,14 @@ public class GameExporter extends BaseExporter
   private String MAP_TEXT = "MapInstructions";
   
   private String CDATA_ELEMENTS  = ORIENTATION_HEADLINE +" "+ORIENTATION_SUMMARY +" "+CALL2ACTION_BRIEFINGTEXT +" "+
-                                   THEPLAN_TEXT +" "+TALK_TEXT +" "+IMAGES_TEXT +" "+VIDEO_TEXT +" "+MAP_TEXT; 
+                                   THEPLAN_TEXT +" "+TALK_TEXT +" "+IMAGES_TEXT +" "+VIDEO_TEXT +" "+MAP_TEXT;
 
   public final String STYLESHEET_NAME = "GameDesign.xsl";
   public final String THREAD_NAME     = "GameExporter";
   public final String FILE_NAME       = "GameDesign";
   
   private static Map<String,String> parameters;
-  
+
   public GameExporter()
   {
   }
@@ -96,7 +96,7 @@ public class GameExporter extends BaseExporter
   @Override
   protected void setStaticTransformationParameters(Map<String, String> map)
   {
-    parameters = map;    
+    parameters = map;
   }
 
   @Override
@@ -176,14 +176,21 @@ public class GameExporter extends BaseExporter
     addElementWithText(metaElem,"Reports",url+"reports");
     addElementWithText(metaElem,"AlternateVideo",AppMaster.getAlternateVideoUrl(sess));
     addElementWithText(metaElem,"PdfAvailable",Boolean.toString(g.isPdfAvailable()));
+
+    GameLinks gLinks = (GameLinks)sess.get(GameLinks.class, 1L);
+    addElementWithText(metaElem,"TroubleEmailAddress",gLinks.getTroubleMailto());
+    addElementWithText(metaElem,"ShowingPriorMovesCards",Boolean.toString(g.isShowPriorMovesCards()));
+    addElementWithText(metaElem,"ShowingPriorMovesActionPlans", Boolean.toString(g.isShowPriorMovesActionPlans()));
+    addElementWithText(metaElem,"ActiveRound",Integer.toString(g.getCurrentMove().getNumber()));
+    addElementWithText(metaElem,"ActivePhase",g.getCurrentMove().getCurrentMovePhase().getDescription());
   }
   
   private void addHeaderFooter(Element root, Session sess, Game g)
   {
     Element hdrFooterElem = createAppend(root,"HeaderFooter");
     //addElementWithText(hdrFooterElem,"ScreenShot","headerFooterScreenShot.png");
-    
-    Move move = g.getCurrentMove(); 
+
+    Move move = g.getCurrentMove();
     GameLinks gl = GameLinks.get(sess);
     String s = move.getTitle();
     addElementWithText(hdrFooterElem,"BrandingText",s==null?"":s);
@@ -204,12 +211,12 @@ public class GameExporter extends BaseExporter
   }
   
   private void addWelcome(Element root, Session sess, Game g)
-  {    
+  {
     Element welcomeElem = createAppend(root,"Welcome");
     //addElementWithText(welcomeElem,"ScreenShot","welcomScreenShot.png");
-    
+
     MovePhase phase = MovePhase.getCurrentMovePhase(sess);
-    
+
     String s = phase.getWindowTitle();
     addElementWithText(welcomeElem,"WindowTitle",s==null?"":s);
     
@@ -221,70 +228,69 @@ public class GameExporter extends BaseExporter
         s = url;
     }
     addElementWithText(welcomeElem,"Video",s==null?"":s);
-    
+
     s = phase.getOrientationCallToActionText();
     addElementWithText(welcomeElem,"CallToActionText",s==null?"":s);
     s = phase.getOrientationHeadline();
     addElementWithText(welcomeElem,ORIENTATION_HEADLINE,s==null?"":s);
     s = phase.getOrientationSummary();
-    addElementWithText(welcomeElem,ORIENTATION_SUMMARY,s==null?"":s);    
+    addElementWithText(welcomeElem,ORIENTATION_SUMMARY,s==null?"":s);
   }
   
   private void addCall2Action(Element root, Session sess, Game g)
   {
     Element call2ActionElem = createAppend(root,"CallToAction");
     //addElementWithText(call2ActionElem,"ScreenShot","callToActionScreenShot.png");
-    
+
     MovePhase phase = MovePhase.getCurrentMovePhase(sess);
-    
+
     String s = "";
     Media vid = phase.getCallToActionBriefingVideo();
-    s = "";
     if(vid != null) {
       String url = vid.getUrl();
       if(url != null)
         s = url;
     }
     addElementWithText(call2ActionElem,"Video",s==null?"":s);
-    
+
     s = phase.getCallToActionBriefingSummary();
     addElementWithText(call2ActionElem,"BriefingSummary",s==null?"":s);
     s = phase.getCallToActionBriefingText();
-    addElementWithText(call2ActionElem,CALL2ACTION_BRIEFINGTEXT,s==null?"":s);    
+    addElementWithText(call2ActionElem,CALL2ACTION_BRIEFINGTEXT,s==null?"":s);
   }
   
   private void addTopCards(Element root, Session sess, Game g)
   {
     Element topCardsElem = createAppend(root,"TopCards");
     //addElementWithText(topCardsElem,"ScreenShot","topcardsScreenShot.png");
-    
+
     MovePhase phase = MovePhase.getCurrentMovePhase(sess);
     CardType posCt = CardType.getPositiveIdeaCardType(sess);
     CardType negCt = CardType.getNegativeIdeaCardType(sess);
-    
+
     String s = phase.getPlayACardTitle();
-    addElementWithText(topCardsElem,"PlayACardText",s==null?"":s);    
-    
+    addElementWithText(topCardsElem,"PlayACardText",s==null?"":s);
+
     s = posCt.getTitle();
-    addElementWithText(topCardsElem,"PositiveTitle",s==null?"":s);    
+    addElementWithText(topCardsElem,"PositiveTitle",s==null?"":s);
     s = posCt.getSummaryHeader();
-    addElementWithText(topCardsElem,"PositiveSummaryHeader",s==null?"":s);    
+    addElementWithText(topCardsElem,"PositiveSummaryHeader",s==null?"":s);
     s = posCt.getPrompt();
-    addElementWithText(topCardsElem,"PositivePrompt",s==null?"":s);    
-    
+    addElementWithText(topCardsElem,"PositivePrompt",s==null?"":s);
+
     s = negCt.getTitle();
-    addElementWithText(topCardsElem,"NegativeTitle",s==null?"":s);    
+    addElementWithText(topCardsElem,"NegativeTitle",s==null?"":s);
     s = negCt.getSummaryHeader();
-    addElementWithText(topCardsElem,"NegativeSummaryHeader",s==null?"":s);    
+    addElementWithText(topCardsElem,"NegativeSummaryHeader",s==null?"":s);
     s = negCt.getPrompt();
-    addElementWithText(topCardsElem,"NegativePrompt",s==null?"":s);    
+    addElementWithText(topCardsElem,"NegativePrompt",s==null?"":s);
   }
   
   private void addSubCards(Element root, Session sess, Game g)
   {
     Element reactCardsElem = createAppend(root,"ReactCards");
     //addElementWithText(subCardsElem,"ScreenShot","subcardsScreenShot.png");
-    
+
     MovePhase phase = MovePhase.getCurrentMovePhase(sess);
     Set<CardType> allowedTypes = phase.getAllowedCards();
     ArrayList<CardType> lis = new ArrayList<CardType>();
@@ -294,35 +300,35 @@ public class GameExporter extends BaseExporter
         
     CardType ct = lis.get(0);
     String s = ct.getTitle();
-    addElementWithText(reactCardsElem,"ReactCard1Title",s==null?"":s);    
+    addElementWithText(reactCardsElem,"ReactCard1Title",s==null?"":s);
     s = ct.getSummaryHeader();
-    addElementWithText(reactCardsElem,"ReactCard1SummaryHeader",s==null?"":s);    
+    addElementWithText(reactCardsElem,"ReactCard1SummaryHeader",s==null?"":s);
     s = ct.getPrompt();
-    addElementWithText(reactCardsElem,"ReactCard1Prompt",s==null?"":s);    
-     
+    addElementWithText(reactCardsElem,"ReactCard1Prompt",s==null?"":s);
+
     ct = lis.get(1);
     s = ct.getTitle();
-    addElementWithText(reactCardsElem,"ReactCard2Title",s==null?"":s);    
+    addElementWithText(reactCardsElem,"ReactCard2Title",s==null?"":s);
     s = ct.getSummaryHeader();
-    addElementWithText(reactCardsElem,"ReactCard2SummaryHeader",s==null?"":s);    
+    addElementWithText(reactCardsElem,"ReactCard2SummaryHeader",s==null?"":s);
     s = ct.getPrompt();
-    addElementWithText(reactCardsElem,"ReactCard2Prompt",s==null?"":s);    
-    
+    addElementWithText(reactCardsElem,"ReactCard2Prompt",s==null?"":s);
+
     ct = lis.get(2);
     s = ct.getTitle();
-    addElementWithText(reactCardsElem,"ReactCard3Title",s==null?"":s);    
+    addElementWithText(reactCardsElem,"ReactCard3Title",s==null?"":s);
     s = ct.getSummaryHeader();
-    addElementWithText(reactCardsElem,"ReactCard3SummaryHeader",s==null?"":s);    
+    addElementWithText(reactCardsElem,"ReactCard3SummaryHeader",s==null?"":s);
     s = ct.getPrompt();
-    addElementWithText(reactCardsElem,"ReactCard3Prompt",s==null?"":s);    
-    
+    addElementWithText(reactCardsElem,"ReactCard3Prompt",s==null?"":s);
+
     ct = lis.get(3);
     s = ct.getTitle();
-    addElementWithText(reactCardsElem,"ReactCard4Title",s==null?"":s);    
+    addElementWithText(reactCardsElem,"ReactCard4Title",s==null?"":s);
     s = ct.getSummaryHeader();
-    addElementWithText(reactCardsElem,"ReactCard4SummaryHeader",s==null?"":s);    
+    addElementWithText(reactCardsElem,"ReactCard4SummaryHeader",s==null?"":s);
     s = ct.getPrompt();
-    addElementWithText(reactCardsElem,"ReactCard4Prompt",s==null?"":s);    
+    addElementWithText(reactCardsElem,"ReactCard4Prompt",s==null?"":s);
   }
   
   private void addSeedCards(Element root, Session sess, Game g)
@@ -348,8 +354,8 @@ public class GameExporter extends BaseExporter
       typ = typ.replaceAll("\\W","");  // remove non chars
       //String typ = n<5?"Innovate":"Defend"; //"Positive":"Negative";
       String txt = cd.getText();
-      addElementWithText(seedCardsElem,typ+"SeedCard"+(n+1),txt==null?"":txt);    
-   }  
+      addElementWithText(seedCardsElem,typ+"SeedCard"+(n+1),txt==null?"":txt);
+   }
   }
 
   private void addActionPlans(Element root, Session sess, Game game)
@@ -358,15 +364,15 @@ public class GameExporter extends BaseExporter
     //addElementWithText(apElem,"ScreenShot","actioPlansScreenShot.png");
    
     String s = game.getDefaultActionPlanThePlanText();
-    addElementWithText(apElem,THEPLAN_TEXT,s==null?"":s);    
+    addElementWithText(apElem,THEPLAN_TEXT,s==null?"":s);
     s = game.getDefaultActionPlanTalkText();
-    addElementWithText(apElem,TALK_TEXT,s==null?"":s);    
+    addElementWithText(apElem,TALK_TEXT,s==null?"":s);
     s = game.getDefaultActionPlanImagesText();
-    addElementWithText(apElem,IMAGES_TEXT,s==null?"":s);    
+    addElementWithText(apElem,IMAGES_TEXT,s==null?"":s);
     s = game.getDefaultActionPlanVideosText();
-    addElementWithText(apElem,VIDEO_TEXT,s==null?"":s);    
+    addElementWithText(apElem,VIDEO_TEXT,s==null?"":s);
     s = game.getDefaultActionPlanMapText();
-    addElementWithText(apElem,MAP_TEXT,s==null?"":s);    
+    addElementWithText(apElem,MAP_TEXT,s==null?"":s);
   }
   
   private void addMap(Element root, Session sess, Game g)
@@ -375,19 +381,19 @@ public class GameExporter extends BaseExporter
     //addElementWithText(mapElem,"ScreenShot","mapScreenShot.png");
 
     String s = g.getMapTitle();
-    addElementWithText(mapElem,"Title",s==null?"":s);    
+    addElementWithText(mapElem,"Title",s==null?"":s);
 
     Double d = g.getMapLatitude();
-    s = d==null?"0.0":d.toString();    
-    addElementWithText(mapElem,"InitialLatitude",s);    
+    s = d==null?"0.0":d.toString();
+    addElementWithText(mapElem,"InitialLatitude",s);
 
     d = g.getMapLongitude();
-    s = d==null?"0.0":d.toString();    
-    addElementWithText(mapElem,"InitialLongitude",s);    
+    s = d==null?"0.0":d.toString();
+    addElementWithText(mapElem,"InitialLongitude",s);
 
     Integer i = g.getMapZoom();
-    s = i==null?"0":i.toString();    
-    addElementWithText(mapElem,"InitialZoom",s);      
+    s = i==null?"0":i.toString();
+    addElementWithText(mapElem,"InitialZoom",s);
   }
   
   private void addOther(Element root, Session sess, Game g)
