@@ -107,6 +107,8 @@ public class IdeaDashboard extends AbsoluteLayout implements MmowgliComponent, V
   
   @Override
   public void initGui()
+  {}
+  public void initGuiTL()
   {
     setWidth(APPLICATION_SCREEN_WIDTH);
     setHeight(IDEADASHBOARD_H);
@@ -296,6 +298,8 @@ public class IdeaDashboard extends AbsoluteLayout implements MmowgliComponent, V
   @Override
   public void enter(ViewChangeEvent event)
   {
-    initGui();    
+    Object key = HSess.checkInit();
+    initGuiTL();
+    HSess.checkClose(key);    
   }
 }
