@@ -2,15 +2,14 @@ package edu.nps.moves.mmowgliMobile.ui;
 
 import java.text.SimpleDateFormat;
 
-import com.vaadin.addon.touchkit.ui.*;
+import com.vaadin.addon.touchkit.ui.NavigationButton;
 import com.vaadin.addon.touchkit.ui.NavigationButton.NavigationButtonClickEvent;
+import com.vaadin.addon.touchkit.ui.NavigationManager;
 import com.vaadin.data.Container;
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
 import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.CardType;
@@ -25,9 +24,8 @@ import edu.nps.moves.mmowgliMobile.data.*;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class CardRenderer extends EntryRenderer implements ClickListener
+public class CardRenderer extends EntryRenderer //implements ClickListener
 {
-  private static final long serialVersionUID = -8682226465281882831L;
   private SimpleDateFormat formatter = new SimpleDateFormat("M/d/yy hh:mm");
 
   public void setMessage(FullEntryView mView, ListEntry message, ListView messageList, CssLayout layout)
@@ -218,18 +216,6 @@ public class CardRenderer extends EntryRenderer implements ClickListener
 
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.vaadin.ui.Button.ClickListener#buttonClick(com.vaadin.ui.Button.ClickEvent)
-   */
-  @Override
-  public void buttonClick(ClickEvent event)
-  {
-    // TODO Auto-generated method stub
-
-  }
-
   @SuppressWarnings("serial")
   private Component makeChildGroupButton(final String title, WrappedCard card, CardType typ, final ListView currentMessageList)
   {
@@ -254,7 +240,7 @@ public class CardRenderer extends EntryRenderer implements ClickListener
     else
       btn.setEnabled(false);
 
-    String textStyle = CardStyler.getCardInverseTextColorStyle(typ);
+    String textStyle = CardStyler.getCardTextColorOverBaseStyle(typ);
     String bgStyle = CardStyler.getCardBaseStyle(typ);
 
     HorizontalLayout hLay = new HorizontalLayout();
