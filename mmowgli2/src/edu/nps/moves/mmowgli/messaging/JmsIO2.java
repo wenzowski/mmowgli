@@ -96,8 +96,6 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
   
   public JmsIO2()
   {
-    // Subscribes to the internal jms, used by the sessions to communicate  with each other.
-
     // Subscribes to the external jms, for communication between Tomcat servers within a private cluster.
     // We want to pass things from JMS to the local jms, and from the local jms to JMS
 
