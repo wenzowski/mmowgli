@@ -173,7 +173,7 @@ public class AdvanceMoveDialog extends Window
       @HibernateClosed
       public void valueChange(ValueChangeEvent event)
       {
-        HSess.init();
+        Object sessKey = HSess.checkInit();
         MoveWrap mw = (MoveWrap) event.getProperty().getValue();
         MovePhase curmp = mw.m.getCurrentMovePhase();
         Move m = Move.getTL(mw.m.getId()); // freshen
@@ -188,7 +188,7 @@ public class AdvanceMoveDialog extends Window
         }
         if (sel != null)
           nextPhase.setValue(sel);
-        HSess.close();
+        HSess.checkClose(sessKey);
       }
     };
 
