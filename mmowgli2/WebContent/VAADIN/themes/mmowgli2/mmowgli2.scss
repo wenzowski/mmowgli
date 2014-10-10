@@ -509,6 +509,12 @@ div .m-textarea-greyborder, .m-greyborder {
     width:89px;
     height:38px;
 }
+.v-nativebutton-m-saveChangesButton {
+  background: transparent url('#{$imageRepo}/saveChangesButton119w24h.png') no-repeat;
+  border-style:none;
+  width:119px;
+  height:24px;
+}
 .v-nativebutton-m-cancelButton:hover {
   background: transparent no-repeat;
   background-image:url('#{$imageRepo}/cancelButtHover89w38h.png');
@@ -784,6 +790,7 @@ div .m-textarea-greyborder, .m-greyborder {
 .m-mmowglidialog {
 	background-color: transparent;
 	border:none;
+	box-shadow:none; /* test */
 }
 .m-mmowglidialog .popupContent .v-window-wrap {
 	border:none;
@@ -799,7 +806,7 @@ div .m-textarea-greyborder, .m-greyborder {
 	display:none;
 }
 
- .m-orientation-summary {
+.m-orientation-summary {
 	color: #58595B;
 	font-family: helvetica;
 	/*font-weight: bold;*/
@@ -809,6 +816,11 @@ div .m-textarea-greyborder, .m-greyborder {
 	color: #58595B;
 	font-family: helvetica;
 	font-size: 16px;
+}
+.m-boxshadow-5 {
+  -webkit-box-shadow: 5px 5px 14px 0px rgba(0,0,0,0.75);
+  -moz-box-shadow: 5px 5px 14px 0px rgba(0,0,0,0.75);
+  box-shadow: 5px 5px 14px 0px rgba(0,0,0,0.75);
 }
 div .v-nativebutton-m-userprofile3-changeemailbutt {
   background: transparent;
@@ -1776,56 +1788,119 @@ div div .m-useradmin-search-combo .v-filterselect-button {
 .m-lime-text {
   color: #90CB41;
 }
-/* mike last change */
-.m-purple, .m-resource-color, .m-662d91, #m-purple {
-  /*color: white;*/
+
+//cardstyle
+.m-orange, .m-orange-back, .m-expand-color, .m-f26522 {
+  background-color: #f26522;
+}
+.m-orange-text {
+  color: #EB642D;
+}
+
+//cardstyle
+.m-red, .m-red-back, .m-counter-color, .m-b61861 {
+  background-color: #b61861;
+}
+.m-red-text {
+  color: #B20062;
+}
+
+//cardstyle
+.m-blue, .m-blue-back, .m-adapt-color, .m-0f75bc {
+  background-color: #0f75bc;
+}
+.m-blue-text {
+  color: #2775BD;	
+}
+
+//cardstyle
+.m-lime, .m-lime-back, .m-explore-color, .m-8cc63f {
+  background-color: #8cc63f;
+}
+.m-lime-text {
+  color: #90CB41;
+}
+
+//cardstyle
+.m-purple, .m-purple-back, .m-resource-color, .m-662d91 {
   background-color: #662d91;
 }
 .m-purple-text {
   color: #682491;
 }
-.m-green, .m-risk-color, .m-00a651, #m-green{
-  /*color: white;*/
+
+//cardstyle
+.m-green, .m-green-back, .m-risk-color, .m-00a651{
   background-color: #00a651;
 }
 .m-green-text {
   color: #24AB51; /*green*/	
 }
-.m-darkred, .m-ab0000, #m-darkred {
-  /*color: white;*/
+
+//cardstyle
+.m-darkred, .m-darkred-back, .m-ab0000 {
   background-color: #AB0000;
 }
 .m-darkred-text {
   color: #AB0000;	
 }
-.m-armyblack, .m-000000, #m-armyblack {
-  /*color: white;*/
+
+//cardstyle
+.m-armyblack, .m-armyblack-back, .m-000000 {
   background-color: #000000;
 }
 .m-armyblack-text {
   color: #000000;
 }
-.m-armygold, .m-fcc702, #m-armygold {
-  /*color: white;*/
+
+//cardstyle
+.m-armygold, .m-armygold-back, .m-fcc702 {
   background-color: #FCC702;
 }
 .m-armygold-text {
   color: #FCC702;
 }
-.m-navyblue, .m-032e57, #m-navyblue {
-  /*color: white;*/
+
+//cardstyle
+.m-navyblue, .m-navyblue-back, .m-032e57 {
   background-color: #032E57;
 }
 .m-navyblue-text {
   color: #032E57;	
 }
-.m-navygold, .m-fcbb38, #m-navygold {
-  /*color: white;*/
+
+//cardstyle
+.m-navygold, .m-navygold-back, .m-fcbb38 {
   background-color: #fcbb38;
 }
 .m-navygold-text {
   color: #fcbb38;
 }
+
+//cardstyle
+.m-whitecard, m-whitecard-back {
+  background-color: #EEEEEE;
+}
+.m-whitecard-text {
+  color: #EEEEEE;
+}
+
+.m-white-text {
+  color: white;
+}
+
+.m-black-text {
+  color: black;
+}
+
+//cardstyle
+.m-blackcard, .m-blackcard-back {
+  background-color: #373737;
+}
+.m-blackcard-text {
+  color: #58595B;
+}
+
 .m-lightgray {
   background-color: LightGray;
 }
