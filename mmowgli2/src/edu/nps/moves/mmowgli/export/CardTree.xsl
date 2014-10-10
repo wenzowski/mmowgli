@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0" 
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0"
                 xmlns:fn="w3.org/2005/xpath-functions">
     <!--  xmlns:mmow="http://mmowgli.nps.edu" xmlns="http://mmowgli.nps.edu"
                 xmlns:date="http://exslt.org/dates-and-times" -->
@@ -9,12 +9,12 @@
     <xsl:param name="displayHiddenCards">false</xsl:param>
     <!-- displayRoundNumber: all, 1, 2, etc.  -->
     <xsl:param name="displayRoundNumber">all</xsl:param>
-    
+
     <xsl:output method="html"/>
     <!-- <xsl:output method="xhtml" encoding="UTF-8" indent="yes"/> -->
-    
+
     <!-- Global variables -->
-    
+
     <!--
     <xsl:variable name="todaysDate">
         <xsl:value-of select="date:day-in-month()"/>
@@ -24,29 +24,29 @@
         <xsl:value-of select="date:year()"/>
     </xsl:variable>
     -->
-    
+
     <!-- must also change CSS td.cardCell below! ensure px included. example: 50px -->
     <xsl:variable name="cardCellWidth">
-        <xsl:text>55px</xsl:text> 
+        <xsl:text>55px</xsl:text>
     </xsl:variable>
     <xsl:variable name="maxColumnCount">
         <xsl:text>30</xsl:text>
     </xsl:variable>
-    
+
     <xsl:variable name="gameTitle">
         <!-- Piracy2012, Piracy2011.1, Energy2012, etc. -->
         <xsl:value-of select="//GameTitle"/>
     </xsl:variable>
-    
+
     <xsl:variable name="gameSecurity">
         <!-- open, FOUO, etc. -->
         <xsl:value-of select="//GameSecurity"/>
     </xsl:variable>
-    
+
     <xsl:variable name="exportDateTime">
         <xsl:value-of select="//CardTree/@exported"/>
     </xsl:variable>
-    
+
     <!-- Common variable for each stylesheet -->
     <xsl:variable name="gameLabel">
         <!-- piracyMMOWGLI, energyMMOWGLI, etc. -->
@@ -81,21 +81,33 @@
             <xsl:when test="starts-with($gameTitle,'cap2con') or starts-with($gameTitle,'Cap2con') or contains($gameTitle,'cap2con') or contains($gameTitle,'Cap2con')">
                 <xsl:text>Capacity, Capabilities and Constraints (cap2con)</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
-                <xsl:text>Unmanned Vehicle Digital Manufacturing (uxvdm)</xsl:text>
-            </xsl:when>
             <xsl:when test="contains($gameTitle,'darkportal') or contains($gameTitle,'dark')">
                 <xsl:text>dark Portal (NDU)</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'ig')">
                 <xsl:text>NPS Inspector General (ig) Review</xsl:text>
             </xsl:when>
+            <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
+                <xsl:text>Officer Accesions</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'training')">
+                <xsl:text>MMOWGLI Training</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
+                <xsl:text>NAWCAD Strategic Cell</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'jctd') or contains(lower-case($gameTitle),'swan')">
+                <xsl:text>JCTD Black Swan</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
+                <xsl:text>Unmanned Vehicle Digital Manufacturing (uxvdm)</xsl:text>
+            </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of disable-output-escaping="yes" select="//GameTitle"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
-        
+
     <!-- massive gyrations due to mixed or missing content... -->
     <xsl:variable name="videoYouTubeID">
         <xsl:choose>
@@ -138,7 +150,22 @@
         </xsl:choose>
     </xsl:variable>
     
-        <!-- supported values:  true, false, summaryOnly -->
+    <!-- TODO get game acronym, url in XML file -->
+    <xsl:variable name="gameAcronym">
+        <xsl:choose>
+            <xsl:when           test="(string-length(//GameAcronym) > 0)">
+                <xsl:value-of select="//GameAcronym"/>
+            </xsl:when>
+            <xsl:when           test="contains(//GameTitle,'Mmowgli')">
+                <xsl:value-of select="substring-before(//GameTitle,'Mmowgli')"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="//GameTitle"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+    
+    <!-- supported values:  true, false, summaryOnly -->
     <!-- it is sometimes useful to show hidden cards while quality/correctness review is in progress
     <xsl:variable name="displayHiddenCards">
         <xsl:choose>
@@ -151,11 +178,11 @@
         </xsl:choose>
     </xsl:variable>
    -->
-    
+
     <!-- Titles may vary for top-level InnovateCards and DefendCards.  Ignore hidden cards because they might have been created during setup period. -->
     <xsl:variable name="innovateCardName"  select="(//InnovateCards/Card[not(@hidden='true')][1]/@type)"/>
     <xsl:variable name="defendCardName"    select="(//DefendCards/Card[not(@hidden='true')][1]/@type)"/>
-    
+
     <!-- these are initial colors which may vary in subsequent rounds, if multipleRounds=true -->
     <xsl:variable name="innovateCardColor" select="//InnovateCards/Card[not(@hidden='true')][1]/@color"/>
     <xsl:variable name= "defendCardColor" select="//DefendCards/Card[not(@hidden='true')][1]/@color"/>
@@ -163,30 +190,37 @@
     <xsl:variable name=  "adaptCardColor" select="//Card[@type=  'Adapt'][1]/@color"/>
     <xsl:variable name="counterCardColor" select="//Card[@type='Counter'][1]/@color"/>
     <xsl:variable name="exploreCardColor" select="//Card[@type='Explore'][1]/@color"/>
-                                
+
     <xsl:variable name="XmlSourceFileName">
         <xsl:text>IdeaCardChain_</xsl:text>
         <xsl:value-of select="$gameTitle"/>
         <xsl:text>.xml</xsl:text>
     </xsl:variable>
-                                
+
     <xsl:variable name="ActionPlanLocalLink">
         <xsl:text>ActionPlanList_</xsl:text>
         <xsl:value-of select="$gameTitle"/>
         <xsl:text>.html</xsl:text>
     </xsl:variable>
-                                
+
     <xsl:variable name="PlayerProfilesLocalLink">
         <xsl:text>PlayerProfiles_</xsl:text>
         <xsl:value-of select="$gameTitle"/>
         <xsl:text>.html</xsl:text>
     </xsl:variable>
-        
+
+    <xsl:variable name="ReportsIndexLocalLink">
+        <!-- supports game titles with spaces
+        <xsl:text>index</xsl:text> -->
+        <xsl:text>ReportsIndex_</xsl:text>
+        <xsl:value-of select="replace($gameTitle,' ','_')"/>
+    </xsl:variable>
+
     <!-- template to put out empty <td/> elements count minus i times -->
     <xsl:template name="indent.for.loop">
         <xsl:param name="i"/>
         <xsl:param name="count"/>
-        
+
         <xsl:variable name="padCell">
             <xsl:choose>
                 <xsl:when test="i > 1">
@@ -198,21 +232,24 @@
             </xsl:choose>
         </xsl:variable>
 
-        <xsl:if test="$i &lt; $count">
-            <td width="{$cardCellWidth}" class="cardCell" align="left">
-                <xsl:text disable-output-escaping="yes">&#160;&#160;&#160;</xsl:text>
-                <!-- <xsl:value-of select="$padCell"/> -->
-            </td>
-            <!-- recurse -->
-            <xsl:call-template name="indent.for.loop">
-                <xsl:with-param name="i">
-                    <xsl:value-of select="$i + 1"/>
-                </xsl:with-param>
-                <xsl:with-param name="count">
-                    <xsl:value-of select="$count"/>
-                </xsl:with-param>
-            </xsl:call-template>
-        </xsl:if>
+
+        <xsl:choose>
+            <xsl:when test="$i &lt; $count">
+                <td width="{$cardCellWidth}" class="cardCell" align="left">
+                    <xsl:text disable-output-escaping="yes">&#160;&#160;&#160;</xsl:text>
+                    <!-- <xsl:value-of select="$padCell"/> -->
+                </td>
+                <!-- recurse -->
+                <xsl:call-template name="indent.for.loop">
+                    <xsl:with-param name="i">
+                        <xsl:value-of select="$i + 1"/>
+                    </xsl:with-param>
+                    <xsl:with-param name="count">
+                        <xsl:value-of select="$count"/>
+                    </xsl:with-param>
+                </xsl:call-template>
+            </xsl:when>
+        </xsl:choose>
     </xsl:template>
 
     <xsl:template match="GameSummary">
@@ -220,7 +257,7 @@
             <xsl:value-of select="."/>
         </h2>
     </xsl:template>
-    
+
     <xsl:template name="cardType">
         <xsl:param name="cType"/>
         <xsl:param name="color"/>
@@ -229,7 +266,7 @@
             <xsl:text disable-output-escaping="yes"> </xsl:text> <!-- &#160;&#160;&#160; -->
         </xsl:param>
         <xsl:param name="size"/>
-        
+
           <xsl:variable name="style">
             <xsl:choose>
               <xsl:when test="string-length($color) > 0">
@@ -247,7 +284,7 @@
               </xsl:otherwise>
             </xsl:choose>
           </xsl:variable>
-    
+
         <xsl:choose>
             <!-- ================================== -->
             <!-- top-level categories for piracy 2011.x -->
@@ -255,7 +292,7 @@
                 <td width="{$cardCellWidth}" style="{$style}" class="innovateStrategy cardCell{$size}" title="Best Strategy (Innovate) card: What approaches can best meet this challenge?"                    align="center"><xsl:value-of select="$cardLabel"/></td>
             </xsl:when>
             <xsl:when test="$cType = 'Worst Strategy'">
-                <td width="{$cardCellWidth}" style="{$style}" class="defendStrategy cardCell{$size}"   title="Worst Strategy (Defend old approaches) card: What mistakes and pitfalls need to be avoided?"     align="center"><xsl:value-of select="$cardLabel"/></td>
+                <td width="{$cardCellWidth}" style="{$style}" class="defendStrategy cardCell{$size}"   title="Worst Strategy (Defend old approaches) card: What mistakes or pitfalls need to be avoided?"     align="center"><xsl:value-of select="$cardLabel"/></td>
             </xsl:when>
             <!-- ================================== -->
             <!-- top-level categories for piracy 2011.x -->
@@ -263,7 +300,7 @@
                 <td width="{$cardCellWidth}" style="{$style}" class="innovateStrategy cardCell{$size}" title="Innovate (New or Best Strategy) card: What approaches can best meet this challenge?"             align="center"><xsl:value-of select="$cardLabel"/></td>
             </xsl:when>
             <xsl:when test="$cType = 'Defend'">
-                <td width="{$cardCellWidth}" style="{$style}" class="defendStrategy cardCell{$size}"   title="Defend (Status Quo Strategy) card: What mistakes and pitfalls need to be avoided?"  align="center"><xsl:value-of select="$cardLabel"/></td>
+                <td width="{$cardCellWidth}" style="{$style}" class="defendStrategy cardCell{$size}"   title="Defend (Status Quo Strategy) card: What mistakes or pitfalls need to be avoided?"  align="center"><xsl:value-of select="$cardLabel"/></td>
             </xsl:when>
             <!-- ================================== -->
             <!-- top-level categories for Energy game -->
@@ -338,7 +375,7 @@
             <xsl:when test="$cType = 'Counter'">
               <!-- class="expand cardCell{$size}" -->
                 <td width="{$cardCellWidth}" style="{$style}" class="counter cardCell{$size}"            title="Counter card: Challenge a parent idea"                                                           align="center"><xsl:value-of select="$cardLabel"/></td>
-            </xsl:when> 
+            </xsl:when>
             <xsl:when test="$cType = 'Adapt'">
               <!-- class="expand cardCell{$size}" -->
                 <td width="{$cardCellWidth}" style="{$style}" class="adapt cardCell{$size}"            title="Adapt card: Take an idea in a different direction"                                               align="center"><xsl:value-of select="$cardLabel"/></td>
@@ -363,13 +400,13 @@
         <!-- Insert divider row before new top-level cards, but only when listing entire card chains -->
         <xsl:variable name="currentCardId"  select="@id"/>
         <xsl:variable name="currentCardType"  select="@type"/>
-        <!-- debug -->
+        <!-- debug
         <xsl:comment>
             <xsl:text>$singleIdeaCardChainRootNumber=</xsl:text>
             <xsl:value-of select="$singleIdeaCardChainRootNumber"/>
             <xsl:text>, $currentCardId=</xsl:text>
             <xsl:value-of select="$currentCardId"/>
-        </xsl:comment>
+        </xsl:comment> -->
         <xsl:choose>
             <xsl:when test="(number(@level) = 1) and ($recurse = 'true') and ((position() = 1) or not(preceding-sibling::*[@type = $currentCardType])) and (string-length($singleIdeaCardChainRootNumber) = 0)">
                 <tr>
@@ -400,7 +437,7 @@
 				<td align="right" valign="top">
                                     <a href="#index" title="to top">
                                         <!-- 1158 x 332, width="386" height="111"  -->
-                                        <img align="center" src="http://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
+                                        <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
                                     </a>
                                 </td>
                             </tr>
@@ -526,21 +563,27 @@
                             </xsl:otherwise>
                         </xsl:choose>
                     </xsl:variable>
+                    
+                    <!-- show card content -->
                     <xsl:choose>
                         <xsl:when test="(@hidden = 'true') and (($displayHiddenCards = 'true') or (($displayHiddenCards = 'summaryOnly') and not($recurse = 'true')))">
                             <!-- strike or strikethrough style, do not link urls since hidden and may be undesirable -->
                             <del title="hidden: {.}" style="color:$roundColor">
                                 <xsl:value-of select="."/>
-                            </del> 
+                            </del>
+                            <!-- link to game -->
+                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#65_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Card {@id}">
+                                <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
+                            </a>
                         </xsl:when>
                         <xsl:when test="(@hidden = 'true') and not($displayHiddenCards = 'true') and ($singleIdeaCardChainRootNumber = $currentCardId)">
                             <!-- showing only single card but it is hidden -->
                             <del title="a Game Master has marked this card Hidden" style="color:$roundColor">
                                 <xsl:text>card content is hidden</xsl:text>
-                            </del> 
+                            </del>
                         </xsl:when>
                         <xsl:when test="(@hidden = 'true') and not($displayHiddenCards = 'true')">
-                            <!-- completely hidden --> 
+                            <!-- completely hidden -->
                         </xsl:when>
                         <!-- Titles may vary for top-level InnovateCards and DefendCards -->
                         <xsl:when test="(@type = (//InnovateCards/Card[1]/@type)) or (@type = (//DefendCards/Card[1]/@type))">
@@ -550,6 +593,10 @@
                                     <xsl:with-param name="string" select="$cardText"/> <!-- normalize-space(text() doesn't work -->
                                 </xsl:call-template>
                             </b>
+                            <!-- link to game -->
+                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#65_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Card {@id}">
+                                <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
+                            </a>
                         </xsl:when>
                         <xsl:otherwise>
                             <!-- child cards are not bold -->
@@ -558,6 +605,10 @@
                                     <xsl:with-param name="string" select="$cardText"/> <!-- normalize-space(text() doesn't work -->
                                 </xsl:call-template>
                             </span>
+                            <!-- link to game -->
+                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#65_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Card {@id}">
+                                <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
+                            </a>
                         </xsl:otherwise>
                     </xsl:choose>
                 </td>
@@ -610,7 +661,7 @@
                 -->
             </tr>
         </xsl:if>
-        
+
         <xsl:choose>
             <xsl:when test="($recurse = 'true') and (($displayHiddenCards = 'true')) or (string-length($singleIdeaCardChainRootNumber) > 0)">
                 <xsl:comment>recursing</xsl:comment>
@@ -624,7 +675,7 @@
                 </xsl:apply-templates>
             </xsl:when>
         </xsl:choose>
-        
+
     </xsl:template>
 
     <!-- default match for text() is to ignore -->
@@ -663,7 +714,7 @@
     </xsl:template>
 
     <xsl:template match="CardTree">
-        <!-- Refactor 
+        <!-- Refactor
         <h1>
             <xsl:text>Card Tree</xsl:text>
             <xsl:if test="GameSummary">
@@ -673,7 +724,7 @@
         </h1>
         <xsl:apply-templates select="GameSummary"/>
         -->
-        
+
         <xsl:if test="(string-length($singleIdeaCardChainRootNumber) = 0)">
             <hr />
         </xsl:if>
@@ -686,7 +737,7 @@
     </xsl:template>
 
     <xsl:template match="/">
-                
+
         <!-- remove any line-break elements -->
         <xsl:variable name="gameSummary">
             <xsl:choose>
@@ -699,12 +750,12 @@
                 <xsl:otherwise>
                     <xsl:value-of select="//GameSummary"/>
                 </xsl:otherwise>
-            </xsl:choose>            
+            </xsl:choose>
         </xsl:variable>
         <!-- debug
         <xsl:comment> <xsl:value-of select="$gameLabel"/><xsl:text disable-output-escaping="yes">  '&lt;br /&gt;'</xsl:text></xsl:comment>
         -->
-                                    
+
         <!--
         <xsl:message>
           <xsl:text>innovateCardColor=</xsl:text>
@@ -713,36 +764,38 @@
           <xsl:value-of select="$defendCardColor"/>
         </xsl:message>
         -->
-                
+
         <html>
             <head>
             <!-- TODO
-                <meta name="identifier" content="http:// TODO /IdeaCardChains.html"/>
+                <meta name="identifier" content="https:// TODO /IdeaCardChains.html"/>
             -->
                 <link rel="shortcut icon" href="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.ico" title="MMOWGLI game"/>
                 <meta name="author"      content="Don Brutzman and Mike Bailey"/>
                 <meta name="description" content="Idea card chain outputs from MMOWGLI game"/>
                 <meta name="created"     content="{current-date()}"/>
                 <meta name="exported"    content="{$exportDateTime}"/>
-                <meta name="filename"    content="IdeaCardChains.html"/>
-                <meta name="reference"   content="MMOWGLI Game Engine, http://portal.mmowgli.nps.edu"/>
+                <meta name="filename"    content="IdeaCardChains_{$gameTitle}.html"/>
+                <meta name="identifier"  content="https://mmowgli.nps.edu/{$gameAcronym}/IdeaCardChains_{$gameTitle}.html"/>
+                <meta name="reference"   content="MMOWGLI Game Engine, https://portal.mmowgli.nps.edu"/>
                 <meta name="generator"   content="Eclipse, https://www.eclipse.org"/>
-                <meta name="generator"   content="Altova XML-Spy, http://www.altova.com"/>
+                <meta name="generator"   content="Altova XML-Spy, https://www.altova.com"/>
                 <meta name="generator"   content="Netbeans, https://www.netbeans.org"/>
                 <meta name="generator"   content="X3D-Edit, https://savage.nps.edu/X3D-Edit"/>
-                                
+
                 <xsl:element name="title">
                     <xsl:text disable-output-escaping="yes">Idea Card Chains Report, </xsl:text>
                     <xsl:value-of disable-output-escaping="yes" select="$gameLabel"/>
+                    <xsl:text> MMOWGLI game</xsl:text>
                 </xsl:element>
-                
+
                 <style type="text/css">
 table {
     border-collapse:collapse;
 }
 table.banner
 {
-    padding:5px 20px; 
+    padding:5px 20px;
 }
 td.cardCell {
     align:center;
@@ -797,7 +850,7 @@ text-shadow:; /* off */
                     </xsl:when>
                 </xsl:choose>
                 <!-- This list of url links appears in both ActionPlanList.xsl and CardTree.xsl -->
-                <xsl:variable name="gamePage">
+                <xsl:variable name="portalPage">
                     <xsl:choose>
                         <xsl:when test="contains($gameTitle,'2011.1')">
                             <xsl:text>https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Piracy+MMOWGLI+Games#section-Piracy+MMOWGLI+Games-PiracyMMOWGLIGame2011.1</xsl:text>
@@ -832,11 +885,23 @@ text-shadow:; /* off */
                         <xsl:when test="contains($gameTitle,'ig')">
                             <xsl:text>https://portal.mmowgli.nps.edu/ig</xsl:text>
                         </xsl:when>
-                        <xsl:when test="contains($gameTitle,'uxvdm')">
+                        <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
+                            <xsl:text>https://portal.mmowgli.nps.edu/coin</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="contains($gameTitle,'training')">
+                            <xsl:text>https://portal.mmowgli.nps.edu/training</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
+                            <xsl:text>https://portal.mmowgli.nps.edu/nsc</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="contains($gameTitle,'jctd') or contains(lower-case($gameTitle),'swan')">
+                            <xsl:text>https://portal.mmowgli.nps.edu/jctd</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                             <xsl:text>https://portal.mmowgli.nps.edu/uxvdm</xsl:text>
                         </xsl:when>
                         <xsl:otherwise>
-                            <xsl:text>http://portal.mmowgli.nps.edu</xsl:text>
+                            <xsl:text>https://portal.mmowgli.nps.edu</xsl:text>
                         </xsl:otherwise>
                     </xsl:choose>
                 </xsl:variable>
@@ -845,6 +910,17 @@ text-shadow:; /* off */
                 <xsl:if test="(string-length($singleIdeaCardChainRootNumber) = 0)">
                     <table align="center" border="0" class="banner">
                         <tr border="0">
+                            <td align="center">
+                                <a href="{$portalPage}" title="Game documentation for {$gameLabel}">
+                                    <!-- 1158 x 332 -->
+                                    <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="386" height="111" border="0"/>
+                                </a>
+                                <br />
+                            </td>
+                            <td>
+                                <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                                <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            </td>
                             <td align="center">
                                 <p>
                                     <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
@@ -855,17 +931,6 @@ text-shadow:; /* off */
                                 <h2 align="center">
                                     <xsl:value-of disable-output-escaping="yes" select="$gameLabel"/> <!-- want escaped <br /> intact for line break -->
                                 </h2>
-                            </td>
-                            <td>
-                                <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                                <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                            </td>
-                            <td align="center">
-                                <a href="{$gamePage}" title="Game documentation for {$gameLabel}">
-                                    <!-- 1158 x 332 -->
-                                    <img align="center" src="http://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="386" height="111" border="0"/>
-                                </a>
-                                <br />
                             </td>
                         </tr>
                         <tr border="1" valign="top" style="background-color:lightgrey">
@@ -878,6 +943,11 @@ text-shadow:; /* off */
                                       <xsl:text>: player motivation</xsl:text>
                                       <br />
                                 </xsl:if>
+                                <!-- Sunburst Visualizer -->
+                                <a href="cardSunburstVisualizer.html" title="Idea Card Sunburst Visualizer">
+                                    <xsl:text disable-output-escaping="yes">Idea&amp;nbsp;Card Sunburst&amp;nbsp;Visualizer</xsl:text>
+                                </a>
+                                <br />
                                 <!-- TOC links for top-level seed cards -->
                                 <!-- Innovate cards -->
                                 <xsl:choose>
@@ -897,7 +967,7 @@ text-shadow:; /* off */
                                                             <xsl:value-of select="@type"/>
                                                           </a>
                                                           <xsl:text> (</xsl:text>
-                                                          <xsl:value-of select="count(//InnovateCards/*[not(@hidden='true')][@type = $currentCardType])"/>
+                                                            <xsl:value-of select="count(//InnovateCards/*[not(@hidden='true')][@type = $currentCardType])"/>
                                                           <xsl:text> total)</xsl:text>
                                                       </li>
                                                   </xsl:if>
@@ -938,7 +1008,7 @@ text-shadow:; /* off */
                                                   </xsl:if>
                                               </xsl:for-each>
                                           </ul>
-                                        </div>                     
+                                        </div>
                                     </xsl:when>
                                     <xsl:otherwise>
                                         <span class="lightgreylink defendStrategy" style="color: lightgrey; text-shadow: 1px 1px #000000; background-color: {$defendCardColor};"> <!-- class="defendStrategy" -->
@@ -952,13 +1022,20 @@ text-shadow:; /* off */
                                 </xsl:choose>
 
                                 <a href="#License" title="License, Terms and Conditions for this content"><xsl:text>License, Terms, Conditions</xsl:text></a>
-                                and 
+                                and
                                 <a href="#Contact" title="Contact links for further information"><xsl:text>Contact</xsl:text></a>
                                 <xsl:if test="string-length($ActionPlanLocalLink) > 0">
                                     <br />
                                     <xsl:text> Corresponding </xsl:text>
-                                    <a href="{$ActionPlanLocalLink}">Action Plans</a> for this game
+                                    <a href="{$ActionPlanLocalLink}">Action Plans</a>
+                                    <xsl:text>, </xsl:text>
                                 </xsl:if>
+                                <a href="{$PlayerProfilesLocalLink}" title="Player Profiles report">
+                                    <xsl:text>Player Profiles</xsl:text>
+                                </a>
+                                <xsl:text> and </xsl:text>
+                                <a href="index.html" title="Reports Index for this game"><xsl:text>Reports Index</xsl:text></a>
+                                <xsl:text> for this game </xsl:text>
                             </td>
                             <td>
                                 <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
@@ -976,9 +1053,12 @@ text-shadow:; /* off */
 
                                     <xsl:text> Idea Card Categories and Counts </xsl:text>
                                     <span title="total does not include Hidden cards">
-                                        <xsl:text>(</xsl:text>
-                                        <xsl:value-of select="$innovateCardCount + $defendCardCount + $exploreCardCount + $expandCardCount + $adaptCardCount + $counterCardCount"/>
-                                        <xsl:text> total)</xsl:text>
+                                        <xsl:text> (</xsl:text>
+                                        <b>
+                                            <xsl:value-of select="$innovateCardCount + $defendCardCount + $exploreCardCount + $expandCardCount + $adaptCardCount + $counterCardCount"/>
+                                            <xsl:text> total</xsl:text>
+                                        </b>
+                                        <xsl:text>)</xsl:text>
                                     </span>
                                     <table align="center" border="0" cellpadding="5" style="color: lightgrey; text-shadow: 1px 1px #000000;">
                                         <tr align="center">
@@ -1103,7 +1183,7 @@ text-shadow:; /* off */
                                                 </xsl:with-param>
                                             </xsl:call-template>
                                         </tr>
-                                    </table>                
+                                    </table>
                                 </p>
 
                                 <xsl:variable name= "superInterestingCardCount" select="count(//Card[(@superInteresting='true')])"/>
@@ -1153,15 +1233,15 @@ text-shadow:; /* off */
                                     </table>
                                 </p>
                                 <p>
-                                  Also available: all published
-                                  <a href="http://portal.mmowgli.nps.edu/reports" target="_blank">MMOWGLI Game Reports</a>
+                                  <xsl:text>Also available: </xsl:text>
+                                  <a href="https://portal.mmowgli.nps.edu/reports" target="_blank">all published MMOWGLI Game Reports</a>
                                 </p>
                             </td>
                         </tr>
                     </table>
         <br />
         <hr />
-        
+
         <!-- Now provide Call To Action, if available -->
         <table align="center" width="100%">
             <tr align="top">
@@ -1180,7 +1260,7 @@ text-shadow:; /* off */
                 <td align="right" valign="top">
                     <a href="#index" title="to top">
                         <!-- 1158 x 332, width="386" height="111"  -->
-                        <img align="center" src="http://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
+                        <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
                     </a>
                 </td>
             </tr>
@@ -1201,7 +1281,7 @@ text-shadow:; /* off */
                     </object>
                     <xsl:if test="string-length(normalize-space($videoAlternateUrl)) > 0">
                         <br />
-                        (No video? Try 
+                        (No video? Try
                         <a href="{normalize-space($videoAlternateUrl)}" target="_blank">this</a>)
                     </xsl:if>
                 </td>
@@ -1222,7 +1302,7 @@ text-shadow:; /* off */
                         The
                         <xsl:choose>
                             <xsl:when test="contains($gameTitle,'nergy')">
-                                    <a href="http://portal.mmowgli.nps.edu/energy-welcome">energyMMOWGLI Portal</a>
+                                    <a href="https://portal.mmowgli.nps.edu/energy-welcome">energyMMOWGLI Portal</a>
                             </xsl:when>
                             <xsl:when test="contains($gameTitle,'iracy')">
                                     <a href="https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Piracy+MMOWGLI+Games">piracyMMOWGLI Portal</a>
@@ -1237,17 +1317,17 @@ text-shadow:; /* off */
             </tr>
         </table>
         <!-- Call To Action complete -->
-        
+
                 </xsl:if>
 
         <!-- Process CardTree/*/Card(s) -->
         <xsl:apply-templates/> <!-- process CardTree for InnovateCards and DefendCards -->
-        
+
         <xsl:if test="(string-length($singleIdeaCardChainRootNumber) = 0)">
-                
+
             <br />
             <hr />
-            
+
             <table border="0" width="100%" cellpadding="0">
                 <tr>
                     <td align="left">
@@ -1266,7 +1346,7 @@ text-shadow:; /* off */
                     <td align="right" valign="top">
                         <a href="#index" title="to top">
                             <!-- 1158 x 332, width="386" height="111"  -->
-                            <img align="center" src="http://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
+                            <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
                         </a>
                     </td>
                 </tr>
@@ -1301,7 +1381,7 @@ text-shadow:; /* off */
                     <td align="right" valign="top">
                         <a href="#index" title="to top">
                             <!-- 1158 x 332, width="386" height="111"  -->
-                            <img align="center" src="http://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
+                            <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
                         </a>
                     </td>
                 </tr>
@@ -1339,7 +1419,7 @@ text-shadow:; /* off */
                     <td align="right" valign="top">
                         <a href="#index" title="to top">
                             <!-- 1158 x 332, width="386" height="111"  -->
-                            <img align="center" src="http://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
+                            <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
                         </a>
                     </td>
                 </tr>
@@ -1377,7 +1457,7 @@ text-shadow:; /* off */
                     <td align="right" valign="top">
                         <a href="#index" title="to top">
                             <!-- 1158 x 332, width="386" height="111"  -->
-                            <img align="center" src="http://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
+                            <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
                         </a>
                     </td>
                 </tr>
@@ -1413,7 +1493,7 @@ text-shadow:; /* off */
                     <td align="right" valign="top">
                         <a href="#index" title="to top">
                             <!-- 1158 x 332, width="386" height="111"  -->
-                            <img align="center" src="http://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
+                            <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
                         </a>
                     </td>
                 </tr>
@@ -1441,7 +1521,7 @@ text-shadow:; /* off */
 
             <blockquote>
                 This data corpus is published under the
-                <a href="http://creativecommons.org/licenses/by-sa/3.0" target="_blank">Creative Commons 3.0 "By Attribution - Share Alike"</a>
+                <a href="https://creativecommons.org/licenses/by-sa/3.0" target="_blank">Creative Commons 3.0 "By Attribution - Share Alike"</a>
                 license for open-source content.
             </blockquote>
 
@@ -1455,59 +1535,59 @@ text-shadow:; /* off */
                            <b>Remix</b>:  to adapt the work
                        </li>
                        <li>
-                           make commercial use of the work 
+                           make commercial use of the work
                        </li>
                    </ul>
                Under the following conditions
                    <ul>
                        <li>
-                           <b>Attribution</b>:  You must attribute the work in the manner specified by the author or licensor 
-                           (but not in any way that suggests that they endorse you or your use of the work).                    
+                           <b>Attribution</b>:  You must attribute the work in the manner specified by the author or licensor
+                           (but not in any way that suggests that they endorse you or your use of the work).
                        </li>
                        <li>
-                           <b>Share Alike</b>:  If you alter, transform, or build upon this work, you may distribute 
-                           the resulting work only under the same or similar license to this one. 
+                           <b>Share Alike</b>:  If you alter, transform, or build upon this work, you may distribute
+                           the resulting work only under the same or similar license to this one.
                        </li>
                    </ul>
                With further understandings listed in the license.
             </blockquote>
 
             <blockquote>
-                <b>Notice</b>:  For any reuse or distribution, you must make clear to others the license terms of this work. 
-                The best way to do this is by providing a link to the license page above. 
+                <b>Notice</b>:  For any reuse or distribution, you must make clear to others the license terms of this work.
+                The best way to do this is by providing a link to the license page above.
             </blockquote>
 
             <h3> Terms and Conditions </h3>
 
             <blockquote>
                 Prior to contributing, MMOWGLI players agree to follow the
-                <a href="https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Terms+and+Conditions" target="_blank">Terms and Conditions</a> 
+                <a href="https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Terms+and+Conditions" target="_blank">Terms and Conditions</a>
                 of the game, which include the
-                <a href="http://movesinstitute.org/mmowMedia/MmowgliGameParticipantInformedConsent.html" target="_blank">Informed Consent to Participate in Research</a>
+                <a href="https://movesinstitute.org/mmowMedia/MmowgliGameParticipantInformedConsent.html" target="_blank">Informed Consent to Participate in Research</a>
                 and the
-                <a href="http://www.defense.gov/socialmedia/user-agreement.aspx" target="_blank">Department of Defense Social Media User Agreement</a>.
+                <a href="https://www.defense.gov/socialmedia/user-agreement.aspx" target="_blank">Department of Defense Social Media User Agreement</a>.
             </blockquote>
 
             <blockquote>
-                The official language of the MMOWGLI game is English. 
+                The official language of the MMOWGLI game is English.
                 We do not support other languages during this version of the game in order to ensure that player postings are appropriate.
             </blockquote>
 
             <blockquote>
                 No classified or sensitive information can be posted to the game.
-                Violation of this policy may lead to serious consequences. 
+                Violation of this policy may lead to serious consequences.
             </blockquote>
 
             <blockquote>
-                All players must acknowledge and accept these requirements prior to user registration and game play. 
-                No exceptions are permitted. 
+                All players must acknowledge and accept these requirements prior to user registration and game play.
+                No exceptions are permitted.
             </blockquote>
 
             <br />
             <hr />
 
 <!-- =================================================== Contact =================================================== -->
-        
+
             <table border="0" width="100%" cellpadding="0">
                 <tr>
                     <td align="left">
@@ -1516,7 +1596,7 @@ text-shadow:; /* off */
                     <td align="right" valign="top">
                         <a href="#index" title="to top">
                             <!-- 1158 x 332, width="386" height="111"  -->
-                            <img align="center" src="http://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
+                            <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
                         </a>
                     </td>
                 </tr>
@@ -1538,26 +1618,26 @@ text-shadow:; /* off */
             <blockquote>
                 Questions, suggestions and comments about these game products are welcome.
                 Please provide a
-                <a href="http://portal.mmowgli.nps.edu/trouble">Trouble Report</a>
+                <a href="https://portal.mmowgli.nps.edu/trouble">Trouble Report</a>
                 or send mail to
-                <a href="mailto:mmowgli-trouble%20at%20movesInstitute.org?subject=Idea%20Card%20Report%20feedback:%20{$gameLabel}"><i><xsl:text disable-output-escaping="yes">mmowgli-trouble at movesInstitute.org</xsl:text></i></a>.
+                <a href="mailto:mmowgli-trouble%20at%20nps.edu?subject=Idea%20Card%20Report%20feedback:%20{$gameLabel}"><i><xsl:text disable-output-escaping="yes">mmowgli-trouble at nps.edu</xsl:text></i></a>.
             </blockquote>
 
             <blockquote>
                 Additional information is available online for the
-                <a href="{$gamePage}"><xsl:value-of select="$gameLabel"/><xsl:text> game</xsl:text></a>
+                <a href="{$portalPage}"><xsl:value-of select="$gameLabel"/><xsl:text> game</xsl:text></a>
                 and the
-                <a href="http://portal.mmowgli.nps.edu">MMOWGLI project</a>.
+                <a href="https://portal.mmowgli.nps.edu">MMOWGLI project</a>.
             </blockquote>
 
             <blockquote>
-    <a href="http://www.nps.navy.mil/disclaimer" target="disclaimer">Official disclaimer</a>:
+    <a href="https://www.nps.navy.mil/disclaimer" target="disclaimer">Official disclaimer</a>:
     "Material contained herein is made available for the purpose of
     peer review and discussion and does not necessarily reflect the
     views of the Department of the Navy or the Department of Defense."
             </blockquote>
         </xsl:if>
-            
+
                 <xsl:choose>
                     <xsl:when test="($gameSecurity='FOUO')">
                         <p align="center">
@@ -1570,9 +1650,9 @@ text-shadow:; /* off */
             </body>
         </html>
     </xsl:template>
-    
+
     <xsl:template name="hyperlink">
-        <!-- Search and replace urls in text:  adapted (with thanks) from 
+        <!-- Search and replace urls in text:  adapted (with thanks) from
             http://www.dpawson.co.uk/xsl/rev2/regex2.html#d15961e67 by Jeni Tennison using url regex (http://[^ ]+) -->
         <!-- Justin Saunders http://regexlib.com/REDetails.aspx?regexp_id=37 url regex ((mailto:|(news|(ht|f)tp(s?))://){1}\S+) -->
         <xsl:param name="string" select="string(.)" />

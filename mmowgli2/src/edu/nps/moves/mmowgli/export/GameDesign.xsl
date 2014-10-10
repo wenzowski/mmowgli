@@ -2,26 +2,26 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
     <!--  xmlns:mmow="http://mmowgli.nps.edu" xmlns="http://mmowgli.nps.edu" -->
     <xsl:output method="html"/>
-    
+
     <xsl:variable name="mmowgliGameDescription">
         <xsl:value-of select="//MmowgliGame/@description"/>
     </xsl:variable>
-    
+
     <xsl:variable name="exportDateTime">
         <xsl:value-of select="//MmowgliGame/@exported"/>
     </xsl:variable>
-    
+
     <xsl:variable name="gameTitle">
         <!-- Piracy2012, Piracy2011.1, Energy2012, etc. -->
         <!-- TODO make consistent -->
-        <xsl:value-of select="//BrandingText"/>
+        <xsl:value-of select="//GameTitle"/>
     </xsl:variable>
-    
+
     <xsl:variable name="gameSecurity">
         <!-- open, FOUO, etc. -->
         <xsl:value-of select="//GameSecurity"/>
     </xsl:variable>
-    
+
     <!-- Common variable for each stylesheet -->
     <xsl:variable name="gameLabel">
         <!-- piracyMMOWGLI, energyMMOWGLI, etc. -->
@@ -65,14 +65,29 @@
             <xsl:when test="contains($gameTitle,'ig')">
                 <xsl:text>NPS Inspector General (ig) Review</xsl:text>
             </xsl:when>
+            <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
+                <xsl:text>Officer Accesions</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'training')">
+                <xsl:text>MMOWGLI Training</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
+                <xsl:text>NAWCAD Strategic Cell</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'jctd') or contains(lower-case($gameTitle),'swan')">
+                <xsl:text>JCTD Black Swan</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
+                <xsl:text>Unmanned Vehicle Digital Manufacturing (uxvdm)</xsl:text>
+            </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of disable-output-escaping="yes" select="//GameTitle"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
-    
+
     <!-- This list of url links appears in both ActionPlanList.xsl and CardTree.xsl -->
-    <xsl:variable name="gamePage">
+    <xsl:variable name="portalPage">
         <xsl:choose>
             <xsl:when test="contains($gameTitle,'2011.1')">
                 <xsl:text>https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Piracy+MMOWGLI+Games#section-Piracy+MMOWGLI+Games-PiracyMMOWGLIGame2011.1</xsl:text>
@@ -104,14 +119,26 @@
             <xsl:when test="starts-with($gameTitle,'cap2con') or starts-with($gameTitle,'Cap2con') or contains($gameTitle,'cap2con') or contains($gameTitle,'Cap2con')">
                 <xsl:text>https://portal.mmowgli.nps.edu/cap2con</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
-                <xsl:text>https://portal.mmowgli.nps.edu/uxvdm</xsl:text>
-            </xsl:when>
             <xsl:when test="contains($gameTitle,'darkportal') or contains($gameTitle,'dark')">
                 <xsl:text>https://portal.mmowgli.nps.edu/NDU</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'ig')">
                 <xsl:text>https://portal.mmowgli.nps.edu/ig</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
+                <xsl:text>https://portal.mmowgli.nps.edu/coin</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'training')">
+                <xsl:text>https://portal.mmowgli.nps.edu/training</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
+                <xsl:text>https://portal.mmowgli.nps.edu/nsc</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'jctd') or contains(lower-case($gameTitle),'swan')">
+                <xsl:text>https://portal.mmowgli.nps.edu/jctd</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
+                <xsl:text>https://portal.mmowgli.nps.edu/uxvdm</xsl:text>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:text>https://portal.mmowgli.nps.edu/</xsl:text>
@@ -119,37 +146,61 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
-    
+
     <xsl:variable name="XmlSourceFileName">
         <xsl:text>GameDesign_</xsl:text>
         <xsl:value-of select="$gameTitle"/>
         <xsl:text>MmowgliGame.xml</xsl:text>
     </xsl:variable>
+
+    <xsl:variable name="ReportsIndexLocalLink">
+        <!-- supports game titles with spaces
+        <xsl:text>index</xsl:text> -->
+        <xsl:text>ReportsIndex_</xsl:text>
+        <xsl:value-of select="replace($gameTitle,' ','_')"/>
+    </xsl:variable>
     
+    <!-- TODO get game acronym, url in XML file -->
+    <xsl:variable name="gameAcronym">
+        <xsl:choose>
+            <xsl:when           test="(string-length(//GameAcronym) > 0)">
+                <xsl:value-of select="//GameAcronym"/>
+            </xsl:when>
+            <xsl:when           test="contains(//GameTitle,'Mmowgli')">
+                <xsl:value-of select="substring-before(//GameTitle,'Mmowgli')"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="//GameTitle"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+
     <xsl:template match="/">
         <html>
             <head>
             <!-- TODO
-                <meta name="identifier" content="https:// TODO /ActionPlanList.html"/>
+                <meta name="identifier" content="http:// TODO /ActionPlanList.html"/>
             -->
                 <link rel="shortcut icon" href="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.ico" title="MMOWGLI game"/>
                 <meta name="description" content="Action plan outputs from MMOWGLI game"/>
                 <meta name="created"     content="{current-date()}"/>
                 <meta name="exported"    content="{$exportDateTime}"/>
-                <meta name="filename"    content="ActionPlanList.html"/>
+                <meta name="filename"    content="GameDesign_{$gameTitle}.html"/>
+                <meta name="identifier"  content="https://mmowgli.nps.edu/{$gameAcronym}/IdeaCardChains_{$gameTitle}.html"/>
                 <meta name="reference"   content="MMOWGLI Game Engine, https://portal.mmowgli.nps.edu"/>
                 <meta name="generator"   content="Eclipse, https://www.eclipse.org"/>
-                <meta name="generator"   content="Altova XML-Spy, http://www.altova.com"/>
+                <meta name="generator"   content="Altova XML-Spy, https://www.altova.com"/>
                 <meta name="generator"   content="Netbeans, https://www.netbeans.org"/>
                 <meta name="generator"   content="X3D-Edit, https://savage.nps.edu/X3D-Edit"/>
-                                
+
                 <xsl:element name="title">
                     <xsl:text>Game Design Report, </xsl:text>
                     <xsl:value-of disable-output-escaping="yes" select="$gameLabel"/>
+                    <xsl:text> MMOWGLI game</xsl:text>
                 </xsl:element>
-                
+
      <style type="text/css">
-         
+
 dt { font-weight:bold; } <!-- font-style:italic; -->
 table.banner   { border:0; background-color:#ffffff; padding-left:15px; padding-right:15px; padding-top:1px; padding-bottom:1px; }
 table.contents { border:0; background-color:#eeffff; padding-left:15px; padding-right:15px; padding-top:1px; padding-bottom:1px; }
@@ -192,6 +243,16 @@ b.error {color: #CC0000}
                 <table align="center" border="0" class="banner">
                     <tr>
                         <td align="center">
+                            <a href="{$portalPage}" title="Game documentation for {$gameLabel}">
+                                <!-- 1158 x 332 -->
+                                <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="386" height="111" border="0"/>
+                            </a>
+                        </td>
+                        <td>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                        </td>
+                        <td align="center">
                             <p>
                                 <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
                             </p>
@@ -202,19 +263,9 @@ b.error {color: #CC0000}
                                 <xsl:value-of disable-output-escaping="yes" select="$gameLabel"/> <!-- want escaped <br /> intact for line break -->
                             </h2>
                         </td>
-                        <td>
-                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                        </td>
-                        <td align="center">
-                            <a href="{$gamePage}" title="Game documentation for {$gameLabel}">
-                                <!-- 1158 x 332 -->
-                                <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="386" height="111" border="0"/>
-                            </a>
-                        </td>
                     </tr>
                 </table>
-                
+
                 <!-- Table of Contents -->
                 <p align="center" style="font-size:-2">
                     <xsl:for-each select="//MmowgliGame/*">
@@ -224,16 +275,18 @@ b.error {color: #CC0000}
                         </xsl:if>
                     </xsl:for-each>
                     <xsl:text> | </xsl:text>
+                    <a href="{concat($ReportsIndexLocalLink,'.html')}" title="Reports Index for this game"><xsl:text>Reports Index</xsl:text></a>
+                    <xsl:text> | </xsl:text>
                     <a href="#Contact"><xsl:text>Contact</xsl:text></a>
                 </p>
-                
+
                 <xsl:apply-templates select="//MmowgliGame/*"/>
-                
+
 <!-- =================================================== Contact =================================================== -->
 
             <br />
             <hr />
-        
+
             <table border="0" width="100%" cellpadding="0">
                 <tr>
                     <td align="left">
@@ -242,7 +295,7 @@ b.error {color: #CC0000}
                     <td align="right" valign="top">
                         <a href="#index" title="to top">
                             <!-- 1158 x 332, width="386" height="111"  -->
-                            <img align="center" src="http://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
+                            <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
                         </a>
                     </td>
                 </tr>
@@ -252,7 +305,7 @@ b.error {color: #CC0000}
                 Game information in this report was exported
                 <b><xsl:value-of select="$exportDateTime"/></b>.
             </blockquote>
-            
+
             <xsl:variable name="LicenseLink">
                 <xsl:text>IdeaCardChain_</xsl:text>
                 <xsl:value-of select="$gameTitle"/>
@@ -270,25 +323,25 @@ b.error {color: #CC0000}
             <blockquote>
                 Questions, suggestions and comments about these game products are welcome.
                 Please provide a
-                <a href="http://portal.mmowgli.nps.edu/trouble">Trouble Report</a>
+                <a href="https://portal.mmowgli.nps.edu/trouble">Trouble Report</a>
                 or send mail to
-                <a href="mailto:mmowgli-trouble%20at%20movesInstitute.org?subject=Game%20Design%20Report%20feedback:%20{$gameLabel}"><i><xsl:text disable-output-escaping="yes">mmowgli-trouble at movesInstitute.org</xsl:text></i></a>.
+                <a href="mailto:mmowgli-trouble%20at%20nps.edu?subject=Game%20Design%20Report%20feedback:%20{$gameLabel}"><i><xsl:text disable-output-escaping="yes">mmowgli-trouble at nps.edu</xsl:text></i></a>.
             </blockquote>
 
             <blockquote>
                 Additional information is available online for the
-                <a href="{$gamePage}"><xsl:value-of select="$gameLabel"/><xsl:text> game</xsl:text></a>
+                <a href="{$portalPage}"><xsl:value-of select="$gameLabel"/><xsl:text> game</xsl:text></a>
                 and the
-                <a href="http://portal.mmowgli.nps.edu/game-wiki">MMOWGLI project</a>.
+                <a href="https://portal.mmowgli.nps.edu/game-wiki">MMOWGLI project</a>.
             </blockquote>
 
             <blockquote>
-    <a href="http://www.nps.navy.mil/disclaimer" target="disclaimer">Official disclaimer</a>:
+    <a href="https://www.nps.navy.mil/disclaimer" target="disclaimer">Official disclaimer</a>:
     "Material contained herein is made available for the purpose of
     peer review and discussion and does not necessarily reflect the
     views of the Department of the Navy or the Department of Defense."
             </blockquote>
-                    
+
                 <xsl:choose>
                     <xsl:when test="($gameSecurity='FOUO')">
                         <p align="center">
@@ -301,7 +354,7 @@ b.error {color: #CC0000}
             </body>
         </html>
     </xsl:template>
-    
+
     <xsl:template match="*">
         <h3>
             <a name="{local-name()}">
@@ -311,7 +364,7 @@ b.error {color: #CC0000}
         <xsl:if test="(local-name()='GameSecurity')">
             <indent>
                 <xsl:value-of select="."/>
-                <br />  
+                <br />
                 <xsl:choose>
                     <xsl:when test="($gameSecurity='FOUO')">
                             <a href="https://portal.mmowgli.nps.edu/fouo" target="_blank" title="UNCLASSIFIED / FOR OFFICIAL USE ONLY (FOUO)">
@@ -406,7 +459,7 @@ b.error {color: #CC0000}
             </xsl:for-each>
         </table>
     </xsl:template>
- 
+
     <xsl:template name="treatHtml">
         <xsl:param name="string" select="string(.)"/>
         <!-- First: find and fix < values -->
@@ -428,7 +481,7 @@ b.error {color: #CC0000}
             </xsl:non-matching-substring>
         </xsl:analyze-string>
     </xsl:template>
- 
+
     <xsl:template name="treatUrl">
         <xsl:param name="string" select="string(.)"/>
         <!-- Find and fix %20 values -->
@@ -442,7 +495,7 @@ b.error {color: #CC0000}
             </xsl:non-matching-substring>
         </xsl:analyze-string>
     </xsl:template>
- 
+
     <xsl:template name="treatParagraphBreaks">
         <xsl:param name="string" select="string(.)"/>
         <!-- limitation:  only works on lower-case html tags -->
@@ -473,9 +526,9 @@ b.error {color: #CC0000}
         <!-- Third: remainder is unmodified -->
         <xsl:value-of select="$result6" disable-output-escaping="yes"/>
     </xsl:template>
-    
+
     <xsl:template name="hyperlink">
-        <!-- Search and replace urls in text:  adapted (with thanks) from 
+        <!-- Search and replace urls in text:  adapted (with thanks) from
             http://www.dpawson.co.uk/xsl/rev2/regex2.html#d15961e67 by Jeni Tennison using url regex (http://[^ ]+) -->
         <!-- Justin Saunders http://regexlib.com/REDetails.aspx?regexp_id=37 url regex ((mailto:|(news|(ht|f)tp(s?))://){1}\S+) -->
         <xsl:param name="string" select="string(.)" />
