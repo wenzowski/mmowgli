@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 1995-2010 held by the author(s).  All rights reserved.
- *  
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *  
+ *
  *  * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *  * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
  *       nor the names of its contributors may be used to endorse or
  *       promote products derived from this software without specific
  *       prior written permission.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -61,7 +61,6 @@ import org.w3c.dom.*;
 
 import com.vaadin.server.Page;
 import com.vaadin.shared.Position;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -148,11 +147,11 @@ public abstract class BaseExporter implements Runnable
           }
         }
       }
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
-    
+    } catch (Exception e) {
+       System.err.println(e.getLocalizedMessage());
+       e.printStackTrace();
+      }
+
     hMap.put(REPORTS_DIRECTORY_URL, getReportsDirectoryUrl());
     setStaticTransformationParameters(hMap);
   }
@@ -264,9 +263,7 @@ public abstract class BaseExporter implements Runnable
     pGL.setComponentAlignment(hdr, Alignment.MIDDLE_CENTER);
     pGL.setSpacing(false);
     for(String key : keySet) {
-      Label lab;
-      pGL.addComponent(lab=new Label("&nbsp;"+key+"&nbsp;&nbsp;"));
-      lab.setContentMode(ContentMode.HTML);
+      pGL.addComponent(new HtmlLabel("&nbsp;"+key+"&nbsp;&nbsp;"));
       pGL.addComponent(parameterFields[i] = new TextField());
       parameterFields[i++].setValue(params.get(key));
     }
@@ -366,8 +363,8 @@ public abstract class BaseExporter implements Runnable
         .add(Restrictions.gt("MOVE.number", 1))
         .setProjection(Projections.rowCount());
 
-    count = ((Long) criteria.list().get(0)).intValue();    
-    return count>0;   
+    count = ((Long) criteria.list().get(0)).intValue();
+    return count>0;
   }
   
   protected void addImageContent(Element imageEl, Media med)
@@ -382,7 +379,7 @@ public abstract class BaseExporter implements Runnable
      * Base64.encodeToString(baos.toByteArray()); baos.close(); // should be
      * inside a finally block node.setTextContent(encodedImage); // store it
      * inside node
-     * 
+     *
      * // DECODING String encodedImage = node.getTextContent(); byte[] bytes =
      * Base64.decode(encodedImage); BufferedImage image = ImageIO.read(new
      * ByteArrayInputStream(bytes)); }
@@ -392,11 +389,11 @@ public abstract class BaseExporter implements Runnable
      * ByteArrayOutputStream baos; String imageString; try { BufferedImage bi =
      * ImageIO.read(new URL(med.getUrl())); baos = new ByteArrayOutputStream();
      * ImageIO.write(bi, "png", baos); baos.flush();
-     * 
+     *
      * imageString = Base64.encodeBase64String(baos.toByteArray());
      * baos.close(); } catch (Exception ex) { imageString =
      * "Image encoding error: " + ex.getLocalizedMessage(); }
-     * 
+     *
      * addElementWithText(imageEl, "ImagePngBase64", imageString);
      */
   }
@@ -606,7 +603,7 @@ public abstract class BaseExporter implements Runnable
   {
     MovePhase mp = MovePhase.getCurrentMovePhase(sess);
     Element cto = createAppend(root,"CallToAction");
-    String vidUrl = "";   
+    String vidUrl = "";
     Media vid = mp.getCallToActionBriefingVideo();
     if(vid != null)
       vidUrl = vid.getUrl();
