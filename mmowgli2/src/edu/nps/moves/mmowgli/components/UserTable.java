@@ -1,10 +1,10 @@
 /*
 * Copyright (c) 1995-2010 held by the author(s).  All rights reserved.
-*  
+*
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions
 * are met:
-*  
+*
 *  * Redistributions of source code must retain the above copyright
 *       notice, this list of conditions and the following disclaimer.
 *  * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
 *       nor the names of its contributors may be used to endorse or
 *       promote products derived from this software without specific
 *       prior written permission.
-*  
+*
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -162,15 +162,15 @@ public class UserTable extends Table implements Button.ClickListener
     else {
       cols  = new String[]{ ORDER_COLUMN,AVATAR_COLUMN, USERNAME_COLUMN, LOCATION_COLUMN, BASICSCORE_COLUMN };
       names = new String[]{ "rank", "", "name", "location", "points" };
-      widths= new int[]   {45,30,270,-1,180};      
+      widths= new int[]   {45,30,270,-1,180};
     }
     UserTable tab = new UserTable(null,cols,names,widths);
     tab.addStyleName("m-leaderboard-table");
     tab.setColumnExpandRatio("location", 1.0f);
     tab.setAvatarSize("25px");
-    return tab;    
+    return tab;
   }
-  
+
   private static UserTable _makeEmptyLeaderBoardTableCombinedScoreTL()
   {
     String[] cols,names;
@@ -183,14 +183,14 @@ public class UserTable extends Table implements Button.ClickListener
     else {
       cols  = new String[]{ ORDER_COLUMN,AVATAR_COLUMN, USERNAME_COLUMN, LOCATION_COLUMN, BASIC_COMBINED_SCORE_COLUMN };
       names = new String[]{ "rank", "", "name", "location", "points"};
-      widths= new int[]   {45,30,270,-1,180};      
+      widths= new int[]   {45,30,270,-1,180};
     }
-    
+
     UserTable tab = new UserTable(null,cols,names,widths);
     tab.addStyleName("m-leaderboard-table");
     tab.setColumnExpandRatio("location", 1.0f);
     tab.setAvatarSize("25px");
-    return tab;    
+    return tab;
   }
 
   // Move number is 1-based
@@ -213,8 +213,8 @@ public class UserTable extends Table implements Button.ClickListener
     tab.addStyleName("m-leaderboard-table");
     tab.setColumnExpandRatio("location", 1.0f);
     tab.setAvatarSize("25px");
-    return tab;    
-   
+    return tab;
+
   }
   public static UserTable makeBuddyTableTL()
   {
@@ -228,14 +228,14 @@ public class UserTable extends Table implements Button.ClickListener
     else {
       cols = new String[]{ AVATAR_COLUMN, USERNAME_COLUMN, LOCATION_COLUMN, BASICSCORE_COLUMN};
       names= new String[]{ "", "name", "location", "basic points"};
-      widths= new int[]{30,270,-1,140};     
+      widths= new int[]{30,270,-1,140};
     }
     UserTable tab = new UserTable(null,cols,names,widths);
     tab.setColumnExpandRatio("location", 1.0f);
     tab.setAvatarSize("25px");
     return tab;
   }
-  
+
   @HibernateSessionThreadLocalConstructor
   public UserTable(String caption, String[] visibleColumns, String[] displayedNames, int[] columnWidths)
   {
@@ -308,7 +308,7 @@ public class UserTable extends Table implements Button.ClickListener
     for(String colNm : visibleColumns)
       if(isAnInnovScoreColumn(colNm))
         return colNm;
-    return null;    
+    return null;
   }
   
   public void initFromDataSource(Container con)
@@ -321,7 +321,7 @@ public class UserTable extends Table implements Button.ClickListener
     setVisibleColumns((Object[])visibleColumns);
     setColumnHeaders(displayedNames);
     setColumnWidths(columnWidths);
-    setSelectable(true);    
+    setSelectable(true);
   }
   
   @SuppressWarnings("serial")
@@ -332,10 +332,10 @@ public class UserTable extends Table implements Button.ClickListener
     {
       if (event.getPropertyId().equals(ORDER_COLUMN) )
         sortByBasicScore();
-    }  
+    }
   }
-  
-  // Special column renderers 
+
+  // Special column renderers
   private void initColumnCustomizers()
   {
     Table.ColumnGenerator colGen = new columnCustomizer();
@@ -420,8 +420,8 @@ public class UserTable extends Table implements Button.ClickListener
           em.setHeight(avatarSize);
           return em;
         }
-        else 
-          return new Label("");         
+        else
+          return new Label("");
       }
       Float score = null;
       if ((score = isABasicScore(columnId.toString(),user)) != null)
@@ -468,7 +468,7 @@ public class UserTable extends Table implements Button.ClickListener
       return true;
     if(s.equals(BASICSCORE_BY_MOVE_COLUMN[4]))
       return true;
-    return false;  
+    return false;
   }
   
   private boolean isAnInnovScoreColumn(String s)
@@ -488,7 +488,7 @@ public class UserTable extends Table implements Button.ClickListener
     if(s.equals(INNOVSCORE_BY_MOVE_COLUMN[4]))
       return true;
 
-    return false;  
+    return false;
   }
   
   private Float isABasicScore(String s, User u)
@@ -530,11 +530,11 @@ public class UserTable extends Table implements Button.ClickListener
   }
   
   private Component handleFloatScore(Float f)
-  {     
+  {
     Label lab = new Label("" + f.floatValue());
     lab.addStyleName("m-userTableText");
     lab.addStyleName("m-text-align-right");
-    return lab;    
+    return lab;
   }
 
   @Override
