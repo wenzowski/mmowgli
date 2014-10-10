@@ -1,10 +1,10 @@
 /*
 * Copyright (c) 1995-2010 held by the author(s).  All rights reserved.
-*  
+*
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions
 * are met:
-*  
+*
 *  * Redistributions of source code must retain the above copyright
 *       notice, this list of conditions and the following disclaimer.
 *  * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
 *       nor the names of its contributors may be used to endorse or
 *       promote products derived from this software without specific
 *       prior written permission.
-*  
+*
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -122,7 +122,7 @@ public class CardVisualizerBuilder
       fos.close();
 
       // JS file
-      File d3jsTemp = new File(d3jsFileTempPath);     
+      File d3jsTemp = new File(d3jsFileTempPath);
       fos = new FileOutputStream(d3jsTemp);
       fis = getClass().getResourceAsStream(VISUALIZER_D3JS_CLASS_NAME);
       
@@ -136,9 +136,9 @@ public class CardVisualizerBuilder
       File jsonTemp = new File(jsonFileTempPath);
       Game g = Game.getTL();
       JsonObject jObj = buildJsonTree(g.isShowPriorMovesCards() ? null : g.getCurrentMove());
-      FileWriter fw = new FileWriter(jsonTemp);   
-      writeCardJson(fw, jObj); 
-      fw.close();      
+      FileWriter fw = new FileWriter(jsonTemp);
+      writeCardJson(fw, jObj);
+      fw.close();
 
       File htmlFinal = new File(htmlFilePath);
       htmlFinal.delete();
@@ -213,8 +213,8 @@ public class CardVisualizerBuilder
     
     treeBuilder.add("children", rootArray);
     return treeBuilder==null ? null : treeBuilder.build();
-   }
-  
+  }
+
   public JsonArrayBuilder createGameDaysArray(TreeSet<String> set, int stringOrLong)
   {
     JsonArrayBuilder ret = Json.createArrayBuilder();
@@ -261,8 +261,6 @@ public class CardVisualizerBuilder
   }
   private void addCard(Card c, JsonArrayBuilder arr, CardIncludeFilter filter, int rootDayIndex)
   {
-//    if(c.isHidden())
-//     return;
     JsonObjectBuilder jsonObj = Json.createObjectBuilder();
     jsonObj
         .add("type", c.getCardType().getTitle())
@@ -277,9 +275,9 @@ public class CardVisualizerBuilder
         .add("value",getValueString(c))   
         .add("gameDay", getDayIndex(c))
         .add("rootDay", rootDayIndex);
-    
-    JsonArrayBuilder childArr = Json.createArrayBuilder();   
-    for(Card ch : c.getFollowOns()) {  
+
+    JsonArrayBuilder childArr = Json.createArrayBuilder();
+    for(Card ch : c.getFollowOns()) {
       addCard(ch,childArr,filter,rootDayIndex); //recurse
     }
     jsonObj.add("children", childArr);
@@ -295,8 +293,8 @@ public class CardVisualizerBuilder
   private String getValueString(Card c)
   {
     return "5"; //todo
-  } 
-  
+  }
+
   interface CardIncludeFilter
   {
     public boolean accept(Card c);
@@ -323,5 +321,4 @@ public class CardVisualizerBuilder
       return !c.isHidden() && (c.getCreatedInMove().getId() == id);
     }
   }
-
 }
