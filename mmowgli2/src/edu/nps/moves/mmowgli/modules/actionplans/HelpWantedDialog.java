@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 1995-2010 held by the author(s).  All rights reserved.
- *  
+ * Copyright (c) 1995-2014 held by the author(s).  All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *  
+ *
  *  * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *  * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
  *       nor the names of its contributors may be used to endorse or
  *       promote products derived from this software without specific
  *       prior written permission.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -45,6 +45,7 @@ import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.Pages.PagesData;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
@@ -82,17 +83,17 @@ public class HelpWantedDialog extends Window
     setSizeUndefined();
     setWidth("500px");
     setHeight("550px");
-    
+
     VerticalLayout vLay = (VerticalLayout) getContent();
     vLay.setMargin(true);
     vLay.setSpacing(true);
     vLay.setSizeFull();
-    
+
     StringBuilder sb = new StringBuilder();
 
     ActionPlan ap = ActionPlan.getTL(aplnId);
     String s = ap.getHelpWanted();
-    
+
     if(s != null) {
       vLay.addComponent(new Label(msg1));
       Label helpWantedLab = new Label(s);
@@ -100,7 +101,7 @@ public class HelpWantedDialog extends Window
       helpWantedLab.setWidth("100%");
       vLay.addComponent(helpWantedLab);
     }
-    
+
     vLay.addComponent(new Label(msg2));
     final TextArea toTA = new TextArea("To");
     toTA.addStyleName("m-textareaboldcaption");
@@ -115,9 +116,12 @@ public class HelpWantedDialog extends Window
     ccTA.setWidth("100%");
     ccTA.setRows(1);
     ccTA.setNullRepresentation("");
-    ccTA.setValue("mmowgli-trouble@movesinstitute.org");
+
+    PagesData pd = new PagesData();
+    ccTA.setValue(pd.gettroubleMailto());
+    
     vLay.addComponent(ccTA);
-   
+
     final TextArea subjTA = new TextArea("Subject");
     subjTA.addStyleName("m-textareaboldcaption");
     subjTA.setWidth("100%");
@@ -131,7 +135,7 @@ public class HelpWantedDialog extends Window
     sb.append('"');
     subjTA.setValue(sb.toString());
     vLay.addComponent(subjTA);
-    
+
     final TextArea msgTA = new TextArea("Message");
     msgTA.addStyleName("m-textareaboldcaption");
     msgTA.setWidth("100%");
@@ -139,7 +143,7 @@ public class HelpWantedDialog extends Window
     msgTA.setNullRepresentation("");
     vLay.addComponent(msgTA);
     vLay.setExpandRatio(msgTA, 1.0f);
-    
+
     HorizontalLayout buttLay = new HorizontalLayout();
     vLay.addComponent(buttLay);
     buttLay.setSpacing(true);
@@ -148,30 +152,30 @@ public class HelpWantedDialog extends Window
     buttLay.addComponent(sp=new Label());
     sp.setHeight("1px");
     buttLay.setExpandRatio(sp, 1.0f);
-    
+
     Button canButt = new Button("Cancel");
     buttLay.addComponent(canButt);
-    
+
     Button sendButt = new Button("Send to authors");
     buttLay.addComponent(sendButt);
-  
+
     canButt.addClickListener(new ClickListener()
-    {  
+    {
       @Override
       public void buttonClick(ClickEvent event)
       {
         UI.getCurrent().removeWindow(HelpWantedDialog.this);        
       }
     });
-    
+
     sendButt.addClickListener(new ClickListener()
-    {  
+    {
       @Override
       @MmowgliCodeEntry
       @HibernateOpened
       @HibernateClosed
       public void buttonClick(ClickEvent event)
-      {       
+      {
         Object tos = toTA.getValue();
         if(tos == null || tos.toString().length()<=0) {
           Notification.show("No recipients", Notification.Type.ERROR_MESSAGE);
@@ -189,7 +193,7 @@ public class HelpWantedDialog extends Window
         Object subj = subjTA.getValue();
         if(subj == null)
           subj = "";
-        
+
         HSess.init();
         
         List<User> authors = parseAuthorsTL(tos.toString().trim());
@@ -204,10 +208,10 @@ public class HelpWantedDialog extends Window
           mmgr.mailToUserTL(me.getId(), me.getId(), "(CC:)"+subj.toString(), msg.toString());
         else
           mmgr.mailToUserTL(me.getId(), me.getId(), subj.toString(), msg.toString(), cc.toString(), MailManager.Channel.BOTH);  // the cc is an email, not a user name
-        
+
         UI.getCurrent().removeWindow(HelpWantedDialog.this); 
         Notification.show("Message(s) sent",null);
-        
+
         HSess.close();
       }
     });
