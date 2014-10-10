@@ -388,8 +388,9 @@
     margin-right: -20px;*/
     margin-top: 5px;
 }
-.message-layout .m-actionplan-text-authors {
+span.m-actionplan-text-authors, .message-layout .m-actionplan-text-authors {
 	color: #00a3e8;
+	font-weight: bold;
 	font-size: 14px;	
 }
 .message-layout .light b {
