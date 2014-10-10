@@ -259,7 +259,7 @@ public class FullEntryView extends NavigationView implements ClickListener
         return ((WrappedActionPlan)msg).getActionPlan().getId();
       return null;     
     }
-    
+ /*   
     private void showReplyButtonOptions() {
         if (replyOptions == null) {
             replyOptions = new Popover();
@@ -289,7 +289,7 @@ public class FullEntryView extends NavigationView implements ClickListener
 
         replyOptions.showRelativeTo(replyButton);
     }
-    
+*/    
   public void updateNewMessages()
   {
     String caption = null;
