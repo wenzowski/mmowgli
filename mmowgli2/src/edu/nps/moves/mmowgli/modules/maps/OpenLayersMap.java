@@ -40,6 +40,7 @@ import com.vaadin.ui.*;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * MmowgliMap.java
@@ -86,6 +87,9 @@ public class OpenLayersMap extends VerticalLayout implements MmowgliComponent, V
     
   @Override
   public void initGui()
+  {
+  }
+  public void initGuiTL()
   {
     setSpacing(true);
     setSizeUndefined();
@@ -166,8 +170,10 @@ public class OpenLayersMap extends VerticalLayout implements MmowgliComponent, V
 
   @Override
   public void enter(ViewChangeEvent event)
-  {  
-    initGui();
+  { 
+    Object key = HSess.checkInit();
+    initGuiTL();
+    HSess.checkClose(key);
   }
 
 }
