@@ -69,6 +69,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="GameName"/>
+      <!--   <xs:element ref="GameId"/>--> 
         <xs:element ref="Location" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
