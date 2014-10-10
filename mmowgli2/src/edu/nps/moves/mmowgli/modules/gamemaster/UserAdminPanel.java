@@ -161,6 +161,9 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
   @Override
   public void initGui()
   {
+  }
+  public void initGuiTL()
+  {
     setWidth(APPLICATION_SCREEN_WIDTH);
     setHeight("100%");
     setSpacing(false);
@@ -428,7 +431,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
         Label lab = new Label(""+qu.getEmail());
         if(qu.isMultipleEmails()) {
           lab.addStyleName("m-background-red");
-          lab.addStyleName("m-whitetext");
+          lab.addStyleName("m-white-text");
           lab.setDescription("player has used multiple emails");
         }
         return lab;
@@ -437,9 +440,9 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
         boolean gm = qu.isGm();
         Label lab = new Label(gm?"true":"");
         if(gm) {
-          lab.addStyleName("m-whitetext");
+          lab.addStyleName("m-white-text");
           lab.addStyleName("m-background-dodgerblue");
-          lab.setDescription("game master");          
+          lab.setDescription("game master");
         }
         return lab;
       }
@@ -448,7 +451,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
         Label lab = new Label(lo?"true":"");
         if(lo) {
           lab.addStyleName("m-background-red");
-          lab.addStyleName("m-whitetext");
+          lab.addStyleName("m-white-text");
           lab.setDescription("locked out of game play");
         }
         return lab;
@@ -466,7 +469,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
         Label lab = new Label(ad?"true":"");
         if(ad) {
           lab.addStyleName("m-background-orange");
-          lab.addStyleName("m-whitetext");
+          lab.addStyleName("m-white-text");
           lab.setDescription("game administrator");
         }
         return lab;
@@ -713,8 +716,8 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     {
       if(lis.size()<2)
         return "";
-      
-      StringBuffer sb = new StringBuffer("previous emails: ");
+
+      StringBuilder sb = new StringBuilder("previous emails: ");
       int sz = lis.size();
       for (int i=1;i<sz;i++) {
         sb.append(lis.get(i));
@@ -1022,6 +1025,8 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
   @Override
   public void enter(ViewChangeEvent event)
   {
-    initGui();    
+    Object key = HSess.checkInit();
+    initGuiTL();
+    HSess.checkClose(key);
   }
 }
