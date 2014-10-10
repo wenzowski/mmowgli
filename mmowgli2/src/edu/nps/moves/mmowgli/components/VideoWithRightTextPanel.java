@@ -122,7 +122,7 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
       if (vidMedia.getType() == MediaType.YOUTUBE) {
         try {
           Flash ytp = new Flash();
-          ytp.setSource(new ExternalResource("http://www.youtube.com/v/"+vidMedia.getUrl()));
+          ytp.setSource(new ExternalResource("https://www.youtube.com/v/"+vidMedia.getUrl()));
           ytp.setParameter("allowFullScreen", "true");
           ytp.setParameter("showRelated", "false");
           ytp.setWidth(539.0f,Unit.PIXELS); //VID_W_PX,Unit.PIXELS);
