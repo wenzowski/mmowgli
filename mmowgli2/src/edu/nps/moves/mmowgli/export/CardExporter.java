@@ -204,7 +204,7 @@ public class CardExporter extends BaseExporter
   
   private String getTextColor(Card c)
   {
-    String s = CardStyler.getCardInverseTextColor(c.getCardType());
+    String s = CardStyler.getCardTextColorOverBase(c.getCardType());
     return checkHash(s);
   }
   
