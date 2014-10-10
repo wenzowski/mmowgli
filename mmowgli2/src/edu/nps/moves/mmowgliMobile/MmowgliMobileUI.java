@@ -20,15 +20,13 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.shared.communication.PushMode;
-import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.UI;
 
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 import edu.nps.moves.mmowgliMobile.ui.MmowgliMobileMainView;
 
 //One or more of the following interferes with the session interceptor design of the hibernate container
-//@Push(value=PushMode.AUTOMATIC,transport=Transport.STREAMING)
+//@Push(value=PushMode.AUTOMATIC,transport=Transport.LONG_POLLING)
 //@PreserveOnRefresh
 
 @SuppressWarnings("serial")
