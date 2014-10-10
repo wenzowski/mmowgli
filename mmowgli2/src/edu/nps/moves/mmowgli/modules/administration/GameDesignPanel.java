@@ -114,6 +114,9 @@ public class GameDesignPanel extends Panel implements MmowgliComponent, GameDesi
   @Override
   public void initGui()
   {
+  }
+  public void initGuiTL()
+  {
     tabSh.setHeight("100%");
     tabSh.setWidth("930px");
 
@@ -138,7 +141,9 @@ public class GameDesignPanel extends Panel implements MmowgliComponent, GameDesi
   @Override
   public void enter(ViewChangeEvent event)
   {
-    initGui();    
+    Object key = HSess.checkInit();
+    initGuiTL();
+    HSess.checkClose(key);    
   }
 }
 
