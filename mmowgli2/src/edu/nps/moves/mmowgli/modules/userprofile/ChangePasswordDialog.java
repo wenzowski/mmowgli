@@ -75,9 +75,9 @@ public class ChangePasswordDialog extends Window
     setCaption("Change Password");
     setModal(true);
     setWidth("350px");
-    //setHeight("200px");
     
-    VerticalLayout vLay = (VerticalLayout)getContent();
+    VerticalLayout vLay = new VerticalLayout();
+    setContent(vLay);
     FormLayout fLay = new FormLayout();
     oldPw = new PasswordField("Current");
     //oldPw.setColumns(20);
