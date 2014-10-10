@@ -155,7 +155,11 @@ public class ScoreManager2
 
   /* Begin ActionPlan scoring events */
   /***********************************/
-  // A
+  /** Called after user creates an action plan
+  *
+  * @param ap the created action plan
+  * @param usr the user who created the action plan
+  */
   public void actionPlanUserJoinsTL(ActionPlan ap, User usr)
   {
     MSysOut.println(marker+"ScoreManager2.actionPlanUserJoins()");
