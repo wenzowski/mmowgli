@@ -2,6 +2,9 @@ package edu.nps.moves.mmowgli.hibernate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 
 import javax.servlet.ServletContext;
 
@@ -45,6 +48,20 @@ public class VHibPii extends AbstractVHib
   {
     init1(context);
     // Now any unique stuff to override
+    
+    // Important: unless this property is set, on the deployed server, /home/tomcat/mmowgli gets
+    // created if the hibernate index directory hasn't been explicitly set.  This causes problems with
+    // other games running on this node. We're not indexing Pii, so just point it to a temp directory,
+    // and ask that it be deleted on app (Tomcat) exit.
+    try {
+      Path p = Files.createTempDirectory("mmowgli_dummy_pii_lucene", PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwxrwx")));
+      p.toFile().deleteOnExit();
+      getConfiguration().setProperty(HIB_FS_SEARCH_INDEXBASE_PROPERTY, p.toString());
+    }
+    catch(Throwable ex) {
+      System.out.println("Exception setting dummy pii lucene index dir >>>>>>>>>>>"+ex.getClass().getSimpleName()+" "+ex.getLocalizedMessage());
+    }
+
     init2();
   }
   public static void markInGame(User user)
