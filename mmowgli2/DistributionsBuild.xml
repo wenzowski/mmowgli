@@ -20,7 +20,9 @@
 	</target>
 
 	<target name="fetchlibs" description="put ivy dependencies in place">
+		<delete dir="build/ivylibs/" includes="**/*"/>
 		<ivy:retrieve conf="default" pattern="build/ivylibs/[artifact](-[classifier]).[ext]"/>
+		<delete file="build/ivylibs/servlet-api.jar"/>  <!-- not wanted in deploy -->
 	</target>
 
 	<!-- This is new in V7, some of this had been done previously by hand -->
@@ -40,7 +42,7 @@
 	  <delete dir="WebContent/VAADIN/themes/liferay"/>
 	  <delete dir="WebContent/VAADIN/themes/reindeer-tests"/>
 	  <!--<delete dir="WebContent/VAADIN/themes/runo"/>   touchkit icons from here?  -->
-	  <delete dir="WebContent/Vaadin/themes/valo"/>
+	  <!--<delete dir="WebContent/Vaadin/themes/valo"/> -->
 	  <delete dir="WebContent/Vaadin/themes/tests-valo"/>
 	  <delete dir="WebContent/VAADIN/themes/tests-book"/>
 	  <delete dir="WebContent/VAADIN/themes/tests-calendar"/>
