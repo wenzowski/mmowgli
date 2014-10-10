@@ -55,7 +55,7 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
-import edu.nps.moves.mmowgli.utility.CardStyler;
+import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 
 /**
  * CardChainTree.java
