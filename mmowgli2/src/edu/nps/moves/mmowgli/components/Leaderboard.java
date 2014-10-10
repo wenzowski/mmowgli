@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 1995-2010 held by the author(s).  All rights reserved.
- *  
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *  
+ *
  *  * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *  * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
  *       nor the names of its contributors may be used to endorse or
  *       promote products derived from this software without specific
  *       prior written permission.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -109,7 +109,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     titleHL.addComponent(tips);
     titleHL.setComponentAlignment(tips, Alignment.MIDDLE_RIGHT);
     titleHL.setExpandRatio(tips, 0.5f);
-    
+
     tableVLayout = new VerticalLayout();
     tableVLayout.setSizeUndefined();
     tableVLayout.setWidth(APPLICATION_SCREEN_WIDTH);
@@ -121,7 +121,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
  
     tableVLayout.addComponent(sp = new Label());
     sp.setHeight("20px"); // to fit top of background
-    
+
     tableVLayout.addComponent(table = createTable());
     tableVLayout.setComponentAlignment(table, Alignment.TOP_CENTER);
     table.setValue(globs.getUserID());
@@ -134,7 +134,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     
     refreshButt.addListener(new RefreshListener());
     refreshButt.setEnabled(false);
- */   
+ */
   }
   private static String TOTALS = "Totals";
   private void maybeShowMoveSelector(HorizontalLayout hl)
@@ -143,7 +143,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     int thisMove = m.getNumber();
     if(thisMove<=1)
       return;
-    
+
     Label lab = null;
     hl.addComponent(lab=new Label());
     lab.setWidth("150px");
@@ -153,7 +153,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     hl.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
     hl.addComponent(lab = new Label());
     lab.setWidth("5px");
-    
+
     ArrayList<String> mvLst = new ArrayList<String>();
     int i = 1;
     while(i<=thisMove) {
@@ -167,7 +167,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     sel.setValue(""+thisMove);
     sel.setImmediate(true);
     sel.addValueChangeListener(new MoveListener());
-    
+
     hl.addComponent(sel);
     hl.setComponentAlignment(sel, Alignment.MIDDLE_CENTER);
   }
