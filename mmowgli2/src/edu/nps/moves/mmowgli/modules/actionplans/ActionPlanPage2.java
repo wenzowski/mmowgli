@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 1995-2010 held by the author(s).  All rights reserved.
- *  
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *  
+ *
  *  * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *  * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
  *       nor the names of its contributors may be used to endorse or
  *       promote products derived from this software without specific
  *       prior written permission.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -81,9 +81,9 @@ import edu.nps.moves.mmowgli.utility.HistoryDialog.DoneListener;
 
 /**
  * ActionPlanPage.java Created on Feb 8, 2011
- * 
+ *
  * MOVES Institute Naval Postgraduate School, Monterey, CA, USA www.nps.edu
- * 
+ *
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
@@ -194,7 +194,6 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     private static final long serialVersionUID = 1L;
 
     SaveCancelPan pan;
-
     public MyTitleListener(SaveCancelPan pan)
     {
       this.pan = pan;
@@ -253,13 +252,16 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       HSess.close();
     }
   }
-
-  /*
-   * private void setValueIfNonNull(AbstractTextField comp, String s) { if(s != null) comp.setValue(s); }
-   */
+/*
+  private void setValueIfNonNull(AbstractTextField comp, String s)
+  {
+    if(s != null)
+      comp.setValue(s);
+  }
+*/
   private String nullOrString(Object o)
   {
-    if (o == null)
+    if(o == null)
       return null;
     return o.toString();
   }
@@ -316,11 +318,12 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     titleAndThumbsHL.addStyleName("m-actionplan-header-container");
     leftTopVL.addComponent(titleAndThumbsHL);
 
-    titleAndThumbsHL.addComponent(sp = new Label());
+    titleAndThumbsHL.addComponent(sp=new Label());
     sp.setWidth("55px");
 
     VerticalLayout vl = new VerticalLayout();
-    vl.addComponent(titleUnion); // titleTA);
+    vl.addComponent(titleUnion); //titleTA);
+    titleUnion.initGui();
 
     titleHistoryButt = new NativeButton();
     titleHistoryButt.setCaption("history");
@@ -331,7 +334,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
     vl.addComponent(titleHistoryButt);
     vl.setComponentAlignment(titleHistoryButt, Alignment.TOP_RIGHT);
-    titleAndThumbsHL.addComponent(vl); // titleTA);
+    titleAndThumbsHL.addComponent(vl); //titleTA);
 
     titleUnion.setWidth(ACTIONPLAN_TITLE_W);
     titleUnion.setValueTL(actPln.getTitle());
@@ -344,28 +347,31 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     addComponent(saveCanPan, "top:0px;left:395px");
     saveCanPan.setVisible(false);
 
-    titleAndThumbsHL.addComponent(sp = new Label());
+    titleAndThumbsHL.addComponent(sp=new Label());
     sp.setWidth("50px");
 
     VerticalLayout thumbVL = new VerticalLayout();
     titleAndThumbsHL.addComponent(thumbVL);
-    thumbVL.addComponent(sp = new Label());
+    thumbVL.addComponent(sp=new Label());
     sp.setHeight("50px");
 
     thumbPanel = new ThumbPanel();
     Map<User, Integer> map = actPln.getUserThumbs();
     Integer t = map.get(me);
-    /*
-     * if(t == null) { map.put(me, 0); ActionPlan.update(actPln); GameEventLogger.logActionPlanUpdate(actPln, "thumbs changed",me.getUserName()); t = 0; }
-     */
-    thumbPanel.setNumUserThumbs(t == null ? 0 : t);
+  /*  if(t == null) {
+      map.put(me, 0);
+      ActionPlan.update(actPln);
+      GameEventLogger.logActionPlanUpdate(actPln, "thumbs changed",me.getUserName());
+      t = 0;
+    } */
+    thumbPanel.setNumUserThumbs(t==null?0:t);
     thumbVL.addComponent(thumbPanel);
 
     HorizontalLayout commentAndViewChainHL = new HorizontalLayout();
     leftTopVL.addComponent(commentAndViewChainHL);
     commentAndViewChainHL.setSpacing(false);
     commentAndViewChainHL.setMargin(false);
-    commentAndViewChainHL.addComponent(sp = new Label());
+    commentAndViewChainHL.addComponent(sp=new Label());
     sp.setWidth("55px");
 
     VerticalLayout commLeftVL = new VerticalLayout();
@@ -383,11 +389,10 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
         UI.getCurrent().setScrollTop(1250); //commentsButt.getWindow().setScrollTop(1250);
       }
     });
-    commLeftVL.addComponent(sp = new Label());
-    sp.setHeight("65px"); // "50px");
+    commLeftVL.addComponent(sp=new Label());
+    sp.setHeight("65px"); //"50px");
 
     commLeftVL.addComponent(envelopeButt);
-    ;
     envelopeButt.addStyleName("m-actionplan-envelope-button");
     envelopeButt.addClickListener(commLis); // same as the link button above
 
@@ -491,11 +496,11 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     tabsHL.setStyleName("m-actionPlanBlackTabs");
     tabsHL.setSpacing(false);
 
-    absL.addComponent(tabsHL, "left:40px;top:0px");
+    absL.addComponent(tabsHL,"left:40px;top:0px");
 
     NewTabClickHandler ntabHndlr = new NewTabClickHandler();
 
-    tabsHL.addComponent(sp = new Label());
+    tabsHL.addComponent(sp=new Label());
     sp.setWidth("19px");
     thePlanTabButt.setStyleName("m-actionPlanThePlanTab");
     thePlanTabButt.addStyleName(ACTIONPLAN_TAB_THEPLAN); // debug
@@ -559,6 +564,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     
     mainVLayout.addComponent(sp = new Label());
     sp.setHeight("90px");
+    
     HorizontalLayout buttLay = new HorizontalLayout();
     buttLay.addStyleName("m-marginleft-60");
     mainVLayout.addComponent(buttLay);
@@ -581,7 +587,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       tlb.addOnListener(new ViewAllListener());
       tlb.addOffListener(new ViewUnhiddenOnlyListener());
       buttLay.addComponent(tlb);
-      buttLay.addComponent(sp = new Label());
+      buttLay.addComponent(sp=new Label());
       sp.setWidth("5px");
     }
     // And the comments
@@ -793,7 +799,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
   public void fillHeaderCommentWithLatest(String s, Session sess)
   {
-    lastCommentLabel.setValue(MmowgliLinkInserter.insertLinksOob(s, null, sess));
+    lastCommentLabel.setValue(MmowgliLinkInserter.insertLinksOob(s,null,sess));
   }
 
   public void adjustCommentsLinkCaption(int numComments)
@@ -831,7 +837,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       browseFwdButt.setDescription("View next Action Plan");
       setComponentAlignment(browseFwdButt, Alignment.MIDDLE_CENTER);
 
-      addComponent(sp = new Label());
+      addComponent(sp=new Label());
       sp.setWidth("1px");
       setExpandRatio(sp, 0.5f);
     }
@@ -859,7 +865,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       hl.addComponent(bp);
 
       Label sp;
-      hl.addComponent(sp = new Label());
+      hl.addComponent(sp=new Label());
       sp.setWidth("75px");
 
       Game g = Game.getTL();
@@ -1107,39 +1113,39 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     public void buttonClick(ClickEvent event)
     {
       Button b = event.getButton();
-      if (b == currentTabButton)
+      if(b == currentTabButton)
         return;
 
-      if (currentTabButton == videosTabButt)
+      if(currentTabButton == videosTabButt)
         videosTab.hideExistingVideos();
 
       currentTabButton.addStyleName("m-transparent-background");
       currentTabPanel.setVisible(false);
       currentTabButton = b;
 
-      if (b == thePlanTabButt) {
+      if(b == thePlanTabButt) {
         thePlanTabButt.removeStyleName("m-transparent-background");
         thePlanTab.setVisible(true);
         currentTabPanel = thePlanTab;
       }
-      else if (b == talkTabButt) {
+      else if(b == talkTabButt) {
         talkTabButt.removeStyleName("m-transparent-background");
         talkTab.setVisible(true);
         newChatLab.setVisible(false);
         currentTabPanel = talkTab;
       }
-      else if (b == imagesTabButt) {
+      else if(b == imagesTabButt) {
         imagesTabButt.removeStyleName("m-transparent-background");
         currentTabPanel = imagesTab;
         imagesTab.setVisible(true);
       }
-      else if (b == videosTabButt) {
+      else if(b == videosTabButt) {
         videosTabButt.removeStyleName("m-transparent-background");
         videosTab.setVisible(true);
         videosTab.showExistingVideos();
         currentTabPanel = videosTab;
       }
-      else if (b == mapTabButt) {
+      else if(b == mapTabButt) {
         mapTabButt.removeStyleName("m-transparent-background");
         currentTabPanel = mapTab;
         mapTab.setVisible(true);
@@ -1335,10 +1341,10 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     @Override
     public String getItemCaption(Object itemId)
     {
-      if (itemId instanceof GreyUser)
-        return "(" + ((GreyUser) itemId).getUserName() + ")";
+      if(itemId instanceof GreyUser)
+        return "("+((GreyUser)itemId).getUserName()+")";
 
-      return ((User) itemId).getUserName();
+      return ((User)itemId).getUserName();
     }
 
     public void setCollection(Collection<?> lis)
@@ -1378,7 +1384,6 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       for (Iterator<?> i = coll.iterator(); i.hasNext();) {
         Object o = i.next();
         if (!(o instanceof GreyUser))
-
           hs.add(User.mergeTL((User) o));
       }
       return hs;
@@ -1537,9 +1542,9 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
     Set<User> authors = ap.getAuthors();
 
-    if (authors != null)
+    if(authors != null)
       for (User u : authors)
-        if (u.getId() == me.getId())
+        if(u.getId() == me.getId())
           return true; // yes, I can edit
 
     return false; // no, I can't edit
@@ -1614,7 +1619,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       addComponent(saveButt);
       saveButt.setStyleName(Reindeer.BUTTON_SMALL);
       saveButt.addStyleName("m-greenbutton");
-      addComponent(lab = new Label());
+      addComponent(lab=new Label());
       lab.setWidth("5px");
     }
 
@@ -1626,7 +1631,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
     public void setClickHearer(ClickListener lis)
     {
-      setClickHearers(lis, lis);
+      setClickHearers(lis,lis);
     }
   }
 
