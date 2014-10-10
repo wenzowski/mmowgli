@@ -45,6 +45,7 @@ import com.vaadin.ui.VerticalLayout;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
@@ -83,6 +84,9 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
     
   @Override
   public void initGui()
+  {
+  }
+  public void initGuiTL()
   {
     setSpacing(true);
     setSizeUndefined();
@@ -135,6 +139,8 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
   @Override 
   public void enter(ViewChangeEvent event)
   {
-    initGui();	
+    Object key = HSess.checkInit();
+    initGuiTL();
+    HSess.checkClose(key);
   }
 }
