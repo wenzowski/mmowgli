@@ -62,8 +62,9 @@ public class Pages implements Serializable
   public static String TROUBLE_MAILTO_TOKEN = "[$TROUBLEMAILTO$]";
   public static String PORTAL_LINK_TOKEN    = "[$PORTALLINK$]";
   public static String CONFIRM_LINK_TOKEN   = "[$CONFIRMLINK$]";
-  public static String GAME_URL_TOKCN       = "[$GAMEURL$]";
-  
+  public static String GAME_URL_TOKEN       = "[$GAMEURL$]";
+  public static String HOW_TO_PLAY_URL_TOKEN = "[$HOWTOPLAYURL$]";
+  public static String ACTION_PLAN_TITLE_TOKEN = "[$ACTIONPLANTITLE$]";
   private static String unameT = "UNAME";
   private static String acronT = "GAMEACRONYM";
   private static String handlT = "GAMEHANDLE";
@@ -74,14 +75,16 @@ public class Pages implements Serializable
   private static String portlT = "PORTALLINK";
   private static String cnfrmT = "CONFIRMLINK";
   private static String gmurlT = "GAMEURL";
-  
+  private static String howToT = "HOWTOPLAYURL";
+  private static String apTtlT = "ACTIONPLANTITLE";
+
   private static String suffix = "$]";
-  private static String prefix = "[$";  
+  private static String prefix = "[$";
 //@formatter:on
-  
+
   public static String replaceTokens(String source, String gameUrl, String uname, String gameAcronym, String gameHandle,
                                      String dateTime, String gameName, String confirmLink, String troubleLink, String troubleMailto,
-                                     String portalLink)
+                                     String portalLink, String how2Link, String apTitle)
   {
     HashMap<String,String> hm = new HashMap<String,String>();
     hm.put(gmurlT, gameUrl);
@@ -94,38 +97,49 @@ public class Pages implements Serializable
     hm.put(tmailT,  troubleMailto);
     hm.put(portlT, portalLink);
     hm.put(cnfrmT, confirmLink);
+    hm.put(howToT,  how2Link);
+    hm.put(apTtlT, apTitle);
     return StrSubstitutor.replace(source, hm , prefix, suffix);
   }
-  
+
   public static String replaceTokens(String source, PagesData data)
   {
-    return StrSubstitutor.replace(source, data.map , prefix, suffix);    
+    return StrSubstitutor.replace(source, data.map , prefix, suffix);
   }
-  
+
   /*****************/
   long   id;          // Primary key
-  String confirmationEmail;
-  String confirmedReminderEmail;
   String actionPlanInviteEmail;
+  String actionPlanInviteEmailSubject;
+  String confirmationEmail;
+  String confirmationEmailSubject;
+  String confirmedReminderEmail;
+  String confirmedReminderEmailSubject;
+  String welcomeEmail;
+  String welcomeEmailSubject;
+  String passwordResetEmail;
+  String passwordResetEmailSubject;
+  String gameMasterRegistrationEmail;
+  String gameMasterRegistrationEmailSubject;
   /*****************/
-  
+
   public static Pages get(Session sess)
   {
     return get(sess,1L);  //only one entry in current design
   }
-  
+
   private static Pages get(Session sess, Serializable id)
   {
     return (Pages)sess.get(Pages.class, id);
   }
-    
+
   public static Pages getTL()
   {
     return (Pages)HSess.get().get(Pages.class, 1L);
   }
-  
+
   /**********************************************************************/
-  
+
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(nullable = false)
@@ -138,7 +152,7 @@ public class Pages implements Serializable
   {
     this.id = id;
   }
-  
+
   @Lob
   public String getConfirmationEmail()
   {
@@ -172,6 +186,100 @@ public class Pages implements Serializable
     actionPlanInviteEmail = s;
   }
 
+  @Lob
+  public String getWelcomeEmail()
+  {
+    return welcomeEmail;
+  }
+
+  public void setWelcomeEmail(String s)
+  {
+    welcomeEmail = s;
+  }
+
+  @Basic
+  public String getConfirmationEmailSubject()
+  {
+    return confirmationEmailSubject;
+  }
+
+  public void setConfirmationEmailSubject(String confirmationEmailSubject)
+  {
+    this.confirmationEmailSubject = confirmationEmailSubject;
+  }
+
+  @Basic
+  public String getConfirmedReminderEmailSubject()
+  {
+    return confirmedReminderEmailSubject;
+  }
+
+  public void setConfirmedReminderEmailSubject(String confirmedReminderEmailSubject)
+  {
+    this.confirmedReminderEmailSubject = confirmedReminderEmailSubject;
+  }
+
+  @Basic
+  public String getActionPlanInviteEmailSubject()
+  {
+    return actionPlanInviteEmailSubject;
+  }
+
+  public void setActionPlanInviteEmailSubject(String actionPlanInviteEmailSubject)
+  {
+    this.actionPlanInviteEmailSubject = actionPlanInviteEmailSubject;
+  }
+
+  @Basic
+  public String getWelcomeEmailSubject()
+  {
+    return welcomeEmailSubject;
+  }
+
+  public void setWelcomeEmailSubject(String welcomeEmailSubject)
+  {
+    this.welcomeEmailSubject = welcomeEmailSubject;
+  }
+
+    @Lob
+    public String getPasswordResetEmail() {
+        return passwordResetEmail;
+    }
+
+    /**
+     * @param s the passwordResetEmail to set
+     */
+    public void setPasswordResetEmail(String s) {
+        this.passwordResetEmail = s;
+    }
+
+    @Basic
+    public String getPasswordResetEmailSubject() {
+        return passwordResetEmailSubject;
+    }
+
+    public void setPasswordResetEmailSubject(String s) {
+        passwordResetEmailSubject = s;
+    }
+
+    @Lob
+    public String getGameMasterRegistrationEmail() {
+        return gameMasterRegistrationEmail;
+    }
+
+    public void setGameMasterRegistrationEmail(String s) {
+        gameMasterRegistrationEmail = s;
+    }
+
+    @Basic
+    public String getGameMasterRegistrationEmailSubject() {
+        return gameMasterRegistrationEmailSubject;
+    }
+
+    public void setGameMasterRegistrationEmailSubject(String s) {
+        gameMasterRegistrationEmailSubject = s;
+    }
+
   public static class PagesData
   {
   //@formatter:off
@@ -185,6 +293,8 @@ public class Pages implements Serializable
     public void setconfirmLink(String s)     {map.put(cnfrmT,s);} public String getconfirmLink()     {return map.get(cnfrmT);}
     public void setportalLink(String s)      {map.put(portlT,s);} public String getportalLink()      {return map.get(portlT);}
     public void setgameUrl(String s)         {map.put(gmurlT,s);} public String getgameUrl()         {return map.get(gmurlT);}
+    public void sethow2Url(String s)         {map.put(howToT,s);} public String gethow2Url()         {return map.get(howToT);}
+    public void setApTitle(String s)         {map.put(apTtlT,s);} public String getApTitle()         {return map.get(apTtlT);}
   //@formatter:on
 
     public HashMap<String,String> map;
@@ -211,6 +321,8 @@ public class Pages implements Serializable
       map.put(tmailT, gl.getTroubleMailto());
       map.put(troubT, gl.getTroubleLink());
       //hm.put(cnfrmT, data.confirmLink); // poked
+      map.put(howToT,  gl.getHowToPlayLink());
+      //hm.put(apTtlT, apTitle); // poked
     }
   }
 }
