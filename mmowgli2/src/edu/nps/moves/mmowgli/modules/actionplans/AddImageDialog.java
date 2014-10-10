@@ -306,7 +306,7 @@ public class AddImageDialog extends Window
       }
       setDisabledFields();
     }
-   }
+  }
   
   @SuppressWarnings("serial")
   class testWebImageHandler implements ClickListener
