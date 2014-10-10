@@ -34,7 +34,6 @@
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
-import static edu.nps.moves.mmowgli.MmowgliConstants.WEB_XML_GAMEMASTER_TMO_KEY;
 
 import java.util.List;
 
@@ -68,8 +67,6 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 public class LoginPopup extends MmowgliDialog
 {
   private static final long serialVersionUID = -5011993698392685409L;
-
-  private static int TOP_OFFSET_TO_MISS_VIDEO = 450;
 
   Label header;
 
@@ -327,10 +324,12 @@ public class LoginPopup extends MmowgliDialog
 
       // Lots of stuff borrowed from RegistrationPageBase
       if (event.getButton() == pwResetButt) {
-        Mmowgli2UI.getGlobals().getFirstUI().removeWindow(LoginPopup.this);
+        UI ui = Mmowgli2UI.getGlobals().getFirstUI();
+        ui.removeWindow(LoginPopup.this);
 
-        PasswordResetPopupListener pwpl = new PasswordResetPopupListener(listener, user);
-        RegistrationPageBase.openPopupWindow(Mmowgli2UI.getGlobals().getFirstUI(), pwpl, TOP_OFFSET_TO_MISS_VIDEO);
+        PasswordResetPopup pwp = new PasswordResetPopup(listener, user);
+        ui.addWindow(pwp);
+        pwp.center();        
       }
       HSess.close();
     }
