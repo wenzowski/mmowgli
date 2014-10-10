@@ -199,36 +199,6 @@ public class ReportGenerator implements Runnable
     ssTrans.transform(apSS, idxSR);
   }
 
-
-  /**
-  private void writeIndexDotHtml(String indexPath, String gameName, String apXName, String apHName, String cXName, String cHName) throws IOException
-  {
-    File iFile = new File(indexPath);
-    StringBuilder sb = new StringBuilder();
-    sb.append("<html lang=\"en\"><head><title>");
-    sb.append(gameName);
-    sb.append(" Reports</title></head><body>");
-    oneLink(sb,apHName);
-    oneLink(sb,apXName);
-    oneLink(sb,cHName);
-    oneLink(sb,cXName);
-    sb.append("</body></html>");
-
-    FileWriter fw = new FileWriter(iFile);
-    fw.write(sb.toString());
-    fw.close();
-  }
-
-  private void oneLink(StringBuilder sb, String fn)
-  {
-    sb.append("<a href='");
-    sb.append(fn);
-    sb.append("'>");
-    sb.append(fn);
-    sb.append("</a><br/>");
-  }
-  */
-
   private void sleep(long ms)
   {
     try {
@@ -255,9 +225,7 @@ public class ReportGenerator implements Runnable
 
   private boolean initted()
   {
-    if(MmowgliConstants.REPORTS_FILESYSTEM_PATH == null)
-      return false;
-    return true;
+    return (MmowgliConstants.REPORTS_FILESYSTEM_PATH != null);
   }
 
   public void poke()
