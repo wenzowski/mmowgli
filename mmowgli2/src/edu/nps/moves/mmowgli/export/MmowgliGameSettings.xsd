@@ -24,6 +24,11 @@
 				<xs:element ref="Reports" />
 				<xs:element ref="AlternateVideo" />
 				<xs:element ref="PdfAvailable" />
+				<xs:element ref="TroubleEmailAddress" />
+				<xs:element ref="ShowingPriorMovesCards" />
+				<xs:element ref="ShowingPriorMovesActionPlans" />
+				<xs:element ref="ActiveRound" />
+				<xs:element ref="ActivePhase" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -46,6 +51,9 @@
 	<xs:element name="Reports" type="xs:anyURI"/>
 	<xs:element name="AlternateVideo" type="xs:anyURI"/>
 	<xs:element name="PdfAvailable" type="xs:boolean"/>
+	<xs:element name="TroubleEmailAddress" type="xs:string"/>
+	<xs:element name="ShowingPriorMovesCards" type="xs:boolean"/>
+	<xs:element name="ShowingPriorMovesActionPlans" type="xs:boolean"/>
 	<xs:element name="BrandingText" type="xs:NCName"/>
 	<xs:element name="BlogURL" type="xs:anyURI"/>
 	<xs:element name="LearnMoreURL" type="xs:anyURI"/>
@@ -54,6 +62,8 @@
 	<xs:element name="CreditsURL" type="xs:anyURI"/>
 	<xs:element name="FaqURL" type="xs:anyURI"/>
 	<xs:element name="TermsURL" type="xs:anyURI"/>
+	<xs:element name="ActiveRound" type="xs:int"/>
+	<xs:element name="ActivePhase" type="xs:string"/>
 	<xs:element name="Welcome">
 		<xs:complexType>
 			<xs:sequence>
@@ -196,6 +206,7 @@
 	<xs:element name="InitialLatitude" type="xs:NMTOKEN"/>
 	<xs:element name="InitialLongitude" type="xs:decimal"/>
 	<xs:element name="InitialZoom" type="xs:integer"/>
+	<xs:element name="Msid" type="xs:string"/>
 	<xs:element name="Other">
 		<xs:complexType>
 			<xs:sequence>
