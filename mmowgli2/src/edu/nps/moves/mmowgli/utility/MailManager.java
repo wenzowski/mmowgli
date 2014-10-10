@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 1995-2014 held by the author(s).  All rights reserved.
- *  
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *  
+ *
  *  * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *  * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
  *       nor the names of its contributors may be used to endorse or
  *       promote products derived from this software without specific
  *       prior written permission.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -44,24 +44,28 @@ import edu.nps.moves.mmowgli.db.Pages.PagesData;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
 
+import static edu.nps.moves.mmowgli.utility.MmowgliLogger.*;
+
 public class MailManager
 {
- private MmowgliMailer mailer;
-  
+  private MmowgliMailer mailer;
+//@formatter:off
   public static String STANDARDEMAILFOOTER =
-    "<br/>------------<br/>"+
-    "<ul><li>You can send email to another user in the game.</li>"+
-    "<li>Your identity and email address remains hidden, only game name is sent.</li>"+
-    "<li>Players can continue to communicate via the game.</li>"+
-    "<li>Be very careful if you independently choose to reveal your actual email address identity.</li>"+
-    "<li>Email messages sent to you can be found within your Player Profile page under the MY MAIL tab.</li>"+
-    "<li>Each player decides on their profile page whether to receive external email, in-game email, neither, or both.</li>"+
-    "</ul>";
+        "<br/>------------<br/>"
+      + "<ul><li>You can send email to another user in the game.</li>"
+      + "<li>Your identity and email address remains hidden, only game name is sent.</li>"
+      + "<li>Players can continue to communicate via the game.</li>"
+      + "<li>Be very careful if you independently choose to reveal your actual email address identity.</li>"
+      + "<li>Email messages sent to you can be found within your Player Profile page under the MY MAIL tab.</li>"
+      + "<li>Each player decides on their profile page whether to receive external email, in-game email, neither, or both.</li>"
+      + "</ul>";
+//@formatter:on
   
-  public static enum Channel {
-    INGAMEMESSAGE,EXTERNALEMAIL,BOTH;
+  public static enum Channel
+  {
+    INGAMEMESSAGE, EXTERNALEMAIL, BOTH;
   }
-  
+
   public MailManager()
   {
     mailer = new MmowgliMailer(MmowgliConstants.SMTP_HOST);
@@ -71,9 +75,9 @@ public class MailManager
   {
     return mailer;
   }
-  
+
   /**
-   * The controller has figured out that someone has played the first follow-on to a user's card. Tell that to the parent.  But only once.
+   * The controller has figured out that someone has played the first follow-on to a user's card. Tell that to the parent. But only once.
    * 
    * @param parent
    *          card
@@ -83,33 +87,33 @@ public class MailManager
   public void firstChildPlayedTL(Card parent, Card child)
   {
     try {
-      if(!Game.getTL().isExternalMailEnabled())
+      if (!Game.getTL().isExternalMailEnabled())
         return;
 
       User author = parent.getAuthor();
       User player = child.getAuthor();
-      
-      if(!author.isOkEmail())  // only email, not in-game messaging
+
+      if (!author.isOkEmail()) // only email, not in-game messaging
         return;
-      
-      if(author.isFirstChildEmailSent())
+
+      if (author.isFirstChildEmailSent())
         return;
-      if(author.getId() == player.getId())
+      if (author.getId() == player.getId())
         return; // don't remind if played on own cards.
-      
+
       List<String> sLis = VHibPii.getUserPiiEmails(author.getId());
-      if(sLis == null || sLis.size()<=0) {
-        System.err.println("No email address found for user "+author.getUserName());
+      if (sLis == null || sLis.isEmpty()) {
+        System.err.println("No email address found for user " + author.getUserName());
         return;
       }
-      
+
       author.setFirstChildEmailSent(true);
       User.updateTL(author);
-      
-      String to = sLis.get(0); //elis.get(0).getAddress();
-      String from = buildMmowgliReturnAddressTL(); //"mmowgli<mmowgli@nps.navy.mil>";
+
+      String to = sLis.get(0); // elis.get(0).getAddress();
+      String from = buildMmowgliReturnAddressTL(); // "mmowgli<mmowgli@nps.navy.mil>";
       String handle = Game.getTL().getGameHandle();
-      String subj = handle+": Your idea has been noticed!";
+      String subj = handle + ": Your idea has been noticed!";
 
       String parentCardType = parent.getCardType().getTitle();
       String parentPlayer = parent.getAuthorName();
@@ -120,7 +124,7 @@ public class MailManager
       String cardText = child.getText();
       Game game = Game.getTL();
       String gameAcronym = game.getAcronym();
-      gameAcronym = gameAcronym==null?"":gameAcronym+" ";
+      gameAcronym = gameAcronym == null ? "" : gameAcronym + " ";
 
       StringBuilder sb = new StringBuilder();
 
@@ -154,97 +158,102 @@ public class MailManager
       mailer.send(to, from, subj, body, true);
     }
     catch (Throwable t) {
-      System.err.println("Error sending email informing of card play: "+t.getClass().getSimpleName()+": "+t.getLocalizedMessage());
+      System.err.println("Error sending email informing of card play: " + t.getClass().getSimpleName() + ": " + t.getLocalizedMessage());
     }
   }
-  
+
   public void mailToUserTL(Object from, Object to, String subject, String body)
   {
-    mailToUserTL(from,to,subject,body, null, Channel.BOTH);
+    mailToUserTL(from, to, subject, body, null, Channel.BOTH);
   }
-  
+
   public void mailToUserTL(Object from, Object to, String subject, String body, String ccEmail, Channel chan)
   {
-    User uFrom = DBGet.getUserFreshTL(from);  // Need to access internal tables, so needs to be fresh
-    User uTo   = DBGet.getUserFreshTL(to);
+    User uFrom = DBGet.getUserFreshTL(from); // Need to access internal tables, so needs to be fresh
+    User uTo = DBGet.getUserFreshTL(to);
     String fromUser = uFrom.getUserName();
     Game game = Game.getTL();
     GameLinks gl = GameLinks.getTL();
     String emailRetAddr = gl.getGameFromEmail();
     String gameHandle = game.getGameHandle();
-    if(!gameHandle.toLowerCase().equals("mmowgli"))      // if the handle is not mmowgli, don't display it in the return addr below
+    if (!gameHandle.toLowerCase().equals("mmowgli")) // if the handle is not mmowgli, don't display it in the return addr below
       gameHandle = "";
-    
+
     boolean externemail = (chan == Channel.EXTERNALEMAIL) || (chan == Channel.BOTH);
-    boolean ingamemail =  (chan == Channel.INGAMEMESSAGE) || (chan == Channel.BOTH);
+    boolean ingamemail = (chan == Channel.INGAMEMESSAGE) || (chan == Channel.BOTH);
     String gameAcronym = game.getAcronym();
-    gameAcronym = gameAcronym==null?"":gameAcronym+" ";
-    
-    if(Game.getTL().isExternalMailEnabled() && uTo.isOkEmail() && externemail) {
+    gameAcronym = gameAcronym == null ? "" : gameAcronym + " ";
+
+    if (Game.getTL().isExternalMailEnabled() && uTo.isOkEmail() && externemail) {
       List<String> sLis = VHibPii.getUserPiiEmails(uTo.getId());
-      if(sLis == null || sLis.size()<=0) {
-        System.err.println("No email address found for user "+uTo.getUserName());
+      if (sLis == null || sLis.isEmpty()) {
+        System.err.println("No email address found for user " + uTo.getUserName());
       }
       else {
         String toEmail = sLis.get(0);
-        if(ccEmail == null)
-          mailer.send(toEmail,gameAcronym+gameHandle+" user "+fromUser+"<"+emailRetAddr+">",subject,body+STANDARDEMAILFOOTER,true); 
+        if (ccEmail == null)
+          mailer.send(toEmail, gameAcronym + gameHandle + " user " + fromUser + "<" + emailRetAddr + ">", subject, body + STANDARDEMAILFOOTER, true);
         else
-          mailer.send(toEmail,gameAcronym+gameHandle+" user "+fromUser+"<"+emailRetAddr+">",subject,body+STANDARDEMAILFOOTER, ccEmail, null, true);
+          mailer.send(toEmail, gameAcronym + gameHandle + " user " + fromUser + "<" + emailRetAddr + ">", subject, body + STANDARDEMAILFOOTER, ccEmail, null,
+              true);
       }
     }
-    else if(ccEmail != null) {
-      mailer.send(ccEmail,gameAcronym+gameHandle+" user "+fromUser+"<"+emailRetAddr+">",subject,body+STANDARDEMAILFOOTER, true);
+    else if (ccEmail != null) {
+      mailer.send(ccEmail, gameAcronym + gameHandle + " user " + fromUser + "<" + emailRetAddr + ">", subject, body + STANDARDEMAILFOOTER, true);
     }
-    
-    if(Game.getTL().isInGameMailEnabled() && uTo.isOkGameMessages() && ingamemail) {
+
+    if (Game.getTL().isInGameMailEnabled() && uTo.isOkGameMessages() && ingamemail) {
       StringBuilder sb = new StringBuilder();
-      if(subject != null && subject.length()>0) {
+      if (subject != null && !subject.isEmpty()) {
         sb.append("<u>Re: ");
         sb.append(subject);
         sb.append("</u></br>");
       }
       sb.append(body);
-      
-      Message msg = new Message(sb.toString().trim(),uFrom,uTo);
+
+      Message msg = new Message(sb.toString().trim(), uFrom, uTo);
       Message.saveTL(msg);
       uTo.getGameMessages().add(msg);
       User.updateTL(uTo);
     }
   }
-  
+
   public void onNewUserSignupTL(User uTo)
   {
     try {
-      if(!Game.getTL().isExternalMailEnabled())
+      if (!Game.getTL().isExternalMailEnabled())
         return;
-      
-      if(!uTo.isOkEmail()) // only email, not in-game messaging
+
+      if (!uTo.isOkEmail()) // only email, not in-game messaging
         return;
-      
+
       List<String> sLis = VHibPii.getUserPiiEmails(uTo.getId());
-      if(sLis == null || sLis.size()<=0) {
-        System.err.println("No email address found for user "+uTo.getUserName());
+      if (sLis == null || sLis.isEmpty()) {
+        System.err.println("No email address found for user " + uTo.getUserName());
         return;
       }
+
+      PagesData pd = new PagesData();
+      String troubleEmail = pd.gettroubleMailto();
+
       Game g = Game.getTL();
       String gameName = g.getTitle();
       String gameHandle = g.getGameHandle();
-      if(!gameHandle.toLowerCase().equals("mmowgli"))
+      if (!gameHandle.toLowerCase().equals("mmowgli"))
         gameHandle = "";
       else
-        gameHandle = gameHandle+" ";
-      
-      String toAddr = sLis.get(0);
-      String from = buildMmowgliReturnAddressTL(); //"mmowgli<mmowgli@nps.navy.mil>";
-      String subj = "Thank you for registering in "+gameName+" "+gameHandle+"game";
+        gameHandle = gameHandle + " ";
 
-      String gameUrl = AppMaster.instance().getAppUrlString(); //((Mmowgli2UI)UI.getCurrent()).getGlobalse().gameUrl();app.globs().gameUrl();
-      if(gameUrl.endsWith("/"))
-        gameUrl = gameUrl.substring(0, gameUrl.length()-1);
+      String toAddr = sLis.get(0);
+      String from = buildMmowgliReturnAddressTL(); // "mmowgli<mmowgli@nps.navy.mil>";
+      String subj = "Thank you for registering in " + gameName + " " + gameHandle + "game";
+
+      String gameUrl = AppMaster.instance().getAppUrlString(); // ((Mmowgli2UI)UI.getCurrent()).getGlobalse().gameUrl();app.globs().gameUrl();
+      if (gameUrl.endsWith("/"))
+        gameUrl = gameUrl.substring(0, gameUrl.length() - 1);
       String gameTrouble = GameLinks.getTL().getTroubleLink();
       String gameAcronym = g.getAcronym();
-      gameAcronym = gameAcronym==null?"":gameAcronym+" ";
+      gameAcronym = gameAcronym == null ? "" : gameAcronym + " ";
 
       StringBuilder sb = new StringBuilder();
 
@@ -264,8 +273,11 @@ public class MailManager
       sb.append(gameUrl);
       sb.append("</a>, and we're glad to have you.");
       sb.append("</p><p>If this enrollment was in error, or your email address was somehow used by someone else without your permission, ");
-      sb.append("please notify us at <a href='mailto:mmowgli-trouble@movesinstitute.org'>mmowgli-trouble@movesinstitute.org</a> and we ");
-      sb.append("will take corrective action.  You can also submit a Trouble Report at <a href='");
+      sb.append("please notify us at <a href='mailto:");
+      sb.append(troubleEmail);
+      sb.append("'>");
+      sb.append(troubleEmail);
+      sb.append("</a> and we will take corrective action.  You can also submit a Trouble Report at <a href='");
       sb.append(gameTrouble);
       sb.append("'>");
       sb.append(gameTrouble);
@@ -282,9 +294,9 @@ public class MailManager
       sb.append("<p>More information is also available on the <a href='");
       sb.append(MmowgliConstants.PORTALWIKI_URL);
       sb.append("'>MMOWGLI Portal</a>.</p>");
-      
+
       sb.append("<p>\"How to Play\" tips can be found on the <a href='https://portal.mmowgli.nps.edu/instructions'>Game Instructions</a> page.</p>");
-      
+
       sb.append("<p>Problems may always be reported on the <a href='http://mmowgli.nps.edu/trouble'>MMOWGLI Trouble Report</a> page at <a href='http://mmowgli.nps.edu/trouble'>mmowgli.nps.edu/trouble</a>.");
       sb.append("</p><p>Thanks for your interest in playing ");
       sb.append(gameAcronym);
@@ -302,24 +314,24 @@ public class MailManager
   {
     Game g = Game.getTL();
     try {
-      if(!g.isExternalMailEnabled())
+      if (!g.isExternalMailEnabled())
         return;
-      if(!u.isOkEmail())
+      if (!u.isOkEmail())
         return;
-      
+
       List<String> sLis = VHibPii.getUserPiiEmails(u.getId());
-      if(sLis == null || sLis.size()<=0) {
-        System.err.println("No email address found for user "+u.getUserName());
+      if (sLis == null || sLis.size() <= 0) {
+        System.err.println("No email address found for user " + u.getUserName());
         return;
       }
-      
+
       String toAddr = sLis.get(0);
-      String from = buildMmowgliReturnAddressTL(); //"mmowgli<mmowgli@nps.navy.mil>";
+      String from = buildMmowgliReturnAddressTL(); // "mmowgli<mmowgli@nps.navy.mil>";
       String handle = g.getGameHandle();
-      String subj = handle+": Invitation to author Action Plan";
-;
+      String subj = handle + ": Invitation to author Action Plan";
+      ;
       String gameAcronym = g.getAcronym();
-      gameAcronym = gameAcronym==null?"":gameAcronym+" ";
+      gameAcronym = gameAcronym == null ? "" : gameAcronym + " ";
 
       StringBuilder sb = new StringBuilder();
 
@@ -362,11 +374,10 @@ public class MailManager
       data.setuserName(uname);
       data.setgameUrl(gameUrl);
       String from = buildMmowgliReturnAddressTL();
-      
-      String gameAcronym = data.getgameAcronym();
-      gameAcronym = gameAcronym==null?"":gameAcronym+" ";     
-      String subj = "Your "+data.getgameHandle()+" registration";
-      
+
+      String subj = Pages.getTL().getConfirmedReminderEmailSubject();
+      subj = Pages.replaceTokens(subj, data);
+
       String body = Pages.getTL().getConfirmedReminderEmail();
       body = Pages.replaceTokens(body, data);
 
@@ -374,9 +385,9 @@ public class MailManager
     }
     catch (Throwable t) {
       System.err.println("Error sending confirmation reminder email: " + t.getClass().getSimpleName() + ": " + t.getLocalizedMessage());
-    }    
+    }
   }
- 
+
   public void sendEmailConfirmationTL(String email, String uname, String confirmUrl)
   {
     try {
@@ -384,13 +395,13 @@ public class MailManager
       data.setuserName(uname);
       data.setconfirmLink(confirmUrl);
 
+      String subj = Pages.getTL().getConfirmationEmailSubject();
+      subj = Pages.replaceTokens(subj, data);
+
       String body = Pages.getTL().getConfirmationEmail();
       body = Pages.replaceTokens(body, data);
-
+      
       String from = buildMmowgliReturnAddressTL();
-      String subj = "Your " + data.getgameHandle() + " registration";
-      String gameAcronym = data.getgameAcronym();
-      gameAcronym = gameAcronym == null ? "" : gameAcronym + " ";
 
       mailer.send(email, from, subj, body, true);
     }
@@ -399,14 +410,52 @@ public class MailManager
     }
   }
 
-  /**
-   * @return (default) mmowgli<mmowgli@nps.navy.mil>
-   */
+  public void sendPasswordResetEmailTL(String email, String uname, String confirmUrl)
+  {
+    try {
+      PagesData data = new PagesData();
+      data.setuserName(uname);
+      data.setconfirmLink(confirmUrl);
+      String from = buildMmowgliReturnAddressTL();
+
+      String subj = Pages.getTL().getPasswordResetEmailSubject();
+      subj = Pages.replaceTokens(subj, data);
+
+      String body = Pages.getTL().getPasswordResetEmail();
+      body = Pages.replaceTokens(body, data);
+
+      mailer.send(email, from, subj, body, true);
+    }
+    catch (Throwable t) {
+      mLog(t.getLocalizedMessage(),t);
+    }
+  }
+
+  public void sendGameMasterRegisteredEmailTL(String email, String uname)
+  {
+    try {
+      PagesData data = new PagesData();
+      data.setuserName(uname);
+      String from = buildMmowgliReturnAddressTL();
+
+      String subj = Pages.getTL().getGameMasterRegistrationEmailSubject();
+      subj = Pages.replaceTokens(subj, data);
+
+      String body = Pages.getTL().getGameMasterRegistrationEmail();
+      body = Pages.replaceTokens(body, data);
+
+      mailer.send(data.gettroubleMailto(), from, subj, body, true);
+    }
+    catch (Throwable t) {
+      mLog(t.getLocalizedMessage(), t);
+    }
+  }
+
   public String buildMmowgliReturnAddressTL()
   {
     Game g = Game.getTL();
     String handle = g.getGameHandle();
     String gameFromEmail = GameLinks.getTL().getGameFromEmail();
-    return handle+"<"+gameFromEmail+">";
+    return handle + "<" + gameFromEmail + ">";
   }
 }
