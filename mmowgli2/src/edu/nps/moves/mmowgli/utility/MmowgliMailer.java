@@ -4,7 +4,7 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *  
+ *
  *  * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *  * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
  *       nor the names of its contributors may be used to endorse or
  *       promote products derived from this software without specific
  *       prior written permission.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -95,7 +95,6 @@ public class MmowgliMailer implements Runnable
     while (true) {
       try {
         QPacket qp = queue.take(); // blocks if nothing there
-        // System.out.println("msg dequeued");
         _send(qp);
       }
       catch (InterruptedException e) {
@@ -120,7 +119,6 @@ public class MmowgliMailer implements Runnable
   {
     QPacket qp = new QPacket(to, from, subject, body, cc, bcc, isHtml);
     try {
-      // System.out.println("msg being queued");
       queue.put(qp);
     }
     catch (InterruptedException e) {
@@ -133,6 +131,9 @@ public class MmowgliMailer implements Runnable
     Session session = Session.getDefaultInstance(props);
     if (debugAndVerbose)
       session.setDebug(true);
+
+    // Date / Time stamp for this message
+    Date date = new Date();
     try {
       // Build the message
       Message msg = new MimeMessage(session);
@@ -151,7 +152,7 @@ public class MmowgliMailer implements Runnable
       msg.setSubject(qp.subject);
 
       msg.setHeader("X-Mailer", "mmowgliQueryHandler");
-      msg.setSentDate(new Date());
+      msg.setSentDate(date);
 
       MimeMultipart mmp = new MimeMultipart();
       MimeBodyPart mbp = new MimeBodyPart();
@@ -214,6 +215,9 @@ public class MmowgliMailer implements Runnable
             System.err.println("  Command: " + ssfe.getCommand());
             System.err.println("  RetCode: " + ssfe.getReturnCode());
             System.err.println("  Response: " + ssfe.getMessage());
+           
+            System.err.println("  Subject: " + qp.subject);
+            System.err.println("  Message: " + qp.body);
           }
           else if (sfe instanceof SMTPAddressSucceededException) {
             System.err.println("ADDRESS SUCCEEDED:");
@@ -224,6 +228,9 @@ public class MmowgliMailer implements Runnable
             System.err.println("  Command: " + ssfe.getCommand());
             System.err.println("  RetCode: " + ssfe.getReturnCode());
             System.err.println("  Response: " + ssfe.getMessage());
+            
+            System.err.println("  Subject: " + qp.subject);
+            System.err.println("  Message: " + qp.body);
           }
         }
       }
@@ -244,16 +251,15 @@ public class MmowgliMailer implements Runnable
     public String cc;
     public String bcc;
     public boolean isHtml;
-
-    public QPacket(String to, String from, String subject, String body, String cc, String bcc, boolean isHtml) {
-      this.to = to;
-      this.from = from;
-      this.subject = subject;
-      this.body = body;
-      this.cc = cc;
-      this.bcc = bcc;
-      this.isHtml = isHtml;
+    public QPacket(String to, String from, String subject, String body, String cc, String bcc, boolean isHtml)
+    {
+      this.to=to;
+      this.from=from;
+      this.subject=subject;
+      this.body=body;
+      this.cc=cc;
+      this.bcc=bcc;
+      this.isHtml=isHtml;
     }
   }
-
 }
