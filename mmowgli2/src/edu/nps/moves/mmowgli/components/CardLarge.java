@@ -55,6 +55,7 @@ import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
+import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 import edu.nps.moves.mmowgli.utility.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -161,7 +162,7 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     title.setDescription(title_tt);
     addComponent(title,CARDBIG_TITLE_POS);
     title.addStyleName("m-cardlarge-title");
-    title.addStyleName(CardStyler.getCardTextColorStyle(card.getCardType()));
+    title.addStyleName(CardStyler.getCardTextColorOverWhiteStyle(card.getCardType()));
     
     User userMe = DBGet.getUserFreshTL(globs.getUserID());  // need favorite cards
     if(starGreyResource!=null && starRedResource!=null ) {
