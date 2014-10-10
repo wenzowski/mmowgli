@@ -1,10 +1,10 @@
 /*
-* Copyright (c) 1995-2010 held by the author(s).  All rights reserved.
-*  
+* Copyright (c) 1995-2014 held by the author(s).  All rights reserved.
+*
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions
 * are met:
-*  
+*
 *  * Redistributions of source code must retain the above copyright
 *       notice, this list of conditions and the following disclaimer.
 *  * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
 *       nor the names of its contributors may be used to endorse or
 *       promote products derived from this software without specific
 *       prior written permission.
-*  
+*
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -111,13 +111,13 @@ public class SignupWindow extends Window
     {
       Label lab;
       Button submitButton;
-      
+
       setMargin(true);
-      
+
       lab = new Label();
       lab.setHeight("30px");
       addComponent(lab);
-      
+
       Game g = Game.getTL();
       GameLinks gl = GameLinks.getTL();
       String signupImgLink = g.getCurrentMove().getCurrentMovePhase().getSignupHeaderImage();
@@ -130,9 +130,9 @@ public class SignupWindow extends Window
         mmowBanner.setHeight(bannerHeightPx);
         mmowBanner.addClickListener(new headerListener());
         mmowBanner.addStyleName("m-cursor-pointer");
-        addComponent(mmowBanner);      
+        addComponent(mmowBanner);
         setComponentAlignment(mmowBanner, Alignment.MIDDLE_CENTER);
-        
+
         lab = new Label();
         lab.setHeight("15px");
         addComponent(lab);
@@ -142,21 +142,19 @@ public class SignupWindow extends Window
       addComponent(vl);
       setComponentAlignment(vl,Alignment.MIDDLE_CENTER);
       vl.setWidth("700px"); //"66%");
-      
       vl.addStyleName("m-greyborder");
       vl.setMargin(true);
       vl.setSpacing(true);
-      
-      
+
       SignupWindow.this.thanksForInterestLink = gl.getThanksForInterestLink();
       SignupWindow.this.aboutLink = gl.getAboutLink();
-      
+
       String brand = g.getCurrentMove().getTitle();
       SignupWindow.this.setCaption("Signup for "+brand+" mmowgli");
       
       String blog = gl.getBlogLink();
       String mainText = g.getCurrentMove().getCurrentMovePhase().getSignupText();
-      
+
       vl.addComponent(lab = new HtmlLabel(""));
       lab.addStyleName("m-font-21-bold");
       lab.setSizeUndefined();
@@ -169,13 +167,13 @@ public class SignupWindow extends Window
       sb.append(brand);
       sb.append(thanksHdr3);
       lab.setValue(sb.toString());
-           
+
       vl.addComponent(lab = new HtmlLabel(mainText));
       vl.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
-      
+
       vl.addComponent(lab = new HtmlLabel(""));
       lab.setHeight("15px");
-      
+
       vl.addComponent(new HtmlLabel("<b>Email address:</b>")); 
       vl.addComponent(emailTF = new TextField());
       emailTF.setWidth("100%");
@@ -183,22 +181,19 @@ public class SignupWindow extends Window
       vl.addComponent(interestTF = new TextField());
       interestTF.setInputPrompt("required for approval");
       interestTF.setWidth("100%");
-            
+
       vl.addComponent(submitButton = new Button("Signup"));
       submitButton.addClickListener(this);
-          
+
       /*
       Embedded npsBanner = new Embedded(null,new ExternalResource(npsUrl));
       npsBanner.setWidth(npsWidthPx);
       npsBanner.setHeight(npsHeightPx);
-      addComponent(npsBanner);      
+      addComponent(npsBanner);
       setComponentAlignment(npsBanner, Alignment.MIDDLE_CENTER);
       */
-      
+
       vl.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
-      
-      lab = new Label();
-      lab.setHeight("30px");
     }
 
     @Override
