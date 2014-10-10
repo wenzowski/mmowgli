@@ -31,7 +31,7 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent
 {
   private static final long serialVersionUID = -5343489408165893669L;
 
-  private Link aboutButt, faqsButt, glossaryButt, creditsButt, troubleButt, termsButt, fixesButt;
+  private Link aboutButt, faqsButt, glossaryButt, creditsButt, troubleButt, termsButt, fixesButt, twitterButt, reportsButt;
   private Link fouoLink;
 
   //@formatter:off
@@ -43,10 +43,11 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent
     creditsButt  = makeLink("Credits and Contact", gl.getCreditsLink(), "Who we are");
     faqsButt     = makeLink("FAQs",                gl.getFaqLink(), "Frequently answered questions");
     glossaryButt = makeLink("Glossary",            gl.getGlossaryLink(), "Terms and acronyms of interest");//"https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Glossary", "Terms and acronyms of interest");
-    termsButt    = makeLink("Terms and Conditions",gl.getTermsLink(), "Player agreements and terms of use");
-    troubleButt  = makeLink("Trouble Report",      gl.getTroubleLink(), "Tell us if you find a problem");
-    fixesButt    = makeLink("Fixes",               gl.getFixesLink(), "Common game fixes and workarounds"); //"https://portal.mmowgli.nps.edu/fixes", "Common game fixes and workarounds");
-    
+    termsButt    = makeLink("Terms and Conditions",gl.getTermsLink(),    "Player agreements and terms of use");
+    troubleButt  = makeLink("Trouble Report",      gl.getTroubleLink(),  "Tell us if you find a problem");
+    fixesButt    = makeLink("Fixes",               gl.getFixesLink(),    "Common game fixes and workarounds"); //"https://portal.mmowgli.nps.edu/fixes", "Common game fixes and workarounds");
+    twitterButt  = makeLink("Twitter",             getTwitterLink(),     "The Mmowgli twitter feed");
+    reportsButt  = makeLink("Reports",             getReportsLink(),     "Game play reports page");
   }
   //@formatter:on
 
@@ -81,13 +82,16 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent
     innerHorLay.addComponent(faqsButt);
     innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
     innerHorLay.addComponent(fixesButt);
-    innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
-    
+    innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");    
     innerHorLay.addComponent(glossaryButt);
-    innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
+    innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");    
+    innerHorLay.addComponent(reportsButt);
+    innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");   
     innerHorLay.addComponent(termsButt);
     innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
     innerHorLay.addComponent(troubleButt);
+    innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
+    innerHorLay.addComponent(twitterButt);
     
     GameLinks gl = GameLinks.getTL();
 /*V7test    if(gl.getFixesLink().toLowerCase().contains("armyscitech") || gl.getGlossaryLink().toLowerCase().contains("armyscitech")) {
@@ -140,5 +144,15 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent
   {
     //fouoButt.setVisible(show);
     fouoLink.setVisible(show);
+  }
+  
+  private String getReportsLink()
+  {
+    return AppMaster.instance().getReportsUrl();
+  }
+  
+  private String getTwitterLink()
+  {
+    return "http://twitter.com/MMOWGLI";
   }
 }
