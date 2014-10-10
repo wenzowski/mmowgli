@@ -253,7 +253,7 @@ public class MCacheManager implements InterTomcatReceiver
  */
   private void _rebuildCards(Session sess)
   {
-     getCardCache().clearCache();
+    getCardCache().clearCache();
     List<Card> allCards = allCardsQuery(sess);
     for(Card c : allCards){
       getCardCache().addToCache(c.getId(), c);
@@ -410,11 +410,6 @@ public class MCacheManager implements InterTomcatReceiver
   public boolean handleIncomingTomcatMessageTL(MMessagePacket packet)
   {
     MSysOut.println("MCacheManager.handleIncomingTomcatMessageTL()");
-    
-//    boolean needMgr = sessMgr==null;
-//    if(needMgr)
-//      sessMgr = new SingleSessionManager();
-    
     switch (packet.msgType) {
       case NEW_CARD:
       case UPDATED_CARD:
@@ -432,9 +427,6 @@ public class MCacheManager implements InterTomcatReceiver
         break;
       default:
     }
-//    if(needMgr)
-//      ((SingleSessionManager)sessMgr).endSession();
-    
     return false; // don't want a retry    
   }
 
@@ -446,7 +438,7 @@ public class MCacheManager implements InterTomcatReceiver
   private void newGameEventTL(char messageType, String message)
   {
     Long id = MMessage.MMParse(messageType,message).id;
-    GameEvent ev = GameEvent.getTL(id); //(GameEvent)M.getSession(sessMgr).get(GameEvent.class, id);
+    GameEvent ev = GameEvent.getTL(id); 
 
     // Here's the check for receiving notification that an event has been created, but it ain't in the db yet.
     if(ev == null) {
@@ -529,7 +521,7 @@ public class MCacheManager implements InterTomcatReceiver
   private void newOrUpdatedUserTL(char messageType, String message)
   {
     synchronized(usersQuick) {
-      Long id = MMessage.MMParse(messageType, message).id; //Long.parseLong(message);
+      Long id = MMessage.MMParse(messageType, message).id;
       User u = DBGet.getUserFreshTL(id); //the fresh should not be required since the Obj cache should have been updated first
 
       addOrUpdateUserInContainer(u);
