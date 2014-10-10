@@ -57,7 +57,7 @@ import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.actionplans.AddAuthorDialog;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
 import edu.nps.moves.mmowgli.utility.BaseCoroutine;
-import edu.nps.moves.mmowgli.utility.CardStyler;
+import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 
 /**
  * CardSummaryListHeader.java Created on Feb 3, 2011
@@ -147,7 +147,7 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
     }
     final MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     ct = CardType.getTL(ctId);
-    String textColorStyle = CardStyler.getCardInverseTextColorStyle(ct);
+    String textColorStyle = CardStyler.getCardTextColorOverBaseStyle(ct);
 
     // nested abslay for the click handler
     AbsoluteLayout topHalfLay = new AbsoluteLayout();
@@ -431,12 +431,7 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
         }
 
         // Admins get to add cards under other names
-        author = User.get(Mmowgli2UI.getGlobals().getUserID(), HSess.get()); // DBGet.getUser(uId);
-                                                                             // //
-                                                                             // assumes
-                                                                             // vaadin
-                                                                             // transaction
-                                                                             // session
+        author = User.get(Mmowgli2UI.getGlobals().getUserID(), HSess.get()); 
         if (author.isAdministrator())
           adminSwitchAuthors(event.getButton(), this);
         else
