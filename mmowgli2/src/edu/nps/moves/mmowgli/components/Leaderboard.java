@@ -101,7 +101,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     titleHL.addComponent(c=globs.getMediaLocator().getLeaderboardTitle());
     titleHL.setComponentAlignment(c, Alignment.MIDDLE_LEFT);
     titleHL.setExpandRatio(c, .5f);
-    
+
     maybeShowMoveSelector(titleHL);
   
     tips.setStyleName(BaseTheme.BUTTON_LINK);
@@ -109,7 +109,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     titleHL.addComponent(tips);
     titleHL.setComponentAlignment(tips, Alignment.MIDDLE_RIGHT);
     titleHL.setExpandRatio(tips, 0.5f);
-
+    
     tableVLayout = new VerticalLayout();
     tableVLayout.setSizeUndefined();
     tableVLayout.setWidth(APPLICATION_SCREEN_WIDTH);
@@ -145,9 +145,6 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
       return;
 
     Label lab = null;
-    hl.addComponent(lab=new Label());
-    lab.setWidth("150px");
-    
     hl.addComponent(lab=new Label("Showing scores from Round "));
     lab.setSizeUndefined();
     hl.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
