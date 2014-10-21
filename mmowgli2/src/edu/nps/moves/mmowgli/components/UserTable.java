@@ -538,19 +538,6 @@ public class UserTable extends Table implements Button.ClickListener
   }
 
   @Override
-  public void sort(Object[] propertyId, boolean[] ascending) throws UnsupportedOperationException
-  {
-   // if(BASICSCORE_COLUMN.equals(propertyId[0]))
-   //   super.sort(new Object[]{"pointsByMove"},ascending);
-   // else
-    
-  //test    super.sort(propertyId, ascending);   // todo mike here
-    Container cont = this.getContainerDataSource();
-    if(cont instanceof HbnContainer)
-      ((HbnContainer<?>)cont).sort(propertyId, ascending);
-  }
-
-  @Override
   public void buttonClick(ClickEvent event)
   {
     ButtonWithUser butt = (ButtonWithUser)event.getButton();
