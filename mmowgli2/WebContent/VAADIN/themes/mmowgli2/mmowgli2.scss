@@ -502,18 +502,16 @@ div .m-textarea-greyborder, .m-greyborder {
     width:100px;
     height:38px;
 }
+.v-nativebutton-m-continueButton:focus {
+  outline:0;
+}
+
 .v-nativebutton-m-cancelButton {
     background: transparent no-repeat;
     background-image:url('#{$imageRepo}/cancelButt89w38h.png');
     border-style:none;
     width:89px;
     height:38px;
-}
-.v-nativebutton-m-saveChangesButton {
-  background: transparent url('#{$imageRepo}/saveChangesButton119w24h.png') no-repeat;
-  border-style:none;
-  width:119px;
-  height:24px;
 }
 .v-nativebutton-m-cancelButton:hover {
   background: transparent no-repeat;
@@ -522,8 +520,21 @@ div .m-textarea-greyborder, .m-greyborder {
   width:89px;
   height:38px;
 }
-  
-  .v-nativebutton-m-weNeedYourHelpButton {
+.v-nativebutton-m-cancelButton:focus {
+  outline:0;
+ }
+ 
+.v-nativebutton-m-saveChangesButton {
+  background: transparent url('#{$imageRepo}/saveChangesButton119w24h.png') no-repeat;
+  border-style:none;
+  width:119px;
+  height:24px;
+}
+.v-nativebutton-m-saveChangesButton:focus {
+  outline:0;
+}
+
+.v-nativebutton-m-weNeedYourHelpButton {
   background: transparent no-repeat;
   background-image: url('#{$imageRepo}/weNeedYourHelp328w78h.png');
   border-style:none;
