@@ -547,9 +547,11 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       }
       catch(Throwable ex) {
         if(viewAndParameters == null || viewAndParameters.equals(""))
-          return ""; // startup
-        System.err.println("Bad fragment:"+viewAndParameters);
-        retrn = null;
+          retrn = ""; // startup
+        else {
+          System.err.println("Bad fragment:"+viewAndParameters);
+          retrn = null;
+        }
       }
       HSess.checkClose(key);
       return retrn;
