@@ -94,10 +94,10 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent
     innerHorLay.addComponent(twitterButt);
     
     GameLinks gl = GameLinks.getTL();
-/*V7test    if(gl.getFixesLink().toLowerCase().contains("armyscitech") || gl.getGlossaryLink().toLowerCase().contains("armyscitech")) {
+    if(gl.getFixesLink().toLowerCase().contains("armyscitech") || gl.getGlossaryLink().toLowerCase().contains("armyscitech")) {
       ;  // This is a hack, but I don't want to pollute the db with a bogus boolean...this is a special case just for these folks.
     }
-    else */{
+    else {
       HorizontalLayout hl = new HorizontalLayout();
       Label lab=null;
       hl.addComponent(lab=new HtmlLabel("Build "+MMOWGLI_BUILD_ID)); lab.addStyleName("m-footer-servername");  //small text
