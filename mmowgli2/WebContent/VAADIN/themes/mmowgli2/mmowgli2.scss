@@ -1297,6 +1297,7 @@ div .v-nativebutton-m-link-button-18 .v-nativebutton-caption{
   width:157px;
   height:77px;
 }
+
 .v-nativebutton-m-actionDashboardActionPlansTab {
   background: transparent no-repeat;
   background-image: url('#{$imageRepo}/actionPlansWhiteTab246w60h.png');
@@ -1304,12 +1305,19 @@ div .v-nativebutton-m-link-button-18 .v-nativebutton-caption{
   width:246px;
   height:60px;
 }
+.v-nativebutton-m-actionDashboardActionPlansTab:focus {
+  outline:0; 
+}
+
 .v-nativebutton-m-actionDashboardMyPlansTab {
   background: transparent no-repeat;
   background-image: url('#{$imageRepo}/actionPlanMyPlansWhiteTab248w60h.png');
   border-style:none;
   width:248px;
   height:60px;
+}
+.v-nativebutton-m-actionDashboardMyPlansTab:focus {
+  outline:0; 
 }
 
 .v-nativebutton-m-actionDashboardNeedAuthorsTab {
@@ -1319,6 +1327,10 @@ div .v-nativebutton-m-link-button-18 .v-nativebutton-caption{
   width:263px;
   height:60px;
 }
+.v-nativebutton-m-actionDashboardNeedAuthorsTab:focus {
+  outline:0;
+}
+
 .m-actionplan-addimage-butt {
 	width: 189px;
 	height: 50px;
@@ -1642,12 +1654,18 @@ div .v-nativebutton-m-link-button-18 .v-nativebutton-caption{
   width:201px;
   height:60px;
 }
+.v-nativebutton-m-ideaDashboardMostRecentTab:focus {
+  outline:0;
+}
 .v-nativebutton-m-ideaDashboardBestStrategyTab, .v-nativebutton-m-ideaDashboardInnovateTab {
   background: transparent no-repeat;
   background-image: url('#{$imageRepo}/innovateWhiteTab163w60h.png');
   border-style:none;
   width:163px;
   height:60px;
+}
+.v-nativebutton-m-ideaDashboardBestStrategyTab:focus, .v-nativebutton-m-ideaDashboardInnovateTab:focus {
+  outline:0;
 }
 .v-nativebutton-m-ideaDashboardEfficiencyTab, .v-nativebutton-m-ideaDashboardEfficiencyTab {
   background: transparent no-repeat;
@@ -1656,6 +1674,9 @@ div .v-nativebutton-m-link-button-18 .v-nativebutton-caption{
   width:163px;
   height:60px;	
 }
+.v-nativebutton-m-ideaDashboardEfficiencyTab:focus, .v-nativebutton-m-ideaDashboardEfficiencyTab:focus {
+  outline:0;
+}
 .v-nativebutton-m-ideaDashboardEmptyInnovateTab {
   background: transparent no-repeat;
   background-image: url('#{$imageRepo}/emptyWhiteTab163w60h.png');
@@ -1663,12 +1684,17 @@ div .v-nativebutton-m-link-button-18 .v-nativebutton-caption{
   width:163px;
   height:60px;	
 }
+.v-nativebutton-m-ideaDashboardEmptyInnovateTab:focus {
+  outline:0;
+}
+
 .m-ideaDashboardEmptyInnovateTab .v-nativebutton-caption, .m-ideaDashboardEmptyDefendTab .v-nativebutton-caption {
   color: #221F20;
   font-family: helvetica;
   font-weight: bold;
   font-size: 18px;
 }
+
 .v-nativebutton-m-ideaDashboardEmptyDefendTab {
   background: transparent no-repeat; 
   background-image: url('#{$imageRepo}/emptyWhiteTab177w60h.png');
@@ -1676,6 +1702,10 @@ div .v-nativebutton-m-link-button-18 .v-nativebutton-caption{
   width:177px;
   height:60px;	
 }
+.v-nativebutton-m-ideaDashboardEmptyDefendTab:focus {
+  outline:0;
+}
+
 .v-nativebutton-m-ideaDashboardWorstStrategyTab, .v-nativebutton-m-ideaDashboardDefendTab {
   background: transparent no-repeat;
   background-image: url('#{$imageRepo}/defendWhiteTab177w60h.png');
@@ -1683,6 +1713,10 @@ div .v-nativebutton-m-link-button-18 .v-nativebutton-caption{
   width:177px;
   height:60px;
 }
+.v-nativebutton-m-ideaDashboardWorstStrategyTab:focus, .v-nativebutton-m-ideaDashboardDefendTab:focus {
+  outline:0;
+}
+
 .v-nativebutton-m-ideaDashboardConsumptionTab, .v-nativebutton-m-ideaDashboardConsumptionTab {
   background: transparent no-repeat;
   background-image: url('#{$imageRepo}/consumptionWhiteTab177w60h.png');
@@ -1690,6 +1724,10 @@ div .v-nativebutton-m-link-button-18 .v-nativebutton-caption{
   width:177px;
   height:60px;
 }
+.v-nativebutton-m-ideaDashboardConsumptionTab:focus, .v-nativebutton-m-ideaDashboardConsumptionTab:focus {
+  outline:0;
+}
+
 .v-nativebutton-m-ideaDashboardSuperActiveTab{
   background: transparent no-repeat;
   background-image: url('#{$imageRepo}/superActiveWhiteTab219w60h.png');
@@ -1697,6 +1735,10 @@ div .v-nativebutton-m-link-button-18 .v-nativebutton-caption{
   width:219px;
   height:60px;
 }
+.v-nativebutton-m-ideaDashboardSuperActiveTab:focus{
+  outline:0;
+}
+
 .m-playanidea-heading-text {
   color: #6C6D6F;
   font-family: helvetica; /* font-family: 'Special Elite', cursive;*/
