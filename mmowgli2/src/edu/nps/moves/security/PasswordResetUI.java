@@ -242,7 +242,7 @@ public class PasswordResetUI extends UI implements ClickListener
       packet.original = null;
       packet.updated = null;
 
-      Notification.show("Password Change Successful!");
+      Notification.show("Password Change Successful! Return to your login window and join Mmowgli.");
     }
     else {
       getPage().setLocation(GameLinks.getTL().getThanksForInterestLink());
