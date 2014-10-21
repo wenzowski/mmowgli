@@ -38,8 +38,8 @@
 		<!-- Servlet 3.0 API -->
 		<dependency org="javax.servlet" name="javax.servlet-api" rev="3.0.1" conf="nodeploy->default" />
 
-		<!-- Precompiled DefaultWidgetSet 
-		<dependency org="com.vaadin" name="vaadin-client-compiled" rev="&vaadin.version;" /> -->
+		<!-- Precompiled DefaultWidgetSet -->
+		<dependency org="com.vaadin" name="vaadin-client-compiled" rev="&vaadin.version;" />
 
 		<!-- Vaadin client side, needed for widget set compilation -->
 		<dependency org="com.vaadin" name="vaadin-client" rev="&vaadin.version;" conf="widgetset-compile->default" />
@@ -65,7 +65,7 @@
 	    <dependency org="org.vaadin.addons" name="animator" rev="2.0.0" />
 	    <dependency org="org.vaadin.addons" name="dom" rev="0.1.0" /> <!-- for animator -->
  		<dependency org="org.vaadin.addon" name="confirmdialog" rev="2.1.1" />
- 	<!--	<dependency org="com.vaadin.tapio" name="googlemaps" rev="0.8.1" /> -->
+ 	    <!--<dependency org="com.vaadin.tapio" name="googlemaps" rev="0.8.1" /> -->
  		<dependency org="org.vaadin.addons" name="restrain" rev="0.1" />
  		<!-- for vornitologist code: -->
  		<dependency org="org.vaadin.addon" name="v-leaflet" rev="0.5.7" />
@@ -80,7 +80,7 @@
 		<dependency org="net.bull.javamelody" name="javamelody-core" rev="1.48.0"/>
 		<dependency org="org.glassfish" name="javax.json" rev="1.0.4"/>
 		<!-- for mobilemail3 code -->
- 	    <dependency org="com.vaadin.addon" name="vaadin-touchkit-agpl" rev="4.0.0.rc1"/>
+ 	    <dependency org="com.vaadin.addon" name="vaadin-touchkit-agpl" rev="4.0.0"/>
  	    <dependency org="de.sven-jacobs" name="loremipsum" rev="1.0"/>
 		<dependency org="org.vaadin.addons" name="qrcode" rev="2.0.1" />
         <dependency org="org.vaadin.addon" name="ios7hotfixes" rev="6.0.2" />
