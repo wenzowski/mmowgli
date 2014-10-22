@@ -335,11 +335,16 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
   private Command gamePermissionsClicked = new Command()
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void menuSelected(MenuItem selectedItem)
     {
+      HSess.init();
       Window win=new EntryPermissionsDialog();
       UI.getCurrent().addWindow(win);
       win.center();
+      HSess.close();
     }
   };
 
