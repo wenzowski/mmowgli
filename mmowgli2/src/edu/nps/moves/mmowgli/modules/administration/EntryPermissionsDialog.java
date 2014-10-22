@@ -119,7 +119,7 @@ public class EntryPermissionsDialog extends Window
 
       vl.addComponent(buildButtons());
       
-      initializeButtons();
+      initializeButtonsTL();
      
       if (readOnly)
         adjustAllForRO(vl);
@@ -189,7 +189,7 @@ public class EntryPermissionsDialog extends Window
     }
 
     @SuppressWarnings({ "serial", "deprecation" })
-    private void initializeButtons()
+    private void initializeButtonsTL()
     {
       MovePhase mp = Game.getTL().getCurrentMove().getCurrentMovePhase();
 
