@@ -31,17 +31,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package edu.nps.moves.mmowgliMobile;
+package edu.nps.moves.mmowgliMobile.unused;
 
 import java.io.IOException;
 
 import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
 
 import org.hibernate.Session;
 import org.hibernate.StaleObjectStateException;
 
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
-import edu.nps.moves.mmowgliMobile.data.MobileVHib;
 
 /**
  * MobileSessionInterceptor.java Created on Feb 11, 2014
@@ -56,7 +56,7 @@ import edu.nps.moves.mmowgliMobile.data.MobileVHib;
  *          which have to do the session management manually (see
  *          SingleSessionManager).
  */
-// @WebFilter(urlPatterns = { "/handheld/*" }, dispatcherTypes = { DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ERROR })
+@WebFilter(urlPatterns = { "/handheld/*" }, dispatcherTypes = { DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ERROR })
 public class MobileSessionInterceptor implements Filter
 {
   @Override
