@@ -8,6 +8,7 @@ import com.vaadin.data.hbnutil.HbnContainer;
 
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 /**
  * ActionPlansByUserContainer.java
  * Created on Feb 27, 2014
@@ -24,10 +25,11 @@ public class ActionPlansByUserContainer<T> extends HbnContainer<T>
   private static final long serialVersionUID = 2622927911766424315L;
 
   private String srchString;
+  
   @SuppressWarnings("unchecked")
   public ActionPlansByUserContainer(User u)
   {
-    super((Class<T>)ActionPlan.class,MobileVHib.getSessionFactory());
+    super((Class<T>)ActionPlan.class,HSess.getSessionFactory());
     srchString = "%"+u.getUserName()+"%"; // postgresql ilike
   }
 
