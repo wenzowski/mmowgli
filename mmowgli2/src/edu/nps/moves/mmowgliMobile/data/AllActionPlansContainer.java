@@ -7,6 +7,7 @@ import org.hibernate.criterion.Restrictions;
 import com.vaadin.data.hbnutil.HbnContainer;
 
 import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 /**
  * AllActionPlansContainer.java
  * Created on Feb 21, 2014
@@ -25,7 +26,7 @@ public class AllActionPlansContainer<T> extends HbnContainer<T>
   @SuppressWarnings("unchecked")
   public AllActionPlansContainer()
   {
-    super((Class<T>)ActionPlan.class,MobileVHib.getSessionFactory());
+    super((Class<T>)ActionPlan.class,HSess.getSessionFactory());
   }
 
   @Override
