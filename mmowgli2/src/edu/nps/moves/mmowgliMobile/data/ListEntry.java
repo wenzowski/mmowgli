@@ -4,7 +4,7 @@ import java.util.*;
 
 import edu.nps.moves.mmowgli.db.*;
 
-public class ListEntry extends AbstractPojo {
+public abstract class ListEntry extends AbstractPojo {
 
     private static final long serialVersionUID = 1L;
 
@@ -37,8 +37,6 @@ public class ListEntry extends AbstractPojo {
     }
     public ListEntry (User user)
     {
-      if(user == null)
-        System.out.println("bp");
       setFields(Arrays.asList(
           new ListEntryField("From", user.getUserName()),
           new ListEntryField("To", "blah user to"),
