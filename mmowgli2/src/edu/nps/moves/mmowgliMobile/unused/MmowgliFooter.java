@@ -1,9 +1,10 @@
-package edu.nps.moves.mmowgliMobile.ui;
+package edu.nps.moves.mmowgliMobile.unused;
 
-import com.vaadin.addon.touchkit.ui.NavigationBar;
+import com.vaadin.addon.touchkit.ui.Toolbar;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
@@ -18,7 +19,7 @@ import com.vaadin.ui.Button.ClickListener;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class MmowgliFooter extends NavigationBar
+public class MmowgliFooter extends Toolbar
 {
   private static final long serialVersionUID = 3065915569244954235L;
   
@@ -31,10 +32,10 @@ public class MmowgliFooter extends NavigationBar
   {
     this.navmgr = nav;
 
-    Button homeButton = new Button();
-    homeButton.setIcon(homeIcon);
-    
-    setLeftComponent(homeButton);
+    Button homeButton = new Button(FontAwesome.HOME);
+    homeButton.setStyleName("no-decoration");
+    addComponent(homeButton);
+
     homeButton.addClickListener(new ClickListener() {
       @Override
       public void buttonClick(ClickEvent event) {
