@@ -3,7 +3,7 @@ package edu.nps.moves.mmowgliMobile.data;
 import edu.nps.moves.mmowgli.db.Card;
 
 /**
- * WrappedCard.java
+ * CardListEntry.java
  * Created on Feb 18, 2014
  *
  * MOVES Institute
@@ -13,12 +13,13 @@ import edu.nps.moves.mmowgli.db.Card;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class WrappedCard extends ListEntry
+public class CardListEntry extends ListEntry
 {
   private static final long serialVersionUID = 2917669864501606058L;
   
   private Card card;
-  public WrappedCard(Card c)
+
+  public CardListEntry(Card c)
   {
     super(c);
     this.card = c;
@@ -28,31 +29,14 @@ public class WrappedCard extends ListEntry
   {
     return card;
   }
-
+  
   @Override
   public boolean equals(Object obj)
   {
     if(obj instanceof Card)
       return ((Card)obj).getId() == getCard().getId();
-    if(obj instanceof WrappedCard)
-      return ((WrappedCard)obj).getCard().getId() == getCard().getId();
+    if(obj instanceof CardListEntry)
+      return ((CardListEntry)obj).getCard().getId() == getCard().getId();
     return false;
   }
-  
-  
- /* 
-  @Override
-  public AbstractPojo getParent()
-  {
-    Card parentCard = card.getParentCard();
-    if(parentCard == null)
-      return null;
-    return new WrappedCard(parentCard);
-  }
-  @Override
-  public void setParent(AbstractPojo parent)
-  {
-    super.setParent(parent);
-  }
-  */
 }
