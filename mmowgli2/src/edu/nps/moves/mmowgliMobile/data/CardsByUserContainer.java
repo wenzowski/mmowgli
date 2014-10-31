@@ -6,7 +6,9 @@ import org.hibernate.criterion.Restrictions;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 /**
  * CardsByTypeContainer.java
  * Created on Feb 11, 2014
@@ -26,7 +28,7 @@ public class CardsByUserContainer<T> extends HbnContainer<T>
   @SuppressWarnings("unchecked")
   public CardsByUserContainer(User user)
   {
-    super((Class<T>)Card.class,MobileVHib.getSessionFactory());
+    super((Class<T>)Card.class,HSess.getSessionFactory());
     this.user=user;
   }
   
