@@ -1,8 +1,11 @@
 package edu.nps.moves.mmowgliMobile;
 
+import com.vaadin.annotations.Theme;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 
 /**
  * MmowgliMobileFallbackUI.java
@@ -15,6 +18,7 @@ import com.vaadin.ui.*;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
+@Theme("mmowglimobile")
 public class MmowgliMobileFallbackUI extends UI
 {
   private static final long serialVersionUID = -3852574001871621481L;
