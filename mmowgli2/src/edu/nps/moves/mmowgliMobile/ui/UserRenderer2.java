@@ -7,9 +7,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.components.HtmlLabel;
-import edu.nps.moves.mmowgli.db.Card;
-import edu.nps.moves.mmowgli.db.Level;
-import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 import edu.nps.moves.mmowgliMobile.data.*;
@@ -182,7 +180,7 @@ public class UserRenderer2 extends EntryRenderer2
     public void buttonClick(ClickEvent event)
     {
       nav.getNavigationManager().navigateTo(new ListView2(new Folder("Action Plans",
-          new ActionPlansByUserContainer(u),Card.class)));
+          new ActionPlansByUserContainer(u),ActionPlan.class)));
     }          
   }
 
