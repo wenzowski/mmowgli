@@ -1,11 +1,11 @@
-package edu.nps.moves.mmowgliMobile.ui;
+package edu.nps.moves.mmowgliMobile.unused;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaadin.addon.touchkit.ui.NavigationButton;
 import com.vaadin.addon.touchkit.ui.NavigationManager;
-import com.vaadin.addon.touchkit.ui.NavigationView;
 import com.vaadin.event.*;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
@@ -14,41 +14,38 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Table.CellStyleGenerator;
 import com.vaadin.ui.Table.ColumnHeaderMode;
 
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgliMobile.data.*;
-import edu.nps.moves.mmowgliMobile.data.ListEntry;
+import edu.nps.moves.mmowgliMobile.ui.ForwardButtonView;
+import edu.nps.moves.mmowgliMobile.unused.*;
 
-public class ListView extends NavigationView implements LayoutClickListener
+public class ListView extends ForwardButtonView implements LayoutClickListener
 {
   private static final long serialVersionUID = -6279802809551568787L;
 
   private Table table;
   private Folder folder;
-
-  /**
-   * A message button which can be selected. Contains the sender, subject and a shortened version of the body
-   * 
-   */
-  private class MessageButton extends CssLayout
+  private NavigationButton hiddenButton;
+  private class EntryButton extends CssLayout
   {
     private static final long serialVersionUID = 1L;
-
-    private final ListEntry message;
-
+    private final ListEntry entry;
     private static final String STYLENAME = "message-button";
 
-    public MessageButton(ListEntry message, ListEntryRenderer renderer)
+    public EntryButton(ListEntry entry, ListEntryRenderer renderer)
     {
-      this.message = message;
+      this.entry = entry;
 
       setWidth("100%");
       setStyleName(STYLENAME);
-      renderer.renderEntry(message, ListView.this, this);
+      renderer.renderEntry(entry, ListView.this, this);
     }
 
     public ListEntry getMessage()
     {
-      return message;
+      return entry;
     }
   }
 
@@ -69,6 +66,7 @@ public class ListView extends NavigationView implements LayoutClickListener
   @SuppressWarnings("serial")
   public ListView(final MmowgliMobileNavManager nav, final Folder folder)
   {
+    System.out.println("ListView constructor");
     if(folder.getPojoClass() == Card.class) {
       addStyleName("m-card-list");
       }
@@ -105,24 +103,24 @@ public class ListView extends NavigationView implements LayoutClickListener
       {
         Class<?> cls = folder.getPojoClass();
         if (cls == Card.class) {
-          final ListEntry m = new WrappedCard(Card.get((Serializable) itemId, MobileVHib.getVHSession()));
+          final ListEntry m = new CardListEntry(Card.get((Serializable) itemId, MobileVHib.getVHSession()));
           m.setParent(folder);
-          MessageButton btn = new MessageButton(m, renderer);
+          EntryButton btn = new EntryButton(m, renderer);
           btn.addLayoutClickListener(ListView.this);
           return btn;
         }
         if (cls == ActionPlan.class) {
-          final ListEntry m = new WrappedActionPlan(ActionPlan.get((Serializable) itemId, MobileVHib.getVHSession()));
+          final ListEntry m = new ActionPlanListEntry(ActionPlan.get((Serializable) itemId, MobileVHib.getVHSession()));
           m.setParent(folder);
-          MessageButton btn = new MessageButton(m, renderer);
+          EntryButton btn = new EntryButton(m, renderer);
           btn.addLayoutClickListener(ListView.this);
           return btn;
 
         }
         if (cls == User.class) {
-          final ListEntry m = new WrappedUser(User.get((Serializable) itemId, MobileVHib.getVHSession()));
+          final ListEntry m = new UserListEntry(User.get((Serializable) itemId, MobileVHib.getVHSession()));
           m.setParent(folder);
-          MessageButton btn = new MessageButton(m, renderer);
+          EntryButton btn = new EntryButton(m, renderer);
           btn.addLayoutClickListener(ListView.this);
           return btn;
 
@@ -138,16 +136,16 @@ public class ListView extends NavigationView implements LayoutClickListener
       public void itemClick(ItemClickEvent event)
       {
         Class<?> cls = folder.getPojoClass();
-        ListEntry msg;
+        ListEntry entry;
         if (cls == Card.class)
-          msg = new WrappedCard(Card.get((Serializable) event.getItemId(), MobileVHib.getVHSession()));
+          entry = new CardListEntry(Card.get((Serializable) event.getItemId(), MobileVHib.getVHSession()));
         else if (cls == ActionPlan.class)
-          msg = new WrappedActionPlan(ActionPlan.get((Serializable) event.getItemId(), MobileVHib.getVHSession()));
+          entry = new ActionPlanListEntry(ActionPlan.get((Serializable) event.getItemId(), MobileVHib.getVHSession()));
         else //if (cls == User.class) {
-          msg = new WrappedUser(User.get((Serializable) event.getItemId(), MobileVHib.getVHSession()));
+          entry = new UserListEntry(User.get((Serializable) event.getItemId(), MobileVHib.getVHSession()));
 
-        msg.setParent(folder);
-        messageClicked(msg, null);
+        entry.setParent(folder);
+        entryClicked(entry, null);
       }
     });
 
@@ -172,25 +170,25 @@ public class ListView extends NavigationView implements LayoutClickListener
 
   private void updateNewMessages()
   {
-    int newMessages = 0;
+    int newEntries = 0;
     for (AbstractPojo child : folder.getChildren()) {
       if (child instanceof ListEntry) {
-        ListEntry msg = (ListEntry) child;
-        newMessages += msg.getStatus() == EntryStatus.NEW ? 1 : 0;
+        ListEntry entry = (ListEntry) child;
+        newEntries += entry.getStatus() == EntryStatus.NEW ? 1 : 0;
       }
     }
 
-    if (newMessages > 0) {
-      setCaption(folder.getName() + " (" + newMessages + ")");
+    if (newEntries > 0) {
+      setCaption(folder.getName() + " (" + newEntries + ")");
     }
     else {
       setCaption(folder.getName());
     }
     if (getUI() != null) {
       ComponentContainer cc = (ComponentContainer) getUI().getContent();
-      if (cc instanceof MainView) {
-        MainView mainView = (MainView) cc;
-        mainView.updateNewMessages();
+      if (cc instanceof MainViewIF) {
+        MainViewIF mainView = (MainViewIF) cc;
+        mainView.updateNewListItems();
       }
     }
   }
@@ -200,12 +198,14 @@ public class ListView extends NavigationView implements LayoutClickListener
   @Override
   public void layoutClick(LayoutClickEvent event)
   {
-    MessageButton btn = (MessageButton) event.getSource();
+    System.out.println("Into ListView layoutClick");
+    EntryButton btn = (EntryButton) event.getSource();
     ListEntry msg = btn.getMessage();
-    messageClicked(msg, btn);
+    entryClicked(msg, btn);
+    System.out.println("Out of ListView layoutClick");
   }
 
-  private void messageClicked(ListEntry msg, MessageButton btn)
+  private void entryClicked(ListEntry msg, EntryButton btn)
   {
      table.select(getMessageTableId(msg));
      setMessage(msg);
@@ -213,31 +213,40 @@ public class ListView extends NavigationView implements LayoutClickListener
 
   private Serializable getMessageTableId(ListEntry msg)
   {
-    if (msg instanceof WrappedCard)
-      return ((WrappedCard) msg).getCard().getId();
-    if (msg instanceof WrappedUser)
-      return ((WrappedUser) msg).getUser().getId();
-    if (msg instanceof WrappedActionPlan)
-      return ((WrappedActionPlan) msg).getActionPlan().getId();
+    if (msg instanceof CardListEntry)
+      return ((CardListEntry) msg).getCard().getId();
+    if (msg instanceof UserListEntry)
+      return ((UserListEntry) msg).getUser().getId();
+    if (msg instanceof ActionPlanListEntry)
+      return ((ActionPlanListEntry) msg).getActionPlan().getId();
     return null;
   }
 
-  private void setMessage(final ListEntry message)
+  private void setMessage(final ListEntry entry)
   {
     // This doesn't work with the breadcrumbs
     /*
-     * ComponentContainer cc = (ComponentContainer) getUI().getContent(); if (cc instanceof MainView) { MainView mainView = (MainView) cc;
+     * ComponentContainer cc = (ComponentContainer) getUI().getContent(); if (cc instanceof MainViewIF) { MainViewIF mainView = (MainViewIF) cc;
      * mainView.setMessage(message, this); }
      */
 
     NavigationManager nav = getNavigationManager();
-    FullEntryView mv = new FullEntryView(true, (MmowgliMobileNavManager) nav);
-    mv.setMessage(message, this);
-    nav.navigateTo(mv);
+   // FullEntryView mv = new FullEntryView((MmowgliMobileNavManager) nav);
+    FullEntryView ev = getNextView();
+    ev.setEntry(entry, this);
+    nav.navigateTo(ev);
   }
 
   public void selectMessage(Object msg)
   {
     table.setValue(msg);
+  }
+  
+  private FullEntryView fev;
+  private FullEntryView getNextView()
+  {
+     if(fev == null)
+       fev = new FullEntryView((MmowgliMobileNavManager) getNavigationManager());
+     return fev;
   }
 }
