@@ -1,4 +1,4 @@
-package edu.nps.moves.mmowgliMobile.ui;
+package edu.nps.moves.mmowgliMobile.unused;
 
 import com.vaadin.addon.touchkit.ui.NavigationManager;
 
@@ -9,7 +9,7 @@ public class MmowgliMobileNavManager extends NavigationManager
 {
   private static final long serialVersionUID = 1L;
 
-  private GameDataCategoriesView mailboxHierarchyView;
+  private GameDataCategoriesView gameCategoriesView;
 
   public MmowgliMobileNavManager()
   {
@@ -21,12 +21,12 @@ public class MmowgliMobileNavManager extends NavigationManager
 
   public void setOrientation(boolean horizontal)
   {
-    mailboxHierarchyView.setOrientation(horizontal);
+    gameCategoriesView.setOrientation(horizontal);
   }
 
   public void navigateHome()
   {
-    mailboxHierarchyView = new GameDataCategoriesView(this);
-    navigateTo(mailboxHierarchyView);
+    gameCategoriesView = new GameDataCategoriesView(this);
+    navigateTo(gameCategoriesView);
   }
 }
