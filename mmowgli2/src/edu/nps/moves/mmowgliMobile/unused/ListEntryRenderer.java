@@ -1,4 +1,4 @@
-package edu.nps.moves.mmowgliMobile.ui;
+package edu.nps.moves.mmowgliMobile.unused;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -8,7 +8,6 @@ import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgliMobile.data.*;
-import edu.nps.moves.mmowgliMobile.data.ListEntry;
 
 /**
  * MessageListRenderer.java Created on Feb 26, 2014
@@ -32,12 +31,12 @@ public abstract class ListEntryRenderer
   
   protected Serializable getPojoId(ListEntry msg)
   {
-    if (msg instanceof WrappedCard)
-      return ((WrappedCard) msg).getCard().getId();
-    if (msg instanceof WrappedUser)
-      return ((WrappedUser) msg).getUser().getId();
-    if (msg instanceof WrappedActionPlan)
-      return ((WrappedActionPlan) msg).getActionPlan().getId();
+    if (msg instanceof CardListEntry)
+      return ((CardListEntry) msg).getCard().getId();
+    if (msg instanceof UserListEntry)
+      return ((UserListEntry) msg).getUser().getId();
+    if (msg instanceof ActionPlanListEntry)
+      return ((ActionPlanListEntry) msg).getActionPlan().getId();
     return null;
   }
 
@@ -104,7 +103,7 @@ public abstract class ListEntryRenderer
     @Override
     public void renderEntry(ListEntry message, ListView messageList, CssLayout layout)
     {
-      WrappedCard wc = (WrappedCard) message;
+      CardListEntry wc = (CardListEntry) message;
       Card c = wc.getCard();
       layout.removeAllComponents();      
       sb.setLength(0);
@@ -125,7 +124,7 @@ public abstract class ListEntryRenderer
     @Override
     public void renderEntry(ListEntry entry, ListView messageList, CssLayout layout)
     {
-      WrappedActionPlan wap = (WrappedActionPlan) entry;
+      ActionPlanListEntry wap = (ActionPlanListEntry) entry;
       ActionPlan ap = wap.getActionPlan();
       layout.removeAllComponents();      
       sb.setLength(0);
@@ -149,7 +148,7 @@ public abstract class ListEntryRenderer
     @Override
     public void renderEntry(ListEntry msg, ListView messageList, CssLayout layout)
     {
-      WrappedUser wu = (WrappedUser) msg;
+      UserListEntry wu = (UserListEntry) msg;
       User u = wu.getUser();
       layout.removeAllComponents();      
       sb.setLength(0);
