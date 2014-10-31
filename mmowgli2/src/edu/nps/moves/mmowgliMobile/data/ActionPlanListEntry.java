@@ -3,7 +3,7 @@ package edu.nps.moves.mmowgliMobile.data;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 
 /**
- * WrappedActionPlan.java
+ * ActionPlanListEntry.java
  * Created on Feb 21, 2014
  *
  * MOVES Institute
@@ -13,12 +13,12 @@ import edu.nps.moves.mmowgli.db.ActionPlan;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class WrappedActionPlan extends ListEntry
+public class ActionPlanListEntry extends ListEntry
 {
   private static final long serialVersionUID = 2917669864501606058L;
   
   private ActionPlan ap;
-  public WrappedActionPlan(ActionPlan ap)
+  public ActionPlanListEntry(ActionPlan ap)
   {
     super(ap);
     this.ap = ap;
@@ -34,25 +34,8 @@ public class WrappedActionPlan extends ListEntry
   {
     if(obj instanceof ActionPlan)
       return ((ActionPlan)obj).getId() == getActionPlan().getId();
-    if(obj instanceof WrappedActionPlan)
-      return ((WrappedActionPlan)obj).getActionPlan().getId() == getActionPlan().getId();
+    if(obj instanceof ActionPlanListEntry)
+      return ((ActionPlanListEntry)obj).getActionPlan().getId() == getActionPlan().getId();
     return false;
   }
-  
-  
- /* 
-  @Override
-  public AbstractPojo getParent()
-  {
-    Card parentCard = card.getParentCard();
-    if(parentCard == null)
-      return null;
-    return new WrappedCard(parentCard);
-  }
-  @Override
-  public void setParent(AbstractPojo parent)
-  {
-    super.setParent(parent);
-  }
-  */
 }
