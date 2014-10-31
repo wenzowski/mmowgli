@@ -1,11 +1,17 @@
-package edu.nps.moves.mmowgliMobile.ui;
+package edu.nps.moves.mmowgliMobile.unused;
+
+import org.hibernate.Session;
 
 import com.vaadin.data.Container;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.Level;
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.utility.MediaLocator;
 import edu.nps.moves.mmowgliMobile.data.*;
 
 /**
@@ -21,21 +27,78 @@ import edu.nps.moves.mmowgliMobile.data.*;
  */
 public class UserRenderer extends EntryRenderer
 {
-  public void setMessage(FullEntryView mView, ListEntry message, ListView messageList, CssLayout layout)
+  private static MediaLocator mediaLocator = new MediaLocator();
+
+  public void setMessage(FullEntryView mView, ListEntry message, ListView messageList, AbstractOrderedLayout layout)
   {
-    WrappedUser wu = (WrappedUser) message;
+    Object key = HSess.checkInit();
+    
+    UserListEntry wu = (UserListEntry) message;
     User u = wu.getUser();
     layout.removeAllComponents();
 
+    HorizontalLayout hlay = new HorizontalLayout();
+    layout.addComponent(hlay);
+    hlay.addStyleName("m-userview-top");
+    hlay.setWidth("100%");
+    hlay.setMargin(true);
+    hlay.setSpacing(true);
+    
+    Image img = new Image();
+    img.addStyleName("m-ridgeborder");
+    img.setSource(mediaLocator.locate(u.getAvatar().getMedia()));
+    img.setWidth("90px");
+    img.setHeight("90px");
+    hlay.addComponent(img);
+    hlay.setComponentAlignment(img, Alignment.MIDDLE_CENTER); 
+    
+    Label lab;
+    hlay.addComponent(lab=new Label());
+    lab.setWidth("5px");
+    
+    VerticalLayout vlay = new VerticalLayout();
+    vlay.setSpacing(true);
+    hlay.addComponent(vlay);
+    hlay.setComponentAlignment(vlay, Alignment.MIDDLE_LEFT);
+    vlay.setWidth("100%");
+    hlay.setExpandRatio(vlay, 1.0f);
+    HorizontalLayout horl = new HorizontalLayout();
+    horl.setSpacing(false);
+    vlay.addComponent(horl);
+    vlay.setComponentAlignment(horl,Alignment.BOTTOM_LEFT);
+    horl.addComponent(lab=new Label("name"));
+    lab.addStyleName("m-user-top-label"); //light-text");
+    horl.addComponent(lab=new HtmlLabel("&nbsp;&nbsp;"+u.getUserName()));
+    lab.addStyleName("m-user-top-value");
+    horl = new HorizontalLayout();
+    horl.setSpacing(false);
+    vlay.addComponent(horl);
+    vlay.setComponentAlignment(horl,Alignment.TOP_LEFT);
+
+    horl.addComponent(lab=new Label("level"));
+    lab.addStyleName("m-user-top-label"); //light-text");
+    Level lev = u.getLevel();
+    if(u.isGameMaster()) {
+      Session sess = MobileVHib.getVHSession();
+      Level l = Level.getLevelByOrdinal(Level.GAME_MASTER_ORDINAL,sess);
+      if(l != null)
+        lev = l;
+    }
+    horl.addComponent(lab=new HtmlLabel("&nbsp;&nbsp;&nbsp;"+lev.getDescription()));
+   lab.addStyleName("m-user-top-value");
+ /*   
     Label lbl = new Label(u.getUserName());
     //lbl.setStyleName("light-text");
     lbl.setSizeUndefined();
     layout.addComponent(lbl);
-    
-    lbl = new Label("<hr/>", ContentMode.HTML);
-    layout.addComponent(lbl);
-
+*/    
+   // Label lbl = new Label("<hr/>", ContentMode.HTML);
+   // layout.addComponent(lbl);
+    Label lbl;
     GridLayout gLay = new GridLayout();
+    gLay.setHeight("155px");  // won't size properly
+    gLay.setMargin(true);
+    gLay.addStyleName("m-userview-mid");
     gLay.setColumns(2);
     gLay.setRows(5);
     gLay.setSpacing(true);
@@ -76,9 +139,11 @@ public class UserRenderer extends EntryRenderer
     gLay.addComponent(lbl = new Label(formatter.format(u.getRegisterDate()),ContentMode.HTML));
     //lbl.setStyleName("light-text");
 
-    layout.addComponent(new Label("<hr/>", ContentMode.HTML));
+//    layout.addComponent(new Label("<hr/>", ContentMode.HTML));
     
     gLay = new GridLayout();
+    gLay.setMargin(true);
+    gLay.addStyleName("m-userview-bottom");
     gLay.setColumns(2);
     gLay.setRows(2);
     gLay.setSpacing(true);
@@ -92,7 +157,7 @@ public class UserRenderer extends EntryRenderer
     lbl.setSizeUndefined();
     lbl.setWidth(LEFT_WIDTH);
     gLay.setComponentAlignment(lbl, Alignment.MIDDLE_RIGHT);
-    Container cntr = new CardsByUserContainer<Card>(u);
+    Container cntr = new CardsByUserContainer<Card>(u); // expects ThreadLocal session to be setup
     gLay.addComponent(lbl = new Label(""+cntr.size(),ContentMode.HTML));
     //lbl.setStyleName("light-text");
     
@@ -101,10 +166,10 @@ public class UserRenderer extends EntryRenderer
     lbl.setSizeUndefined();
     lbl.setWidth(LEFT_WIDTH);
     gLay.setComponentAlignment(lbl, Alignment.MIDDLE_RIGHT);
-    cntr = new ActionPlansByUserContainer<Card>(u);
+    cntr = new ActionPlansByUserContainer<Card>(u);  // expects ThreadLocal session to be setup
     gLay.addComponent(lbl = new Label(""+cntr.size(),ContentMode.HTML));
     //lbl.setStyleName("light-text");
-    
+ /*   
     layout.addComponent(new Label("<hr/>", ContentMode.HTML));
 
     gLay = new GridLayout();
@@ -114,7 +179,7 @@ public class UserRenderer extends EntryRenderer
     gLay.setWidth("100%");
     gLay.setColumnExpandRatio(1, 1.0f);
     layout.addComponent(gLay);
-
+*/
     gLay.addComponent(lbl = new Label("exploration points:"));
     lbl.setStyleName("light-text");
     lbl.setSizeUndefined();
@@ -131,6 +196,7 @@ public class UserRenderer extends EntryRenderer
     gLay.addComponent(lbl = new Label(""+u.getInnovationScore(),ContentMode.HTML));
     //lbl.setStyleName("light-text");
 
+    HSess.checkClose(key);
   }
 
 
