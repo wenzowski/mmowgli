@@ -1,9 +1,9 @@
-package edu.nps.moves.mmowgliMobile.ui;
+package edu.nps.moves.mmowgliMobile.unused;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 
-import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.AbstractOrderedLayout;
 
 import edu.nps.moves.mmowgliMobile.data.*;
 
@@ -20,17 +20,17 @@ import edu.nps.moves.mmowgliMobile.data.*;
  */
 public abstract class EntryRenderer
 {
-  abstract public void setMessage(FullEntryView mView, ListEntry msg, ListView messageList, CssLayout layout);
+  abstract public void setMessage(FullEntryView mView, ListEntry msg, ListView messageList, AbstractOrderedLayout layout);
  
   protected SimpleDateFormat formatter = new SimpleDateFormat("M/d/yy hh:mm");
   protected Serializable getPojoId(ListEntry msg)
   {
-    if(msg instanceof WrappedCard)
-      return ((WrappedCard)msg).getCard().getId();
-    if(msg instanceof WrappedUser)
-      return ((WrappedUser)msg).getUser().getId();
-    if(msg instanceof WrappedActionPlan)
-      return ((WrappedActionPlan)msg).getActionPlan().getId();
+    if(msg instanceof CardListEntry)
+      return ((CardListEntry)msg).getCard().getId();
+    if(msg instanceof UserListEntry)
+      return ((UserListEntry)msg).getUser().getId();
+    if(msg instanceof ActionPlanListEntry)
+      return ((ActionPlanListEntry)msg).getActionPlan().getId();
     return null;     
   }
 }

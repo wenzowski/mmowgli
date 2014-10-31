@@ -1,11 +1,11 @@
-package edu.nps.moves.mmowgliMobile.ui;
+package edu.nps.moves.mmowgliMobile.unused;
 
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgliMobile.data.ListEntry;
-import edu.nps.moves.mmowgliMobile.data.WrappedActionPlan;
+import edu.nps.moves.mmowgliMobile.data.ActionPlanListEntry;
 
 /**
  * ActionPlanRenderer.java
@@ -46,9 +46,9 @@ public class ActionPlanRenderer extends EntryRenderer
     lab.addStyleName("m-actionplan-hr");
     return lab;
   }
-  public void setMessage(FullEntryView mView, ListEntry message, ListView messageList, CssLayout layout)
+  public void setMessage(FullEntryView mView, ListEntry message, ListView messageList, AbstractOrderedLayout layout)
   {
-    WrappedActionPlan wap = (WrappedActionPlan) message;
+    ActionPlanListEntry wap = (ActionPlanListEntry) message;
     ActionPlan ap = wap.getActionPlan();
 
     layout.removeAllComponents();
