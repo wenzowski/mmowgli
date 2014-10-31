@@ -39,6 +39,7 @@ import java.util.List;
 import javax.persistence.*;
 
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import edu.nps.moves.mmowgli.hibernate.HSess;
@@ -147,13 +148,18 @@ public class Level implements Serializable
   
   public static Level getLevelByOrdinalTL(int ord)
   {
-     Criteria crit = HSess.get().createCriteria(Level.class)
-     .add(Restrictions.eq("ordinal", ord));    
-     @SuppressWarnings("rawtypes")
-     List lis = crit.list();
-     if(lis != null && lis.size()>0) // should only be 1
-       return (Level)lis.get(0);
-     return null;
+    return getLevelByOrdinal(ord, HSess.get());
+  }
+  
+  public static Level getLevelByOrdinal(int ord, Session sess)
+  {
+    Criteria crit = sess.createCriteria(Level.class)
+    .add(Restrictions.eq("ordinal", ord));    
+    @SuppressWarnings("rawtypes")
+    List lis = crit.list();
+    if(lis != null && lis.size()>0) // should only be 1
+      return (Level)lis.get(0);
+    return null;  
   }
   
   public String toString()
