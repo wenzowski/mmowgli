@@ -8,6 +8,7 @@ import com.vaadin.data.hbnutil.HbnContainer;
 
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 /**
  * CardsByTypeContainer.java
  * Created on Feb 11, 2014
@@ -28,7 +29,7 @@ public class CardsByTypeContainer<T> extends HbnContainer<T> implements CardType
   @SuppressWarnings("unchecked")
   public CardsByTypeContainer(CardType typ)
   {
-    super((Class<T>)Card.class,MobileVHib.getSessionFactory());
+    super((Class<T>)Card.class,HSess.getSessionFactory());
     this.typ = typ;
   }
 
