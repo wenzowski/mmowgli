@@ -1,3 +1,25 @@
+/*
+  Copyright (C) 2010-2014 Modeling Virtual Environments and Simulation
+  (MOVES) Institute at the Naval Postgraduate School (NPS)
+  http://www.MovesInstitute.org and http://www.nps.edu
+ 
+  This file is part of Mmowgli.
+  
+  Mmowgli is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  any later version.
+
+  Mmowgli is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with Mmowgli in the form of a file named COPYING.  If not,
+  see <http://www.gnu.org/licenses/>
+*/
+
 package edu.nps.moves.mmowgliMobile.ui;
 
 import com.vaadin.addon.touchkit.ui.NavigationView;
@@ -6,6 +28,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
+import edu.nps.moves.mmowgli.components.Hr;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.HSess;
@@ -104,7 +127,7 @@ public class UserRenderer2 extends EntryRenderer2
     addRow(gLay,"affiliation:",u.getAffiliation());
     addRow(gLay,"date registered:",formatter.format(u.getRegisterDate()));
     
-    gLay.addComponent(new HtmlLabel("<hr/>"),0,5,1,5); 
+    gLay.addComponent(new Hr(),0,5,1,5); 
     
     Container cntr = new CardsByUserContainer<Card>(u);  // expects ThreadLocal session to be setup
     numCards = cntr.size();
@@ -113,7 +136,7 @@ public class UserRenderer2 extends EntryRenderer2
     numAps = cntr.size();
     addRow(gLay,"action plans:",""+numAps);
     
-    gLay.addComponent(new HtmlLabel("<hr/>"),0,8,1,8); 
+    gLay.addComponent(new Hr(),0,8,1,8); 
     
     addRow(gLay,"exploration points:",""+u.getBasicScore());
     addRow(gLay,"innovation points:",""+u.getInnovationScore());

@@ -16,7 +16,7 @@
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with Mmowgli, in the form of a file named COPYING.  If not,
+  along with Mmowgli in the form of a file named COPYING.  If not,
   see <http://www.gnu.org/licenses/>
 */
 
