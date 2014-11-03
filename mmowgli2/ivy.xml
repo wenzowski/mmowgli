@@ -79,15 +79,13 @@
 		<!-- <dependency org="org.hibernate" name="hibernate-search-orm" rev="4.4.2.Final" /> -->
 		<dependency org="net.bull.javamelody" name="javamelody-core" rev="1.48.0"/>
 		<dependency org="org.glassfish" name="javax.json" rev="1.0.4"/>
-		<!-- for mobilemail3 code -->
+		<!-- for mobile -->
  	    <dependency org="com.vaadin.addon" name="vaadin-touchkit-agpl" rev="4.0.0"/>
- 	    <dependency org="de.sven-jacobs" name="loremipsum" rev="1.0"/>
-		<dependency org="org.vaadin.addons" name="qrcode" rev="2.0.1" />
         <dependency org="org.vaadin.addon" name="ios7hotfixes" rev="6.0.2" />
         <!-- for hbncontainer -->
         <dependency org="com.google.guava" name="guava" rev="16.0.1" />
         <dependency org="net.sf.saxon" name="Saxon-HE" rev="9.5.1-5"/>
-        <dependency org="org.peimari" name="maddon" rev="1.5" />
+        <dependency org="org.peimari" name="maddon" rev="1.15" />
         <!-- won't work with V 7.* 
         <dependency org="org.vaadin.vol" name="openlayers-wrapper" rev="1.3.1" />-->
         <dependency org="com.google.gdata" name="core" rev="1.47.1"/>
