@@ -43,7 +43,6 @@ public class GameDataCategoriesView2 extends ForwardButtonView
 
   public GameDataCategoriesView2()
   {
-    System.out.println("GameDataCategoriesView constructor");
     HSess.init();
     setCaption(Game.getTL().getTitle());
     setWidth("100%");

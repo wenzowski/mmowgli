@@ -85,7 +85,6 @@ public class ListView2 extends ForwardButtonView implements LayoutClickListener
   @SuppressWarnings("serial")
   public ListView2(final Folder folder)
   {
-    System.out.println("ListView constructor");
     setCaption(folder.getName());
     if(folder.getPojoClass() == Card.class) {
       addStyleName("m-card-list");
@@ -103,7 +102,6 @@ public class ListView2 extends ForwardButtonView implements LayoutClickListener
     this.folder = folder;
     setRenderer();
 
-
     table = new Table(null, folder.getContainer());
     table.setImmediate(true);
     table.setSelectable(true);
@@ -112,7 +110,6 @@ public class ListView2 extends ForwardButtonView implements LayoutClickListener
     table.setColumnHeaderMode(ColumnHeaderMode.HIDDEN);
     table.setSizeFull();
     
-
     // Replace name column with navigation buttons
     table.addGeneratedColumn("name", new Table.ColumnGenerator() {
       private static final long serialVersionUID = 1L;

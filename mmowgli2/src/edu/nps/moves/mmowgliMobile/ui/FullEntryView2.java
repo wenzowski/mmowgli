@@ -55,8 +55,6 @@ public class FullEntryView2 extends ForwardButtonView// implements ClickListener
 
   public FullEntryView2()
   {
-    System.out.println("FullEntryView constructor");
-
     setContent(layout);
     layout.setWidth("100%");
     layout.setStyleName("message-layout");

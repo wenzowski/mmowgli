@@ -40,7 +40,6 @@ public class FolderView2 extends ForwardButtonView //NavigationView
 
   public FolderView2(final Folder[] folders, String title)
   {
-    System.out.println("FolderView constructor");
     setCaption(title);
     setWidth("100%");
     setHeight("100%");
