@@ -26,11 +26,14 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.*;
+import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.Label;
 
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
+import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgliMobile.data.*;
-import edu.nps.moves.mmowgliMobile.data.ListEntry;
 
 /**
  * MessageListRenderer.java Created on Feb 26, 2014
@@ -137,7 +140,7 @@ public abstract class ListEntryRenderer2
       sb.append(" ");
       italicBoldText(sb,c.getAuthorName());
       
-      layout.addComponent(new Label(sb.toString(),ContentMode.HTML));
+      layout.addComponent(new HtmlLabel(sb.toString()));
     }
   }
 
@@ -161,7 +164,7 @@ public abstract class ListEntryRenderer2
       sb.append(". ");
       normalText(sb,ap.getTitle());
       
-      layout.addComponent(new Label(sb.toString(),ContentMode.HTML));
+      layout.addComponent(new HtmlLabel(sb.toString()));
     }
   }
 
@@ -189,7 +192,7 @@ public abstract class ListEntryRenderer2
       sb.append("/");
       boldText(sb,u.getInnovationScore());
       
-      layout.addComponent(new Label(sb.toString(),ContentMode.HTML));
+      layout.addComponent(new HtmlLabel(sb.toString()));
     }
   }
 }

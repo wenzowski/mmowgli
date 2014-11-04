@@ -44,6 +44,7 @@ import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.AvatarPanel;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.EmailPii;
@@ -99,8 +100,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
     lab.setWidth(null);  // makes it undefined so it's not 100%
     contentVLayout.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
 
-    contentVLayout.addComponent(lab = new Label("&nbsp;"));
-    lab.setContentMode(ContentMode.HTML);
+    contentVLayout.addComponent(lab = new HtmlLabel("&nbsp;"));;
     lab.addStyleName("m-dialog-text");
     lab.setWidth(null);  // makes it undefined so it's not 100%
     contentVLayout.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);

@@ -29,6 +29,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.components.BoundAffiliationCombo;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.Affiliation;
 import edu.nps.moves.mmowgli.db.User;
@@ -68,8 +69,7 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
     contentVLayout.addComponent(sp = new Label());
     sp.setHeight("20px");
 
-    Label header = new Label("<center>Affiliation category and location are optional and are displayed to other game players.</center>"); // and help you</center>");
-    header.setContentMode(ContentMode.HTML);
+    Label header = new HtmlLabel("<center>Affiliation category and location are optional and are displayed to other game players.</center>"); // and help you</center>");
     header.addStyleName("m-dialog-label-noindent");
     contentVLayout.addComponent(header);
     contentVLayout.setComponentAlignment(header, Alignment.TOP_CENTER);
@@ -98,8 +98,7 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
     locTf.setInputPrompt("optional");
     
     Label lab;
-    contentVLayout.addComponent(lab = new Label(warning));
-    lab.setContentMode(ContentMode.HTML);
+    contentVLayout.addComponent(lab = new HtmlLabel(warning));
     lab.addStyleName(labelStyle);
     
     HorizontalLayout hl = new HorizontalLayout();

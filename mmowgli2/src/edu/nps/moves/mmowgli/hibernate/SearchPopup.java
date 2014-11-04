@@ -177,8 +177,7 @@ public class SearchPopup extends Window implements ClickListener
     topHL.addComponent(searchButt);
     searchButt.setClickShortcut(KeyCode.ENTER);
 
-    vLay.addComponent(statusLabel = new Label("&nbsp;"));
-    statusLabel.setContentMode(ContentMode.HTML);
+    vLay.addComponent(statusLabel = new HtmlLabel("&nbsp;"));
     statusLabel.setImmediate(true);
 
     resultsTable = new Table();

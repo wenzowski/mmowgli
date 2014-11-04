@@ -23,10 +23,10 @@
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.User;
@@ -57,8 +57,7 @@ public class RegistrationPageSecondPermissionPopup extends MmowgliDialog
     setTitleString(g.getSecondLoginPermissionPageTitle());
 
     contentVLayout.setSpacing(true);
-    Label lab = new Label(g.getSecondLoginPermissionPageText());
-    lab.setContentMode(ContentMode.HTML);
+    Label lab = new HtmlLabel(g.getSecondLoginPermissionPageText());
     lab.setWidth("82%");
     lab.addStyleName(labelStyle);
     contentVLayout.addComponent(lab);

@@ -30,11 +30,11 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewProvider;
 import com.vaadin.server.Page;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.Leaderboard;
 import edu.nps.moves.mmowgli.components.SignupsTable;
 import edu.nps.moves.mmowgli.db.*;
@@ -432,9 +432,8 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     vl.setSizeUndefined();
     vl.setMargin(true);
     vl.setSpacing(true);
-    Label lab;
-    vl.addComponent(lab = new Label(g.getAdminLoginMessage()));
-    lab.setContentMode(ContentMode.HTML);
+
+    vl.addComponent(new HtmlLabel(g.getAdminLoginMessage()));
 
     HorizontalLayout buttHL = new HorizontalLayout();
     buttHL.setSpacing(true);

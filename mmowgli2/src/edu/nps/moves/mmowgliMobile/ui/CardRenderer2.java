@@ -26,11 +26,11 @@ import java.text.SimpleDateFormat;
 
 import com.vaadin.addon.touchkit.ui.NavigationManager;
 import com.vaadin.data.Container;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.CardType;
 import edu.nps.moves.mmowgli.hibernate.HSess;
@@ -108,7 +108,7 @@ public class CardRenderer2 extends EntryRenderer2 //implements ClickListener
     lbl.addStyleName("m-text-align-center");
     horl.setComponentAlignment(lbl, Alignment.MIDDLE_CENTER);
     horl.setExpandRatio(lbl, 1.0f);
-    horl.addComponent(lbl=new Label(formatter.format(message.getTimestamp()),ContentMode.HTML));
+    horl.addComponent(lbl=new HtmlLabel(formatter.format(message.getTimestamp())));
     lbl.setWidth("115px");;
     lbl.addStyleName("m-text-align-right");
     horl.setComponentAlignment(lbl, Alignment.MIDDLE_CENTER);

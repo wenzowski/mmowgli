@@ -160,8 +160,7 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
       rightColVLayout.addComponent(headerImg);
     }
     else {
-      headingLab = new Label(heading);
-      headingLab.setContentMode(ContentMode.HTML);
+      headingLab = new HtmlLabel(heading);
       if (largerText)
         headingLab.addStyleName("m-orientation-heading");
       else
@@ -169,8 +168,7 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
       rightColVLayout.addComponent(headingLab);
     }
 
-    summaryLab = new Label(summary);
-    summaryLab.setContentMode(ContentMode.HTML);
+    summaryLab = new HtmlLabel(summary);
     if (largerText)
       summaryLab.addStyleName("m-orientation-summary");
     else
@@ -178,8 +176,7 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
     rightColVLayout.addComponent(summaryLab);
 
     // text = text.replace("\n", "<br/><br/>"); // pure html with <p> tags seems to work well
-    textLab = new Label(text);
-    textLab.setContentMode(ContentMode.HTML);
+    textLab = new HtmlLabel(text);
     if (largerText)
       textLab.addStyleName("m-orientation-text");
     else

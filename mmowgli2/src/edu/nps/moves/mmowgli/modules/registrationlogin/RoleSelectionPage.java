@@ -23,12 +23,12 @@
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.GameQuestion;
@@ -70,9 +70,8 @@ public class RoleSelectionPage extends MmowgliDialog
     contentVLayout.addStyleName("m-role-page"); 
     
     Label lab;
-    contentVLayout.addComponent(lab = new Label("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This optional information is revealed to other players."));
+    contentVLayout.addComponent(lab = new HtmlLabel("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This optional information is revealed to other players."));
     lab.addStyleName(labelStyle);
-    lab.setContentMode(ContentMode.HTML);
     contentVLayout.addComponent(lab=new Label());
     lab.setHeight("10px");
 
