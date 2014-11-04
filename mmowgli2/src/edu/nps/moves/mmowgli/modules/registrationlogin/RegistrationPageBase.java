@@ -570,10 +570,9 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       vLay.setSizeUndefined();
       vLay.setWidth("400px");
 
-      Label message = new Label(
+      Label message = new HtmlLabel(
           "A confirmation email has been sent to <b>"+email+"</b>.");
       vLay.addComponent(message);
-      message.setContentMode(ContentMode.HTML);
 
       message = new Label(
           "Follow the link in the message "+

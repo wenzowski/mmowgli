@@ -25,11 +25,11 @@ package edu.nps.moves.mmowgli.modules.registrationlogin;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.shared.ui.BorderStyle;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.User;
 /**
@@ -59,9 +59,8 @@ abstract public class RegistrationPageAgreement extends MmowgliDialog
     setTitleString(getTitle()); //"User Agreement 1");
 
     contentVLayout.setSpacing(true);
-    Label lab = new Label(getLabelText()); //"First, please confirm your willingness to meet game requirements.  I also confirm that I am at least 18 years of age.");
+    Label lab = new HtmlLabel(getLabelText()); //"First, please confirm your willingness to meet game requirements.  I also confirm that I am at least 18 years of age.");
     lab.addStyleName(topLabelStyle);
-    lab.setContentMode(ContentMode.HTML);
     contentVLayout.addComponent(lab);
     
     HorizontalLayout hlayout = new HorizontalLayout();
@@ -81,8 +80,7 @@ abstract public class RegistrationPageAgreement extends MmowgliDialog
       hlayout.setComponentAlignment(readLink, Alignment.MIDDLE_LEFT);
     }
     
-    lab = new Label(getReadLabel()); //"<i>Consent to Participate in Anonymous Survey</i>");
-    lab.setContentMode(ContentMode.HTML);
+    lab = new HtmlLabel(getReadLabel()); //"<i>Consent to Participate in Anonymous Survey</i>");
     lab.setSizeUndefined();
     hlayout.addComponent(lab);
     hlayout.setSizeUndefined();

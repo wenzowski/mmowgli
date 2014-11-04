@@ -27,10 +27,10 @@ import org.jasypt.util.password.StrongPasswordEncryptor;
 
 import com.vaadin.addon.touchkit.ui.NavigationView;
 import com.vaadin.addon.touchkit.ui.Popover;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
@@ -75,7 +75,7 @@ public class SigninPopover extends Popover implements Button.ClickListener
     layout.addComponent(submitButt = new Button("Sign in",new SubmitListener()));
     submitButt.setSizeUndefined();
     
-    layout.addComponent(errorLab = new Label("",ContentMode.HTML));
+    layout.addComponent(errorLab = new HtmlLabel(""));
     layout.setComponentAlignment(errorLab, Alignment.TOP_CENTER);
  // Decorate with navigation view
     NavigationView content = new NavigationView(layout);

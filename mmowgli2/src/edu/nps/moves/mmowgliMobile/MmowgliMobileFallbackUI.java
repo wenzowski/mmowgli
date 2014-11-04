@@ -24,10 +24,11 @@ package edu.nps.moves.mmowgliMobile;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 
 /**
  * MmowgliMobileFallbackUI.java
@@ -58,7 +59,7 @@ public class MmowgliMobileFallbackUI extends UI
   @Override
   protected void init(VaadinRequest request)
   {
-      Label label = new Label(MSG, ContentMode.HTML);
+      Label label = new HtmlLabel(MSG);
       
       VerticalLayout content = new VerticalLayout();
       content.setMargin(true);
