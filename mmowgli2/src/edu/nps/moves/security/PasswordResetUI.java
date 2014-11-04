@@ -108,8 +108,7 @@ public class PasswordResetUI extends UI implements ClickListener
   String thanksHdr2 = "'>";
   String thanksHdr3 = "</a> game.";
 
-  String bannerWidthPx = "400px";
-  String bannerHeightPx = "114px";
+  String bannerWidthPx = "550px";
   NativeButton saveButt = null;
   PasswordField newPw = null;
   PasswordField newPw2 = null;
@@ -138,7 +137,7 @@ public class PasswordResetUI extends UI implements ClickListener
     
     VerticalLayout vl = new VerticalLayout();
     hLay.addComponent(vl);
-    vl.setWidth("400px");
+    vl.setWidth(bannerWidthPx);
     
     hLay.addComponent(lab=new Label());
     hLay.setExpandRatio(lab, 0.5f);
@@ -180,7 +179,7 @@ public class PasswordResetUI extends UI implements ClickListener
     HorizontalLayout buttLay = new HorizontalLayout();
     buttLay.setSpacing(true);
     vl.addComponent(buttLay);
-    vl.setComponentAlignment(buttLay, Alignment.TOP_RIGHT);
+    vl.setComponentAlignment(buttLay, Alignment.TOP_CENTER);
     
     NativeButton cancelButt = new NativeButton();
     cancelButt.setStyleName("m-cancelButton");
