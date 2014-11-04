@@ -1,4 +1,4 @@
-// Global variable overrides. Must be declared before importing Valo.
+m-card// Global variable overrides. Must be declared before importing Valo.
 
 // Defines the plaintext font size, weight and family. Font size affects general component sizing.
 //$v-font-size: 16px;
@@ -32,9 +32,9 @@
 @mixin mmowglimobile {
   @include touchkit;     // this made it work for me
   
-  .m-touchkit-blueicon .v-icon {
+.m-touchkit-blueicon .v-icon {
     color: #00a3e8;
-   }
+}
 .message-layout .m-actionplan-text {
 	color: #797b7f;
 	font-size: 14px;
@@ -45,7 +45,8 @@
     margin-right: -20px;*/
     margin-top: 5px;
 }
-span.m-actionplan-text-authors, .message-layout .m-actionplan-text-authors {
+span.m-actionplan-text-authors, .message-layout .m-actionplan-text-authors, 
+span.m-card-text-author, .message-layout .m-card-text-author {
 	color: #00a3e8;
 	font-weight: bold;
 	font-size: 14px;	
@@ -101,7 +102,14 @@ span.m-actionplan-text-authors, .message-layout .m-actionplan-text-authors {
   color: #5d5d5d;
   font-size: 14px;
 }
-  
+.message-button .m-bold14 {
+  font-weight:bold;
+  font-size: 14px;
+}
+.m-horiz-padding-3 {
+  padding-left: 3px;
+  padding-right: 3px;
+}
 .message-button .m-messageList-italic-bold {
   font-weight:bold;
   color: #5d5d5d;
@@ -141,7 +149,7 @@ span.m-actionplan-text-authors, .message-layout .m-actionplan-text-authors {
 
 
 .m-card-list .v-table-cell-wrapper {
-	height: 60px;
+	height: 80px;
 }
 .m-actionplan-list .v-table-cell-wrapper {
 	height: 105px;
@@ -178,8 +186,7 @@ span.m-actionplan-text-authors, .message-layout .m-actionplan-text-authors {
     border: 3px solid;
     border-radius: 12px;
     border-color: #888888;
-    background-color: #DCCBB0;
-    border-style: ridge;
+    background-color: #E1D5BB;
 }
 .m-userview-mid {
     border: 3px solid;
