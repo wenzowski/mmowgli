@@ -22,13 +22,9 @@
 
 package edu.nps.moves.mmowgliMobile;
 
-import java.io.IOException;
-import java.util.Enumeration;
-
-import javax.servlet.*;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.vaadin.addon.touchkit.server.TouchKitServlet;
 import com.vaadin.addon.touchkit.settings.TouchKitSettings;
@@ -130,16 +126,13 @@ public class MmowgliMobileVaadinServlet extends TouchKitServlet implements Sessi
   {
     event.getSession().addUIProvider(uiProvider);
   }
-
-
+  
   @Override
   public void sessionDestroy(SessionDestroyEvent event)
-  {
- 
+  { 
   }
-
-
-
+  
+/*
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
   {
@@ -267,6 +260,6 @@ public class MmowgliMobileVaadinServlet extends TouchKitServlet implements Sessi
     System.out.println("mobile log...........");
   }
 
-
+*/
 
 }

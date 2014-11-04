@@ -25,14 +25,17 @@ package edu.nps.moves.mmowgliMobile.ui;
 import java.text.SimpleDateFormat;
 
 import com.vaadin.addon.touchkit.ui.NavigationManager;
+import com.vaadin.addon.touchkit.ui.NavigationView;
 import com.vaadin.data.Container;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.themes.BaseTheme;
 
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
@@ -103,11 +106,19 @@ public class CardRenderer2 extends EntryRenderer2 //implements ClickListener
     img.setHeight("30px");
     horl.addComponent(img);
        
-    horl.addComponent(lbl=new Label(c.getAuthorName()));
-    lbl.setWidth("100%");
-    lbl.addStyleName("m-text-align-center");
-    horl.setComponentAlignment(lbl, Alignment.MIDDLE_CENTER);
-    horl.setExpandRatio(lbl, 1.0f);
+//    horl.addComponent(lbl=new Label(c.getAuthorName()));
+//    lbl.setWidth("100%");
+//    lbl.addStyleName("m-text-align-center");
+//    horl.setComponentAlignment(lbl, Alignment.MIDDLE_CENTER);
+//    horl.setExpandRatio(lbl, 1.0f);
+    
+    Button authButt = new MyButton(c.getAuthorName(),c,mView);    
+    authButt.setStyleName(BaseTheme.BUTTON_LINK);
+    authButt.setWidth("100%");
+    horl.addComponent(authButt);
+    horl.setComponentAlignment(authButt, Alignment.MIDDLE_CENTER);
+    horl.setExpandRatio(authButt, 1.0f);
+    
     horl.addComponent(lbl=new HtmlLabel(formatter.format(message.getTimestamp())));
     lbl.setWidth("115px");;
     lbl.addStyleName("m-text-align-right");
@@ -169,4 +180,36 @@ public class CardRenderer2 extends EntryRenderer2 //implements ClickListener
      }
      return btn;
   } 
+  
+  @SuppressWarnings("serial")
+  class MyButton extends Button implements ClickListener
+  {
+    private Card c;
+    private NavigationView view;
+    public MyButton (String title, Card c, NavigationView view)
+    {
+      super(title);
+      this.c = c;
+      this.view = view;
+      addClickListener(this);
+    }
+    @Override
+    public void buttonClick(ClickEvent event)
+    {
+      HSess.init();
+      String authorName = c.getAuthorName();
+      User u = User.getUserWithUserNameTL(authorName);
+      if(u == null)  {
+        System.out.println("*****DB erroror, no user exists with name = "+authorName);
+      }
+      else {
+        UserListEntry entry = new UserListEntry(u);
+        NavigationManager nav = view.getNavigationManager();
+        FullEntryView2 fev = new FullEntryView2();
+        fev.setEntry(entry, null);
+        nav.navigateTo(fev);
+      }
+      HSess.close();      
+    }
+  }
 }
