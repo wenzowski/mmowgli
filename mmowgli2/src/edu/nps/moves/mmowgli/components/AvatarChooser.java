@@ -25,9 +25,9 @@ package edu.nps.moves.mmowgli.components;
 import java.util.Collection;
 
 import com.vaadin.event.MouseEvents;
-import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.Avatar;
@@ -74,9 +74,9 @@ public class AvatarChooser extends Window implements MmowgliComponent
 
     this.initSelectedID = selectedId;
     
-    setWidth("750px");
-    setHeight("260px");
-    setResizable(false);
+    setWidth("745px");
+    setHeight("215px");
+    setResizable(true);
     setClosable(false);
   }
   
@@ -86,42 +86,17 @@ public class AvatarChooser extends Window implements MmowgliComponent
   {
     VerticalLayout mainLayout = new VerticalLayout();
     mainLayout.setSizeFull();
-    mainLayout.setMargin(true);
+    mainLayout.setMargin(true); //test
     mainLayout.setSpacing(true);
-    
-    setContent(mainLayout);
-    Panel p = new Panel();
-
-    p.setWidth("100%");
-    p.setHeight("150px");
-    mainLayout.addComponent(p);
-    
-    butts = new HorizontalLayout();
-    butts.setWidth("99%");
-    butts.setSpacing(true);
-    mainLayout.addComponent(butts);
-    mainLayout.setComponentAlignment(butts, Alignment.TOP_RIGHT);
-
     MediaLocator medLoc = Mmowgli2UI.getGlobals().getMediaLocator();
-    Label sp;
-    butts.addComponent(sp = new Label());
-    sp.setWidth("1px");
-    butts.setExpandRatio(sp, 1.0f);
-    
-    NativeButton cancelButt = new NativeButton();
-    medLoc.decorateCancelButton(cancelButt);
-    butts.addComponent(cancelButt);
-    butts.setComponentAlignment(cancelButt,Alignment.MIDDLE_CENTER);
-    
-    NativeButton selectButt = new NativeButton();
-    medLoc.decorateSelectButton(selectButt);
-    butts.addComponent(selectButt);
-    butts.setComponentAlignment(selectButt,Alignment.MIDDLE_CENTER);
+    Label sp;  
+    setContent(mainLayout);
 
-    imgLay = new HorizontalLayout();
-    p.setContent(imgLay);
-    imgLay.setHeight("105px");
+    Panel p = new Panel(imgLay=new HorizontalLayout());
     imgLay.setSpacing(true);
+    
+    p.setWidth("100%");
+    mainLayout.addComponent(p);
     
     Collection<?> lis = Avatar.getContainer().getItemIds();
     avIdArr = new Object[lis.size()];
@@ -133,23 +108,45 @@ public class AvatarChooser extends Window implements MmowgliComponent
       if(initSelectedID == null)
         initSelectedID = id; // sets first one
       Avatar a = Avatar.getTL(id);
-      Embedded em = new Embedded(null, medLoc.locate(a.getMedia()));
+      Image em = new Image(null, medLoc.locate(a.getMedia()));
       em.setWidth("95px");
       em.setHeight("95px");
       em.addClickListener(new ImageClicked());
+
       if(id.equals(initSelectedID)) {
         em.addStyleName("m-orangeborder5");
         lastSel = em;
       }
       else
-        em.addStyleName("m-greyborder5"); //m-orangeborder5
+        em.addStyleName("m-greyborder5");
       imgLay.addComponent(em);
     }
     
-    sp = new Label();
-    mainLayout.addComponent(sp = new Label());
-    sp.setHeight("1px");
+    butts = new HorizontalLayout();
+    butts.setWidth("100%");
+    butts.setSpacing(true);
+    mainLayout.addComponent(butts);
 
+
+    butts.addComponent(sp = new Label());
+    sp.setWidth("1px");
+    butts.setExpandRatio(sp, 1.0f);
+    
+    NativeButton cancelButt = new NativeButton();
+    medLoc.decorateCancelButton(cancelButt);
+    butts.addComponent(cancelButt);
+    
+    NativeButton selectButt = new NativeButton();
+    medLoc.decorateSelectButton(selectButt);
+    butts.addComponent(selectButt);
+    
+    butts.addComponent(sp = new Label(""));
+    sp.setWidth("20px");
+    
+    mainLayout.addComponent(sp = new Label(""));
+    sp.setHeight("1px");
+    mainLayout.setExpandRatio(sp, 1.0f);;
+    
     cancelButt.addClickListener(new ClickListener()
     {
       @Override
@@ -170,7 +167,7 @@ public class AvatarChooser extends Window implements MmowgliComponent
     });
   }
   
-  private Embedded lastSel = null;
+  private Image lastSel = null;
   
   @SuppressWarnings("serial")
   class ImageClicked implements MouseEvents.ClickListener
@@ -179,7 +176,7 @@ public class AvatarChooser extends Window implements MmowgliComponent
     @MmowgliCodeEntry
     public void click(com.vaadin.event.MouseEvents.ClickEvent event)
     {
-      Embedded emb = (Embedded)event.getSource();
+      Image emb = (Image)event.getSource();
       int idx = 0;
 
       for(int x=0;x<avIdArr.length;x++)
