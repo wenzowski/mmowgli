@@ -32,7 +32,8 @@ Thread-Local Session Model
 --------------------------
 Database access through Hibernate in this version of Mmowgli is handled through a static (i.e., jvm-wide) class, HSess.java.
 This class uses Java's "ThreadLocal" feature to store a single Hibernate session instance for used by any code executing in
-the context of the chosen thread.  It is used in the following way:
+the context of the chosen thread.  It is thread-safe, so other user sessions running in the same JVM but different threads
+do not conflict.  It is used in the following way:
 
 1.  At the entry points to mmowgli code from Vaadin ("system") code, the HSess.init() method is called to set up a session.
 2.  Any mmowgli code running from that point on in the same thread may use the session by retrieving it through the Hsess.get() method.
@@ -43,6 +44,18 @@ In those cases, Object sessionKey = HSess.checkInit() may be used to conditional
 HSess.checkClose(sessionKey) to conditionally close the session.
 
 Two conventions are available to help with session accounting:
-1.  If a mmowgli method anywhere expects a thread-local session to exist, its name ends with "TL" (for "thread-local").
+1.  If a mmowgli method anywhere expects a thread-local session to exist, its name ends with "TL" (for "thread-local"). This means code
+    in the method may use HSess.get() to get a session assuming that a caller method has already done HSess.init().  It also means that
+    code in the method will and MUST not do a HSess.close(), which is also assumed to be done by the caller.
 2.  There are "marker" annotations in the edu.nps.moves.mmowgli.markers package to annotate methods where a session is used. (The use
-    of these is not yet consistent throughout the code.)
+    of these is not yet consistent throughout the mmowgli code.)
+    
+"Out-of-band" methods
+---------------------
+In previous mmowgli versions which used the "session-per-event" hooks to establish Hibernate sessions, application code which ran from a
+background thread or handled JMS message reception and needed to use the game database through Hibernate had to "manually" handle session
+creation and closing.  Our naming convention for those method involved appending "oob" to the method name.  "Out-of-band" is a term from TCP
+referring to meta-data which is sent outside of a connection, and the term is uses in a similar way here.
+
+With the thread-local method of Hibernate session management, there is no distinction between oob and other methods as far as sessions are
+concerted.  All oob methods use the TL mechanism directly or through associated methods.
