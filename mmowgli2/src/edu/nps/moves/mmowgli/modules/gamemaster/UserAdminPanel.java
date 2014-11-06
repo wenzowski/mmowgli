@@ -174,14 +174,15 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
 
     tableVLayout.addComponent(lab = new Label());
     lab.setHeight("20px");
-    tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;color:red;'>" + WARNING_LABEL + "</span>"));
+    tableVLayout.addComponent(lab=new HtmlLabel("<span style='margin-left:40px;color:red;'>" + WARNING_LABEL + "</span>"));
+    lab.addStyleName("m-text-align-center");
     tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberUsersLabelTL() + "</span>"));
     tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberOnlineLabel() + "</span>"));
     tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberGameMastersTL() + "</span>"));
     tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>" + getNumberCardsLabelTL() + "</span>"));
     tableVLayout.addComponent(new HtmlLabel("<span style='margin-left:40px;'>Double click a row to edit</span>"));
 
-    tableVLayout.addComponent(lab = new HtmlLabel("<center><b><span style='font-size:175%'>User Administration</span></b></center>"));
+    tableVLayout.addComponent(lab = new HtmlLabel("<center><b><span style='font-size:175%'>Player Administration</span></b></center>"));
     
     HorizontalLayout srchHL = buildSearchRow();
     tableVLayout.addComponent(srchHL);
@@ -247,14 +248,14 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       if (srchStr.length() <= 0) { // null search
         tableContainer.removeComponent(table);
         table = createTable(lastTableFiller=new SimpleTableFiller());
-        table.setCaption("User Adminstration");
+        table.setCaption("Player Adminstration");
         addTableToLayout(uid);
         return;
       }
 
       tableContainer.removeComponent(table);
       table = createTable(lastTableFiller=new DefaultTableFiller(dbField,srchStr));
-      table.setCaption("User Adminstration");
+      table.setCaption("Player Adminstration");
       addTableToLayout(uid);
     } 
   }
