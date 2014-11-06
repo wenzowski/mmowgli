@@ -402,10 +402,15 @@ public class Card implements Serializable
     MovePhase thisPhase = thisMove.currentMovePhase;
     int thisMoveNum = thisMove.getNumber();
     int cardMoveNum = card.getCreatedInMove().getNumber();
-    // boolean isHidden = CardMarkingManager.isHidden(card);  too expensive, use card hidden bit instead
-    boolean isHidden = card.isHidden();
+
+    boolean isHidden = card.isHidden();    // boolean isHidden = CardMarkingManager.isHidden(card);  too expensive, use card hidden bit instead
     //boolean canSeeCurrent = !MovePhase.isGuestAndIsPreparePhase(me) || (thisMoveNum == 1);  // last clause added 6 Sep 2013
-    boolean canSeeCurrent =  me.isAdministrator() || me.isGameMaster() || (( thisMoveNum == 1 || ! thisPhase.isPreparePhase()) && !isHidden);
+    boolean canSeeCurrent =  me.isAdministrator() ||
+                             me.isGameMaster() ||
+                             (( thisMoveNum == 1 || ! thisPhase.isPreparePhase()) && !isHidden);
+    if(me.isViewOnly() && isHidden) // never let guests see hidden cards
+      canSeeCurrent = false;
+    
     boolean canSeePast = me.isAdministrator() || (Game.get(sess).isShowPriorMovesCards() && !isHidden);
     
     if(cardMoveNum == thisMoveNum && canSeeCurrent)
