@@ -93,6 +93,7 @@ public class MessagingManager implements BroadcastListener
 
   public void sendSessionMessage(MMessagePacket message)
   {
+    MSysOut.println("MessagingManager.sendSessionMessage() typ="+message.msgType);
     message.session_id = ui.getUserSessionUUID();
     Broadcaster.broadcast(message);
   }
@@ -103,6 +104,7 @@ public class MessagingManager implements BroadcastListener
   @Override
   public void handleIncomingSessionMessage(final MMessagePacket message)
   {
+    MSysOut.println("MessagingManager.handleIncomingSessionMessage() typ="+message.msgType);    
     // If this message is from this session, we know we're in the session thread
     // try to deliver the message to us directly  
 
@@ -114,7 +116,6 @@ public class MessagingManager implements BroadcastListener
       deliverInLine(message);
     }
     else { */
-      MSysOut.println("MessagingManager"+myseq+" queing for polling or pushing");
       messageQueue.add(message);
 //   }
   }
@@ -130,7 +131,7 @@ public class MessagingManager implements BroadcastListener
     else
       MSysOut.println("MessagingManager"+myseq+": no listeners");
   }
- *? 
+ */
   /*
    * This is our internal thread which serializes handling of messages for this session when received from another session and we aren't in Vaadin thread
    */
@@ -141,10 +142,7 @@ public class MessagingManager implements BroadcastListener
       while (alive) {
         try {
           Object message = messageQueue.take();
-
-          MSysOut.println("Calling ui.access on "+ui.getClass().getSimpleName()+" "+ui.hashCode());
           ui.access(new MessageRunner(message)); // this makes sure our access of the UI does not conflict with normal Vaadin
-          MSysOut.println("Out of ui.access on "+ui.getClass().getSimpleName()+" "+ui.hashCode());
         }
         catch (InterruptedException | UIDetachedException ex) {
           System.err.println(ex.getClass().getSimpleName()+" in MessagingManager.queueReader" + myseq);
@@ -174,15 +172,9 @@ public class MessagingManager implements BroadcastListener
     {
       try {
         boolean push = false;
-        char typ = ((MMessagePacket) msg).msgType;
-        MSysOut.println("" + myseq + "MessageRunner(through UI.access()) got mess " + typ);
         if (!listenersInThisSession.isEmpty()) {
           HSess.init();
-          MSysOut.println("" + myseq + "MessageRunner(through UI.access()): delivering " + typ + " to local listeners");
-
           for (MMMessageListener lis : listenersInThisSession) {
-            MSysOut.println("" + myseq + "MessagingRunner(through UI.access()).deliver " + typ +
-                            " to " + lis.getClass().getSimpleName() + " " + lis.hashCode());
             if (lis.receiveMessageTL((MMessagePacket) msg))
               push = true;
           }
@@ -198,10 +190,6 @@ public class MessagingManager implements BroadcastListener
             }
           }
         }
-        else
-          MSysOut.println("MessageManager: no listeners");
-
-        MSysOut.println("" + myseq + "MessageRunner(through UI.access() exit, typ " + typ + ")");
       }
       catch (Throwable t) {
         t.printStackTrace();
