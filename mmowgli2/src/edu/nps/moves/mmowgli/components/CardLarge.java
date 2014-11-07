@@ -354,7 +354,7 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     if(!id.equals(cardId))  //; the card should be for us, but just to make sure
       return;
 
-    System.out.println("**** in CardLarge.update_oobTL(), "+id.toString()+" "+cardId.toString());
+    MSysOut.println("CardLarge.update_oobTL(), "+id.toString()+" "+cardId.toString());
     Session sess = HSess.get();
     
     Card c = DBGet.getCardFreshTL(id);
