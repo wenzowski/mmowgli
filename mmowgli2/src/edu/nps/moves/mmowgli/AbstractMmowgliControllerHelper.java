@@ -229,8 +229,6 @@ public class AbstractMmowgliControllerHelper
     {
       public boolean handle(UI ui, Object uId)
       {
-        MSysOut.println("AbstractMmowgliControllerHelper.movePhaseUpdated_oob.handle() UI = "+ui.getClass().getSimpleName()+" "+ui.hashCode());
-        
         boolean push=false;
         
         if(((Mmowgli2UI)ui).movePhaseUpdatedOobTL((Serializable)uId))
@@ -1217,5 +1215,12 @@ public class AbstractMmowgliControllerHelper
     notif.setHtmlContentAllowed(true);
     notif.setDelayMsec(-1);  // user must click
     notif.show(Page.getCurrent());   
+  }
+
+  public void handleCreateActionPlan(Button button, Object cardRootId)
+  {
+    Window subWin = new CreateActionPlanWindow(null,cardRootId);
+    UI.getCurrent().addWindow(subWin);
+    subWin.center();   
   }
 }
