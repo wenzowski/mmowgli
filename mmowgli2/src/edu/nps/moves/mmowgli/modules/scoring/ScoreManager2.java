@@ -64,7 +64,7 @@ public class ScoreManager2
   private float userActionPlanCommentPoints = 0.0f;
   private float userSignupAnswerPoints;
   
-  private String marker = "=======>>";
+  private String marker = ""; //"=======>>";
   
   // Called by code which has just created and saved to db.
   // This call updates author Users in db.
