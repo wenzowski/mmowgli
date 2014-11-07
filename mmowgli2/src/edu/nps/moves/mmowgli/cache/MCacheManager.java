@@ -398,7 +398,7 @@ public class MCacheManager implements InterTomcatReceiver
   @Override
   public boolean handleIncomingTomcatMessageTL(MMessagePacket packet)
   {
-    MSysOut.println("MCacheManager.handleIncomingTomcatMessageTL()");
+    MSysOut.println("MCacheManager.handleIncomingTomcatMessageTL(), type = "+packet.msgType);
     switch (packet.msgType) {
       case NEW_CARD:
       case UPDATED_CARD:
