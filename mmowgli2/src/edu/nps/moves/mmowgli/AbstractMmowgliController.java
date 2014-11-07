@@ -346,6 +346,11 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         Mmowgli2UI.getAppUI().setFrameContent(lMap);
         lMap.initGuiTL();
   
+      case CARDCREATEACTIONPLANCLICK:
+        Object cardId = butt.getParam();
+        helper.handleCreateActionPlan(event.getButton(), cardId);
+        break;
+        
       case PLAYIDEACLICK:
       case CALLTOACTIONCLICK:
       case SHOWUSERPROFILECLICK:
@@ -473,7 +478,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
   @Override
   public boolean receiveMessageTL(MMessagePacket pkt)
   {
-    MSysOut.println("AbstractMmowgliController receiveMessage(pkt,sessMgr)");
+    MSysOut.println("AbstractMmowgliController receiveMessage(pkt) type= "+pkt.msgType);
     try {
     switch(pkt.msgType) {
       case GAMEEVENT:
