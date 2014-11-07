@@ -46,7 +46,8 @@ HSess.checkClose(sessionKey) to conditionally close the session.
 Two conventions are available to help with session accounting:
 1.  If a mmowgli method anywhere expects a thread-local session to exist, its name ends with "TL" (for "thread-local"). This means code
     in the method may use HSess.get() to get a session assuming that a caller method has already done HSess.init().  It also means that
-    code in the method will and MUST not do a HSess.close(), which is also assumed to be done by the caller.
+    code in the method will and MUST not do a HSess.close(), which is also assumed to be done by the caller.  The rule is that any code
+    calling a TL method must insure that HSess.init() has been called.
 2.  There are "marker" annotations in the edu.nps.moves.mmowgli.markers package to annotate methods where a session is used. (The use
     of these is not yet consistent throughout the mmowgli code.)
     
