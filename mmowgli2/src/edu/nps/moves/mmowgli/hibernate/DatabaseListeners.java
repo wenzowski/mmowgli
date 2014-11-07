@@ -101,7 +101,7 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-      MSysOut.println("Save db listener");
+      if(enabled) MSysOut.println(">>> Save db listener <<<");
       super.onSaveOrUpdate(event); // default behavior first
 /*      if (!enabled)
         return;
@@ -152,7 +152,7 @@ public class DatabaseListeners
       if(msgTyp != null)
         messageOut(event, msgTyp, msg);
 */
-      MSysOut.println("Out of save db listener");
+      if(enabled) MSysOut.println("Out of save db listener");
     }
   }
   @SuppressWarnings("serial")
@@ -163,7 +163,7 @@ public class DatabaseListeners
     @Override
     public void onPostInsert(PostInsertEvent event)
     {
-      MSysOut.println("PostInsert db listener");
+      MSysOut.println(">>> PostInsert db listener type = "+event.getEntity().getClass().getSimpleName()+" <<<");
 
       if (!enabled)
         return;
@@ -172,25 +172,21 @@ public class DatabaseListeners
       String msg = "";
 
       if (obj instanceof Card) {
-        MSysOut.println("postinsert card");
         msgTyp = NEW_CARD;
         msg = "" + ((Card) obj).getId();
         // DBGet.cacheCard((Card)obj);
         mcache.putCard((Card) obj);
       }
       else if (obj instanceof User) {
-        MSysOut.println("postinsert user");
         msgTyp = NEW_USER;
         msg = "" + ((User) obj).getId();
         DBGet.cacheUser((User) obj);
       }
       else if (obj instanceof ActionPlan) {
-        MSysOut.println("postinsert ap");
         msgTyp = NEW_ACTIONPLAN;
         msg = "" + ((ActionPlan) obj).getId();
       }
       else if (obj instanceof GameEvent) {
-        MSysOut.println("postinsert ge");
         msgTyp = GAMEEVENT;
         GameEvent ge = (GameEvent) obj;
         msg = "" + ge.getId() + "\t" + ge.getEventtype().toString() + "\t" + ge.getParameter();
@@ -198,7 +194,6 @@ public class DatabaseListeners
       }
 
       else if (obj instanceof Message) {
-        MSysOut.println("postinsert message");
         Message m = (Message) obj;
         if (m.getToUser() == null) // means its a comment on an Action Plan, let
                                    // the AP update handle it
@@ -218,8 +213,7 @@ public class DatabaseListeners
       if (msgTyp != null)
         messageOut(event, msgTyp, msg);
 
-      MSysOut.println("Out of post insert db listener");
-
+      MSysOut.println(">>> Out of post insert db listener <<<");
     }
 
     @Override
@@ -236,7 +230,7 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-      MSysOut.println("Update db listener");
+      if(enabled) MSysOut.println(">>> Update db listener <<<");
       super.onSaveOrUpdate(event); // default behavior first
    /*   if(!enabled)
         return;
@@ -291,7 +285,7 @@ public class DatabaseListeners
       if(msgTyp != null)
         messageOut(event,msgTyp,msg);
   */    
-      MSysOut.println("Out of update db listener");
+      if(enabled) MSysOut.println(">>> Out of update db listener <<<");
     }
   }
   
@@ -302,7 +296,7 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
   @Override
   public void onPostUpdate(PostUpdateEvent event)
   {
-      MSysOut.println("Postupdate db listener");
+      if(enabled) MSysOut.println(">>> Postupdate db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<");
 
       if(!enabled)
         return;
@@ -312,70 +306,59 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
       Character msgTyp = null;
       String msg = "";
       if (obj instanceof Card) {
-        MSysOut.println("postupdate card");
         msgTyp = UPDATED_CARD;
         msg = "" + ((Card) obj).getId();
         mcache.putCard((Card)obj);
         //DBGet.cacheCard((Card)obj);
      }
       else if (obj instanceof User) {
-        MSysOut.println("postupdate user");
         msgTyp = UPDATED_USER;
         msg = "" + ((User) obj).getId();
         DBGet.cacheUser((User)obj);
       }
       else if (obj instanceof ActionPlan) {
-        MSysOut.println("postupdate ap***********************************************************");
         msgTyp = UPDATED_ACTIONPLAN;
         msg = "" + ((ActionPlan) obj).getId();
       }
       else if (obj instanceof ChatLog) {
-        MSysOut.println("postupdate chatlog");
         msgTyp = UPDATED_CHAT;
         msg = "" + ((ChatLog) obj).getId();
       }
       else if (obj instanceof Media) {
-        MSysOut.println("postupdate media");
         msgTyp = UPDATED_MEDIA;
         msg = "" + ((Media) obj).getId();
       }
       else if (obj instanceof Game) {
-        MSysOut.println("postupdate game");
         msgTyp = UPDATED_GAME;
         msg = "";
       }
       else if(obj instanceof CardType) {
-        MSysOut.println("postupdate cardtype");
         CardTypeManager.updateCardType((CardType)obj);
         msgTyp = UPDATED_CARDTYPE;
         msg = ""+((CardType)obj).getId();
       }
       else if(obj instanceof Move) {
-        MSysOut.println("postupdate move");
         msgTyp = UPDATED_MOVE;
         msg = "" + ((Move) obj).getId();        
       }
       else if(obj instanceof MovePhase) {
-        MSysOut.println("postupdate movephase");
         msgTyp = UPDATED_MOVEPHASE;
         msg = "" + ((MovePhase) obj).getId();
       }
       else {
         MSysOut.println("Post update listener didn't understand "+obj.getClass().getSimpleName());
-        //System.err.println("Unprocessed db update in ApplicationMaster: " + obj.getClass().getSimpleName());
       }
       if(msgTyp != null)
         messageOut(event,msgTyp,msg);
       
-      MSysOut.println("Out of postupdate db listener");    
+      MSysOut.println(">>> Out of postupdate db listener <<");    
   }
 
   @Override
   public boolean requiresPostCommitHanding(EntityPersister persister)
   {
     return true;
-  }
-   
+  }   
  }
   
   @SuppressWarnings("serial")
@@ -386,7 +369,7 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
     @Override
     public void onDelete(DeleteEvent event) throws HibernateException
     {
-      MSysOut.println("Delete db listener");
+      if(enabled) MSysOut.println(">>> Delete db listener <<<");
       super.onDelete(event);
       if(!enabled)
         return;
@@ -397,6 +380,7 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
       if(obj instanceof User)
         //todo V7 convirm mCacheManager().removeUser((Long)((User)obj).getId());
         mcache.removeUser((Long)((User)obj).getId());
+      MSysOut.println(">>> Out of delete db listener <<<");
     }
   }
   
