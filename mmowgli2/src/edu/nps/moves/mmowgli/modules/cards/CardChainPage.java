@@ -32,6 +32,7 @@ import java.net.URLEncoder;
 import java.util.*;
 
 import org.hibernate.Session;
+import org.vaadin.dialogs.ConfirmDialog;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -122,9 +123,9 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     User me = DBGet.getUserTL(globs.getUserID());
     
     if(c == null)
-      System.err.println("ERROR!!!! Once again, null card in CardChainPage.initGui(cardId = "+cardId+")");
+      System.err.println("ERROR!!!! Null card in CardChainPage.initGui(cardId = "+cardId+")");
     if(me == null)
-      System.err.println("ERROR!!!! Once again, null user in CardChainPage.initGui(userId = "+globs.getUserID()+")");
+      System.err.println("ERROR!!!! Null user in CardChainPage.initGui(userId = "+globs.getUserID()+")");
 
     if(c.isHidden() && !me.isAdministrator() && !me.isGameMaster()) {
       // This case should only come into play when a non-gm user is showing this page
@@ -264,7 +265,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
         return true;
     return false;      
   }
-
+  
   @SuppressWarnings("serial")
   private class MarkingChangeListener implements ValueChangeListener
   {
@@ -272,14 +273,14 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     @MmowgliCodeEntry
     @HibernateOpened
     @HibernateClosed
-    public void valueChange(ValueChangeEvent event)
+    public void valueChange(final ValueChangeEvent event)
     {
       HSess.init();
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       Property<?> prop = event.getProperty();
       CardMarking cm = (CardMarking)prop.getValue();
-      Card card = DBGet.getCardFreshTL(cardId);
-      
+      final Card card = DBGet.getCardFreshTL(cardId);
+
       if(cm == null) { // markings have been cleared
         if(card.getMarking()!=null && card.getMarking().size()>0) {
           globs.getScoreManager().cardMarkingWillBeClearedTL(card);   // call this before hitting db
@@ -290,15 +291,59 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       }
       else {
         cm = CardMarking.mergeTL(cm);
-        globs.getScoreManager().cardMarkingWillBeSetTL(card,cm);  // call this before hitting db
-        card.getMarking().clear();        // Only one marking at a time
-        card.getMarking().add(cm);
-        card.setHidden(CardMarkingManager.isHiddenMarking(cm));
-        Card.updateTL(card);
+        boolean needWarning = (!card.getFollowOns().isEmpty() && CardMarkingManager.isHiddenMarking(cm));
+        if(!needWarning) {
+          setMarkingsTL(card,cm);
+//          globs.getScoreManager().cardMarkingWillBeSetTL(card,cm);  // call this before hitting db
+//          card.getMarking().clear();        // Only one marking at a time
+//          card.getMarking().add(cm);
+//          card.setHidden(CardMarkingManager.isHiddenMarking(cm));
+//          Card.updateTL(card);
+        }
+        else {
+          ConfirmDialog.show(CardChainPage.this.getUI(), "Child cards will also be hidden.  Continue?",
+              new ConfirmDialog.Listener() {                          
+                @Override
+                public void onClose(ConfirmDialog dialog)
+                {
+                  if(dialog.isConfirmed()) {
+                    HSess.init();
+                    CardMarking cmm = CardMarking.mergeTL((CardMarking)event.getProperty().getValue());
+                    Card c;
+                    setMarkingsTL(c=DBGet.getCardFreshTL(cardId),cmm);
+                    hideAllChildrenTL(c);
+                    HSess.close();
+                  }
+                }
+          });
+        }
       }
       GameEventLogger.cardMarkedTL(cardId,Mmowgli2UI.getGlobals().getUserID());
       HSess.close();
     }
+  }
+  private void hideAllChildrenTL(Card c)
+  {
+    c.getMarking().clear();
+    c.getMarking().add(CardMarkingManager.getHiddenMarking());
+    c.setHidden(true);
+    Card.updateTL(c);
+    
+    Set<Card> childs = c.getFollowOns();
+    Iterator<Card> itr = childs.iterator();
+    while(itr.hasNext()) {
+      Card ch = itr.next();
+      hideAllChildrenTL(ch); // recurse
+    }    
+  }
+  
+  private void setMarkingsTL(Card card, CardMarking cm)
+  {
+    Mmowgli2UI.getGlobals().getScoreManager().cardMarkingWillBeSetTL(card,cm);  // call this before hitting db
+    card.getMarking().clear();        // Only one marking at a time
+    card.getMarking().add(cm);
+    card.setHidden(CardMarkingManager.isHiddenMarking(cm));
+    Card.updateTL(card);    
   }
   
   @SuppressWarnings("serial")
@@ -415,7 +460,6 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       VerticalLayout spacerVL = new VerticalLayout();
       topHL.addComponent(spacerVL);
       topHL.setExpandRatio(spacerVL, 1.0f);
-      spacerVL.setHeight("100%");
       spacerVL.setWidth("100%");
       parentSumm=CardSummary.newCardSummarySmallTL(parent.getId());
       spacerVL.addComponent(parentSumm);
@@ -672,11 +716,11 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // read the mcast, but that's clumsy. It doesn't see to cause a problem here. Keep a lookout.
     // We might have fixed this with the synchro in the mcast
 
-    System.out.println("******In CardChainPage.cardUpdated_oobTL "+externCardId.toString()+" "+cardId.toString());
     if (externCardId.equals(cardId)) {   // Don't do this: externCardId == cardId  !
       // game masters can change text and marking
-
-      Card c = DBGet.getCardFreshTL(cardId);
+      Card c = DBGet.getCardTL(cardId); //DBGet.getCardFreshTL(cardId); test..cache should have it, maybe not db yet
+      c = Card.mergeTL(c);
+      MSysOut.println("In CardChainPage.cardUpdated_oobTL "+externCardId.toString()+" "+cardId.toString()+" hidden = "+c.isHidden());
       loadMarkingPanel_oobTL(c);
       cardLg.update_oobTL(cardId);
       updateFollowers_oobTL(externCardId);
