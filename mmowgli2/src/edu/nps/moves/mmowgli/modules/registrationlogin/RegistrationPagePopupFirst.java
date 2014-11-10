@@ -37,7 +37,6 @@ import org.jasypt.digest.StandardStringDigester;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
