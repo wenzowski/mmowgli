@@ -31,7 +31,6 @@ import java.util.List;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.VaadinServletService;
 import com.vaadin.shared.ui.BorderStyle;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
