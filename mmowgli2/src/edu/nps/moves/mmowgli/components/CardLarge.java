@@ -203,6 +203,7 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
         avatarIcon = new Embedded(null, avRes);
         avatarIcon.setWidth(CARDBIG_ICON_W);
         avatarIcon.setHeight(CARDBIG_ICON_H);
+        avatarIcon.addStyleName("m-cursor-pointer");
         avatarIcon.setDescription(userProfile_tt);
         addComponent(avatarIcon, CARDBIG_ICON_POS);
       }
@@ -223,7 +224,6 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     dateLab.setWidth(CARDBIG_DATE_W);
     dateLab.setHeight(CARDBIG_DATE_H);
     dateLab.addStyleName("m-cardlarge-user");
-    dateLab.addStyleName("m-cursor-pointer");
     dateLab.setDescription(date_tt);
     addComponent(dateLab,CARDBIG_DATE_POS);
     
@@ -238,25 +238,39 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
       addComponent(moveLab,"top:300px;left:300px");
     }
      
-    // Listen for layout click events
-     wrapper.addLayoutClickListener(new LayoutClickListener()
+    wrapper.addLayoutClickListener(new LayoutClickListener()
     {
       @MmowgliCodeEntry
-      @HibernateOpened
-      @HibernateRead
-      @HibernateClosed
-      public void layoutClick(LayoutClickEvent event)
+       public void layoutClick(LayoutClickEvent event)
       {
-        HSess.init();
         Component c = event.getChildComponent();
-        Card card = DBGet.getCardTL(cardId);    // bring up-to-date in this session
-        if (c == uname) {
-          AppEvent evt = new AppEvent(CARDAUTHORCLICK, CardLarge.this, card.getAuthor().getId());
-          Mmowgli2UI.getGlobals().getController().miscEventTL(evt);
-        }
-        HSess.close();
+        if(c == uname)
+          goToUserProfilePage();
       }
     });
+    
+    addLayoutClickListener(new LayoutClickListener()
+    {
+      @MmowgliCodeEntry
+      public void layoutClick(LayoutClickEvent event)
+      {
+        Component c = event.getChildComponent();
+        if(c == avatarIcon)
+          goToUserProfilePage();
+      }     
+    });
+  }
+  
+  @HibernateOpened
+  @HibernateRead
+  @HibernateClosed
+  private void goToUserProfilePage()
+  {
+    HSess.init();
+    Card card = DBGet.getCardTL(cardId);    // bring up-to-date in this session
+    AppEvent evt = new AppEvent(CARDAUTHORCLICK, CardLarge.this, card.getAuthor().getId());
+    Mmowgli2UI.getGlobals().getController().miscEventTL(evt);
+    HSess.close();   
   }
   
   private void showMarking_oob(Card card)
