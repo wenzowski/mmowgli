@@ -28,7 +28,6 @@ import java.net.URL;
 
 import com.vaadin.server.ExternalResource;
 import com.vaadin.shared.ui.BorderStyle;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
