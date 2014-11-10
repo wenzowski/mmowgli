@@ -112,7 +112,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
           ap = ActionPlan.mergeTL(ap); // dif session
         }
         if(ap == null) {
-          System.err.println("ACTIONPLANSHOWCK=LICK with invalid id: "+param);
+          System.err.println("ACTIONPLANSHOWCLICK with invalid id: "+param);
           break;
         }
         ui.navigateTo(new AppEvent(mEv,ui,param));
@@ -137,7 +137,11 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       case SHOWUSERPROFILECLICK:
         ui.navigateTo(new AppEvent(mEv,ui,param));
         break;
-        
+      
+      case CARDAUTHORCLICK:
+        ui.navigateTo(new AppEvent(MmowgliEvent.SHOWUSERPROFILECLICK,ui,param));
+        break;
+       
       default:
         MSysOut.println("TODO, AbstractMmowgliController.miscEvent(): "+mEv.toString());
     }    
