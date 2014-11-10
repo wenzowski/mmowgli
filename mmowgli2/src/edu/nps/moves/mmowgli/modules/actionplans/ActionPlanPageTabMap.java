@@ -204,7 +204,7 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
     rightLay.addComponent(savePanel);
     rightLay.setComponentAlignment(savePanel, Alignment.TOP_CENTER);
     savePanel.setVisible(editingOK);
-    MapSaveListener msLis = new MapSaveListener();
+   // MapSaveListener msLis = new MapSaveListener();
   //  savePanel.setClickHearers(msLis.mapLocListener,msLis.mapMarkerListener,msLis.cancelListener);
     
   /*  DragAndDropWrapper ddw = new DragAndDropWrapper(googleMapWidget);
