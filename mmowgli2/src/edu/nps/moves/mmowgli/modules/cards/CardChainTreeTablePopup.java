@@ -63,6 +63,7 @@ public class CardChainTreeTablePopup extends MmowgliDialog2 implements ClickList
     super(null);
     setWidth("600px");
     setHeight("400px");
+    addStyleName("m-noborder"); // V7 difference
     
     super.initGui();
     selectedId = tempSelectedId = rootId;
