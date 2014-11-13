@@ -143,7 +143,8 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
 
     chooser = new AvatarPanel(null); // no initselected
     chooser.setWidth("500px"); //"470px"); // doesn't work well w/ relative width 470=min for displaying 4 across of size below
-    chooser.setHeight("130px"); // 125 enough for mac to show complete image plus bottom scrollbar, IE 7 will ALWAYS show vert scroller
+  //  chooser.setHeight("130px"); // 125 enough for mac to show complete image plus bottom scrollbar, IE 7 will ALWAYS show vert scroller
+    // todo, check commented-out line on windows...works well on new macs.
     chooser.initGui();
     contentVLayout.addComponent(chooser);
     contentVLayout.setComponentAlignment(chooser, Alignment.TOP_CENTER);
