@@ -371,7 +371,20 @@ div .m-textarea-greyborder, .m-greyborder {
     width:202px;
     height:50px;
   }
-
+  .v-nativebutton-m-rejectNoThanksButton {
+    background: transparent  no-repeat;
+    background-image: url('#{$imageRepo}/rejectNoThanksButt188w37h.png');
+    border-style:none;
+    width:188px;
+    height:37px;
+  }
+  .v-nativebutton-m-rejectNoThanksButton:hover {
+    background: transparent  no-repeat;
+    background-image: url('#{$imageRepo}/rejectNoThanksButtHover188w37h.png');
+    border-style:none;
+    width:188px;
+    height:37px;
+  }
   .m-calltoaction {
     background: transparent no-repeat;
     background-image: url('#{$imageRepo}/callToActionBackground.png');
@@ -510,7 +523,13 @@ div .m-textarea-greyborder, .m-greyborder {
 .v-nativebutton-m-continueButton:focus {
   outline:0;
 }
-
+div .v-nativebutton-m-signin-forgotButton {
+  background: transparent;
+  border-style: none;
+  color: #3987c5;
+  height: 18px;
+  margin-right: 10px;
+} 
 .v-nativebutton-m-cancelButton {
     background: transparent no-repeat;
     background-image:url('#{$imageRepo}/cancelButt89w38h.png');
