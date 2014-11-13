@@ -48,7 +48,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  * @version $Id$
  */
 
-@WebServlet(value = "/handheld/*", asyncSupported = true, loadOnStartup=1)
+@WebServlet(value = "/mobile/*", asyncSupported = true, loadOnStartup=1)
 @VaadinServletConfiguration(productionMode = false, ui = MmowgliMobileUI.class)
 public class MmowgliMobileVaadinServlet extends TouchKitServlet implements SessionInitListener, SessionDestroyListener
 {
