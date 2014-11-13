@@ -28,6 +28,9 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
+import edu.nps.moves.mmowgli.db.GameLinks;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+
 /**
  * NotAllowedPopover.java created on Oct 28, 2014
  * 
@@ -68,22 +71,13 @@ public class NotAllowedPopover extends Popover
       @Override
       public void buttonClick(ClickEvent event)
       {
-        UI.getCurrent().removeWindow(NotAllowedPopover.this);
-        UI.getCurrent().setContent(new ThatsAllFolks());
+        HSess.init();
+        GameLinks links = GameLinks.getTL();
+        HSess.close();
+
+        UI.getCurrent().getPage().setLocation(links.getThanksForInterestLink());
+        getSession().close();
       }
     });
-  }
-
-  @SuppressWarnings("serial")
-  class ThatsAllFolks extends VerticalLayout
-  {
-    public ThatsAllFolks()
-    {
-      Label lbl;
-      setHeight("100%");
-      addComponent(lbl=new Label("That's all folks!"));
-      lbl.addStyleName("m-text-align-center");
-      setComponentAlignment(lbl,Alignment.MIDDLE_CENTER);
-    }
   }
 }
