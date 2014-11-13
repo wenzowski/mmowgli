@@ -28,7 +28,6 @@ import com.vaadin.shared.ui.BorderStyle;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 
-import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.User;
@@ -95,7 +94,8 @@ abstract public class RegistrationPageAgreement extends MmowgliDialog
     
     NativeButton rejectButt = new NativeButton();
     hl.addComponent(rejectButt);
-    Mmowgli2UI.getGlobals().mediaLocator().decorateDialogRejectButton(rejectButt);    
+    rejectButt.setStyleName("m-rejectNoThanksButton");
+   // Mmowgli2UI.getGlobals().mediaLocator().decorateDialogRejectButton(rejectButt);    
     rejectButt.addClickListener(new RejectListener());
     
     hl.addComponent(lab = new Label());
@@ -103,7 +103,8 @@ abstract public class RegistrationPageAgreement extends MmowgliDialog
     
     NativeButton continueButt = new NativeButton();
     hl.addComponent(continueButt);
-    Mmowgli2UI.getGlobals().mediaLocator().decorateDialogAcceptAndContinueButton(continueButt);
+    //Mmowgli2UI.getGlobals().mediaLocator().decorateDialogAcceptAndContinueButton(continueButt);
+    continueButt.setStyleName("m-acceptAndContinueButton");
     continueButt.addClickListener(new MyContinueListener());
     
     continueButt.setClickShortcut(KeyCode.ENTER);
