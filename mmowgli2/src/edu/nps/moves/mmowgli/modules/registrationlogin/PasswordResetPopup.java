@@ -152,7 +152,7 @@ public class PasswordResetPopup extends Window implements Button.ClickListener
     if(!uname.isEmpty())
       proceedWithNameTL_2a(uname,piiSess);
     else
-      proceedWithEnteredEmailTL_2b(piiSess);
+      proceedWithEnteredEmailTL_2b(piiSess,null);
 
     piiSess.close();
   }
@@ -166,14 +166,14 @@ public class PasswordResetPopup extends Window implements Button.ClickListener
        finalConfirmationCheckTL_4(ePii.get(0).getAddress(),usr);
     }
     else
-      proceedWithEnteredEmailTL_2b(piiSess);
+      proceedWithEnteredEmailTL_2b(piiSess,"No player found.");
   }   
   
-  private void proceedWithEnteredEmailTL_2b(Session piiSess)
+  private void proceedWithEnteredEmailTL_2b(Session piiSess, String errorStr)
   {
     String email = emailTf.getValue().trim();
     if(email == null || email.length()<=0) {
-      errorOut("No email specified.");
+      errorOut(errorStr != null? errorStr:"No email specified.");
       return;
     }
     checkValidEmailTL_3(email,piiSess);
