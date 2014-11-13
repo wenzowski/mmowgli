@@ -26,22 +26,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.hibernate.search.annotations.Analyze;
-import org.hibernate.search.annotations.DocumentId;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.*;
 import org.jasypt.hibernate4.type.EncryptedStringType;
+
+import edu.nps.moves.mmowgli.db.User;
 
 /** Used for jasypt encryption of fields */
 
@@ -97,7 +92,26 @@ public class UserPii implements Serializable
   List<EmailPii> emailAddresses = new ArrayList<EmailPii>(); // one or more email addresses
 
   long userObjectId;
-
+  
+  public static ArrayList<User> getUserFromEmailTL(String email, Session piiSess)
+  {
+    Criteria criteria = piiSess.createCriteria(UserPii.class);
+    ArrayList<User> aLis = new ArrayList<User>();
+    
+    @SuppressWarnings("unchecked")
+    List<UserPii> results = criteria.list();
+    for(UserPii upii : results) {
+      List<EmailPii> elis = upii.getEmailAddresses();
+      for(EmailPii epii : elis) {
+        String s = epii.getAddress().trim();
+        if(s.equalsIgnoreCase(email)) {
+          aLis.add( User.getTL(upii.getUserObjectId()));
+        }          
+      }
+    }
+    return aLis;
+  }
+  
   /** No-args constructor, used by hibernate */
   public UserPii()
   {
