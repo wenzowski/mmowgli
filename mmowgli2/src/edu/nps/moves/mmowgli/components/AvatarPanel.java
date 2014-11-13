@@ -26,9 +26,7 @@ import java.util.Collection;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.event.MouseEvents;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Panel;
+import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.Avatar;
@@ -68,7 +66,7 @@ public class AvatarPanel extends Panel implements MmowgliComponent
 
     imgLay = new HorizontalLayout();
     setContent(imgLay);
-    imgLay.setHeight("105px");
+  //  imgLay.setHeight("105px");
     imgLay.setSpacing(true);
     
     @SuppressWarnings("unchecked")
@@ -83,7 +81,7 @@ public class AvatarPanel extends Panel implements MmowgliComponent
       avIdArr[idx++] = id;
 
       Avatar a = Avatar.getTL(id);
-      Embedded em = new Embedded(null, loc.locate(a.getMedia()));
+      Image em = new Image(null, loc.locate(a.getMedia()));
       em.setWidth("95px");
       em.setHeight("95px");
       em.addClickListener(new ImageClicked());
@@ -112,11 +110,11 @@ public class AvatarPanel extends Panel implements MmowgliComponent
     
       if(aId.equals(selId)) {       
         if(selectedIdx != null) {
-          Embedded oldSel = (Embedded)imgLay.getComponent(selectedIdx);
+          Image oldSel = (Image)imgLay.getComponent(selectedIdx);
           oldSel.removeStyleName("m-orangeborder5");
           oldSel.addStyleName("m-greyborder5");
         }
-        Embedded em = (Embedded)imgLay.getComponent(i);
+        Image em = (Image)imgLay.getComponent(i);
         em.removeStyleName("m-greyborder5");
         em.addStyleName("m-orangeborder5");
         selectedIdx = i;        
@@ -132,7 +130,7 @@ public class AvatarPanel extends Panel implements MmowgliComponent
     @MmowgliCodeEntry
     public void click(com.vaadin.event.MouseEvents.ClickEvent event)
     {
-      Embedded emb = (Embedded)event.getSource();
+      Image emb = (Image)event.getSource();
       for(int x=0;x<avIdArr.length;x++)
         if(imgLay.getComponent(x) == emb) {
           setSelectedAvatarId(avIdArr[x]);
