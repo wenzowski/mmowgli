@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -42,14 +44,10 @@ import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
 /*
  * Program:      MMOWGLI
- *
  * Filename:     PasswordResetPopup.java
- *
  * Author(s):    Terry Norbraten
  *               http://www.nps.edu and http://www.movesinstitute.org
- *
  * Created on:   Created on Jan 23, 2014 11:10:11 AM
- *
  * Description:  Popup to initiate a forgot password reset process
  */
 
@@ -61,35 +59,25 @@ import edu.nps.moves.mmowgli.hibernate.VHibPii;
  */
 public class PasswordResetPopup extends Window implements Button.ClickListener
 {
-  private static final long serialVersionUID = 8282736664554448888L;
-
-  private User user; // what gets returned
+  private static final long serialVersionUID = 353792651604998559L;
   private TextField userIDTf, emailTf;
 
-  private String email;
-  private boolean error = false;
-
   /**
-   * Default Constructor
-   * 
-   * @param app
-   *          the main Vaadin application currently running
-   * @param listener
-   *          the end listener to listen for cancel events
-   * @param user
-   *          the User who wishes to reset their password
+   * @param app      the main Vaadin application currently running
+   * @param listener the end listener to listen for cancel events
+   * @param user     the User who wishes to reset their password
    */
+
   @SuppressWarnings("serial")
-  public PasswordResetPopup(Button.ClickListener listener, User usr)
+  public PasswordResetPopup(Button.ClickListener listener, String uname)
   {
-    user = usr;
     setCaption("Password Reset");
     VerticalLayout vLay = new VerticalLayout();
     vLay.setSpacing(true);
     vLay.setMargin(true);
     setContent(vLay);
     
-    vLay.addComponent(new HtmlLabel("<center>Please fill in your user name and email address<br/>to initiate a password reset.</center>"));
+    vLay.addComponent(new HtmlLabel("<center>Please fill in your game name and/or email address<br/>to initiate a password reset.</center>"));
     // Use an actual form widget here for data binding and error display.
     FormLayout formLay = new FormLayout();
     formLay.setSizeUndefined();
@@ -98,15 +86,13 @@ public class PasswordResetPopup extends Window implements Button.ClickListener
     vLay.addComponent(formLay);
     vLay.setComponentAlignment(formLay, Alignment.TOP_CENTER);
 
-    formLay.addComponent(userIDTf = new TextField("User ID:"));
+    formLay.addComponent(userIDTf = new TextField("Game name:"));
     userIDTf.addStyleName("m-dialog-textfield");
     userIDTf.setWidth("85%");
     userIDTf.setTabIndex(100);
 
     // Help out a little here
-    if (user != null)
-      userIDTf.setValue(user.getUserName());
-
+    userIDTf.setValue(uname==null?"":uname);
     formLay.addComponent(emailTf = new TextField("Email:"));
     emailTf.addStyleName("m-dialog-textfield");
     emailTf.setWidth("85%");
@@ -147,75 +133,128 @@ public class PasswordResetPopup extends Window implements Button.ClickListener
   public void buttonClick(Button.ClickEvent event)
   {
     HSess.init();
-
-    performChecksTL(event);
-    if (!error) {
-      makeResetAnnounceDialogTL();
-    }
-    // reset for next attempt
-    error = false;
-
+    handleNameAndOrEmailTL_1(event);
     HSess.close();
   }
 
-  private void performChecksTL(Button.ClickEvent event)
+  private void handleNameAndOrEmailTL_1(Button.ClickEvent event)
   {
-    // Checks:
-    // 1. Email address has ampersand
-    email = emailTf.getValue().toString().trim();
+    String uname = userIDTf.getValue().trim();
+    String email = emailTf.getValue().trim();
+    if(uname.isEmpty() && email.isEmpty()) {
+      errorOut("Specify game name and/or email address.");
+      return;
+    }
+    Session piiSess = VHibPii.getASession();
+    // First, if user entered gname, no matter if an email was entered, use it.  There can be multiple users sharing
+    // an email, but not multiple email per user
+
+    if(!uname.isEmpty())
+      proceedWithNameTL_2a(uname,piiSess);
+    else
+      proceedWithEnteredEmailTL_2b(piiSess);
+
+    piiSess.close();
+  }
+  
+  private void proceedWithNameTL_2a(String uname, Session piiSess)
+  {
+    User usr = User.getUserWithUserName(HSess.get(), uname);
+    if(usr != null) {
+       UserPii uPii = VHibPii.getUserPii(usr.getId(), piiSess, false);
+       List<EmailPii> ePii = uPii.getEmailAddresses(); 
+       finalConfirmationCheckTL_4(ePii.get(0).getAddress(),usr);
+    }
+    else
+      proceedWithEnteredEmailTL_2b(piiSess);
+  }   
+  
+  private void proceedWithEnteredEmailTL_2b(Session piiSess)
+  {
+    String email = emailTf.getValue().trim();
+    if(email == null || email.length()<=0) {
+      errorOut("No email specified.");
+      return;
+    }
+    checkValidEmailTL_3(email,piiSess);
+  }
+  
+  private void checkValidEmailTL_3(String email, Session piiSess)
+  {
+    // Email address has ampersand
+
     EmailValidator v = new EmailValidator("");
     if (email == null || !v.isValid(email)) {
-      errorOut("Invalid email address entered.");
+      errorOut("Invalid email address.");
       return;
     }
 
-    // 2 Check that is in DB
-    if (RegistrationPagePopupFirst.checkEmail(email)) {
-      errorOut("Email address not found in database for user: " + user.getUserName() + ".");
+    // Check that is in DB
+    if (RegistrationPagePopupFirst.checkEmail(email,piiSess)) {
+      errorOut("Email address not found."); // in database for user: " + user.getUserName() + ".");
       return;
     }
-
-    Session sess = VHibPii.getASession();
-    UserPii uPii = VHibPii.getUserPii(user.getId(), sess, false);
-    List<EmailPii> ePii = uPii.getEmailAddresses();
-
-    boolean emailChecks = false;
-
-    // 3. Continue email checks
-    for (EmailPii e : ePii) {
-      if (e.getAddress().equalsIgnoreCase(email)) {
-        emailChecks = true;
-      }
+    
+    ArrayList<User> aLis =  UserPii.getUserFromEmailTL(email, piiSess);
+    if(aLis.isEmpty()) {
+      errorOut("Player not associated with email "+email);
+      return;    
     }
+      
+    // Check for disabled account only if there's one user.  Gets too complicated otherwise, and the unlikely chance that
+    // a multi-user accounted situation exists where one or all are disabled will still not pass login.
 
-    sess.close();
-
-    if (!emailChecks) {
-      errorOut("Email address not associated with user: " + user.getUserName() + ".");
-      return;
-    }
-
-    // 4. Check user account status
-    if (user.isAccountDisabled()) {
+    // Check user account status
+    if(aLis.size() == 1 && aLis.get(0).isAccountDisabled()) {
       errorOut("This account has been disabled.");
       return;
     }
-
-    Game g = Game.getTL();
-
-    // 5. Check user email confirmation status
-    if (g.isEmailConfirmation() && !user.isEmailConfirmed()) {
-      errorOut("This email address has not yet been confirmed.");
-    }
-    else {
-
-      // did not fail confirm check; if confirmation off, make sure they can get in in the future or questions will arise
-      user.setEmailConfirmed(true);
-      User.updateTL(user);
-    }
+    // otherwise, proceed
+    finalConfirmationCheckTL_4(email, aLis);
+  }
+  
+  //Check user email confirmation status
+  private void finalConfirmationCheckTL_4(String email, User u)
+  {
+    ArrayList<User> aLis = new ArrayList<User>();
+    aLis.add(u);
+    finalConfirmationCheckTL_4(email,aLis);
   }
 
-  private void makeResetAnnounceDialogTL()
+  private void finalConfirmationCheckTL_4(String email, ArrayList<User> aLis)
+  {
+    ArrayList<User> confirmedUsers = new ArrayList<User>(aLis); // working list
+    Game g = Game.getTL();
+    boolean confirmationOn = g.isEmailConfirmation();
+    if (confirmationOn) {
+      Iterator<User> itr = aLis.iterator();
+      while (itr.hasNext()) {
+        User u = itr.next();
+        if (!u.isEmailConfirmed()) {
+          confirmedUsers.remove(u);
+        }
+      }
+    }
+    if (confirmedUsers.isEmpty()) {
+      errorOut("This email address has not yet been confirmed.");
+      return;
+    }
+
+    // did not fail confirm check; if confirmation off, make sure they can get in in the future or questions will arise
+    if (!confirmationOn) {
+      Iterator<User> itr = confirmedUsers.iterator();
+      while (itr.hasNext()) {
+        User us = itr.next();
+
+        us.setEmailConfirmed(true);
+        User.updateTL(us);
+      }
+    }
+    
+    makeResetAnnounceDialogTL_5(email,confirmedUsers);
+  }
+
+  private void makeResetAnnounceDialogTL_5(String email, ArrayList<User>aLis)
   {
     UI myUI = getUI();
     myUI.removeWindow(PasswordResetPopup.this);
@@ -230,17 +269,17 @@ public class PasswordResetPopup extends Window implements Button.ClickListener
     vLay.setSizeUndefined();
     vLay.setWidth("400px");
 
-    Label message = new HtmlLabel("An email has been sent to " + user.getUserName() + " at <b>" + email + "</b>.");
+    Label message = new HtmlLabel("An email has been sent to <b>" + email + "</b>.");
     vLay.addComponent(message);
 
-    message = new Label("Follow the link in the message to confirm your password reset request to enable login to your mmowgli user account.");
+    message = new Label("Follow the link in the message to confirm your password reset request to enable login to your mmowgli player account.");
     vLay.addComponent(message);
 
     message = new Label("Please be advised that you will only have three hours to complete this process, after which time "
                       + "you will have to re-initiate a new password reset process from the game login page.");
     vLay.addComponent(message);
 
-    message = new HtmlLabel("Now, press <b>Homepage -- Return to login</b> after receiveing a reset request confirmation email.");
+    message = new HtmlLabel("Now, press <b>Homepage -- Return to login</b> after receiving a reset request confirmation email.");
     vLay.addComponent(message);
 
     @SuppressWarnings("serial")
@@ -272,14 +311,20 @@ public class PasswordResetPopup extends Window implements Button.ClickListener
     myUI.addWindow(resetAnnounceDialog);
     resetAnnounceDialog.center();
 
-    // This process generates unique uId for this reset process that will
+    // This process generates unique uId for th3 reset process that will
     // need to be confirmed once the user receives a confirmation email and
     // click on the link containing the uId
-    PasswordReset pr = new PasswordReset(user);
-    PasswordReset.saveTL(pr);
+    Iterator<User> itr = aLis.iterator();
+    // sends email to all user accounts (which are at the same email address)
+    // if a game name was entered, only that account receives the email
+    while(itr.hasNext()) {
+      User usr = itr.next();
+      PasswordReset pr = new PasswordReset(usr);
+      PasswordReset.saveTL(pr);
 
-    String confirmUrl = buildConfirmUrl(pr);
-    AppMaster.instance().getMailManager().sendPasswordResetEmailTL(email, user.getUserName(), confirmUrl);
+      String confirmUrl = buildConfirmUrl(pr);
+      AppMaster.instance().getMailManager().sendPasswordResetEmailTL(email, usr.getUserName(), confirmUrl);
+    }
   }
 
   private String buildConfirmUrl(PasswordReset pr)
@@ -298,7 +343,6 @@ public class PasswordResetPopup extends Window implements Button.ClickListener
 
   private void errorOut(String s)
   {
-    error = true;
     Notification.show("Could not process password reset", s, Notification.Type.ERROR_MESSAGE);
   }
 
