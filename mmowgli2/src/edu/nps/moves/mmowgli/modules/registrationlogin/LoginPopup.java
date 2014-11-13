@@ -133,23 +133,16 @@ public class LoginPopup extends MmowgliDialog
 
     // Password reset
     HorizontalLayout h2 = new HorizontalLayout();
-
-    // This puts the link right under the cancel button centered
     h2.setWidth("100%");
     contentVLayout.addComponent(h2);
 
     h2.addComponent(lab = new Label());
     h2.setExpandRatio(lab, 01.0f);
-
-    pwResetButt = new NativeButton("Forgot password?");
-    pwResetButt.setWidth(120, Unit.PIXELS);
-
-    // Reusing this css component so that we don't have to redeploy a new
-    // VADDIN.zip
-    pwResetButt.addStyleName("m-userprofile3-changeemailbutt");
+    pwResetButt = new NativeButton("Forgot password or game name?");
+    pwResetButt.addStyleName("m-signin-forgotButton");
     h2.addComponent(pwResetButt);
 
-    pwResetButt.addClickListener(new MyForgotPasswordListener());
+    pwResetButt.addClickListener(new MyForgotLoginInfoListener());
 
     userIDTf.focus();
   }
@@ -289,7 +282,23 @@ public class LoginPopup extends MmowgliDialog
   }
 
   @SuppressWarnings("serial")
-  class MyForgotPasswordListener implements Button.ClickListener
+  class MyForgotLoginInfoListener implements Button.ClickListener
+  {
+    @Override
+    public void buttonClick(ClickEvent event)
+    {      
+      String uname = userIDTf.getValue().toString();
+
+      UI ui = Mmowgli2UI.getGlobals().getFirstUI();
+      ui.removeWindow(LoginPopup.this);
+      PasswordResetPopup pwp = new PasswordResetPopup(listener, uname);
+      ui.addWindow(pwp);
+      pwp.center();        
+    }
+  }
+
+  @SuppressWarnings("serial")
+  class MyOldForgotPasswordListener implements Button.ClickListener
   {
     @MmowgliCodeEntry
     @HibernateOpened
@@ -316,7 +325,7 @@ public class LoginPopup extends MmowgliDialog
         UI ui = Mmowgli2UI.getGlobals().getFirstUI();
         ui.removeWindow(LoginPopup.this);
 
-        PasswordResetPopup pwp = new PasswordResetPopup(listener, user);
+        PasswordResetPopup pwp = new PasswordResetPopup(listener, user.getUserName());
         ui.addWindow(pwp);
         pwp.center();        
       }
