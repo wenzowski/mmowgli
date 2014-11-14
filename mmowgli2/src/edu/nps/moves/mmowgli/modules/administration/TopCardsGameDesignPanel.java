@@ -95,8 +95,8 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
     addComponent(renderFields(negativeFields, negativeTypeSelect, "2 Choose NEGATIVE top card type for this round", cantEditNegativeTypeWarning));
     negativeFields.initGui();
 
-    fillSelectCommon(positiveTypeSelect, CardType.getDefinedPositiveTypesTL());
-    fillSelectCommon(negativeTypeSelect, CardType.getDefinedNegativeTypesTL());
+    fillSelectCommonTL(positiveTypeSelect, CardType.getDefinedPositiveTypesTL());
+    fillSelectCommonTL(negativeTypeSelect, CardType.getDefinedNegativeTypesTL());
     
     positiveTypeSelect.addValueChangeListener(myCardTypeListener);
     negativeTypeSelect.addValueChangeListener(myCardTypeListener);
@@ -201,10 +201,10 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
         {
           HSess.init();
           if(cls == CardClass.POSITIVEIDEA) {
-            fillSelectCommon(positiveTypeSelect, CardType.getDefinedPositiveTypesTL());            
+            fillSelectCommonTL(positiveTypeSelect, CardType.getDefinedPositiveTypesTL());            
           }
           else if(cls == CardClass.NEGATIVEIDEA) {
-            fillSelectCommon(negativeTypeSelect, CardType.getDefinedNegativeTypesTL());            
+            fillSelectCommonTL(negativeTypeSelect, CardType.getDefinedNegativeTypesTL());            
           }
           HSess.close();
          }        
@@ -383,7 +383,7 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
     }
   }
 
-  private void fillSelectCommon(NativeSelect combo, List<CardType> lis)
+  private void fillSelectCommonTL(NativeSelect combo, List<CardType> lis)
   {
     boolean oldCommit = commitCardType;
     commitCardType = false;
@@ -395,6 +395,7 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
    
     Set<CardType> cts = moveBeingEdited.getCurrentMovePhase().getAllowedCards();
     for (CardType ct : lis) {
+      ct = (CardType)HSess.get().merge(ct);
       TypeLine tl = new TypeLine(ct);
       if (typeLFirst == null)
         typeLFirst = tl;
