@@ -422,7 +422,7 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
         // Admins get to add cards under other names
         author = User.get(Mmowgli2UI.getGlobals().getUserID(), HSess.get()); 
         if (author.isAdministrator())
-          adminSwitchAuthors(event.getButton(), this);
+          adminSwitchAuthorsTL(event.getButton(), this);
         else
           run(); // does not need to suspend, so "continues" and executes step2
                  // in the same clicklistener thread
@@ -448,13 +448,18 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
     }
 
     @SuppressWarnings("serial")
-    private void adminSwitchAuthors(Button butt, final CardPlayHandler coroutine)
+    @HibernateRead
+    private void adminSwitchAuthorsTL(Button butt, final CardPlayHandler coroutine)
     {
       ArrayList<User> meLis = new ArrayList<User>(1);
       meLis.add(coroutine.author);
-
+      User me = User.getTL(Mmowgli2UI.getGlobals().getUserID());
+      
       final AddAuthorDialog dial = new AddAuthorDialog(meLis, true);
-      dial.infoLabel.setValue("As administrator, you may choose another player to be card author.");
+      StringBuilder sb = new StringBuilder("As adminstrator, <b>");
+      sb.append(me.getUserName());
+      sb.append("</b>, you may choose another player to be card author.");
+      dial.infoLabel.setValue(sb.toString());
       dial.setCaption("Select Proxy Author");
       dial.setMultiSelect(false);
       dial.cancelButt.setCaption("Use myself");
