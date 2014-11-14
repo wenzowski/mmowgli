@@ -244,6 +244,11 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
   @Override
   public void initGui()
   {
+    initGuiTL();
+  }
+
+  public void initGuiTL()
+  {
     tabSh.setHeight("100%");
     tabSh.setWidth("930px");
 
