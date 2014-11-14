@@ -50,6 +50,8 @@ import edu.nps.moves.mmowgli.export.ReportGenerator;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.messaging.InterTomcatIO.InterTomcatReceiver;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
@@ -434,9 +436,13 @@ public class AppMaster
     return miscTimer;
   }
 
+  @HibernateOpened
+  @HibernateClosed
   public void logSessionEnd(Serializable uId)
   {
+    HSess.init();
     GameEventLogger.logSessionEndTL(uId);
+    HSess.close();
   }
 
   /*
