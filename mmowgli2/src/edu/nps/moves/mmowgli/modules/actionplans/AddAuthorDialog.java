@@ -33,6 +33,7 @@ import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.User;
 
 /**
@@ -55,7 +56,7 @@ public class AddAuthorDialog extends Window
   public boolean addClicked = false;
   private Object selected;
   
-  public Label infoLabel = new Label("Choose users to receive invitations to author this plan.  Their names will appear on the action plan author list when/if they accept.");
+  public Label infoLabel = new HtmlLabel("Choose users to receive invitations to author this plan.  Their names will appear on the action plan author list when/if they accept.");
   private HorizontalLayout buttHL;
   
   public AddAuthorDialog(Collection<User> currentlySelectedNames)
