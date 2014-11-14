@@ -113,9 +113,9 @@ System.out.println("bp");
     super.servletInitialized();
     
     getService().addSessionInitListener(this);
+    getService().addSessionDestroyListener(this);;
     initLogging();
     ServletContext context = getServletContext();
-    MSysOut.println("Mmowgli: contextPath: "+context.getContextPath());
     appMaster = AppMaster.instance(this,context);// Initialize app master, global across on user sessions on this cluster node
 
     context.setAttribute(MmowgliConstants.APPLICATION_MASTER_ATTR_NAME, appMaster);
@@ -140,153 +140,53 @@ System.out.println("bp");
     new MmowgliSessionGlobals(event,this);   // Initialize global object across all users windows, gets stored in VaadinSession object referenced in event
     event.getSession().addUIProvider(new Mmowgli2UIProvider());
     //MSysOut.println("JMETERdebug: Session created, id = "+event.getSession().hashCode());
-
-    if(appMaster != null)  // might be with error on startup
-      appMaster.doSessionCountUpdate(++sessionCount);   
+    if(appMaster != null)  {// might be with error on startup
+      appMaster.doSessionCountUpdate(incrementSessionCount());
+    }
   }
 
   @Override
   public void sessionDestroy(SessionDestroyEvent event)
   {
-    //MSysOut.println("JMETERdebug: Session destroyed, id = "+event.getSession().hashCode());    
+    //MSysOut.println("JMETERdebug: Session destroyed, id = "+event.getSession().hashCode()); 
     if(appMaster != null) { // might be with error on startup
-      appMaster.doSessionCountUpdate(--sessionCount);
+      appMaster.doSessionCountUpdate(decrementSessionCount());
 
       MmowgliSessionGlobals globs = event.getSession().getAttribute(MmowgliSessionGlobals.class);  // store this for use across the app
       if(globs != null)
         appMaster.logSessionEnd(globs.getUserID());
     }   
   }
-  
-  // Methods to override if needed
-/*
-  @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+  private int incrementSessionCount()
   {
-    super.doGet(req, resp);
-    MSysOut.println("doGet..........");
+    return ++sessionCount;
+  }
+  private int decrementSessionCount()
+  {
+    if(sessionCount <= 0)
+      sessionCount = 1; // for the line below
+    return --sessionCount;
   }
 
+/* Methods to override if needed
   @Override
-  protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
-  {
-    super.doDelete(req, resp);
-    MSysOut.println("doDelete.........");
-  }
-
-  @Override
-  protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
-  {
-    super.doHead(req, resp);
-    MSysOut.println("doHead.......");
-  }
-
-  @Override
-  protected void doOptions(HttpServletRequest arg0, HttpServletResponse arg1) throws ServletException, IOException
-  {
-    super.doOptions(arg0, arg1);
-    MSysOut.println("doOptions..........");
-  }
-
-  @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
-  {
-    super.doPost(req, resp);
-    MSysOut.println("doPost..........");
-  }
-
-  @Override
-  protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
-  {
-    super.doPut(req, resp);
-    MSysOut.println("doPut............");
-  }
-
-  @Override
-  protected void doTrace(HttpServletRequest arg0, HttpServletResponse arg1) throws ServletException, IOException
-  {
-    super.doTrace(arg0, arg1);
-    MSysOut.println("doTrace...............");
-  }
-
-  @Override
-  protected long getLastModified(HttpServletRequest req)
-  {
-    MSysOut.println("getLastModified...........");
-    return super.getLastModified(req);
-  }
-
-  @Override
-  public void service(ServletRequest arg0, ServletResponse arg1) throws ServletException, IOException
-  {
-    arg0.setAttribute("org.apache.catalina.ASYNC_SUPPORTED", true);//http://stackoverflow.com/questions/7749350/illegalstateexception-not-supported-on-asynccontext-startasyncreq-res
-    super.service(arg0, arg1);
-    //MSysOut.println("service.............");
-  }
-
-  @Override
-  public String getInitParameter(String name)
-  {
-    //MSysOut.println("getInitParameter..........");
-    return super.getInitParameter(name);
-  }
-
-  @Override
-  public Enumeration<String> getInitParameterNames()
-  {
-    //MSysOut.println("getInitParameterNames..........");
-    return super.getInitParameterNames();
-  }
-
-  @Override
-  public ServletConfig getServletConfig()
-  {
-    //MSysOut.println("getServletConfig..............");
-    return super.getServletConfig();
-  }
-
-  @Override
-  public ServletContext getServletContext()
-  {
-    //MSysOut.println("getServletContext............");
-    return super.getServletContext();
-  }
-
-  @Override
-  public String getServletInfo()
-  {
-    MSysOut.println("getServletInfo.............");
-    return super.getServletInfo();
-  }
-
-  @Override
-  public String getServletName()
-  {
-    //MSysOut.println("getServletName.............");
-    return super.getServletName();
-  }
-
-  @Override
-  public void init() throws ServletException
-  {
-    super.init();
-    //MSysOut.println("init.............");
-  }
-
-  @Override
-  public void log(String message, Throwable t)
-  {
-    super.log(message, t);
-    MSysOut.println("log............");
-  }
-
-  @Override
-  public void log(String msg)
-  {
-    super.log(msg);
-    MSysOut.println("log...........");
-  }
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{}
+  protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{}
+  protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{}
+  protected void doOptions(HttpServletRequest arg0, HttpServletResponse arg1) throws ServletException, IOException{}
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{}
+  protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{}
+  protected void doTrace(HttpServletRequest arg0, HttpServletResponse arg1) throws ServletException, IOException{}
+  protected long getLastModified(HttpServletRequest req){}
+  public void service(ServletRequest arg0, ServletResponse arg1) throws ServletException, IOException{}
+  public String getInitParameter(String name){}
+  public Enumeration<String> getInitParameterNames(){}
+  public ServletConfig getServletConfig(){}
+  public ServletContext getServletContext(){}
+  public String getServletInfo(){}
+  public String getServletName(){}
+  public void init() throws ServletException{}
+  public void log(String message, Throwable t){}
+  public void log(String msg){}
 */
-
-
 }
