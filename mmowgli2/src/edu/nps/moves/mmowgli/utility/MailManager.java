@@ -67,11 +67,6 @@ public class MailManager
 
   /**
    * The controller has figured out that someone has played the first follow-on to a user's card. Tell that to the parent. But only once.
-   * 
-   * @param parent
-   *          card
-   * @param child
-   *          card
    */
   public void firstChildPlayedTL(Card parent, Card child)
   {
@@ -328,7 +323,7 @@ public class MailManager
       sb.append(u.getUserName());
       sb.append("</b>, from <i>");
       sb.append(gameAcronym);
-      sb.append("mmowgli</i>, the \"Massively Multiplayer Online War Game Leveraging the Internet\".</p><p>At ");
+      sb.append("mmowgli</i>, the Massively Multiplayer Online War Game Leveraging the Internet.</p><p>At ");
       sb.append(new SimpleDateFormat("MM/dd HH:mm z").format(new Date()));
       sb.append(", you were invited to become a (co-) author of the following ActionPlan:<br/><center>");
       sb.append(ap.getTitle());
