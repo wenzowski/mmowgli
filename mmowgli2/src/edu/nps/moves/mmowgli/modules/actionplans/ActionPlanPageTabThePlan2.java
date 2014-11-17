@@ -113,6 +113,8 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
       Game g = Game.getTL();
       missionContentLab = new HtmlLabel(g.getDefaultActionPlanThePlanText());
     }
+    MovePhase ph = MovePhase.getCurrentMovePhaseTL();
+    
     flowLay.addComponent(missionContentLab);
     flowLay.setComponentAlignment(missionContentLab, Alignment.TOP_LEFT);
     flowLay.addStyleName("m-actionplan-mission-content-text");
@@ -131,19 +133,19 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
     lab.setHeight("20px");
     flowLay.addComponent(lab);
    
-    flowLay.addComponent(whoGroup=buildTextAreaGroup("Who is involved?", whoTA, "Who-is-involved history", "Previous values", "Text", "getSubTitleEditHistory", "getSubTitle", "setSubTitleWithHistoryTL"));
+    flowLay.addComponent(whoGroup=buildTextAreaGroup(ph.getActionPlanWhoIsInvolvedHeader()/*"Who is involved?"*/, whoTA, "Who-is-involved history", "Previous values", "Text", "getSubTitleEditHistory", "getSubTitle", "setSubTitleWithHistoryTL"));
     whoGroup.setValueTL(actPln.getSubTitle()); // misnamed since we're calling it it who is involved instead of subtitle
    
-    flowLay.addComponent(whatGroup=buildTextAreaGroup("What is it?", whatTA, "What-is-it history", "Previous values", "Text", "getWhatIsItEditHistory", "getWhatIsItText", "setWhatIsItTextWithHistoryTL"));
+    flowLay.addComponent(whatGroup=buildTextAreaGroup(ph.getActionPlanWhatIsItHeader()/*"What is it?"*/, whatTA, "What-is-it history", "Previous values", "Text", "getWhatIsItEditHistory", "getWhatIsItText", "setWhatIsItTextWithHistoryTL"));
     whatGroup.setValueTL(actPln.getWhatIsItText());
    
-    flowLay.addComponent(whatTakeGroup=buildTextAreaGroup("What will it take?", whatWillItTakeTA, "What-will-it-take history", "Previous values", "Text", "getWhatTakeEditHistory","getWhatWillItTakeText","setWhatWillItTakeTextWithHistoryTL"));
+    flowLay.addComponent(whatTakeGroup=buildTextAreaGroup(ph.getActionPlanWhatWillItTakeHeader()/*"What will it take?"*/, whatWillItTakeTA, "What-will-it-take history", "Previous values", "Text", "getWhatTakeEditHistory","getWhatWillItTakeText","setWhatWillItTakeTextWithHistoryTL"));
     whatTakeGroup.setValueTL(actPln.getWhatWillItTakeText());
 
-    flowLay.addComponent(howGroup=buildTextAreaGroup("How will it work?", howWorkTA,"How-will-it-work history", "Previous values", "Text", "getHowWorkEditHistory","getHowWillItWorkText","setHowWillItWorkTextWithHistoryTL"));
+    flowLay.addComponent(howGroup=buildTextAreaGroup(ph.getActionPlanHowWillItWorkHeader()/*"How will it work?"*/, howWorkTA,"How-will-it-work history", "Previous values", "Text", "getHowWorkEditHistory","getHowWillItWorkText","setHowWillItWorkTextWithHistoryTL"));
     howGroup.setValueTL(actPln.getHowWillItWorkText());
 
-    flowLay.addComponent(howChangeGroup=buildTextAreaGroup("How will it change the situation?", howChangeTA, "How-will-it-change-things history", "Previous values", "Text", "getHowChangeEditHistory","getHowWillItChangeText","setHowWillItChangeTextWithHistoryTL"));
+    flowLay.addComponent(howChangeGroup=buildTextAreaGroup(ph.getActionPlanHowWillItChangeHeader()/*"How will it change the situation?"*/, howChangeTA, "How-will-it-change-things history", "Previous values", "Text", "getHowChangeEditHistory","getHowWillItChangeText","setHowWillItChangeTextWithHistoryTL"));
     howChangeGroup.setValueTL(actPln.getHowWillItChangeText());
   }
 
