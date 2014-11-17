@@ -142,6 +142,18 @@ public class MovePhase implements Serializable
       LOGIN_ALLOW_NEWPLAYERS );
   
   public static short LOGIN_ALLOW_NONE = 0x0;
+  
+  public static final String WHO_IS_INVOLVED   = "Who is involved?";
+  public static final String WHAT_IS_IT        = "What is it?";
+  public static final String WHAT_WILL_IT_TAKE = "What will it take?";
+  public static final String HOW_WILL_IT_WORK  = "How will it work?";
+  public static final String HOW_WILL_IT_CHANGE_THE_SITUATION = "How will it change the situation?";
+  
+  String actionPlanWhoIsInvolvedHeader;
+  String actionPlanWhatIsItHeader;
+  String actionPlanWhatWillItTakeHeader;
+  String actionPlanHowWillItWorkHeader;
+  String actionPlanHowWillItChangeHeader;
 //@formatter:on
 
   public static MovePhase mergeTL(MovePhase ph)
@@ -818,6 +830,61 @@ public class MovePhase implements Serializable
   public void setRestrictByQueryList(boolean restrictByQueryList)
   {
     this.restrictByQueryList = restrictByQueryList;
+  }
+
+  @Basic
+  public String getActionPlanWhoIsInvolvedHeader()
+  {
+    return actionPlanWhoIsInvolvedHeader;
+  }
+
+  public void setActionPlanWhoIsInvolvedHeader(String actionPlanWhoIsInvolvedHeader)
+  {
+    this.actionPlanWhoIsInvolvedHeader = actionPlanWhoIsInvolvedHeader;
+  }
+  
+  @Basic
+  public String getActionPlanWhatIsItHeader()
+  {
+    return actionPlanWhatIsItHeader;
+  }
+
+  public void setActionPlanWhatIsItHeader(String actionPlanWhatIsItHeader)
+  {
+    this.actionPlanWhatIsItHeader = actionPlanWhatIsItHeader;
+  }
+  
+  @Basic
+  public String getActionPlanWhatWillItTakeHeader()
+  {
+    return actionPlanWhatWillItTakeHeader;
+  }
+
+  public void setActionPlanWhatWillItTakeHeader(String actionPlanWhatWillItTakeHeader)
+  {
+    this.actionPlanWhatWillItTakeHeader = actionPlanWhatWillItTakeHeader;
+  }
+  
+  @Basic
+  public String getActionPlanHowWillItWorkHeader()
+  {
+    return actionPlanHowWillItWorkHeader;
+  }
+
+  public void setActionPlanHowWillItWorkHeader(String actionPlanHowWillItWorkHeader)
+  {
+    this.actionPlanHowWillItWorkHeader = actionPlanHowWillItWorkHeader;
+  }
+
+  @Basic
+  public String getActionPlanHowWillItChangeHeader()
+  {
+    return actionPlanHowWillItChangeHeader;
+  }
+
+  public void setActionPlanHowWillItChangeHeader(String actionPlanHowWillItChangeHeader)
+  {
+    this.actionPlanHowWillItChangeHeader = actionPlanHowWillItChangeHeader;
   }
 
   public void cloneFrom(MovePhase existing)
