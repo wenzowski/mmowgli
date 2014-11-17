@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli.signupServer;
 
+import java.util.UUID;
+
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
@@ -34,6 +36,7 @@ import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.MovePhase;
 import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HasUUID;
 
 /**
  * SignupServer.java
@@ -48,10 +51,12 @@ import edu.nps.moves.mmowgli.hibernate.HSess;
  */
 @Theme("mmowgli2")
 @Widgetset("edu.nps.moves.mmowgli.widgetset.Mmowgli2Widgetset")
-public class SignupServer extends UI
+public class SignupServer extends UI implements HasUUID
 {
   private static final long serialVersionUID = 9205707803230381489L;
   private String tail2 = "/signup";
+  private UUID uuid;
+  
   /**
    * Init is invoked on application load (when a user accesses the application
    * for the first time).
@@ -60,6 +65,7 @@ public class SignupServer extends UI
   @Override
   public void init(VaadinRequest req)
   {
+    uuid = UUID.randomUUID();
     // Check if we want a signup window
     HSess.init();
     Game g = Game.getTL();
@@ -125,5 +131,10 @@ public class SignupServer extends UI
     {
       quitAndGoTo(url);
     }
+  }
+  
+  public String getUI_UUID()
+  {
+    return uuid.toString();
   }
  }
