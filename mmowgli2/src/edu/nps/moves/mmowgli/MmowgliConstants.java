@@ -47,7 +47,7 @@ public class MmowgliConstants
   public static int    MAP_ZOOM_DEFAULT = 5;
   
   // Database version matching this code
-  public static long DATABASE_VERSION = 20140509; // db which matches this code
+  public static long DATABASE_VERSION = 20141114; // db which matches this code
 
   public static long DATABASE_VERSION_BEFORE_EMAILPII_DIGESTS = 20130626;
   public static long DATABASE_VERSION_AFTER_EMAILPII_DIGESTS = 20130627;
