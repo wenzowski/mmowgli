@@ -216,6 +216,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
   TopCardsGameDesignPanel topCardsPan;
   SubCardsGameDesignPanel subCardsPan;
   SeedCardsGameDesignPanel seedCardsPan;
+  ActionPlanChaptersGameDesignPanel chaptersPan;
 
   MoveSelector moveSelector;
   private Move moveBeingEdited;
@@ -234,6 +235,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     tabPanels.add(topCardsPan = new TopCardsGameDesignPanel(editMove, globs));
     tabPanels.add(subCardsPan = new SubCardsGameDesignPanel(editMove, globs));
     tabPanels.add(seedCardsPan = new SeedCardsGameDesignPanel(editMove, globs));
+    tabPanels.add(chaptersPan = new ActionPlanChaptersGameDesignPanel(editMove, globs));
   }
 
   public void addMoveListener(MoveChangeListener lis)
@@ -282,13 +284,14 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     tabSh.addTab(topCardsPan, "Top Card Types");
     tabSh.addTab(subCardsPan, "Sub Card Types");
     tabSh.addTab(seedCardsPan, "Seed Card Initialization");
-
+    tabSh.addTab(chaptersPan, "Action Plan Headings");
     addComponent(tabSh);
 
     titlesPan.initGui();
     topCardsPan.initGui();
     subCardsPan.initGui();
     seedCardsPan.initGui();
+    chaptersPan.initGui();
     moveSelector.setMove(Game.getTL().getCurrentMove());
   }
   
@@ -361,6 +364,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
         topCardsPan.moveChangedTL(mov);
         subCardsPan.moveChangedTL(mov);
         seedCardsPan.moveChangedTL(mov);
+        chaptersPan.moveChangedTL(mov);
 
         if(externalListener != null)
           externalListener.moveChangedTL(mov);
