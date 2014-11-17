@@ -24,6 +24,7 @@ package edu.nps.moves.security;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -42,22 +43,25 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.markers.HasUUID;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.modules.userprofile.ChangePasswordDialog;
 import edu.nps.moves.mmowgli.modules.userprofile.ChangePasswordDialog.PasswordPacket;
 
 @Theme("mmowgli2")
-public class PasswordResetUI extends UI implements ClickListener
+public class PasswordResetUI extends UI implements ClickListener, HasUUID
 {
   private static final long serialVersionUID = 3824891380520659358L;
   private String UUID_PARAM = "uid";
   private String RESETCODE_COL = "resetCode";
-
+  private UUID uuid;
+  
   @SuppressWarnings("serial")
   @Override
   protected void init(VaadinRequest request)
   {
     Timestamp rightNow = new Timestamp(System.currentTimeMillis());
+    uuid = UUID.randomUUID();
 
     String uid = request.getParameter(UUID_PARAM);
     System.out.println("uid = " + uid);
@@ -89,6 +93,7 @@ public class PasswordResetUI extends UI implements ClickListener
           return;
         }
       }
+      HSess.close();
     }
     vLay.addComponent(new Button("Go to help page", new ClickListener()
     {
@@ -102,6 +107,7 @@ public class PasswordResetUI extends UI implements ClickListener
         getSession().close();
       }
     }));
+    
   }
 
   String thanksHdr1 = "Thanks for playing the <a href='";
@@ -239,4 +245,9 @@ public class PasswordResetUI extends UI implements ClickListener
     HSess.close();
     getSession().close();
   }
+  
+  public String getUI_UUID()
+  {
+    return uuid.toString();
+  }  
 }
