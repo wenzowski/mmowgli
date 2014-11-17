@@ -31,10 +31,13 @@ import org.hibernate.event.spi.*;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.service.ServiceRegistry;
 
+import com.vaadin.ui.UI;
+
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.markers.HasUUID;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
@@ -405,13 +408,17 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
 
   private void messageOut(AbstractEvent event, char msgTyp, String msg)
   {
-    Mmowgli2UI ui = Mmowgli2UI.getAppUI();
     String session_id=null;
     String ui_id = null;
-    if(ui != null) {
-      session_id = ui.getUserSessionUUID();
-      ui_id = ui.getUI_UUID();
+    
+    UI currUI = UI.getCurrent();
+    if(currUI != null) {
+      if(currUI instanceof HasUUID)
+        ui_id = ((HasUUID)currUI).getUI_UUID();
+      if(currUI instanceof Mmowgli2UI)
+        session_id = ((Mmowgli2UI)currUI).getUserSessionUUID();
     }
+
     AppMaster.instance().incomingDatabaseEvent(
         new MMessagePacket(msgTyp,
                            msg,
