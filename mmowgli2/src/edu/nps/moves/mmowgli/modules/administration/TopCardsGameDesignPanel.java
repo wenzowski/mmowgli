@@ -393,9 +393,9 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
     TypeLine typeLFirst = null;
     combo.removeAllItems();
    
-    Set<CardType> cts = moveBeingEdited.getCurrentMovePhase().getAllowedCards();
+    Move myMove = Move.mergeTL(moveBeingEdited);
+    Set<CardType> cts = myMove.getCurrentMovePhase().getAllowedCards();
     for (CardType ct : lis) {
-      ct = (CardType)HSess.get().merge(ct);
       TypeLine tl = new TypeLine(ct);
       if (typeLFirst == null)
         typeLFirst = tl;
