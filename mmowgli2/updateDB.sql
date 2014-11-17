@@ -1,5 +1,17 @@
 # This is a list of SQL commands which may be useful to update old game databases. This file is not intended to be run in its entirety.
-# Remember to also update the ApplicationConstants field DATABASE_VERSION
+# Remember to also update the MmowgliConstants field DATABASE_VERSION
+
+UPDATE `Game` SET `version` = '20141114' WHERE `id` = '1';
+ALTER TABLE `MovePhase` ADD `actionPlanWhoIsInvolvedHeader` VARCHAR(255)  CHARACTER SET utf8  COLLATE utf8_general_ci  NOT NULL  DEFAULT 'Who is involved?';
+ALTER TABLE `MovePhase` ADD `actionPlanWhatIsItHeader` VARCHAR(255)  CHARACTER SET utf8  COLLATE utf8_general_ci  NOT NULL  DEFAULT 'What is it?'  AFTER `actionPlanWhoIsInvolvedHeader`;
+ALTER TABLE `MovePhase` ADD `actionPlanWhatWillItTakeHeader` VARCHAR(255)  CHARACTER SET utf8  COLLATE utf8_general_ci  NOT NULL  DEFAULT 'What will it take?'  AFTER `actionPlanWhatIsItHeader`;
+ALTER TABLE `MovePhase` ADD `actionPlanHowWillItWorkHeader` VARCHAR(255)  CHARACTER SET utf8  COLLATE utf8_general_ci  NOT NULL  DEFAULT 'How will it work?'  AFTER `actionPlanWhatWillItTakeHeader`;
+ALTER TABLE `MovePhase` ADD `actionPlanHowWillItChangeHeader` VARCHAR(255)  CHARACTER SET utf8  COLLATE utf8_general_ci  NOT NULL  DEFAULT 'How will it change the situation?'  AFTER `actionPlanHowWillItWorkHeader`;
+UPDATE `MovePhase` SET `actionPlanWhoIsInvolvedHeader` = 'Who is involved?';
+UPDATE `MovePhase` SET `actionPlanWhatIsItHeader` = 'What is it?';
+UPDATE `MovePhase` SET `actionPlanWhatWillItTakeHeader` = 'What will it take?';
+UPDATE `MovePhase` SET `actionPlanHowWillItWorkHeader` = 'How will it work?';
+UPDATE `MovePhase` SET `actionPlanHowWillItChangeHeader` = 'How will it change the situation?';
 
 UPDATE `Game` SET `version` = '20140509' WHERE `id` = '1';
 ALTER TABLE `Game` ADD `mapLatitude` DOUBLE  NOT NULL  DEFAULT '36.610902'  AFTER `mapTitle`;
