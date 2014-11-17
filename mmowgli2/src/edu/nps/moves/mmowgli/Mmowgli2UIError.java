@@ -22,12 +22,15 @@
 
 package edu.nps.moves.mmowgli;
 
+import java.util.UUID;
+
 import com.vaadin.annotations.Theme;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 
+import edu.nps.moves.mmowgli.markers.HasUUID;
 /**
  * Mmowgli2UILogin.java
  * Created on Apr 28, 2014
@@ -41,14 +44,16 @@ import com.vaadin.ui.Button.ClickEvent;
  */
 
 @Theme("mmowgli2")
-public class Mmowgli2UIError extends UI
+public class Mmowgli2UIError extends UI implements HasUUID
 {
   private static final long serialVersionUID = 9069779406128535862L;
-
+  private UUID uuid;
   @SuppressWarnings("serial")
   @Override
   protected void init(VaadinRequest request)
   {
+    uuid = UUID.randomUUID();
+    
     final VerticalLayout layout = new VerticalLayout();
     layout.setMargin(true);
     setContent(layout);
@@ -68,4 +73,9 @@ public class Mmowgli2UIError extends UI
     });
     layout.addComponent(button);
   }
+  
+  public String getUI_UUID()
+  {
+    return uuid.toString();
+  } 
 }
