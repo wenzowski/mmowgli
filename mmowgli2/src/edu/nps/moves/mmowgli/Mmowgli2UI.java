@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.PUSHTRANSPORT;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -41,6 +43,7 @@ import edu.nps.moves.mmowgli.db.MovePhase;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
+import edu.nps.moves.mmowgli.markers.HasUUID;
 import edu.nps.moves.mmowgli.messaging.MessagingManager;
 import edu.nps.moves.mmowgli.messaging.WantsMovePhaseUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
@@ -49,7 +52,6 @@ import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 /**
  * Mmowgli2UI.java
  * Created on Jan 22, 2014
@@ -69,7 +71,7 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 */
 
 @SuppressWarnings("serial")
-abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMovePhaseUpdates
+abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMovePhaseUpdates, HasUUID
 {
   private MmowgliOuterFrame outerFr;
   private MmowgliSessionGlobals globals;
