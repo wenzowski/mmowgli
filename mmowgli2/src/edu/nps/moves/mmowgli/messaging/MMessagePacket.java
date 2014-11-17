@@ -43,7 +43,7 @@ public class MMessagePacket
   public String msg;
 
   public String session_id = "unset";  // user session id
-  public String ui_id      = "unset";  // ui (window) id
+  private String ui_id      = "unset";  // ui (window) id
   public String tomcat_id  = "unset";  // server id
   public String message_uuid = UUID.randomUUID().toString();
   
