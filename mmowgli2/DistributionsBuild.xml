@@ -54,6 +54,7 @@
 	<target name="bii.war"        depends="confirmClean,zipVaadinDir"> <deployOne outFile="bii.war"        webxml="bii_web.xml"        /></target>
 	<target name="blackswan.war"  depends="confirmClean,zipVaadinDir"> <deployOne outFile="blackswan.war"  webxml="blackswan_web.xml"  /></target>
 	<target name="cap2con.war"    depends="confirmClean,zipVaadinDir"> <deployOne outFile="cap2con.war"    webxml="cap2con_web.xml"    /></target>
+	<target name="COIN.war"       depends="confirmClean,zipVaadinDir"> <deployOne outFile="COIN.war"       webxml="COIN_web.xml"       /></target>
 	<target name="darkportal.war" depends="confirmClean,zipVaadinDir"> <deployOne outFile="darkportal.war" webxml="darkportal_web.xml" /></target>
 	<target name="em2.war"        depends="confirmClean,zipVaadinDir"> <deployOne outFile="em2.war"        webxml="em2_web.xml"        /></target>
 	<target name="energy.war"     depends="confirmClean,zipVaadinDir"> <deployOne outFile="energy.war"     webxml="energy_web.xml"     /></target>
@@ -86,6 +87,7 @@
 		bii.war,
 		blackswan.war,
 		cap2con.war,
+		COIN.war,
 		darkportal.war,
 		em2.war,
 		energy.war,
