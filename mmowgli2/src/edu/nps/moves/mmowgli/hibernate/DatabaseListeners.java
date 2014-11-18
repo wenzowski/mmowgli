@@ -104,7 +104,7 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-      if(enabled) MSysOut.println(">>> Save db listener <<<");
+//      if(enabled) MSysOut.println(">>> Save db listener <<<");
       super.onSaveOrUpdate(event); // default behavior first
 /*      if (!enabled)
         return;
@@ -155,7 +155,7 @@ public class DatabaseListeners
       if(msgTyp != null)
         messageOut(event, msgTyp, msg);
 */
-      if(enabled) MSysOut.println("Out of save db listener");
+ //     if(enabled) MSysOut.println("Out of save db listener");
     }
   }
   @SuppressWarnings("serial")
@@ -167,7 +167,9 @@ public class DatabaseListeners
     public void onPostInsert(PostInsertEvent event)
     {
       MSysOut.println(">>> PostInsert db listener type = "+event.getEntity().getClass().getSimpleName()+" <<<");
-
+      if(event.getEntity() instanceof User)
+         MSysOut.println("         user id = "+((User)event.getEntity()).getId());
+      
       if (!enabled)
         return;
       Object obj = event.getEntity();
@@ -216,7 +218,7 @@ public class DatabaseListeners
       if (msgTyp != null)
         messageOut(event, msgTyp, msg);
 
-      MSysOut.println(">>> Out of post insert db listener <<<");
+      MSysOut.println(">>> Out of post insert db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
     }
 
     @Override
@@ -233,7 +235,7 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-      if(enabled) MSysOut.println(">>> Update db listener <<<");
+//      if(enabled) MSysOut.println(">>> Update db listener <<<");
       super.onSaveOrUpdate(event); // default behavior first
    /*   if(!enabled)
         return;
@@ -288,7 +290,7 @@ public class DatabaseListeners
       if(msgTyp != null)
         messageOut(event,msgTyp,msg);
   */    
-      if(enabled) MSysOut.println(">>> Out of update db listener <<<");
+//      if(enabled) MSysOut.println(">>> Out of update db listener <<<");
     }
   }
   
@@ -300,6 +302,8 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
   public void onPostUpdate(PostUpdateEvent event)
   {
       if(enabled) MSysOut.println(">>> Postupdate db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<");
+      if(enabled) if(event.getEntity() instanceof User)
+                     MSysOut.println("       user id = "+((User)event.getEntity()).getId());
 
       if(!enabled)
         return;
@@ -354,7 +358,7 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
       if(msgTyp != null)
         messageOut(event,msgTyp,msg);
       
-      MSysOut.println(">>> Out of postupdate db listener <<");    
+      MSysOut.println(">>> Out of postupdate db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
   }
 
   @Override
