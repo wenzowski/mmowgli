@@ -83,7 +83,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 @WebServlet(value = "/*", loadOnStartup=1, asyncSupported=true)// the "/" means only urls at the context root (Mmowgli2/) come here,  default is /*
 @VaadinServletConfiguration(heartbeatInterval=300, closeIdleSessions=true, ui = Mmowgli2UILogin.class, productionMode = false)
-
+// (heartbeat of 300 is Vaadin default....5 min)
 // Settings in web.xml (are supposed to) override those listed here
 
 public class Mmowgli2VaadinServlet extends VaadinServlet implements SessionInitListener, SessionDestroyListener
@@ -113,7 +113,7 @@ System.out.println("bp");
     super.servletInitialized();
     
     getService().addSessionInitListener(this);
-    getService().addSessionDestroyListener(this);;
+    getService().addSessionDestroyListener(this);
     initLogging();
     ServletContext context = getServletContext();
     appMaster = AppMaster.instance(this,context);// Initialize app master, global across on user sessions on this cluster node
@@ -139,6 +139,7 @@ System.out.println("bp");
   {
     new MmowgliSessionGlobals(event,this);   // Initialize global object across all users windows, gets stored in VaadinSession object referenced in event
     event.getSession().addUIProvider(new Mmowgli2UIProvider());
+    
     //MSysOut.println("JMETERdebug: Session created, id = "+event.getSession().hashCode());
     if(appMaster != null)  {// might be with error on startup
       appMaster.doSessionCountUpdate(incrementSessionCount());
