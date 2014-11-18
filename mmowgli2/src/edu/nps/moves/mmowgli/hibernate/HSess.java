@@ -63,7 +63,7 @@ public class HSess
   {
     if(get()!=null){
       dumpPreviousCallerTrace();
-      throw new RuntimeException("Programming error, hibernate session leak");
+      repair();  // closes after dumping stack in sys out
     }
     
     Session s = VHib.openSession();
@@ -124,11 +124,15 @@ public class HSess
     return new HbnContainer(cls,getSessionFactory());
   }
 
+  private static void repair()
+  {
+    close();
+  }
   private static void dumpPreviousCallerTrace()
   {
     StackTraceElement[] ste = dbgThreadLocal.get();
     if(ste != null) {
-      System.out.println(">>>>>>>>>>>>>Existing leaked session was created by the following sequence of code:");
+      System.out.println(">>>>>>>>>>>>>Session leak: existing leaked session was created by the following sequence of code:");
       for(StackTraceElement elem : ste)
         System.out.println(elem.toString());
       System.out.println(">>>>>>>>>>>>>End of code sequence.");
