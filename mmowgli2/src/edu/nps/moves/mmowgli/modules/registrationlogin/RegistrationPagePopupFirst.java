@@ -37,6 +37,7 @@ import org.jasypt.digest.StandardStringDigester;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.server.Page;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -453,7 +454,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
 
     private void errorOutTL(String s)
     {
-      Notification.show("Could not register", s, Notification.Type.ERROR_MESSAGE);
+      new Notification("Could not register", s, Notification.Type.ERROR_MESSAGE,true).show(Page.getCurrent());
       if (user != null) {
         User.deleteTL(user);
         UserPii uPii = VHibPii.getUserPii(user.getId());
