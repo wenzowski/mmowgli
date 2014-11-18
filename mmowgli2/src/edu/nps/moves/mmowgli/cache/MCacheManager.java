@@ -512,7 +512,10 @@ public class MCacheManager implements InterTomcatReceiver
     synchronized(usersQuick) {
       Long id = MMessage.MMParse(messageType, message).id;
       User u = DBGet.getUserFreshTL(id); //the fresh should not be required since the Obj cache should have been updated first
-
+      
+      if(u == null) // will have gotten warnings in sys out
+        return;
+      
       addOrUpdateUserInContainer(u);
 
       if(u.isViewOnly() || u.isAccountDisabled())
