@@ -95,6 +95,7 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
     formLay.addComponent(locTf = new TextField("Location:"));
     locTf.setColumns(31);
     locTf.setInputPrompt("optional");
+    locTf.addStyleName("m-noleftmargin");
     
     Label lab;
     contentVLayout.addComponent(lab = new HtmlLabel(warning));
@@ -112,6 +113,9 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
     hl.addComponent(continueButt);
     continueButt.addClickListener(new JoinListener());   
     continueButt.setClickShortcut(KeyCode.ENTER);
+    
+    hl.addComponent(lab = new Label());
+    lab.setWidth("20px"); // don't run off the end
   }
   
   @SuppressWarnings("serial")
