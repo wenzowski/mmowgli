@@ -129,7 +129,7 @@ public class DBGet
           break retry;
         System.err.println("DBGet.getUser(id,sess) try " + retries+" failed");
         if(retries-- <= 0) {
-          System.err.println("User with id "+id+" not found in db!!!!!! Exception trapped, dump:");
+          System.err.println("User with id "+id+" not found in db, stack trace:");
           new Exception().printStackTrace();
           break retry;
         }
@@ -137,7 +137,8 @@ public class DBGet
       }
     }
 
-    userCache.addToCache(id, u);
+    if(u != null)
+      userCache.addToCache(id, u);
 
     return u;  
   }
