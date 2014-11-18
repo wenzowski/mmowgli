@@ -22,7 +22,9 @@
 
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import static edu.nps.moves.mmowgli.MmowgliConstants.LOGIN_CONTINUE_BUTTON;
+import static edu.nps.moves.mmowgli.MmowgliConstants.USER_NAME_TEXTBOX;
+import static edu.nps.moves.mmowgli.MmowgliConstants.USER_PASSWORD_TEXTBOX;
 
 import java.util.List;
 
@@ -30,7 +32,6 @@ import org.hibernate.criterion.Restrictions;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.server.WrappedSession;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -43,7 +44,6 @@ import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
 import edu.nps.moves.mmowgli.markers.*;
-import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 /**
  * LoginPopup.java Created on Dec 15, 2010
  * Updated Mar 6, 2014 Vaadin 7
@@ -240,22 +240,6 @@ public class LoginPopup extends MmowgliDialog
           return;
         }
       }
-      
-      WrappedSession wSess = Mmowgli2UI.getCurrent().getSession().getSession();    
-      int oldtmo = wSess.getMaxInactiveInterval();
-      int tmo = oldtmo;
-      if(user.isGameMaster() || user.isAdministrator()) {
-        if(GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS != null) {
-          try {
-            tmo = Integer.parseInt(GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS);
-          } catch(Throwable t) {
-            MSysOut.println("Error parsing "+WEB_XML_GAMEMASTER_TMO_KEY + "from web.xml");
-          }
-        }
-      }
-      if(tmo != oldtmo)
-        wSess.setMaxInactiveInterval(tmo);// units = seconds
-      MSysOut.println("Session timeout: "+tmo+" seconds");
       
       HSess.close();
       listener.buttonClick(event); // back up the chain
