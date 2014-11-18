@@ -22,14 +22,12 @@
 
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.NO_LOGGEDIN_USER_ID;
-import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.io.Serializable;
 import java.util.List;
 
-import com.vaadin.server.ExternalResource;
-import com.vaadin.server.VaadinServletService;
+import com.vaadin.server.*;
 import com.vaadin.shared.ui.BorderStyle;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
@@ -48,6 +46,7 @@ import edu.nps.moves.mmowgli.hibernate.VHibPii;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.MailManager;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * RegistrationPageBase.java
@@ -669,6 +668,17 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         user.setWelcomeEmailSent(true);
         User.updateTL(user);
       }
+      
+      // Adjust session timeouts.  Default (standard user) is set in web.xml
+      VaadinSession vsess = UI.getCurrent().getSession();
+      WrappedSession sess = vsess.getSession();
+      if(user.isGameMaster())
+        sess.setMaxInactiveInterval(GAMEMASTER_SESSION_TIMEOUT_SECONDS);
+      if(user.isAdministrator())
+        sess.setMaxInactiveInterval(ADMINSTRATOR_SESSION_TIMEOUT_SECONDS);
+      
+      MSysOut.println("Vaadin heartbeat interval (sec): "+vsess.getConfiguration().getHeartbeatInterval());
+      MSysOut.println("Tomcat timeout (\"maxInactiveInterval\") (sec): "+sess.getMaxInactiveInterval());
 
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       if (globs != null) {
