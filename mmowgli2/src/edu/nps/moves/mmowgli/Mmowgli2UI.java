@@ -128,7 +128,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     }
     
     globs.getMessagingManager().addMessageListener((AbstractMmowgliController)globs.getController());
-    //setPollInterval(5000); // 5 secs. (-1 to disable)
+
     setPollInterval(-1);
     HSess.checkClose(sessKey);
     MSysOut.println("Out of UI.init()");
