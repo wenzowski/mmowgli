@@ -2031,7 +2031,9 @@ div div .m-useradmin-search-combo .v-filterselect-button {
 .m-overflow-visible {
   overflow: visible;
 }
-
+.m-noleftmargin, .v-textfield-m-noleftmargin, .m-dialog-content tbody tr td input.m-noleftmargin, .m-dialog-content div div input.m-noleftmargin {
+  margin-left: 0px;
+}
 .m-noresize {
 	resize: none;
 }
