@@ -180,8 +180,6 @@ public class AppMaster
   //@formatter:off
     JMS_INTERNODE_URL               = getInitParameter(WEB_XML_JMS_URL_KEY);
     JMS_INTERNODE_TOPIC             = getInitParameter(WEB_XML_JMS_TOPIC_KEY);
-    GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS
-                                    = getInitParameter(WEB_XML_GAMEMASTER_TMO_KEY);
 
     DEPLOYMENT_TOKEN                = getInitParameter(WEB_XML_DEPLOYMENT_TOKEN_KEY);
     GAME_URL_TOKEN                  = getInitParameter(WEB_XML_GAME_URL_TOKEN_KEY);
