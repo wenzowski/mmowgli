@@ -325,11 +325,12 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
 
     Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
     for(UI ui : uis) {
-      AppMenuBar menubar = ((Mmowgli2UI)ui).getMenuBar();
-      if (menubar != null) { // can be at start
-        menubar.gameUpdatedExternallyTL();
+      if(ui instanceof Mmowgli2UI && !(ui instanceof Mmowgli2UILogin)) {
+        AppMenuBar menubar = ((Mmowgli2UI)ui).getMenuBar();
+        if (menubar != null) { // can be at start
+          menubar.gameUpdatedExternallyTL();
+        }
       }
-
     }
     return true;
   }
