@@ -76,7 +76,7 @@ public class RoleSelectionPage extends MmowgliDialog
     lab.setHeight("10px");
 
     expertiseTf = new TextField();
-    expertiseTf.addStyleName("m-nopaddingormargin");
+    expertiseTf.addStyleName("m-noleftmargin");
     expertiseTf.setCaption("Enter a short description of your pertinent expertise.");
     expertiseTf.setColumns(38);
     expertiseTf.setInputPrompt("optional");
