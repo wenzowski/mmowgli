@@ -64,16 +64,15 @@ public class MmowgliConstants
   public static String MMOWGLI_FRAME_WIDTH = "1100px";
   public static int MMOWGLI_FRAME_WIDTH_I = 1100;
 
-  public static long INSTANCEPOLLERINTVERVAL_MS = 1000L * 1000 * 5; // test
-                                                                    // 60L*1000*5;
-                                                                    // // 5
-                                                                    // minutes
+  public static long INSTANCEPOLLERINTVERVAL_MS = 1000L * 1000 * 5; // test 60L*1000*5; // 5 minutes
   public static Long NO_LOGGEDIN_USER_ID = -1L;
   
- // Let these be set in webxml
+  // Let this be set in webxml
   //public static int USER_SESSION_TIMEOUT_IN_SECONDS = 15*60;
- // public static int GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS = 4*60;
   
+  public static int GAMEMASTER_SESSION_TIMEOUT_SECONDS   = 2*60*60;   // 2 hours
+  public static int ADMINSTRATOR_SESSION_TIMEOUT_SECONDS = 24*60*60;  //whole day
+ 
   // Servlet context constants
   // This is the attribute name in the web app servlet context which holds a
   // reference to the single ApplicationMaster instance,
@@ -145,7 +144,6 @@ public class MmowgliConstants
   // Following get set in ApplicationMaster
   public static String DEPLOYMENT = null;
   public static String DEPLOYMENT_TOKEN = null;
-  public static String GAMEMASTER_SESSION_TIMEOUT_IN_SECONDS = null;
   
   public static String GAME_URL_TOKEN = null;
   public static String GAME_IMAGES_URL_RAW = null; // may need token
