@@ -127,7 +127,6 @@ public class MmowgliConstants
   public static String WEB_XML_JMS_TOPIC_KEY        = "jmsTopic";  
   public static String WEB_XML_JMS_URL_KEY          = "jmsUrl"; 
   public static String WEB_XML_SMTP_HOST_KEY        = "smtpHost";
-  public static String WEB_XML_GAMEMASTER_TMO_KEY   = "gameMasterTimeout";
   
   public static String WEB_XML_USER_IMAGES_FILESYSTEM_PATH_KEY = "userImagesPath";
   public static String WEB_XML_USER_IMAGES_URL_KEY             = "userImagesUrl";
