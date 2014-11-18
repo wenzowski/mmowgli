@@ -60,6 +60,7 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
   protected String titleStyle = "m-dialog-title";
   protected String titleStyleSmall = "m-dialog-title-smaller";
   protected String labelStyle = "m-dialog-label";
+  protected String labelStyleNoIndent = "m-dialog-label-noindent";
   protected String topLabelStyle = "m-dialog-toplabel";
   private Label titleLab = null;
 
