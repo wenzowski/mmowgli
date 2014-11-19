@@ -320,7 +320,18 @@ public class AbstractMmowgliControllerHelper
     if(Mmowgli2UI.getGlobals() instanceof WantsGameUpdates)
       Mmowgli2UI.getGlobals().gameUpdatedExternallyTL();
     
-    return iterateUIContents(1L,new ContentsHandler()
+    boolean psh = this.iterateUIs(null, new UIHandler()
+    {
+      @Override
+      public boolean handle(UI ui, Object obj)
+      {
+        if(ui instanceof WantsGameUpdates)
+          return((WantsGameUpdates)ui).gameUpdatedExternallyTL();
+        return false;
+      }
+      
+    });
+    boolean psh2 = iterateUIContents(1L,new ContentsHandler()
     {
       public boolean handle(Component comp, Object cId)
       {
@@ -329,6 +340,8 @@ public class AbstractMmowgliControllerHelper
         return false;
       }     
     });
+    
+    return (psh2 || psh);
   }
 
 
