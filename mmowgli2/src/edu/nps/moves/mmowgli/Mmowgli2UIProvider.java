@@ -64,10 +64,12 @@ public class Mmowgli2UIProvider extends DefaultUIProvider
     if(count == 0)
       return Mmowgli2UILogin.class;
     
-    MmowgliSessionGlobals globs = ((Mmowgli2UI)uis.toArray()[0]).getSessionGlobals();
-    if(globs != null && globs.isLoggedIn())
-      return Mmowgli2UISubsequent.class;
-    
+    UI zero = (UI)uis.toArray()[0];
+    if(zero instanceof Mmowgli2UI) {
+      MmowgliSessionGlobals globs = ((Mmowgli2UI)zero).getSessionGlobals();
+      if(globs != null && globs.isLoggedIn())
+        return Mmowgli2UISubsequent.class;
+    }
     return Mmowgli2UIError.class;
   }
 }
