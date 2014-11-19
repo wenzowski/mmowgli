@@ -477,6 +477,12 @@ public class SubCardsGameDesignPanel extends VerticalLayout implements MmowgliCo
     {
       return typ;
     }
+
+    @Override
+    public String toString()
+    {
+      return typ.getTitle() + "/" + typ.getSummaryHeader();
+    }
   }
 
   private void changeTypeCombo(NativeSelect combo, CardType ct)
