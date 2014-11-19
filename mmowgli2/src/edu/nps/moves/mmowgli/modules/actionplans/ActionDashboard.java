@@ -35,6 +35,7 @@ import com.vaadin.shared.Position;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Notification.Type;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
@@ -193,9 +194,9 @@ public class ActionDashboard extends VerticalLayout implements MmowgliComponent,
           "<center> Look for the \"you're invited to join!\" notice.<br/>"+
           "First, check out the plan.  Then, if you want to join,<br/>"+
           "click the link to become an author."+
-          "</center>");
+          "</center>",Type.HUMANIZED_MESSAGE,true); // allow html
 
-      note.setPosition(Position.MIDDLE_CENTER); //Window.Notification.POSITION_CENTERED);
+      note.setPosition(Position.MIDDLE_CENTER);
       note.setDelayMsec(5000);// 5 secs
       note.show(Page.getCurrent());
     }     
