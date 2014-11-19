@@ -41,12 +41,10 @@ import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.Move;
 import edu.nps.moves.mmowgli.db.MovePhase;
 import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HasUUID;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
-import edu.nps.moves.mmowgli.markers.HasUUID;
-import edu.nps.moves.mmowgli.messaging.MessagingManager;
-import edu.nps.moves.mmowgli.messaging.WantsMovePhaseUpdates;
-import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
+import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
 import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
@@ -71,7 +69,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 */
 
 @SuppressWarnings("serial")
-abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMovePhaseUpdates, HasUUID
+abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMovePhaseUpdates, WantsGameUpdates, HasUUID
 {
   private MmowgliOuterFrame outerFr;
   private MmowgliSessionGlobals globals;
@@ -307,6 +305,14 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
 	  if(outerFr != null)  // might not be ready yet
       return outerFr.gameEvent_oobTL(typ, message); 
 	  return false;
+  }
+  
+  @Override
+  public boolean gameUpdatedExternallyTL()
+  {
+    if(outerFr != null)
+      return outerFr.gameUpdatedExternallyTL();
+    return false;
   }
   
   @Override
