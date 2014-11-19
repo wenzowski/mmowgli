@@ -35,6 +35,7 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
 import edu.nps.moves.mmowgli.db.Media.Source;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
+import edu.nps.moves.mmowgli.messaging.WantsGameUpdates;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
@@ -44,7 +45,7 @@ import edu.nps.moves.mmowgli.utility.MediaLocator;
  * @since $Date$
  * @copyright Copyright (C) 2011
  */
-public class Footer extends AbsoluteLayout implements MmowgliComponent
+public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGameUpdates
 {
   private static final long serialVersionUID = -5343489408165893669L;
 
@@ -171,5 +172,14 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent
   private String getTwitterLink()
   {
     return "http://twitter.com/MMOWGLI";
+  }
+
+  @Override
+  public boolean gameUpdatedExternallyTL()
+  {
+    Game g = Game.getTL();
+    boolean isVisible = fouoLink.isVisible();
+    fouoLink.setVisible(g.isShowFouo());
+    return isVisible != g.isShowFouo();
   }
 }
