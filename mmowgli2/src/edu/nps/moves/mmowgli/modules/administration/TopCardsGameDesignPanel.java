@@ -444,6 +444,12 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
     {
       return typ;
     }
+    
+    @Override
+    public String toString()
+    {
+      return typ.getTitle() + "/" + typ.getSummaryHeader();
+    }
   }
   
   private int getCardCountFromThisMoveTL(Move m, CardClass ccls)
