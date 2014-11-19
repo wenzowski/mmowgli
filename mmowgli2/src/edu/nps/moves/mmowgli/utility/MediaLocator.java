@@ -121,7 +121,6 @@ public class MediaLocator implements Serializable
 		switch(m.getSource())
 		{
 		case USER_UPLOADS_REPOSITORY:  // used to be CLASSPATH
-		  System.out.println("in MediaLocator.locate/USER_UPLOADS_REPOSITORY");
 	     try {
 	        if(url.indexOf(':') == -1)
 	          return new ExternalResource(new URL(getUserImagesUrl(),url));
