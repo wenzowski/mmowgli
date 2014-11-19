@@ -349,7 +349,8 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         LeafletMap lMap = new LeafletMap();
         Mmowgli2UI.getAppUI().setFrameContent(lMap);
         lMap.initGuiTL();
-  
+        break;
+        
       case CARDCREATEACTIONPLANCLICK:
         Object cardId = butt.getParam();
         helper.handleCreateActionPlan(event.getButton(), cardId);
