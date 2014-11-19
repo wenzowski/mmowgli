@@ -27,6 +27,7 @@ import org.hibernate.*;
 import com.vaadin.data.hbnutil.HbnContainer;
 
 import edu.nps.moves.mmowgli.MmowgliConstants;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * HSess.java
@@ -128,14 +129,24 @@ public class HSess
   {
     close();
   }
+
   private static void dumpPreviousCallerTrace()
   {
-    StackTraceElement[] ste = dbgThreadLocal.get();
-    if(ste != null) {
-      System.out.println(">>>>>>>>>>>>>Session leak: existing leaked session was created by the following sequence of code:");
-      for(StackTraceElement elem : ste)
-        System.out.println(elem.toString());
-      System.out.println(">>>>>>>>>>>>>End of code sequence.");
+    MSysOut.println(">>>>>>>>>>>>>> Session leak, current stack:");
+    StackTraceElement[] elems = new Throwable().getStackTrace();
+    dumpStackElements(elems);
+
+    elems = dbgThreadLocal.get();
+    if (elems != null) {
+      MSysOut.println(">>>>>>>>>>>>> Existing leaked session was created by the following:");
+      dumpStackElements(elems);
     }
+  }
+
+  private static void dumpStackElements(StackTraceElement[] stes)
+  {
+    for (StackTraceElement elem : stes)
+      MSysOut.println(elem.toString());
+    MSysOut.println(">>>>>>>>>>>>> End of stack dumps.");
   }
 }
