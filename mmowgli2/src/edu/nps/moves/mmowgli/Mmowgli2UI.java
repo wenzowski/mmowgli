@@ -77,6 +77,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   private MmowgliSessionGlobals globals;
   private Navigator navigator;
   private UUID uuid;
+  private boolean uiFullyInitted = false;  // after components added, AFTER login screens
   
   private boolean firstUI = false;
   protected Mmowgli2UI(boolean firstUI)
@@ -127,8 +128,12 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
       setRunningApplicationFrameworkTL();
     }
     
-    globs.getMessagingManager().addMessageListener((AbstractMmowgliController)globs.getController());
-
+    //This has caused some recent exceptions, break it apart temporarily    
+    //globs.getMessagingManager().addMessageListener((AbstractMmowgliController)globs.getController());
+    MessagingManager mm = globs.getMessagingManager();
+    MmowgliController cntlr = globs.getController();
+    mm.addMessageListener((AbstractMmowgliController)cntlr);
+    
     setPollInterval(-1);
     HSess.checkClose(sessKey);
     MSysOut.println("Out of UI.init()");
@@ -200,12 +205,19 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     navigator = new Navigator(this,getContentContainer());
     
     getSessionGlobals().getController().setupNavigator(navigator);
+    
+    uiFullyInitted = true;
   }
   
   /* Similar functionality...*/
   public void navigateTo(AppEvent ev)
   {
     navigator.navigateTo(ev.getFragmentString());
+  }
+  
+  public boolean isUiFullyInitted()
+  {
+    return uiFullyInitted;
   }
   
   public void setFrameContent(Component c)
@@ -267,7 +279,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
 
   public AppMenuBar getMenuBar()
   {
-    return outerFr.getMenuBar();
+    return (outerFr==null)?null:outerFr.getMenuBar();
   }
 
   public void quitAndGoTo(String logoutUrl)
@@ -278,7 +290,8 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
 
   public void showOrHideFouoButton(boolean show)
   {
-    outerFr.showOrHideFouoButton(show);    
+    if(outerFr != null)
+      outerFr.showOrHideFouoButton(show);    
   }
 
 // called from message receiver in controller, header might need update
