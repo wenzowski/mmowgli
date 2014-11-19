@@ -161,7 +161,7 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
           GameEventLogger.logGameDesignChangeTL("Map zoom", val, uid);
         }
         catch (Exception ex) {
-          Notification.show("Parameter error", "<html>Check for proper integer format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE);
+          new Notification("Parameter error", "Check for proper integer format.</br>New value not committed.",Notification.Type.WARNING_MESSAGE,true).show(Page.getCurrent());
         }
         HSess.close();
       }
