@@ -33,9 +33,7 @@ import edu.nps.moves.mmowgli.components.Footer;
 import edu.nps.moves.mmowgli.components.Header;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.messaging.MMessage;
-import edu.nps.moves.mmowgli.messaging.WantsMovePhaseUpdates;
-import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
+import edu.nps.moves.mmowgli.messaging.*;
 /**
  * MmowgliOuterFrame.java
  * Created on Jan 27, 2014
@@ -47,7 +45,7 @@ import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdates, WantsMovePhaseUpdates
+public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdates, WantsMovePhaseUpdates, WantsGameUpdates
 {
   private static final long serialVersionUID = 6619931431041760684L;
   private Header header;
@@ -119,5 +117,11 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
   public boolean movePhaseUpdatedOobTL(Serializable pId)
   {
     return false; // header doesn't use it
+  }
+
+  @Override
+  public boolean gameUpdatedExternallyTL()
+  {
+    return footer.gameUpdatedExternallyTL();
   }
 }
