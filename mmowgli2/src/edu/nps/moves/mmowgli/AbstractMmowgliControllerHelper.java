@@ -110,13 +110,15 @@ public class AbstractMmowgliControllerHelper
     boolean push = false;
     Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
     for(UI ui : uis) {
-      if(! (ui instanceof Mmowgli2UI)  || (ui instanceof Mmowgli2UILogin) )  // might be the error ui
+      if(! (ui instanceof Mmowgli2UI))  // might be the error ui
         continue;
       Mmowgli2UI mui = (Mmowgli2UI)ui;
-      Component comp = mui.getFrameContent();
-      if(comp != null)
-        if(handler.handle(comp, obj))
-          push = true;
+      if(mui.isUiFullyInitted()) {
+        Component comp = mui.getFrameContent();
+        if(comp != null)
+          if(handler.handle(comp, obj))
+           push = true;
+      }
     }   
     return push;
   }
@@ -125,7 +127,7 @@ public class AbstractMmowgliControllerHelper
     boolean push = false;
     Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
     for(UI ui : uis) {
-      if(! (ui instanceof Mmowgli2UI) || (ui instanceof Mmowgli2UILogin) )  // might be the error ui
+      if(! (ui instanceof Mmowgli2UI))  // might be the error ui
         continue;
       Mmowgli2UI mui = (Mmowgli2UI)ui;
       if(mui != null)
