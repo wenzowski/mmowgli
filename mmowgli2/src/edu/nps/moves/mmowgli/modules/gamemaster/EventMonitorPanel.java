@@ -193,7 +193,6 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
           sb.append("<b>");
           sb.append(count);
           sb.append("</b>");
-          sb.append(",");
           sb.append(" Action Plan");
           if (count != 1) {
               sb.append("s");
