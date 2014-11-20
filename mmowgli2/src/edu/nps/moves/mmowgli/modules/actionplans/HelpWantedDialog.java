@@ -73,7 +73,8 @@ public class HelpWantedDialog extends Window
     setWidth("500px");
     setHeight("550px");
 
-    VerticalLayout vLay = (VerticalLayout) getContent();
+    VerticalLayout vLay = new VerticalLayout();
+    setContent(vLay);
     vLay.setMargin(true);
     vLay.setSpacing(true);
     vLay.setSizeFull();
