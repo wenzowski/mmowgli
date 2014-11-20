@@ -331,7 +331,6 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     titleUnion.addStyleName("m-lightgrey-border");
     // titleUnion.addStyleName("m-opacity-75");
     titleUnion.setHeight("95px"); // 120 px); must make it this way for alignment of r/o vs rw
-    titleUnion.initGui();
 
     addComponent(saveCanPan, "top:0px;left:395px");
     saveCanPan.setVisible(false);
