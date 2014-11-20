@@ -71,7 +71,8 @@ public class MmowgliMessageBroadcaster
     final Window bcastWindow = new Window(title);
     bcastWindow.setModal(true);
 
-    VerticalLayout layout = (VerticalLayout) bcastWindow.getContent();
+    VerticalLayout layout = new VerticalLayout();
+    bcastWindow.setContent(layout);
     layout.setMargin(true);
     layout.setSpacing(true);
     layout.setWidth("99%");
