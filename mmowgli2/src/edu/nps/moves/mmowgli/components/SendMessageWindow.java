@@ -87,7 +87,8 @@ public class SendMessageWindow extends Window
     this.emails = emails;
     
     setModal(true);
-    VerticalLayout layout = (VerticalLayout) getContent();
+    VerticalLayout layout = new VerticalLayout();
+    setContent(layout);
     layout.setMargin(true);
     layout.setSpacing(true);
     layout.setWidth("100%");
