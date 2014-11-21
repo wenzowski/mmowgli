@@ -69,7 +69,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 */
 
 @SuppressWarnings("serial")
-abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMovePhaseUpdates, WantsGameUpdates, HasUUID
+abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMovePhaseUpdates, WantsGameUpdates, WantsGameEventUpdates, HasUUID
 {
   private MmowgliOuterFrame outerFr;
   private MmowgliSessionGlobals globals;
@@ -89,7 +89,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   @HibernateOpened
   protected void init(VaadinRequest request)
   {  
-    MSysOut.println("Into UI.init()");
+    MSysOut.println("Into "+(firstUI?"Mmowgli2UILogin":"Mmowgli2UISubsequent") +".init()");
     AppMaster.instance().oneTimeSetAppUrlFromUI();
     
     Object sessKey = HSess.checkInit();
@@ -98,10 +98,6 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     setWindowTitleTL();
     VerticalLayout layout = new VerticalLayout();
     setContent(layout);
-
-    //  System.out.println("VMShareTest="+VMShareTest.test);
-    //  System.out.println("VMShareTest now changed to Mmowgli2UI");
-    //  VMShareTest.test = "Mmowgli2UI";
       
     MmowgliSessionGlobals globs = getSession().getAttribute(MmowgliSessionGlobals.class);
     if(!globs.initted) {
@@ -110,15 +106,14 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
       globs.setMediaLocator(new MediaLocator());
       globs.setFirstUI(this);
       
-      MessagingManager mm = new MessagingManager(this);
+      MessagingManager2 mm = new MessagingManager2();
       globs.setMessagingManager(mm);
-      mm.registerSession();
-      
-      globs.initted=true;
+      globs.getMessagingManager().registerSession();
     }
     
     globals = globs;          
     setCustomBackgroundTL();
+  
     if(firstUI) {      
       setLoginContentTL(); 
     }
@@ -128,27 +123,19 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     
     //This has caused some recent exceptions, break it apart temporarily    
     //globs.getMessagingManager().addMessageListener((AbstractMmowgliController)globs.getController());
-    MessagingManager mm = globs.getMessagingManager();
+    MessagingManager2 mm = globs.getMessagingManager();
     MmowgliController cntlr = globs.getController();
     mm.addMessageListener((AbstractMmowgliController)cntlr);
     
     setPollInterval(-1);
     HSess.checkClose(sessKey);
-    MSysOut.println("Out of UI.init()");
+    
+    if(!globs.initted)
+      globs.initted=true;
+    
+    MSysOut.println("Out of "+(firstUI?"Mmowgli2UILogin":"Mmowgli2UISubsequent") +".init()");
   }
-  
-  @Override
-  public void detach()
-  {
-    MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-    MessagingManager mm = globs.getMessagingManager();
-    if(mm != null) {
-      globs.setMessagingManager(null);
-      mm.unregisterSession();
-    }
-    super.detach();
-  }
-  
+   
   public void setWindowTitleTL()
   {
     setWindowTitle(HSess.get());
@@ -204,6 +191,9 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     
     getSessionGlobals().getController().setupNavigator(navigator);
     
+    Game g = Game.getTL();
+    showOrHideFouoButton(g.isShowFouo());
+
     uiFullyInitted = true;
   }
   
@@ -300,13 +290,13 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     return false;
   }
 
-  public boolean gameEvent_oobTL(char typ, String message)
+  @Override
+  public boolean gameEventLoggedOobTL(Object evId)
   {
-	  if(outerFr != null)  // might not be ready yet
-      return outerFr.gameEvent_oobTL(typ, message); 
-	  return false;
+    if(outerFr != null)
+      return outerFr.gameEventLoggedOobTL(evId);
+    return false;
   }
-  
   @Override
   public boolean gameUpdatedExternallyTL()
   {
