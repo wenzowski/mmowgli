@@ -31,7 +31,9 @@ import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.GameLinks;
+import edu.nps.moves.mmowgli.db.Media;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
 import edu.nps.moves.mmowgli.db.Media.Source;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
@@ -124,29 +126,10 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
       hl.setSizeUndefined();
       mainAbsLay.addComponent(hl,"bottom:3px;right:15px;");   
     }
-    
 
- /*   fouoButt = new IDNativeButton(null, FOUOCLICK);
-    addComponent(fouoButt,"top:92px;left:365px");
-    fouoButt.addStyleName("fouobutton"); // for auto testing
-    fouoButt.addStyleName("borderless");
-    app.globs().mediaLocator().decorateImageButton(fouoButt, "fouo250w36h.png");
-    fouoButt.setWidth("250px");
-    fouoButt.setHeight("36px");
-
-    fouoButt.setDescription(g.getFouoDescription());
-    
-    fouoButt.setVisible(false); //by default
- */   
-    fouoLink = new Link(null,new ExternalResource(gl.getFouoLink()));
+    fouoLink = Footer.buildFouoNoticeTL();
     addComponent(fouoLink,"top:92px;left:365px");
-    Resource icon = medLoc.locate(new Media("fouo250w36h.png", // todo, database-ize
-                                  "", "",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
-    fouoLink.setIcon(icon);
-    fouoLink.setDescription(Game.getTL().getFouoDescription());
-    fouoLink.setTargetName(PORTALTARGETWINDOWNAME);
-    fouoLink.setTargetBorder(BorderStyle.DEFAULT);
-    
+    fouoLink.setVisible(Game.getTL().isShowFouo());    
   }
     
   private Link makeLink(String text, String url, String tooltip)
@@ -158,9 +141,9 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
     return l;
   }
   
+  // Can be deleted
   public void showHideFouoButton(boolean show)
   {
-    //fouoButt.setVisible(show);
     fouoLink.setVisible(show);
   }
   
@@ -182,4 +165,20 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
     fouoLink.setVisible(g.isShowFouo());
     return isVisible != g.isShowFouo();
   }
+  
+  public static Link buildFouoNoticeTL()
+  {
+    GameLinks gl = GameLinks.getTL();
+    MediaLocator mediaLoc = Mmowgli2UI.getGlobals().getMediaLocator();
+    Link fouoLink = new Link(null,new ExternalResource(gl.getFouoLink()));
+    Resource icon = mediaLoc.locate(new Media("fouo250w36h.png", // todo, database-ize
+                                  "", "",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
+    fouoLink.setIcon(icon);
+    fouoLink.setDescription(Game.getTL().getFouoDescription());
+    fouoLink.setTargetName(PORTALTARGETWINDOWNAME);
+    fouoLink.setTargetBorder(BorderStyle.DEFAULT);
+    return fouoLink;
+  }
+
+
 }
