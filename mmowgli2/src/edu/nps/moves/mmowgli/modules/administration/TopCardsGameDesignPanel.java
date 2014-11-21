@@ -113,7 +113,7 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
     negativeTypeSelect.setReadOnly(locked);
     
     childCardsWarning.setVisible(locked);
-    
+    moveBeingEdited = (Move)Move.mergeTL(moveBeingEdited);
    // boolean warning = checkCardCountGtZero(CardType.getPositiveIdeaCardType(moveBeingEdited));  // true if > zero cards
     boolean warning = checkCardCountGtTL(CardType.getPositiveIdeaCardType(moveBeingEdited),8);  // true if > 8 cards
     cantEditPositiveTypeWarning.setVisible(warning);
