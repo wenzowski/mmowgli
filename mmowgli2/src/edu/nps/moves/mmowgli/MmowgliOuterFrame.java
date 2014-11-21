@@ -24,13 +24,14 @@ package edu.nps.moves.mmowgli;
 
 import java.io.Serializable;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.ComponentContainer;
-import com.vaadin.ui.VerticalLayout;
+import org.vaadin.maddon.layouts.MHorizontalLayout;
+
+import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.components.AppMenuBar;
 import edu.nps.moves.mmowgli.components.Footer;
 import edu.nps.moves.mmowgli.components.Header;
+import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.messaging.*;
@@ -45,13 +46,14 @@ import edu.nps.moves.mmowgli.messaging.*;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdates, WantsMovePhaseUpdates, WantsGameUpdates
+public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdates, WantsMovePhaseUpdates, WantsGameUpdates, WantsGameEventUpdates
 {
   private static final long serialVersionUID = 6619931431041760684L;
   private Header header;
   private Footer footer;
   private MmowgliContentFrame mContentFr;
   private AppMenuBar menubar;
+  private Component fouoButton;
   
   public MmowgliOuterFrame()
   {
@@ -61,14 +63,43 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
    // addStyleName("m-redborder");   this is a good debugging border
     
     User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
-    if(me.isGameMaster() || me.isAdministrator() || me.isDesigner())
-       addComponent(menubar = new AppMenuBar(me.isGameMaster(),me.isAdministrator(),me.isDesigner()));
-    
+
+    addMenuBarAndFouoRowTL(me);
     addComponent(header=new Header());
     header.initGui();
     addComponent(mContentFr = new MmowgliContentFrame());
     addComponent(footer=new Footer());
     footer.initGui();
+  }
+  
+  public void addMenuBarAndFouoRowTL(User me)
+  {
+    HorizontalLayout hlay = new MHorizontalLayout().withMargin(false).withSpacing(false).withFullHeight();
+    addComponent(hlay);
+    
+    if(me.isGameMaster() || me.isAdministrator() || me.isDesigner()) {
+      menubar = new AppMenuBar(me.isGameMaster(),me.isAdministrator(),me.isDesigner());
+      hlay.addComponent(menubar);
+      hlay.setExpandRatio(menubar, 0.5f);
+      hlay.setComponentAlignment(menubar, Alignment.TOP_LEFT);
+    }
+    else {
+      Label lab = new Label();
+      hlay.addComponent(lab);
+      hlay.setExpandRatio(lab, 0.5f);
+    }
+    hlay.addComponent(fouoButton = makeFouoButtonTL());
+    
+    Label lab = new Label();
+    hlay.addComponent(lab);
+    hlay.setExpandRatio(lab, 0.5f);
+  }
+  
+  private Component makeFouoButtonTL()
+  {
+    Component comp =  Footer.buildFouoNoticeTL();
+    comp.setVisible(Game.getTL().isShowFouo());
+    return comp;
   }
   
   public void setFrameContent(Component c)
@@ -96,15 +127,9 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
     return header.refreshUserTL(uId);
   }
 
-  public boolean gameEvent_oobTL(char typ, String message)
-  {
-    MMessage MSG = MMessage.MMParse(typ, message);
-    return header.gameEventLoggedOobTL(MSG.id) ;  
-  }
- 
   public void showOrHideFouoButton(boolean show)
   {
-    //header.showOrHideFouoButton(show);
+    fouoButton.setVisible(show);
     footer.showHideFouoButton(show);    
   }
 
@@ -122,6 +147,23 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
   @Override
   public boolean gameUpdatedExternallyTL()
   {
-    return footer.gameUpdatedExternallyTL();
+    boolean ret = false;
+
+    boolean fouoShow = Game.getTL().isShowFouo();
+    if (fouoShow != fouoButton.isVisible()) {
+      fouoButton.setVisible(fouoShow);
+      ret = true;
+    }
+    if (header.gameUpdatedExternallyTL())
+      ret = true;
+    if (footer.gameUpdatedExternallyTL())
+      ret = true;
+    return ret;
+  }
+
+  @Override
+  public boolean gameEventLoggedOobTL(Object evId)
+  {
+    return header.gameEventLoggedOobTL(evId);
   }
 }
