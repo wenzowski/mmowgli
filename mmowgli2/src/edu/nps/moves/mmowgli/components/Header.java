@@ -51,6 +51,7 @@ import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsGameEventUpdates;
+import edu.nps.moves.mmowgli.messaging.WantsGameUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
 import edu.nps.moves.mmowgli.utility.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
@@ -63,7 +64,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGameEventUpdates, WantsMoveUpdates
+public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGameEventUpdates, WantsMoveUpdates, WantsGameUpdates
 {
   private static final long serialVersionUID = 3247182543408578788L;
   private static String user_profile_tt = "View your player profile";
@@ -107,6 +108,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   private int buttonChars = 0;
   
   private MediaLocator mediaLoc;
+  
   @HibernateSessionThreadLocalConstructor
   public Header()
   {
@@ -147,7 +149,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     brandingLab.setHeight(h_movetitle);
     brandingLab.addStyleName("m-header-branding-text"); //m-header-movetitle-text");
   }
-  
+   
   private void addDivider(HorizontalLayout hl, int buttonChars)
   {
     int sp;
@@ -340,6 +342,15 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
       moveNumLab.setValue(move.getName());
       addComponent(moveNumLab, "top:103px;left:333px");
     }
+/*    if(user != null && (user.isAdministrator() || user.isGameMaster() || user.isDesigner() )) { // has a menu
+      //  fouoLink.addStyleName("m-absolutePositioning");
+        addComponent(fouoLink,"top:-10px;left:400px");
+    }
+    else
+      addComponent(fouoLink,"top:0px;left:400px");
+    
+    fouoLink.setVisible(g.isShowFouo());
+    */
   }
   
   private void setBrandingLabelText(Move m, Game g)
@@ -577,4 +588,10 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     }
     return false;
   }
-}
+
+  @Override
+  public boolean gameUpdatedExternallyTL()
+  {
+    return false;
+  } 
+ }
