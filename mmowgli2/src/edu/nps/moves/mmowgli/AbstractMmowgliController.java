@@ -45,8 +45,8 @@ import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
-import edu.nps.moves.mmowgli.messaging.MessagingManager;
-import edu.nps.moves.mmowgli.messaging.MessagingManager.MMMessageListener;
+import edu.nps.moves.mmowgli.messaging.MessagingManager2;
+import edu.nps.moves.mmowgli.messaging.MessagingManager2.MMMessageListener2;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionDashboard;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2;
 import edu.nps.moves.mmowgli.modules.actionplans.HowToWinActionPopup;
@@ -71,7 +71,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public abstract class AbstractMmowgliController implements MmowgliController, MMMessageListener
+public abstract class AbstractMmowgliController implements MmowgliController, MMMessageListener2
 {
   private boolean initted = false;
   //private Navigator navigator;
@@ -326,9 +326,9 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       case SIGNOUTCLICK:
         Serializable uid = ui.getSessionGlobals().getUserID();
         GameEventLogger.logUserLogoutTL(uid);
-        MessagingManager mgr = Mmowgli2UI.getGlobals().getMessagingManager();
+        MessagingManager2 mgr = Mmowgli2UI.getGlobals().getMessagingManager();
         if(mgr != null) {
-          mgr.sendSessionMessage(new MMessagePacket(USER_LOGOUT,""+uid));
+          mgr.sendSessionMessage(new MMessagePacket(USER_LOGOUT,""+uid),ui);
           mgr.unregisterSession();
         }
       /*  sendToBus(USER_LOGOUT, "" + uid, false);
@@ -481,39 +481,48 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
   
   // MessageReceiver interface for in-line (sessMgr == null) && oob events
   @Override
-  public boolean receiveMessageTL(MMessagePacket pkt)
+  public boolean receiveMessage(MMessagePacket pkt)
   {
     MSysOut.println("AbstractMmowgliController receiveMessage(pkt) type= "+pkt.msgType);
     try {
     switch(pkt.msgType) {
-      case GAMEEVENT:
-        return helper.gameEvent_oobTL(pkt.msgType, pkt.msg); //messageType,message);
+    case UPDATED_ACTIONPLAN:
+    case NEW_ACTIONPLAN:
+      return helper.actionPlanUpdated_oob(Long.parseLong(pkt.msg));
 
-      case UPDATED_GAME:
-        return helper.gameUpdated_oobTL();
+    case NEW_CARD:
+      return helper.cardPlayed_oob(Long.parseLong(pkt.msg));
+    case UPDATED_CARD:
+      return helper.cardUpdated_oob(Long.parseLong(pkt.msg));
+    case UPDATED_CHAT:
+      return helper.chatLogUpdated_oob(Long.parseLong(pkt.msg));
+      
+    case UPDATED_GAME:
+      return helper.gameUpdated_oob();
 
-      case NEW_CARD:
-        return helper.cardPlayed_oobTL(Long.parseLong(pkt.msg));
+    case UPDATED_MEDIA: // normally means only that the caption has been edited
+      return helper.mediaUpdated_oob(Long.parseLong(pkt.msg));
+      
+    case UPDATED_MOVE:
+      return helper.moveUpdated_oob(Long.parseLong(pkt.msg));
+    
+    case UPDATED_MOVEPHASE:
+      return helper.movePhaseUpdated_oob(Long.parseLong(pkt.msg));
+      
+    case NEW_MESSAGE:
+      return helper.newGameMessage_oob(Long.parseLong(pkt.msg));
+
+    case UPDATED_USER:
+      // probably a scoring change
+      return helper.userUpdated_oob(Long.parseLong(pkt.msg));
+        
+    case GAMEEVENT:
+        return helper.gameEvent_oob(pkt.msgType, pkt.msg); //messageType,message);
+
 
       case NEW_USER:
-        return helper.newUser_oobTL(Long.parseLong(pkt.msg));
-
-      case NEW_MESSAGE:
-        return helper.newGameMessage_oobTL(Long.parseLong(pkt.msg));
-
-      case UPDATED_CARD:
-        return helper.cardUpdated_oobTL(Long.parseLong(pkt.msg));
-
-      case UPDATED_USER:
-        // probably a scoring change
-        return helper.userUpdated_oobTL(Long.parseLong(pkt.msg));
-        
-      case UPDATED_MOVE:
-        return helper.moveUpdated_oobTL(Long.parseLong(pkt.msg));
-      
-      case UPDATED_MOVEPHASE:
-        MSysOut.println("AbstractMmowglicontroller.receiveMessage() got UPDATED_MOVEPHASE");
-        return helper.movePhaseUpdated_oobTL(Long.parseLong(pkt.msg));
+        helper.newUser_oob(Long.parseLong(pkt.msg));
+        return false;
         
       case USER_LOGON:
 //        id = Long.parseLong(message);
@@ -525,21 +534,16 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
 //        User usr = DBGet.getUser(id,sessMgr.getSession());
 //        broadcastNews_oob(sessMgr,"User " + usr.getUserName() + " / " + usr.getLocation() + " went offline");
         break;
-      case UPDATED_ACTIONPLAN:
-      case NEW_ACTIONPLAN:
-        return helper.actionPlanUpdated_oobTL(Long.parseLong(pkt.msg));
 
-      case UPDATED_CHAT:
-        return helper.chatLogUpdated_oobTL(Long.parseLong(pkt.msg));
-
-      case UPDATED_MEDIA: // normally means only that the caption has been edited
-        return helper.mediaUpdated_oobTL(Long.parseLong(pkt.msg));
      
       case INSTANCEREPORTCOMMAND:
-        helper.doSessionReportTL(pkt.msg);
+        helper.doSessionReport(pkt.msg);
         break;
       case UPDATED_CARDTYPE:
+        Object key = HSess.checkInit();
         CardType ct = (CardType)HSess.get().get(CardType.class, Long.parseLong(pkt.msg));
+        HSess.checkClose(key);
+        
         CardTypeManager.updateCardType(ct);
         break;
       }
