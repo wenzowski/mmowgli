@@ -37,7 +37,7 @@ import com.vaadin.ui.UI;
 import edu.nps.moves.mmowgli.components.AppMenuBar;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
-import edu.nps.moves.mmowgli.messaging.MessagingManager;
+import edu.nps.moves.mmowgli.messaging.MessagingManager2;
 import edu.nps.moves.mmowgli.messaging.WantsGameUpdates;
 import edu.nps.moves.mmowgli.modules.scoring.ScoreManager2;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
@@ -68,7 +68,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   private boolean internetExplorer  = false;
 
   private MmowgliController controller;
-  private MessagingManager messagingManager;
+  private MessagingManager2 messagingManager;
   private MediaLocator mediaLoc;
   private ScoreManager2 scoreManager;
   private Serializable userId=null;
@@ -335,12 +335,12 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     return true;
   }
 
-  public void setMessagingManager(MessagingManager mm)
+  public void setMessagingManager(MessagingManager2 mm)
   {
     messagingManager = mm;    
   }
 
-  public MessagingManager getMessagingManager()
+  public MessagingManager2 getMessagingManager()
   {
     return messagingManager;   
   }
