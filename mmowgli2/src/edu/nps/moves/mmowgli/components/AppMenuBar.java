@@ -250,7 +250,7 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
   }
 
   @Override
-  public boolean gameUpdatedExternallyTL()
+  public boolean gameUpdatedExternallyTL(Object nullObj)
   {
     boolean ret = false;
     
