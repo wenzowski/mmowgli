@@ -158,7 +158,7 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
   }
 
   @Override
-  public boolean gameUpdatedExternallyTL()
+  public boolean gameUpdatedExternallyTL(Object nullObj)
   {
     Game g = Game.getTL();
     boolean isVisible = fouoLink.isVisible();
