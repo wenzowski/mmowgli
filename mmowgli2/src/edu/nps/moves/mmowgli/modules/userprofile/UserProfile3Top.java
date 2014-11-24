@@ -23,8 +23,9 @@
 package edu.nps.moves.mmowgli.modules.userprofile;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
-import static edu.nps.moves.mmowgli.db.Badge.*;
-import java.io.Serializable;
+import static edu.nps.moves.mmowgli.db.Badge.BADGE_AP_AUTHOR;
+import static edu.nps.moves.mmowgli.db.Badge.BADGE_EIGHT_ID;
+
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -1075,7 +1076,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
     }
   }
   @Override
-  public boolean userUpdated_oobTL(Serializable uId)
+  public boolean userUpdated_oobTL(Object uId)
   {
     if(uId != this.uid)
       return false;
