@@ -25,6 +25,7 @@ package edu.nps.moves.mmowgli;
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
@@ -479,84 +480,126 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     dialog.center();
   }
   
-  // MessageReceiver interface for in-line (sessMgr == null) && oob events
+  // MessageReceiver interface for oob events
+  // This is the controller for one user session, but the user may have several windows, in the form of
+  // Vaadin UI objects.  The message needs to be passed to each UI, if appropriate.
   @Override
-  public boolean receiveMessage(MMessagePacket pkt)
+  public void receiveMessage(MMessagePacket pkt)
   {
-    MSysOut.println("AbstractMmowgliController receiveMessage(pkt) type= "+pkt.msgType);
-    try {
-    switch(pkt.msgType) {
-    case UPDATED_ACTIONPLAN:
-    case NEW_ACTIONPLAN:
-      return helper.actionPlanUpdated_oob(Long.parseLong(pkt.msg));
-
-    case NEW_CARD:
-      return helper.cardPlayed_oob(Long.parseLong(pkt.msg));
-    case UPDATED_CARD:
-      return helper.cardUpdated_oob(Long.parseLong(pkt.msg));
-    case UPDATED_CHAT:
-      return helper.chatLogUpdated_oob(Long.parseLong(pkt.msg));
-      
+    HSess.init();
+    // First check session-global handlers
+    switch(pkt.msgType)
+    {
     case UPDATED_GAME:
-      return helper.gameUpdated_oob();
-
-    case UPDATED_MEDIA: // normally means only that the caption has been edited
-      return helper.mediaUpdated_oob(Long.parseLong(pkt.msg));
-      
-    case UPDATED_MOVE:
-      return helper.moveUpdated_oob(Long.parseLong(pkt.msg));
+      Mmowgli2UI.getGlobals().gameUpdatedExternallyTL(null);
+      break;
+    case UPDATED_CARDTYPE:
+      CardType ct = (CardType) HSess.get().get(CardType.class, Long.parseLong(pkt.msg));
+      CardTypeManager.updateCardType(ct);
+      break;
+    case INSTANCEREPORTCOMMAND:
+      helper.doSessionReport(pkt.msg);
+      break;
+    }
     
-    case UPDATED_MOVEPHASE:
-      return helper.movePhaseUpdated_oob(Long.parseLong(pkt.msg));
+    // Now check each UI
+    Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
+    for (UI ui : uis) {
+      if (ui == null || !(ui instanceof Mmowgli2UI) || !((Mmowgli2UI) ui).isUiFullyInitted()) // might be the error ui
+        continue;
+      Mmowgli2UI mui = (Mmowgli2UI) ui;
+      mui.access(mui.getControllerHelper().getAccessRunner(pkt));
+    }
+    HSess.close();
+  }
+  
+  
+  // MessageReceiver interface for oob events
+  // This is the controller for one user session, but the user may have several windows, in the form of
+  // Vaadin UI objects.  The message needs to be passed to each UI, if appropriate.
+  // TODO (future) it would be more appropriate to attach a message handler to each UI.  That is, each UI
+  // would have it's own receiveMessage(pkt).
+  //@Override
+  public void oldreceiveMessage(MMessagePacket pkt)
+  {
+   // MSysOut.println("AbstractMmowgliController receiveMessage(pkt) type= " + pkt.msgType);
+    HSess.init();
+    try {
+      switch (pkt.msgType) {
       
-    case NEW_MESSAGE:
-      return helper.newGameMessage_oob(Long.parseLong(pkt.msg));
-
-    case UPDATED_USER:
-      // probably a scoring change
-      return helper.userUpdated_oob(Long.parseLong(pkt.msg));
-        
-    case GAMEEVENT:
-        return helper.gameEvent_oob(pkt.msgType, pkt.msg); //messageType,message);
-
+      case UPDATED_ACTIONPLAN:
+      case NEW_ACTIONPLAN:
+        helper.actionPlanUpdated_oob(Long.parseLong(pkt.msg));
+        break;
+      case NEW_CARD:
+        helper.cardPlayed_oob(Long.parseLong(pkt.msg));
+        break;
+      case UPDATED_CARD:
+        helper.cardUpdated_oob(Long.parseLong(pkt.msg));
+        break;
+      case UPDATED_CHAT:
+        helper.chatLogUpdated_oob(Long.parseLong(pkt.msg));
+        break;
+      case UPDATED_GAME:
+        helper.gameUpdated_oob();
+        break;
+      case UPDATED_MEDIA: // normally means only that the caption has been edited
+        helper.mediaUpdated_oob(Long.parseLong(pkt.msg));
+        break;
+      case UPDATED_MOVE:
+        helper.moveUpdated_oob(Long.parseLong(pkt.msg));
+        break;
+      case UPDATED_MOVEPHASE:
+        helper.movePhaseUpdated_oob(Long.parseLong(pkt.msg));
+        break;
+      case NEW_MESSAGE:
+        helper.newGameMessage_oob(Long.parseLong(pkt.msg));
+        break;
+      case UPDATED_USER:
+        // probably a scoring change
+        helper.userUpdated_oob(Long.parseLong(pkt.msg));
+        break;
+      case GAMEEVENT:
+        helper.gameEvent_oob(pkt.msgType, pkt.msg); // messageType,message);
+        break;
 
       case NEW_USER:
         helper.newUser_oob(Long.parseLong(pkt.msg));
-        return false;
-        
-      case USER_LOGON:
-//        id = Long.parseLong(message);
-//        User u = DBGet.getUser(id,sessMgr.getSession());
-//        broadcastNews_oob(sessMgr,"User " + u.getUserName() + " / " + u.getLocation() + " now online");
-        break;
-      case USER_LOGOUT:
-//        id = Long.parseLong(message);
-//        User usr = DBGet.getUser(id,sessMgr.getSession());
-//        broadcastNews_oob(sessMgr,"User " + usr.getUserName() + " / " + usr.getLocation() + " went offline");
         break;
 
-     
+      case USER_LOGON:
+        // id = Long.parseLong(message);
+        // User u = DBGet.getUser(id,sessMgr.getSession());
+        // broadcastNews_oob(sessMgr,"User " + u.getUserName() + " / " + u.getLocation() + " now online");
+        break;
+      case USER_LOGOUT:
+        // id = Long.parseLong(message);
+        // User usr = DBGet.getUser(id,sessMgr.getSession());
+        // broadcastNews_oob(sessMgr,"User " + usr.getUserName() + " / " + usr.getLocation() + " went offline");
+        break;
+
       case INSTANCEREPORTCOMMAND:
         helper.doSessionReport(pkt.msg);
         break;
       case UPDATED_CARDTYPE:
         Object key = HSess.checkInit();
-        CardType ct = (CardType)HSess.get().get(CardType.class, Long.parseLong(pkt.msg));
+        CardType ct = (CardType) HSess.get().get(CardType.class, Long.parseLong(pkt.msg));
         HSess.checkClose(key);
-        
+
         CardTypeManager.updateCardType(ct);
         break;
       }
     }
-    catch(RuntimeException re) {
-      System.err.println("RuntimeException trapped in MmowgliOneApplicationController oob loop: "+re.getClass().getSimpleName()+", "+re.getLocalizedMessage());
+    catch (RuntimeException re) {
+      System.err.println("RuntimeException trapped in MmowgliOneApplicationController oob loop: " + re.getClass().getSimpleName() + ", "
+          + re.getLocalizedMessage());
       re.printStackTrace();
     }
-    catch(Throwable t) {
-      System.err.println("Throwable trapped in MmowgliOneApplicationController oob loop: "+t.getClass().getSimpleName()+", "+t.getLocalizedMessage());
+    catch (Throwable t) {
+      System.err.println("Throwable trapped in MmowgliOneApplicationController oob loop: " + t.getClass().getSimpleName() + ", " + t.getLocalizedMessage());
       t.printStackTrace();
     }
-    return false;  // no push required
+    HSess.close();
   }
 
   public String buildFragment(AppEvent ev)
