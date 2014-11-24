@@ -25,7 +25,6 @@ package edu.nps.moves.mmowgli.components;
 import static edu.nps.moves.mmowgli.MmowgliConstants.APPLICATION_SCREEN_WIDTH;
 import static edu.nps.moves.mmowgli.MmowgliEvent.IMPROVESCORECLICK;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -216,7 +215,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
   
   // Here we're told that user data has changed, probably scores
   @Override
-  public boolean userUpdated_oobTL(Serializable uId)
+  public boolean userUpdated_oobTL(Object uId)
   {
     return false; // don't need a ui update
   }
