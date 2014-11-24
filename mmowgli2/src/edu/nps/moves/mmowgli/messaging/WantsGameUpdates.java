@@ -36,5 +36,5 @@ package edu.nps.moves.mmowgli.messaging;
  */
 public interface WantsGameUpdates
 { 
-  public boolean gameUpdatedExternallyTL();
+  public boolean gameUpdatedExternallyTL(Object nullObj);
 }
