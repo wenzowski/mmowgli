@@ -319,7 +319,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
    * Something in the game object was changed
    */
   @Override
-  public boolean gameUpdatedExternallyTL()
+  public boolean gameUpdatedExternallyTL(Object nullObj)
   {
     Mmowgli2UI.getAppUI().setWindowTitle(HSess.get());
 
@@ -328,7 +328,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
       if(ui instanceof Mmowgli2UI) {
         AppMenuBar menubar = ((Mmowgli2UI)ui).getMenuBar();
         if (menubar != null) { // can be at start
-          menubar.gameUpdatedExternallyTL();
+          menubar.gameUpdatedExternallyTL(null);
         }
       }
     }
