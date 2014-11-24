@@ -732,7 +732,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
    * We only want to check to see if the user star has changed
    */
   @Override
-  public boolean userUpdated_oobTL(Serializable uId)
+  public boolean userUpdated_oobTL(Object uId)
   {
     MSysOut.println("CardChainPage.userUpdated_oobTL("+uId.toString()+")");
     return cardLg.updateUser_oobTL(uId);
