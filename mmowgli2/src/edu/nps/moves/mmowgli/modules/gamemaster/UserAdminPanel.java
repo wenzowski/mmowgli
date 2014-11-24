@@ -1005,7 +1005,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
   }
 
   @Override
-  public boolean userUpdated_oobTL(Serializable uId)
+  public boolean userUpdated_oobTL(Object uId)
   {
     // Not used here, we update the table container directly after edits.
     return false;
