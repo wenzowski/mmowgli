@@ -27,6 +27,7 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.NO_LOGGEDIN_USER_ID;
 import static edu.nps.moves.mmowgli.MmowgliConstants.VAADIN_BUILD_VERSION;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
@@ -81,8 +82,112 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 public class AbstractMmowgliControllerHelper
 {
   public static String linesep = System.getProperty("line.separator");
+  
+  interface UIHandler       {boolean handle(Mmowgli2UI ui, Object obj);}
+  interface UpdatesHandler  {boolean handle(Mmowgli2UI ui, Component comp, Object obj);}
 
-  void doSessionReportTL(String message)
+  class GenericUpdateHandler<T> implements UpdatesHandler
+  {
+    private Class<T> tClass;
+
+    public GenericUpdateHandler(Class<T> clazz)
+    {
+      tClass = clazz;
+    }
+
+    @Override
+    public boolean handle(Mmowgli2UI ui, Component comp, Object obj)
+    {
+      boolean ret = false;
+      if (tClass.isInstance(ui))
+        if (callOut(ui, obj))
+          ret = true;
+
+      if (tClass.isInstance(comp))
+        if (callOut(comp, obj))
+          ret = true;
+      return ret;
+    }
+
+    private boolean callOut(Object obj, Object arg)
+    {
+      try {
+        return (boolean) tClass.getMethods()[0].invoke(obj, arg);
+      }
+      catch (InvocationTargetException | IllegalAccessException ex) {
+        throw new RuntimeException("Program error in AbstractMmowgliControllerHelper.GenericUpdateHandler<T>.callOut(), obj = "+
+        (obj == null?"null":obj.getClass().getSimpleName()+
+        " arg = "+
+        (arg == null?"null":arg.getClass().getSimpleName())));
+      }
+    }
+  }
+//@formatter:off
+  private GenericUpdateHandler<WantsActionPlanUpdates> actionPlanUpdateHandler = new GenericUpdateHandler<WantsActionPlanUpdates>(WantsActionPlanUpdates.class);
+  private GenericUpdateHandler<WantsCardUpdates>       cardUpdatesHandler      = new GenericUpdateHandler<WantsCardUpdates>      (WantsCardUpdates.class);
+  private GenericUpdateHandler<WantsChatLogUpdates>    chatLogUpdateHandler    = new GenericUpdateHandler<WantsChatLogUpdates>   (WantsChatLogUpdates.class);
+  private GenericUpdateHandler<WantsGameEventUpdates>  gameEventUpdatesHandler = new GenericUpdateHandler<WantsGameEventUpdates> (WantsGameEventUpdates.class);
+  private GenericUpdateHandler<WantsGameUpdates>       gameUpdatesHandler      = new GenericUpdateHandler<WantsGameUpdates>      (WantsGameUpdates.class);
+  private GenericUpdateHandler<WantsMediaUpdates>      mediaUpdateHandler      = new GenericUpdateHandler<WantsMediaUpdates>     (WantsMediaUpdates.class);
+  private GenericUpdateHandler<WantsMessageUpdates>    messageUpdateHandler    = new GenericUpdateHandler<WantsMessageUpdates>   (WantsMessageUpdates.class);
+  private GenericUpdateHandler<WantsMovePhaseUpdates>  movePhaseUpdateHandler  = new GenericUpdateHandler<WantsMovePhaseUpdates> (WantsMovePhaseUpdates.class);
+  private GenericUpdateHandler<WantsMoveUpdates>       moveUpdateHandler       = new GenericUpdateHandler<WantsMoveUpdates>      (WantsMoveUpdates.class);
+  private GenericUpdateHandler<WantsUserUpdates>       userUpdateHandler       = new GenericUpdateHandler<WantsUserUpdates>      (WantsUserUpdates.class);
+//@formatter:on
+  
+  private void iterateUIsAndContents(final Object obj, final UpdatesHandler handler)
+  {
+    // Get each UI, if right kind, run the handler within a ui.access call;
+    // push changes if required
+    Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
+    for (UI ui : uis) {
+      if (ui == null || !(ui instanceof Mmowgli2UI) || !((Mmowgli2UI) ui).isUiFullyInitted()) // might be the error ui
+        continue;
+
+      final Mmowgli2UI mui = (Mmowgli2UI) ui;
+      final Component comp = mui.getFrameContent();
+
+      mui.access(new Runnable()
+      {
+        public void run()
+        {
+          Object key = HSess.checkInit();
+          if (handler.handle(mui, comp, obj)) {
+            MSysOut.println("pushing");
+            mui.push();
+          }
+          HSess.checkClose(key);
+        }
+      });
+    }
+  }   
+  
+  private void iterateUIs(final Object obj, final UIHandler handler)
+  {
+    // Get each UI, if right kind, run the handler within a ui.access call;
+    // push changes if required
+    Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
+    for (UI ui : uis) {
+      if (ui == null || !(ui instanceof Mmowgli2UI) || !((Mmowgli2UI)ui).isUiFullyInitted()) // might be the error ui
+        continue;
+
+      final Mmowgli2UI mui = (Mmowgli2UI) ui;
+      mui.access(new Runnable()
+      {
+        public void run()
+        {
+          Object key = HSess.checkInit();
+          if (handler.handle(mui, obj)){
+            MSysOut.println("2pushing");
+            mui.push();            
+          }
+          HSess.checkClose(key);
+        }
+      });
+    }
+  }
+ 
+  void doSessionReport(String message)
   {
     //todo
     /*
@@ -104,249 +209,78 @@ public class AbstractMmowgliControllerHelper
     sessIO.sendDelayed(INSTANCEREPORT, msg);
     */
   }
-  
-  private boolean iterateUIContents(Object obj, ContentsHandler handler)
+  void mediaUpdated_oob(Object medId)
   {
-    boolean push = false;
-    Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
-    for(UI ui : uis) {
-      if(! (ui instanceof Mmowgli2UI))  // might be the error ui
-        continue;
-      Mmowgli2UI mui = (Mmowgli2UI)ui;
-      if(mui.isUiFullyInitted()) {
-        Component comp = mui.getFrameContent();
-        if(comp != null)
-          if(handler.handle(comp, obj))
-           push = true;
-      }
-    }   
-    return push;
-  }
-  private boolean iterateUIs(Object obj, UIHandler handler)
+    iterateUIsAndContents(medId,mediaUpdateHandler);
+  }  
+  void chatLogUpdated_oob(Object logId)
   {
-    boolean push = false;
-    Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
-    for(UI ui : uis) {
-      if(! (ui instanceof Mmowgli2UI))  // might be the error ui
-        continue;
-      Mmowgli2UI mui = (Mmowgli2UI)ui;
-      if(mui != null)
-        if(handler.handle(mui,obj))
-          push = true;
-    } 
-    return push;
-  }
-  
-  interface ContentsHandler {boolean handle(Component c, Object obj);}
-  interface UIHandler       {boolean handle(UI ui, Object obj);}
-  
-  boolean mediaUpdated_oobTL(Object medId)
+    iterateUIsAndContents(logId,chatLogUpdateHandler);
+  } 
+  void actionPlanUpdated_oob(Object apId)
   {
-    return iterateUIContents(medId, new ContentsHandler()
-    {
-      public boolean handle(Component comp, Object medId)
-      {
-        if(comp instanceof WantsMediaUpdates)
-          return((WantsMediaUpdates) comp).mediaUpdatedOobTL((Serializable)medId);
-        return false;
-      }
-    });
+    iterateUIsAndContents(apId,actionPlanUpdateHandler);
   }
-  
-  boolean chatLogUpdated_oobTL(Object logId)
-  {
-    return iterateUIContents(logId,new ContentsHandler()
-    {
-      public boolean handle(Component comp, Object logId)
-      {
-        if(comp instanceof WantsChatLogUpdates)
-          return ((WantsChatLogUpdates) comp).logUpdated_oobTL((Serializable)logId);
-        return false;
-      }    
-    });
-  }
-
-  boolean actionPlanUpdated_oobTL(Object apId)
-  {
-    return iterateUIContents(apId,new ContentsHandler()
-    {
-      public boolean handle(Component comp, Object apId)
-      {
-        if(comp instanceof WantsActionPlanUpdates)
-          return ((WantsActionPlanUpdates) comp).actionPlanUpdatedOobTL((Serializable)apId);
-        return false;
-      }     
-    });
-  }
-
-  boolean userUpdated_oobTL(Object uId)
+  void userUpdated_oob(Object uId)
   {
     //todo
-    // what's this? app.globs().userUpdated_oob(mgr, uId);
-    final Object meId = Mmowgli2UI.getGlobals().getUserID();
-    return iterateUIs(uId,new UIHandler()
-    {
-      public boolean handle(UI ui, Object uId)
-      {
-        boolean push=false;
-        
-        if(uId.equals(meId)){ // is it me, did my score change because of what somebody else did?
-           if(((Mmowgli2UI)ui).refreshUser_oobTL(uId))
-             push = true;
-         }
-        Component c = ((Mmowgli2UI)ui).getFrameContent();
-        if (c != null && c instanceof WantsUserUpdates)
-          if(((WantsUserUpdates) c).userUpdated_oobTL((Serializable)uId))
-           push = true;
-        
-        return push;
-      }
-    });
+    // what's this? app.globs().userUpdated_oob(mgr, uId);   iterateUIsAndContents(uId,userUpdateHandler);
+    iterateUIsAndContents(uId,userUpdateHandler);
   }
-  boolean moveUpdated_oobTL(Object uId)
+  void moveUpdated_oob(Object uId)
   {
-    return iterateUIs(uId,new UIHandler()
-    {
-      public boolean handle(UI ui, Object uId)
-      {
-        boolean push=false;
-        
-        if(((Mmowgli2UI)ui).moveUpdatedOobTL((Serializable)uId))
-          push = true;
-
-        Component c = ((Mmowgli2UI)ui).getFrameContent();
-        if (c != null && c instanceof WantsMoveUpdates)
-          if(((WantsMoveUpdates) c).moveUpdatedOobTL((Serializable)uId))
-           push = true;
-        
-        return push;
-      }
-    });   
+    iterateUIsAndContents(uId,moveUpdateHandler);
   }
-
-  public boolean movePhaseUpdated_oobTL(long uId)
+  public void movePhaseUpdated_oob(long uId)
   {
-    MSysOut.println("AbstractMmowgliControllerHelper.movePhaseUpdated_oob()");
-    return iterateUIs(uId,new UIHandler()
-    {
-      public boolean handle(UI ui, Object uId)
-      {
-        boolean push=false;
-        
-        if(((Mmowgli2UI)ui).movePhaseUpdatedOobTL((Serializable)uId))
-          push = true;
-
-        Component c = ((Mmowgli2UI)ui).getFrameContent();
-        if (c != null && c instanceof WantsMoveUpdates)
-          if(((WantsMovePhaseUpdates) c).movePhaseUpdatedOobTL((Serializable)uId))
-           push = true;
-        
-        return push;
-      }
-    });   
+    iterateUIsAndContents(uId,movePhaseUpdateHandler);
   }
-
-  boolean cardUpdated_oobTL(Object cardId)
+  void cardUpdated_oob(Object cardId)
   {
-    MSysOut.println("cardUpdated_oobTL");
-    return iterateUIContents(cardId,new ContentsHandler()
-    {
-      public boolean handle(Component comp, Object cId)
-      {
-        if(comp instanceof WantsCardUpdates)
-          return ((WantsCardUpdates) comp).cardUpdated_oobTL((Serializable)cId);
-        return false;
-      }     
-    });
-  }
-  
-  // Mail messages
-  boolean newGameMessage_oobTL(Object uid)
-  {
-    Message msg = (Message)HSess.get().get(Message.class, (Serializable)uid);
-    if(msg == null) // Here's a way to get the message when it's ready:
-      msg = ComeBackWhenYouveGotIt.waitForMessage_oob(/*"_newGameMessage_oobTL",*/ this, uid);
-    if(msg == null)
-      return false;
-    
-    User toUser = msg.getToUser(); // null if Act. Pln comment
-    if(toUser == null || toUser.getId() != (Long)Mmowgli2UI.getGlobals().getUserID())
-      return false;
-
-    return iterateUIContents(uid,new ContentsHandler()
-    {
-      public boolean handle(Component comp, Object id)
-      {
-        if(comp instanceof WantsMessageUpdates)
-          return ((WantsMessageUpdates) comp).messageCreated_oobTL((Serializable)id);
-        return false;
-      }     
-    });
-  }
-  
-  public void _newGameMessage_oobTL(Object uid, final UI ui)
-  {
-    newGameMessage_oobTL(uid);
-    ui.access(new Runnable(){public void run(){ui.push();}});
-  }
-
-  boolean newUser_oobTL(Object uId)
-  {
-    // Let the score manager do something if he wants
-    // no...this should be a one-time only thing, is done at reg time
-    // app.globs().scoreManager().newUser_oob(sess,uId);
-    return false; // no push
-  }
-  
-  boolean cardPlayed_oobTL(Object cardId)
+    iterateUIsAndContents(cardId,cardUpdatesHandler);
+  }  
+  void cardPlayed_oob(Object cardId)
   {
     // no, we can't update scores based on receiving word from somebody else, else
     // every instance would bump the same score!
     // app.globs().scoreManager().cardPlayed(card);
+    iterateUIsAndContents(cardId,this.cardUpdatesHandler);
+  }  
+  void gameUpdated_oob()
+  {
+    Mmowgli2UI.getGlobals().gameUpdatedExternallyTL(null);
+    iterateUIsAndContents(null, gameUpdatesHandler); 
+  }
+  
+  // Mail messages
+  void newGameMessage_oob(Object uid)
+  {
+    Object key = HSess.checkInit();
+    Message msg = (Message)HSess.get().get(Message.class, (Serializable)uid);
+    HSess.checkClose(key);
     
-    return iterateUIContents(cardId,new ContentsHandler()
-    {
-      public boolean handle(Component comp, Object cId)
-      {
-        if(comp instanceof WantsCardUpdates)
-          return ((WantsCardUpdates) comp).cardPlayed_oobTL((Serializable)cId);
-        return false;
-      }     
-    });
+    if(msg == null) // Here's a way to get the message when it's ready:
+      msg = ComeBackWhenYouveGotIt.waitForMessage_oob(/*"_newGameMessage_oobTL",*/ this, uid);
+    if(msg == null)
+      return;
+    
+    User toUser = msg.getToUser(); // null if Act. Pln comment
+    if(toUser == null || toUser.getId() != (Long)Mmowgli2UI.getGlobals().getUserID())
+      return;
+
+    iterateUIsAndContents(uid,this.messageUpdateHandler);
   }
 
-  boolean gameUpdated_oobTL()
+  void newUser_oob(Object uId)
   {
-    if(Mmowgli2UI.getGlobals() instanceof WantsGameUpdates)
-      Mmowgli2UI.getGlobals().gameUpdatedExternallyTL();
-    
-    boolean psh = this.iterateUIs(null, new UIHandler()
-    {
-      @Override
-      public boolean handle(UI ui, Object obj)
-      {
-        if(ui instanceof WantsGameUpdates)
-          return((WantsGameUpdates)ui).gameUpdatedExternallyTL();
-        return false;
-      }
-      
-    });
-    boolean psh2 = iterateUIContents(1L,new ContentsHandler()
-    {
-      public boolean handle(Component comp, Object cId)
-      {
-        if(comp instanceof WantsGameUpdates)
-          return((WantsGameUpdates) comp).gameUpdatedExternallyTL();
-        return false;
-      }     
-    });
-    
-    return (psh2 || psh);
+    // Let the score manager do something if he wants
+    // no...this should be a one-time only thing, is done at reg time
+    // app.globs().scoreManager().newUser_oob(sess,uId);
   }
-
-
-  boolean gameEvent_oobTL(char typ, String message)
+   
+  boolean gameEvent_oob(char typ, String message)
   {
+    Object key = HSess.checkInit();
     MMessage MSG = MMessage.MMParse(typ, message);
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     Serializable meId = globs.getUserID();
@@ -363,34 +297,39 @@ public class AbstractMmowgliControllerHelper
       if(badBoyId.equals(meId)) {
         // Aiy chihuahua! I've been bumped!
         GameLinks gl = GameLinks.getTL();
+        HSess.checkClose(key);
         showNotifInAllBrowserWindows("We're sorry, but your mmowgli account has been locked out and you will now be logged off. "+
             "Send a trouble report or contact "+gl.getTroubleMailto()+" for clarification.","IMPORTANT!!", "m-yellow-notification");
         doLogOutIn8Seconds();
         return true; // show notifications
       }
     }
-    boolean ret = Mmowgli2UI.getAppUI().gameEvent_oobTL(typ, message); // for head and blog headline
+   boolean ret = false;//Mmowgli2UI.getAppUI().gameEvent_oobTL(typ, message); // for head and blog headline
     
-    if(notifyGameEventListeners_oobTL(MSG))
-      ret = true;
+   notifyGameEventListeners_oob(MSG);  // for head and blog headline
+
       
     if (eventType == GameEvent.EventType.MESSAGEBROADCAST ||
         eventType == GameEvent.EventType.MESSAGEBROADCASTGM) {
 
-      if(meId == NO_LOGGEDIN_USER_ID)
+      if(meId == NO_LOGGEDIN_USER_ID) {
+        HSess.checkClose(key);
         return ret;  // Don't display messages during login sequence
-
+      }
       GameEvent ge = (GameEvent) HSess.get().get(GameEvent.class, MSG.id);
       if(ge == null)
         ge = ComeBackWhenYouveGotIt.fetchGameEventWhenPossible(MSG.id);
       
       if(ge == null) {
         System.err.println("Can't get Game Event from database: id="+MSG.id+", MmowgliOneApplicationController on "+AppMaster.instance().getServerName());
+        HSess.checkClose(key);
         return ret;
       }
+
       String bdcstMsg = ge.getDescription();
       bdcstMsg = MmowgliLinkInserter.insertUserName_oobTL(bdcstMsg);
-
+      HSess.checkClose(key);
+      
       if(eventType == GameEvent.EventType.MESSAGEBROADCAST) {
         showNotifInAllBrowserWindows(bdcstMsg, "IMPORTANT!!", "m-yellow-notification");
          ret = true;
@@ -422,7 +361,7 @@ public class AbstractMmowgliControllerHelper
     notif.setStyleName(style);
     
     iterateUIs(notif, new UIHandler() {
-      public boolean handle(UI ui, Object notif)
+      public boolean handle(Mmowgli2UI ui, Object notif)
       {
         ((Notification) notif).show(ui.getPage());
         return true;
@@ -456,38 +395,11 @@ public class AbstractMmowgliControllerHelper
     */
   }
 
-  private boolean notifyGameEventListeners_oobTL(MMessage MSG)
+  private void notifyGameEventListeners_oob(MMessage MSG)
   {
-    // sessMgr may be null
-  // Question here...checking for WantsGameEventUpdates against the framework as well as component. probably historical
-    /*
-    ApplicationWindow[] wins = app.getApplicationWindows();
-    for (ApplicationWindow win : wins) {
-      ApplicationFramework windowFramework = win.getApplicationFramework();
-      if(windowFramework != null) {
-        if(windowFramework instanceof WantsGameEventUpdates) {
-          if(((WantsGameEventUpdates)windowFramework).gameEventLoggedOob(sessMgr, MSG.id))
-            windowFramework.needToPushChanges();
-        }
-        Component c = windowFramework.getDisplayedPanel();
-        if (c instanceof WantsGameEventUpdates) {
-          if(((WantsGameEventUpdates) c).gameEventLoggedOob(sessMgr, MSG.id))
-            windowFramework.needToPushChanges();
-        }
-      }
-    }
-    */
-    return iterateUIContents(MSG,new ContentsHandler()
-    {
-      public boolean handle(Component comp, Object MSG)
-      {
-        if(comp instanceof WantsGameEventUpdates)
-          return ((WantsGameEventUpdates) comp).gameEventLoggedOobTL(((MMessage)MSG).id);
-        return false;
-      }     
-    });   
+    iterateUIsAndContents(MSG.id,gameEventUpdatesHandler);
   }
-
+  
   void handleShowActiveUsersPerServer(MenuBar mbar)
   {
     Object[][] oa = Mmowgli2UI.getGlobals().getSessionCountByServer();
