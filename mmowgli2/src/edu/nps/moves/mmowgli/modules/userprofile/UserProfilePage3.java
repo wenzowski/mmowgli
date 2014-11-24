@@ -204,7 +204,7 @@ public class UserProfilePage3 extends AbsoluteLayout implements MmowgliComponent
   }
 
   @Override
-  public boolean userUpdated_oobTL(Serializable uId)
+  public boolean userUpdated_oobTL(Object uId)
   {
     return topPan.userUpdated_oobTL(uId);
   }
