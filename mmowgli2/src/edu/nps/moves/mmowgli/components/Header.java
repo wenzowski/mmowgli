@@ -53,8 +53,9 @@ import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsGameEventUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsGameUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
-import edu.nps.moves.mmowgli.utility.*;
-import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
+import edu.nps.moves.mmowgli.utility.IDNativeButton;
+import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
  * Header.java Created on Feb 5, 2011
@@ -554,8 +555,6 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   
   public boolean gameEventLoggedOobTL(Object evId)
   {
-    MSysOut.println("Header.gameEventLoggedOobTL()");
-    
     GameEvent ev = (GameEvent)HSess.get().get(GameEvent.class, (Serializable)evId);
     if(ev == null) {
       ev = ComeBackWhenYouveGotIt.fetchGameEventWhenPossible((Long)evId);
@@ -574,7 +573,6 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   @Override
   public boolean moveUpdatedOobTL(Serializable mvId)
   {
-    MSysOut.println("Header.moveUpdatedOobTL()");
     Move m = (Move)HSess.get().get(Move.class, (Serializable)mvId);
     if(m == null) {
       m = ComeBackWhenYouveGotIt.fetchMoveWhenPossible((Long)mvId);
@@ -590,7 +588,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   }
 
   @Override
-  public boolean gameUpdatedExternallyTL()
+  public boolean gameUpdatedExternallyTL(Object nullObj)
   {
     return false;
   } 
