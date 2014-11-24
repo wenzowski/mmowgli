@@ -22,7 +22,6 @@
 
 package edu.nps.moves.mmowgli.messaging;
 
-import java.io.Serializable;
 
 /**
  * WantsUserUpdates.java
@@ -37,5 +36,5 @@ import java.io.Serializable;
  */
 public interface WantsUserUpdates
 {
-  public boolean userUpdated_oobTL(Serializable uId);
+  public boolean userUpdated_oobTL(Object uId);
 }
