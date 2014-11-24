@@ -282,10 +282,11 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
           HSess.init();
           mcache.handleIncomingTomcatMessageTL(mMessagePacket);
           HSess.close();
+          Broadcaster.broadcast(mMessagePacket);  
         }
       });
     }
     // This guy, however, gets run "inline" if appropriate
-    Broadcaster.broadcast(mMessagePacket);    
+    //Broadcaster.broadcast(mMessagePacket);    mike test
   }
 }
