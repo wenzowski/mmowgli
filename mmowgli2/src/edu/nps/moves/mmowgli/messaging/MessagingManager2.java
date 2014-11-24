@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.messaging.Broadcaster.BroadcastListener;
 import edu.nps.moves.mmowgli.utility.MThreadManager;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
@@ -54,11 +53,7 @@ public class MessagingManager2 implements BroadcastListener
   
   public interface MMMessageListener2
   {
-    /**
-     * @return whether UI changes need to be pushed
-     * if mgr == null, this is in vaadin event thread, so use VHib
-     */
-    public boolean receiveMessage(MMessagePacket pkt);
+    public void receiveMessage(MMessagePacket pkt);
   }
 
   public MessagingManager2()
