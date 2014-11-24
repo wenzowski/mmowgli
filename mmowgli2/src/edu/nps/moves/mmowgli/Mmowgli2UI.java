@@ -69,10 +69,11 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 */
 
 @SuppressWarnings("serial")
-abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMovePhaseUpdates, WantsGameUpdates, WantsGameEventUpdates, HasUUID
+abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMovePhaseUpdates, WantsGameUpdates, WantsGameEventUpdates, WantsUserUpdates, HasUUID
 {
   private MmowgliOuterFrame outerFr;
   private MmowgliSessionGlobals globals;
+  private AbstractMmowgliControllerHelper2 controllerHelper;
   private Navigator navigator;
   private UUID uuid;
   private boolean uiFullyInitted = false;  // after components added, AFTER login screens
@@ -120,6 +121,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     else {
       setRunningApplicationFrameworkTL();
     }
+    controllerHelper = new AbstractMmowgliControllerHelper2(this);
     
     //This has caused some recent exceptions, break it apart temporarily    
     //globs.getMessagingManager().addMessageListener((AbstractMmowgliController)globs.getController());
@@ -207,7 +209,10 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   {
     return uiFullyInitted;
   }
-  
+  public boolean isFirstUI()
+  {
+    return firstUI;
+  }
   public void setFrameContent(Component c)
   {
     outerFr.setFrameContent(c);
@@ -259,7 +264,11 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
       css.setStyles(css1 + bkgUrl + css2);
     } 
   }
-
+  public AbstractMmowgliControllerHelper2 getControllerHelper()
+  {
+    return controllerHelper;
+  }
+  
   public MediaLocator getMediaLocator()
   {
     return globals.getMediaLocator();
@@ -282,14 +291,13 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
       outerFr.showOrHideFouoButton(show);    
   }
 
-// called from message receiver in controller, header might need update
-  public boolean refreshUser_oobTL(Object uId)
+  public boolean userUpdated_oobTL(Object uId)
   {
     if(outerFr != null)
       return outerFr.refreshUser_oobTL(uId); 
     return false;
+    
   }
-
   @Override
   public boolean gameEventLoggedOobTL(Object evId)
   {
@@ -298,10 +306,10 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     return false;
   }
   @Override
-  public boolean gameUpdatedExternallyTL()
+  public boolean gameUpdatedExternallyTL(Object nullObj)
   {
     if(outerFr != null)
-      return outerFr.gameUpdatedExternallyTL();
+      return outerFr.gameUpdatedExternallyTL(null);
     return false;
   }
   
