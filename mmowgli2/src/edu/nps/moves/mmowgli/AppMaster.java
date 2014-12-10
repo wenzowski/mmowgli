@@ -95,6 +95,22 @@ public class AppMaster
   private String userImagesUrlString;
   private URL    userImagesUrl;
   
+  public static final int ALL_LOGS = -1;
+  public static final int MESSAGING_LOGS = 0x1;
+  public static final int DB_LISTENER_LOGS = 0x2;
+  public static final int MCACHE_LOGS = 0x04;
+  public static final int TICK_LOGS = 0x08;
+  public static final int USER_UPDATE_LOGS = 0x10;
+  public static final int CARD_UPDATE_LOGS = 0x20;
+  
+  public static int sysOutLogLevel = ALL_LOGS;
+  static {
+    sysOutLogLevel &= ~MESSAGING_LOGS;  // turn off message logs
+    sysOutLogLevel &= ~MCACHE_LOGS;     // turn off cache logs  
+    sysOutLogLevel &= ~TICK_LOGS;       // turn off tick display
+    //sysOutLogLevel &= ~USER_UPDATE_LOGS; //turn off user updates displays
+    MSysOut.println("System log level = "+sysOutLogLevel);
+  }
   private static AppMaster myInstance = null;
 
   public static AppMaster instance(VaadinServlet servlet, ServletContext context)
