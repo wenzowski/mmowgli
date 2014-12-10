@@ -113,6 +113,11 @@ public class DBGet
     return getUser(id,HSess.get());
   }
   
+  public static void putUser(User u)
+  {
+    userCache.addToCache(u.getId(), u);
+  }
+  
   public static User getUser(Object id, Session sess)
   {
     if(USERCACHEDISABLED)
