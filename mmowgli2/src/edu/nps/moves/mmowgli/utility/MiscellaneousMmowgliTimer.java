@@ -28,6 +28,8 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import edu.nps.moves.mmowgli.AppMaster;
+
 public class MiscellaneousMmowgliTimer
 {
   private Timer timer;
@@ -59,7 +61,7 @@ public class MiscellaneousMmowgliTimer
     @Override
     public void run()
     {
-      MSysOut.immPrint("-tick-" + tickFormat.format(new Date()));
+      MSysOut.immPrint(AppMaster.TICK_LOGS,"-tick-" + tickFormat.format(new Date()));
     }
   }
 
@@ -72,11 +74,23 @@ public class MiscellaneousMmowgliTimer
     private MSysOut() {
     }
 
+    public static void println(int logLevel, String...sa)
+    {
+      if((AppMaster.sysOutLogLevel & logLevel) == logLevel)
+        println(sa);
+    }
+    
     public static void println(String... sa)
     {
       addToSb(true,false,sa);
     }
 
+    public static void print(int logLevel, String...sa)
+    {
+      if((AppMaster.sysOutLogLevel & logLevel) == logLevel)
+        print(sa);
+    }
+    
     public static void print(String... sa)
     {
       addToSb(false,false,sa);
@@ -103,6 +117,12 @@ public class MiscellaneousMmowgliTimer
       Long t = System.currentTimeMillis();
       t&=0xFFFFFF;
       return ""+t+" ";
+    }
+    
+    public static void immPrint(int logLevel, String... sa)
+    {
+      if((AppMaster.sysOutLogLevel & logLevel) == logLevel)
+        immPrint(sa);
     }
     
     // immediate write
