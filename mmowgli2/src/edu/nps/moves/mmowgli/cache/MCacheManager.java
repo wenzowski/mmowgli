@@ -36,6 +36,7 @@ import org.hibernate.criterion.Restrictions;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
@@ -81,7 +82,8 @@ public class MCacheManager implements InterTomcatReceiver
   private BeanContainer<Long,QuickUser> quickUsersContainer;
 
   public static int GAMEEVENTCAPACITY = 1000; // number cached, not all returned in a hunk to client
-
+  private static int myLogLevel = AppMaster.MCACHE_LOGS;
+  
   //private Timer listsRefreshTimer;
 
   private MSuperActiveCacheManager supActMgr;
@@ -96,7 +98,7 @@ public class MCacheManager implements InterTomcatReceiver
 
   private MCacheManager()
   {
-    MSysOut.println("Enter MCacheManager constructor");
+    MSysOut.println(myLogLevel,"Enter MCacheManager constructor");
     try {
       Session sess = HSess.getSessionFactory().openSession();
       supActMgr = new MSuperActiveCacheManager();
@@ -129,7 +131,7 @@ public class MCacheManager implements InterTomcatReceiver
       sess.close();
 
       DBGet.mCacheMgr = this;
-      MSysOut.println("Exit MCacheManager constructor");
+      MSysOut.println(myLogLevel,"Exit MCacheManager constructor");
     }
     catch (Throwable t) {
       System.err.println("Exception in MCacheManager: "+t.getClass().getSimpleName()+" "+t.getLocalizedMessage());
@@ -211,7 +213,7 @@ public class MCacheManager implements InterTomcatReceiver
   private void addOrUpdateUserInContainer(User u)
   {
     if(u == null) {
-      MSysOut.println("Null user in addOrUpdateUserInContainer()!!!!!! Exception trapped, dump:");
+      MSysOut.println(myLogLevel,"Null user in addOrUpdateUserInContainer()!!!!!! Exception trapped, dump:");
       new Exception().printStackTrace();
       return;
     }
@@ -398,7 +400,7 @@ public class MCacheManager implements InterTomcatReceiver
   @Override
   public boolean handleIncomingTomcatMessageTL(MMessagePacket packet)
   {
-    MSysOut.println("MCacheManager.handleIncomingTomcatMessageTL(), type = "+packet.msgType);
+    MSysOut.println(myLogLevel,"MCacheManager.handleIncomingTomcatMessageTL(), type = "+packet.msgType);
     switch (packet.msgType) {
       case NEW_CARD:
       case UPDATED_CARD:
@@ -470,7 +472,7 @@ public class MCacheManager implements InterTomcatReceiver
           GameEvent ge = (GameEvent)sess.get(GameEvent.class, evorig.getId());
           if(ge != null) {
             if(i>0)
-              MSysOut.println("(MCacheManager)Delayed fetch of GameEvent from db, got it on try "+i);
+              MSysOut.println(myLogLevel,"(MCacheManager)Delayed fetch of GameEvent from db, got it on try "+i);
             evorig.clone(ge); // get its data
             HSess.close();
             return;
@@ -694,7 +696,8 @@ public class MCacheManager implements InterTomcatReceiver
     if((c=getCardCache().getObjectForKey(id)) == null) {
       return getCardFresh(id,sess);
     }
-    return c;
+    //return c;
+    return (Card)sess.merge(c);
   }
 
   public Card getCardFresh(Object id, Session sess)
