@@ -28,8 +28,14 @@ public class MThreadManager
 {
   private MThreadManager(){} // not instanciable
   
-  private static ExecutorService pool = Executors.newCachedThreadPool();
-
+  // Using a fixed thread pool is a way to let database listener thread complete before other db listener threads run.
+  // It necessarily synchronizes db access which is counter to what a pool normally does.
+  // I think some of our problems have had to do with some code getting the message that the db has changed, but we're running
+  // in the context of the listener, which is in the context of the hibernate update/save calls.  This seems to let the first
+  // finish before the latter tries to access the first's data.
+  
+  private static ExecutorService pool = Executors.newFixedThreadPool(1); //newCachedThreadPool();
+  
   public static void run(Runnable runner)
   {
     pool.execute(new Preamble(runner));
