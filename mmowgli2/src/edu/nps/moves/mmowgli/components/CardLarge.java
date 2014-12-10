@@ -36,9 +36,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
-import edu.nps.moves.mmowgli.AppEvent;
-import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
+import edu.nps.moves.mmowgli.*;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
@@ -339,6 +337,7 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
         starButton.setIcon(starRedResource);
       }
       userMe.setFavoriteCards(set);
+      DBGet.putUser(userMe); // put into cache right now
       User.updateTL(userMe);
       
       HSess.close(); // will commit
@@ -368,10 +367,10 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     if(!id.equals(cardId))  //; the card should be for us, but just to make sure
       return;
 
-    MSysOut.println("CardLarge.update_oobTL(), "+id.toString()+" "+cardId.toString());
+    MSysOut.println(AppMaster.CARD_UPDATE_LOGS,"CardLarge.update_oobTL(), "+id.toString()+" "+cardId.toString());
     Session sess = HSess.get();
     
-    Card c = DBGet.getCardFreshTL(id);
+    Card c = DBGet.getCardTL(id); // was getFresh, but cache is probably more recent
     // Only 2 things to update...text and marking
     Game g = Game.getTL();
     content.setValue(formatText(c.getText(),g,sess));
@@ -384,15 +383,15 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
   
   public boolean updateUser_oobTL(Object uid)
   {
-    MSysOut.println("CardLarge.userUpdated_oobTL("+uid.toString()+")"); 
+    MSysOut.println(AppMaster.USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL("+uid.toString()+")"); 
     if(uid.equals(Mmowgli2UI.getGlobals().getUserID())) {
-      Card c = DBGet.getCardFreshTL(cardId);
+      Card c = DBGet.getCardTL(cardId);// was getFresh, but cache is probably more recent
       boolean retb = checkStar(c,uid);
-      MSysOut.println("CardLarge.userUpdated_oobTL() checkStar() returned "+retb);
+      MSysOut.println(AppMaster.USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL() checkStar() returned "+retb);
       return retb;
     }
     else
-      MSysOut.println("CardLarge.userUpdated_oobTL() not me");
+      MSysOut.println(AppMaster.USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL() not me");
 
     return false;
   }
