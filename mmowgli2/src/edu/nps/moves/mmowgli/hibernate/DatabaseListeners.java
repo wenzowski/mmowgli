@@ -52,7 +52,8 @@ public class DatabaseListeners
   public MySaveOrUpdateListener saveOrUpdateListener;
   public MyDeleteListener deleteListener;
   private MCacheManager mcache;
-
+  private static int myLogLevel = AppMaster.DB_LISTENER_LOGS;
+  
   public DatabaseListeners(ServiceRegistry sRegistry)
   {
     saveListener         = new MySaveListener();
@@ -104,7 +105,7 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-//      if(enabled) MSysOut.println(">>> Save db listener <<<");
+/*      if(enabled) */MSysOut.println(myLogLevel,">>> Save db listener <<< "+false);
       super.onSaveOrUpdate(event); // default behavior first
 /*      if (!enabled)
         return;
@@ -166,9 +167,9 @@ public class DatabaseListeners
     @Override
     public void onPostInsert(PostInsertEvent event)
     {
-      MSysOut.println(">>> PostInsert db listener type = "+event.getEntity().getClass().getSimpleName()+" <<<");
-      if(event.getEntity() instanceof User)
-         MSysOut.println("         user id = "+((User)event.getEntity()).getId());
+      MSysOut.println(myLogLevel,">>> PostInsert db listener type = "+event.getEntity().getClass().getSimpleName()+" <<< "+enabled);
+      //if(event.getEntity() instanceof User)
+      //   MSysOut.println(myLogLevel,"         user id = "+((User)event.getEntity()).getId());
       
       if (!enabled)
         return;
@@ -218,7 +219,7 @@ public class DatabaseListeners
       if (msgTyp != null)
         messageOut(event, msgTyp, msg);
 
-      MSysOut.println(">>> Out of post insert db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
+      MSysOut.println(myLogLevel,">>> Out of post insert db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
     }
 
     @Override
@@ -235,7 +236,7 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-//      if(enabled) MSysOut.println(">>> Update db listener <<<");
+/*     if(enabled)*/ MSysOut.println(myLogLevel,">>> Update db listener <<< "+false);
       super.onSaveOrUpdate(event); // default behavior first
    /*   if(!enabled)
         return;
@@ -301,9 +302,9 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
   @Override
   public void onPostUpdate(PostUpdateEvent event)
   {
-      if(enabled) MSysOut.println(">>> Postupdate db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<");
+      if(enabled) MSysOut.println(myLogLevel,">>> Postupdate db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<< "+enabled);
       if(enabled) if(event.getEntity() instanceof User)
-                     MSysOut.println("       user id = "+((User)event.getEntity()).getId());
+                     MSysOut.println(myLogLevel,"       user id = "+((User)event.getEntity()).getId());
 
       if(!enabled)
         return;
@@ -353,12 +354,12 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
         msg = "" + ((MovePhase) obj).getId();
       }
       else {
-        MSysOut.println("Post update listener didn't understand "+obj.getClass().getSimpleName());
+        MSysOut.println(myLogLevel,"Post update listener didn't understand "+obj.getClass().getSimpleName());
       }
       if(msgTyp != null)
         messageOut(event,msgTyp,msg);
       
-      MSysOut.println(">>> Out of postupdate db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
+      MSysOut.println(myLogLevel,">>> Out of postupdate db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
   }
 
   @Override
@@ -376,7 +377,7 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
     @Override
     public void onDelete(DeleteEvent event) throws HibernateException
     {
-      if(enabled) MSysOut.println(">>> Delete db listener <<<");
+      if(enabled) MSysOut.println(myLogLevel,">>> Delete db listener <<<");
       super.onDelete(event);
       if(!enabled)
         return;
@@ -387,7 +388,7 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
       if(obj instanceof User)
         //todo V7 convirm mCacheManager().removeUser((Long)((User)obj).getId());
         mcache.removeUser((Long)((User)obj).getId());
-      MSysOut.println(">>> Out of delete db listener <<<");
+      MSysOut.println(myLogLevel,">>> Out of delete db listener <<<");
     }
   }
   
