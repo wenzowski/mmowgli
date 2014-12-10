@@ -40,6 +40,7 @@ import org.hibernate.search.annotations.*;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
@@ -131,11 +132,13 @@ public class Card implements Serializable
   public static void updateTL(Card c)
   {
     forceUpdateEvent(c);
+    AppMaster.instance().getMcache().putCard(c);  // The update listener code seems to get run before the object is actually in the db.  This helps.
     HSess.get().update(c);
   }
  
   public static void saveTL(Card c)
   {
+    AppMaster.instance().getMcache().putCard(c);  // The update listener code seems to get run before the object is actually in the db.  This helps.
     HSess.get().save(c);
   }
 
@@ -297,7 +300,6 @@ public class Card implements Serializable
   }
   
   // This card can have many follow-on cards, but each follow-on has only one "parent"
-  @SuppressWarnings("deprecation")
   @OneToMany(cascade = CascadeType.ALL)
   @JoinTable(name="Card_FollowOnCards",
         joinColumns = @JoinColumn(name="card_id"),
