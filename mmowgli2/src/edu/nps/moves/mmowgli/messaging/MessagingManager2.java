@@ -25,6 +25,7 @@ package edu.nps.moves.mmowgli.messaging;
 import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.messaging.Broadcaster.BroadcastListener;
 import edu.nps.moves.mmowgli.utility.MThreadManager;
@@ -48,6 +49,7 @@ public class MessagingManager2 implements BroadcastListener
   private HashSet<MMMessageListener2> listenersInThisSession = new HashSet<MMMessageListener2>();
   private static int seq = 1;
   private int myseq = -1;
+  private static int myLogLevel = AppMaster.MESSAGING_LOGS;
   
   public boolean alive = true;
   
@@ -86,7 +88,7 @@ public class MessagingManager2 implements BroadcastListener
 
   public void sendSessionMessage(MMessagePacket message, Mmowgli2UI ui)
   {
-    MSysOut.println("MessagingManager.sendSessionMessage() typ="+message.msgType);
+    MSysOut.println(myLogLevel,"MessagingManager.sendSessionMessage() typ="+message.msgType);
     message.session_id = ui.getUserSessionUUID();
     Broadcaster.broadcast(message);
   }
@@ -98,7 +100,7 @@ public class MessagingManager2 implements BroadcastListener
   @Override
   public void handleIncomingSessionMessage(final MMessagePacket message)
   {
-    MSysOut.println("MessagingManager.handleIncomingSessionMessage() typ="+message.msgType);    
+    MSysOut.println(myLogLevel,"MessagingManager.handleIncomingSessionMessage() typ="+message.msgType);    
     // If this message is from this session, we know we're in the session thread
     // try to deliver the message to us directly  
 
