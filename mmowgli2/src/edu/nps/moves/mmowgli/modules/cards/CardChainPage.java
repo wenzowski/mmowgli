@@ -279,7 +279,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       Property<?> prop = event.getProperty();
       CardMarking cm = (CardMarking)prop.getValue();
-      final Card card = DBGet.getCardFreshTL(cardId);
+      final Card card = DBGet.getCardTL(cardId); // Was getCardFresh, but the cache should be more recent
 
       if(cm == null) { // markings have been cleared
         if(card.getMarking()!=null && card.getMarking().size()>0) {
@@ -310,7 +310,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
                     HSess.init();
                     CardMarking cmm = CardMarking.mergeTL((CardMarking)event.getProperty().getValue());
                     Card c;
-                    setMarkingsTL(c=DBGet.getCardFreshTL(cardId),cmm);
+                    setMarkingsTL(c=DBGet.getCardTL(cardId),cmm);// Was getCardFresh, but the cache should be more recent
                     hideAllChildrenTL(c);
                     HSess.close();
                   }
@@ -342,6 +342,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     Mmowgli2UI.getGlobals().getScoreManager().cardMarkingWillBeSetTL(card,cm);  // call this before hitting db
     card.getMarking().clear();        // Only one marking at a time
     card.getMarking().add(cm);
+    MSysOut.println("*************** setting card marking hidden bit to "+CardMarkingManager.isHiddenMarking(cm));
     card.setHidden(CardMarkingManager.isHiddenMarking(cm));
     Card.updateTL(card);    
   }
@@ -582,7 +583,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   }
   
   /** This is an attempt to put more logic on the server and less into big client updates */
-  private void updateFollowers_oobTL(Object cId)
+  private void updateFollowers_oobTL(Card card)
   {
     // Easiest to throw everything away and reload, but trying to increase performance here.
     
@@ -592,7 +593,6 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // The follow-on list in a card is now maintained sorted by Hibernate, so start picking off the top until
     // we get to one we have, then stop;  Then add the new ones to the top of the layout
 
-    Card card = DBGet.getCardFreshTL(cId);
     Vector<Card> newCards = new Vector<Card>();
       
     for(Card c: card.getFollowOns() ) {
@@ -634,27 +634,34 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     c.setHidden(true); 
   }
   
+  /*
+    MSysOut.println("!!!! CardChainPage.cardCreated (not saved yet) id = "+c.getId());
+    MSysOut.println("!!!! CardChainPage.cardCreated getting displayed card to be parent");
+    MSysOut.println("!!!! CardChainPage.cardCreated setting displayed card "+parent.getId()+" as parent in "+c.getId());
+    MSysOut.println("!!!! CardChainPage.cardCreated getting existing followons, size = "+(set==null?"0":""+set.size()));
+    MSysOut.println("!!!! CardChainPage.cardCreated adding new card to parents followons set");    
+    MSysOut.println("!!!! CardChainPage.cardCreated telling mailmanager about card");
+    MSysOut.println("!!!! CardChainPage.cardCreated telling scoremgr about new card");
+    MSysOut.println("!!!! CardChainPage.cardCreated updating db with new parent");
+    MSysOut.println("!!!! CardChainPage.cardCreated saving new card to db "+c.getId());
+    MSysOut.println("!!!! CardChainPage.cardCreated #children = "+(parent.getFollowOns()==null?0:parent.getFollowOns().size()));
+    MSysOut.println("!!!! CardChainPage.cardCreated logging game event");   
+ */
   @Override
   public void cardCreatedTL(Card c)
   {
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-    Card parent = DBGet.getCardFreshTL(cardId);
+    Card parent = DBGet.getCardTL(cardId);
     c.setParentCard(parent);
     
     if(parent.isHidden())  // hidden parents produce hidden children
       markHidden(c);
     
-    Card.saveTL(c);  // new one saved
-    
-    GameEventLogger.cardPlayedTL(c.getId());
-    
     SortedSet<Card> set = parent.getFollowOns();
+
     if(set == null)
       parent.setFollowOns(set = new TreeSet<Card>(new Card.DateDescComparator()));
     set.add(c);   
-    parent.setFollowOns(set);  // think this is unnecessary
-    
-    Card.updateTL(parent);
     
     // If the set has only one card, that's the one we added, so he had no children before.  We want to send an email
     // to the parent author saying that the first followon was played on his card.  But we only do that once -- each player
@@ -667,7 +674,10 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // Now it used to be that we'd wait for the update listener, then fill out our list all over
     // Trying to optimize so we stick the new one on the top of the list and don' bother updateing ourselves
     // if the new card is already there.
-       
+
+    Card.saveTL(c);
+    Card.updateTL(parent);      
+    GameEventLogger.cardPlayedTL(c.getId());
   }
 
   @Override
@@ -718,12 +728,14 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
 
     if (externCardId.equals(cardId)) {   // Don't do this: externCardId == cardId  !
       // game masters can change text and marking
+      MSysOut.println(AppMaster.CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL "+externCardId.toString());
       Card c = DBGet.getCardTL(cardId); //DBGet.getCardFreshTL(cardId); test..cache should have it, maybe not db yet
-      c = Card.mergeTL(c);
-      MSysOut.println("In CardChainPage.cardUpdated_oobTL "+externCardId.toString()+" "+cardId.toString()+" hidden = "+c.isHidden());
+      MSysOut.println(AppMaster.CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL # children = "+(c.getFollowOns()==null?"0":c.getFollowOns().size()));
+
+      //c = Card.mergeTL(c);
       loadMarkingPanel_oobTL(c);
       cardLg.update_oobTL(cardId);
-      updateFollowers_oobTL(externCardId);
+      updateFollowers_oobTL(c);
       return true;              // ui
     }
     return false;
@@ -734,7 +746,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   @Override
   public boolean userUpdated_oobTL(Object uId)
   {
-    MSysOut.println("CardChainPage.userUpdated_oobTL("+uId.toString()+")");
+    MSysOut.println(AppMaster.USER_UPDATE_LOGS,"CardChainPage.userUpdated_oobTL("+uId.toString()+")");
     return cardLg.updateUser_oobTL(uId);
   }
 
