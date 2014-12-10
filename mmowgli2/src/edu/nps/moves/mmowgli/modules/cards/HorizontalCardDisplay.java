@@ -138,10 +138,9 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       start.setImmediate(true);
       start.addStyleName("m-vcr-fonticon");
       start.setDescription("show earliest cards");
-
       start.setHtmlContentAllowed(true);
-
       start.setIcon(FontAwesome.STEP_BACKWARD);
+      
       addComponent(start);
     
       left = new NativeButton(null,leftLis);
@@ -149,7 +148,8 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       left.addStyleName("m-vcr-fonticon");
       left.setDescription("show earlier cards");
       left.setHtmlContentAllowed(true);
-      left.setIcon(FontAwesome.BACKWARD);
+      //left.setIcon(FontAwesome.BACKWARD);      
+      left.setCaption("<i class=\"fa fa-play fa-rotate-180\"></i>");       // want to get a reverse play button
       addComponent(left);
       
       addComponent(sp=new Label());
