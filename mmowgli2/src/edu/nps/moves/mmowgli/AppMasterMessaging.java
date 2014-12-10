@@ -62,6 +62,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   private JmsIO2     _jmsIO;
   private static int sequenceCount = 0;
   private int mysequence = -1;
+  private static final int myLogLevel = AppMaster.MESSAGING_LOGS;
   
   public AppMasterMessaging(AppMaster appMaster)
   {
@@ -78,7 +79,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
         _jmsIO = new JmsIO2();
         _jmsIO.addReceiver(this);
         _jmsIO.addFirstExternalListener(this);
-        MSysOut.println("*****Internode IO built in AppMasterMessaging");
+        MSysOut.println(myLogLevel,"*****Internode IO built in AppMasterMessaging");
       }
       catch (Exception ex) {
         System.err.println("Can't build internode IO in ApplicationMaster: "+ex.getClass().getSimpleName()+" "+ex.getLocalizedMessage());
@@ -99,7 +100,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   @Override
   public boolean doPreviewMessage(MMessagePacket pkt)
   {
-    MSysOut.println("AppMasterMessaging.doPreviewMessage()...got external message");
+    MSysOut.println(myLogLevel,"AppMasterMessaging.doPreviewMessage()...got external message");
     HSess.init();
     HSess.get().getTransaction().setTimeout(HIBERNATE_TRANSACTION_TIMEOUT_IN_SECONDS);
     MMessage msg;
@@ -221,7 +222,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   @Override 
   public boolean handleIncomingTomcatMessageTL(MMessagePacket pkt)
   {
-    MSysOut.println("AppMasterMessaging/JMSIO2.handleIncomingTomcatMessageOob()");
+    MSysOut.println(myLogLevel,"AppMasterMessaging/JMSIO2.handleIncomingTomcatMessageOob()");
     
     if(getMcache() != null)
       mcache.handleIncomingTomcatMessageTL(pkt);
@@ -264,7 +265,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   @Override
   public void handleIncomingSessionMessage(MMessagePacket message)
   {
-    MSysOut.println("AppMasterMessaging, seq "+mysequence+", incomingSessionMessageHandler(receiveBroadcast()), tomcat_id = "+message.tomcat_id);
+    MSysOut.println(myLogLevel,"AppMasterMessaging, seq "+mysequence+", incomingSessionMessageHandler(receiveBroadcast()), tomcat_id = "+message.tomcat_id);
     ((JmsIO2)getInterTomcatIO()).sendSessionMessage(message);
   }
   
@@ -273,7 +274,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
  */
   public void incomingDatabaseEvent(final MMessagePacket mMessagePacket)
   {
-    MSysOut.println("AppMasterMessaging.incomingDatabaseEvent()");
+    MSysOut.println(myLogLevel,"AppMasterMessaging.incomingDatabaseEvent()");
     if(getMcache() != null) {
       /* We're in the hibernate thread here.  Have to let it complete before we can look up the object */
       MThreadManager.run( new Runnable(){
