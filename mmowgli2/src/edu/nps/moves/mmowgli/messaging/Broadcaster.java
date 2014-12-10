@@ -27,6 +27,8 @@ import java.util.LinkedList;
 //import java.util.concurrent.ExecutorService;
 //import java.util.concurrent.Executors;
 
+
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /* This is straight out of the vaadin 7 book.  Simple is good */
@@ -56,7 +58,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 public class Broadcaster implements Serializable
 {
   private static final long serialVersionUID = 11160928201779804L;
-  
+  private static final int myLogLevel = AppMaster.MESSAGING_LOGS;
   //static ExecutorService executorService = Executors.newCachedThreadPool();
 
   public interface BroadcastListener
@@ -78,7 +80,7 @@ public class Broadcaster implements Serializable
   
   public static synchronized void broadcast(MMessagePacket message, BroadcastListener blackout)
   {
-    MSysOut.println("Broadcaster received message type "+message.msgType);
+    MSysOut.println(myLogLevel,"Broadcaster received message type "+message.msgType);
     // Since we know the listeners need to be quick and not block, we don't need this
     /*
     for (final BroadcastListener listener: listeners)
@@ -91,7 +93,7 @@ public class Broadcaster implements Serializable
     */
     for(BroadcastListener listener: listeners)
       if(blackout == null || !blackout.equals(listener)) {
-        MSysOut.println("Broadcaster delivering message "+message.msgType+" to "+listener.getClass().getSimpleName()+" "+listener.hashCode());
+        MSysOut.println(myLogLevel,"Broadcaster delivering message "+message.msgType+" to "+listener.getClass().getSimpleName()+" "+listener.hashCode());
         listener.handleIncomingSessionMessage(message); 
       }
   }
