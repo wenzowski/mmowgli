@@ -303,8 +303,8 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
   public void onPostUpdate(PostUpdateEvent event)
   {
       if(enabled) MSysOut.println(myLogLevel,">>> Postupdate db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<< "+enabled);
-      if(enabled) if(event.getEntity() instanceof User)
-                     MSysOut.println(myLogLevel,"       user id = "+((User)event.getEntity()).getId());
+//      if(enabled) if(event.getEntity() instanceof User)
+//                     MSysOut.println(myLogLevel,"       user id = "+((User)event.getEntity()).getId());
 
       if(!enabled)
         return;
