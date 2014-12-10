@@ -516,7 +516,7 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
             }
             else if (o instanceof QuickUser) {
               QuickUser qu = (QuickUser) o;
-              coroutine.author = DBGet.getUserFreshTL(qu.id);
+              coroutine.author = DBGet.getUserTL(qu.id);
             }
           }
           coroutine.run(); // finish up
