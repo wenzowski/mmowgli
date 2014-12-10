@@ -30,11 +30,9 @@ import com.vaadin.shared.Position;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 
-import edu.nps.moves.mmowgli.AbstractMmowgliControllerHelper.UIHandler;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.messaging.*;
-import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
 import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
 
