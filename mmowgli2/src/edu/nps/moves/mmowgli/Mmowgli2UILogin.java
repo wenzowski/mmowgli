@@ -48,7 +48,7 @@ import com.vaadin.shared.ui.ui.Transport;
           "https://fonts.googleapis.com/css?family=Special+Elite",// typewriter
           "https://fonts.googleapis.com/css?family=Open+Sans:700&subset=latin,latin-ext", // army sci tech
           "https://fonts.googleapis.com/css?family=Gentium+Book+Basic&subset=latin,latin-ext",//
-          "http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"})//ditto
+          "https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"})//ditto
 
 //Loading the google code this way (anno) runs into the X-Frame-Options SAMEORIGIN error
 @JavaScript ({
