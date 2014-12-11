@@ -145,7 +145,7 @@ public class DBGet
     if(u != null)
       userCache.addToCache(id, u);
 
-    return u;  
+    return (User)sess.merge(u);  
   }
   
   public static User getUserFreshTL(Object id)
