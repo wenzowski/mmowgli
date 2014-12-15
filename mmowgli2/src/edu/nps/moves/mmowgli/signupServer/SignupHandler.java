@@ -32,6 +32,7 @@ import org.jasypt.digest.StandardStringDigester;
 
 import edu.nps.moves.mmowgli.db.pii.Query2Pii;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * SignupHandler.java
@@ -114,21 +115,29 @@ public class SignupHandler
     return tlis.get(0);
   }
  */ 
+  @SuppressWarnings("unchecked")
   public static Query2Pii getQuery2WithEmail(String email)
   {
-    Session sess = VHibPii.getASession();
-    String checkDigest = emailDigester.digest(email.toLowerCase());
+    List<Query2Pii> tlis=null;
+    Session sess=null;
+    try {
+      sess = VHibPii.getASession();
+      String checkDigest = emailDigester.digest(email.toLowerCase());
     
-    Criteria crit = sess.createCriteria(Query2Pii.class)
+      Criteria crit = sess.createCriteria(Query2Pii.class)
                     .add(Restrictions.eq("digest", checkDigest));
     
-    @SuppressWarnings("unchecked")
-    List<Query2Pii> tlis = (List<Query2Pii>)crit.list(); 
-    
-    sess.close();
+      tlis = (List<Query2Pii>)crit.list(); 
+    }
+    catch(Exception ex) {
+      MSysOut.println("Exception in SignupHandler: "+ex.getClass().getSimpleName()+": "+ex.getLocalizedMessage());
+    }
+    if(sess != null)
+      sess.close();
     
     if(tlis.size()<=0)
       return null;
+    
     return tlis.get(0);    
   }
 }
