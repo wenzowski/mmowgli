@@ -31,6 +31,7 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewProvider;
 import com.vaadin.server.Page;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -488,8 +489,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
   {
     HSess.init();
     // First check session-global handlers
-    switch(pkt.msgType)
-    {
+    switch (pkt.msgType) {
     case UPDATED_GAME:
       Mmowgli2UI.getGlobals().gameUpdatedExternallyTL(null);
       break;
@@ -501,18 +501,25 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       helper.doSessionReport(pkt.msg);
       break;
     }
-    
+
     // Now check each UI
-    Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
-    for (UI ui : uis) {
-      if (ui == null || !(ui instanceof Mmowgli2UI) || !((Mmowgli2UI) ui).isUiFullyInitted()) // might be the error ui
-        continue;
-      Mmowgli2UI mui = (Mmowgli2UI) ui;
-      mui.access(mui.getControllerHelper().getAccessRunner(pkt));
+    Mmowgli2UI appui = Mmowgli2UI.getAppUI(); // got some null ptrs here
+    if (appui != null) {
+      VaadinSession vSess = appui.getSession();
+      if (vSess != null) {
+        Collection<UI> uis = vSess.getUIs();
+        if (uis != null) {
+          for (UI ui : uis) {
+            if (ui == null || !(ui instanceof Mmowgli2UI) || !((Mmowgli2UI) ui).isUiFullyInitted()) // might be the error ui
+              continue;
+            Mmowgli2UI mui = (Mmowgli2UI) ui;
+            mui.access(mui.getControllerHelper().getAccessRunner(pkt));
+          }
+        }
+      }
     }
     HSess.close();
-  }
-  
+  }  
   
   // MessageReceiver interface for oob events
   // This is the controller for one user session, but the user may have several windows, in the form of
