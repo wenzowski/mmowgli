@@ -271,8 +271,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
   public void onMessage(javax.jms.Message message)
   {
     try {
-      //JMSMessageUtil.dump("*****Message received on appmaster (JmsIO2) from external jms: ",message);
-      MSysOut.println("*****Message received on appmaster (JmsIO2) from external jms");
+      MSysOut.println("Message received on appmaster (JmsIO2) from external jms");
       MMessagePacket pkt = JMSMessageUtil.decode(message);
       // We discard anything sent by us so we don't get into an infinite feedback loop      
       if (pkt.tomcat_id==null || !pkt.tomcat_id.equals(tomcatServerIdentifier)) {
@@ -296,7 +295,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
            globs.getAppMaster().receivedFromOtherNodes(pkt);  */
       }
       else
-        JMSMessageUtil.dump("*****Message dumped because it's from me.", message);
+        JMSMessageUtil.dump("Message dumped because it's from me.", message);
     }
     catch (JMSException e) {
       JMSMessageUtil.showException("Exception in JmsIO2.onMessage(): ",e);
