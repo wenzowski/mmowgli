@@ -130,7 +130,7 @@ public class SignupHandler
       tlis = (List<Query2Pii>)crit.list(); 
     }
     catch(Exception ex) {
-      MSysOut.println("Exception in SignupHandler: "+ex.getClass().getSimpleName()+": "+ex.getLocalizedMessage());
+      MSysOut.println("***Exception in SignupHandler: "+ex.getClass().getSimpleName()+": "+ex.getLocalizedMessage());
     }
     if(sess != null)
       sess.close();
