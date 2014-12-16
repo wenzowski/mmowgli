@@ -24,6 +24,8 @@ package edu.nps.moves.mmowgli.signupServer;
 
 import java.util.UUID;
 
+import javax.servlet.annotation.WebServlet;
+
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
@@ -54,12 +56,12 @@ import edu.nps.moves.mmowgli.markers.HasUUID;
 public class SignupServer extends UI implements HasUUID
 {
   private static final long serialVersionUID = 9205707803230381489L;
-  private String tail2 = "/signup";
+  private String tail2 = "/signup";   //This gets overwritten with actual annotation from SignupServlet.java
   private UUID uuid;
   
   /**
    * Init is invoked on application load (when a user accesses the application
-   * for the first time).
+   * at this URL for the first time).
    */
   
   @Override
@@ -76,12 +78,15 @@ public class SignupServer extends UI implements HasUUID
       w.center();
       addWindow(w);
     }
-    else {
-      // Redirect to game site
-      // Appmaster is in main game context, but should be ok
-      String url = AppMaster.instance().getAppUrl().toExternalForm();
-      if(url.endsWith("/") || url.endsWith("\\"))
-        url = url.substring(0,url.length()-1);
+    else {  // Redirect to game site
+      Class<SignupServlet> obj = SignupServlet.class;
+      WebServlet anno = (WebServlet)obj.getAnnotation(WebServlet.class);
+      tail2 = anno.value()[0];
+      while(!Character.isLetterOrDigit(tail2.charAt(tail2.length()-1)))
+        tail2 = tail2.substring(0,tail2.length()-1);
+
+      String url = AppMaster.getUrlString();
+
       if(url.toLowerCase().endsWith(tail2))
         url = url.substring(0, url.length()-tail2.length());
       else
