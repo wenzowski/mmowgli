@@ -95,26 +95,7 @@ public class SignupHandler
     sess.getTransaction().commit();
     sess.close();
   }
- /*
-  public static Query2 getQuery2WithEmail(String email)
-  {
-    SingleSessionManager ssm = new SingleSessionManager();
-    Session sess = ssm.getSession();
-    
-    String checkDigest = emailDigester.digest(email.toLowerCase());
-    
-    Criteria crit = sess.createCriteria(Query2.class)
-                    .add(Restrictions.eq("digest", checkDigest));
-    
-    @SuppressWarnings("unchecked")
-    List<Query2> tlis = (List<Query2>)crit.list(); 
-    
-    ssm.endSession();
-    if(tlis.size()<=0)
-      return null;
-    return tlis.get(0);
-  }
- */ 
+ 
   @SuppressWarnings("unchecked")
   public static Query2Pii getQuery2WithEmail(String email)
   {
