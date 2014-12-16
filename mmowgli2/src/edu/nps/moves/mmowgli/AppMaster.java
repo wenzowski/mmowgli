@@ -270,9 +270,9 @@ public class AppMaster
         url = new URL(url.getProtocol(),url.getHost(),url.getFile());  //lose any query bit
         appUrl = url;
         appUrlString = url.toString();
-        if(appUrlString.endsWith("/"))
-          appUrlString = appUrlString.substring(0, appUrlString.length()-1);
-        
+        if(appUrlString.endsWith("/") || appUrlString.endsWith("\\"))
+          appUrlString = appUrlString.substring(0, appUrlString.length()-1);       
+
         computeUrls();
       }
       catch(MalformedURLException ex) {
@@ -280,7 +280,28 @@ public class AppMaster
       }
     }
   }
-
+  // todo combine,
+  public static String getUrlString()
+  {
+    String rets = null;
+    try {
+      URL url = Page.getCurrent().getLocation().toURL();
+      if(url.getPort() == 80 || url.getPort() == 443)
+        url = new URL(url.getProtocol(),url.getHost(),url.getFile());  //lose any query bit
+      else
+        url = new URL(url.getProtocol(),url.getHost(),url.getPort(),url.getFile());
+      String urlString = url.toString();
+      if(urlString.endsWith("/")|| urlString.endsWith("\\"))
+        urlString = urlString.substring(0, urlString.length()-1);
+      
+      rets = urlString;
+    }
+    catch(MalformedURLException ex) {
+      System.err.println("Can't form App URL in AppMaster.oneTimeSetAppUrlFromUI()");
+    }
+    return rets;
+  }
+  
   public void init(ServletContext context)
   {
     piiHibernate = VHibPii.instance(); // This has already been initialized
