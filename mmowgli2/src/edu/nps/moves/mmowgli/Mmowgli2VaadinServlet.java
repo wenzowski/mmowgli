@@ -22,8 +22,6 @@
 
 package edu.nps.moves.mmowgli;
 
-import java.util.logging.LogManager;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -97,16 +95,7 @@ public class Mmowgli2VaadinServlet extends VaadinServlet implements SessionInitL
   {
     MSysOut.println("Mmowgli2VaadinServlet().....");
   }
-  private void initLogging()
-  {
-    try {
-      LogManager.getLogManager().readConfiguration(getClass().getResourceAsStream("/logging.properties"));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
-System.out.println("bp");
-  }
+  
   @Override
   protected void servletInitialized() throws ServletException
   {
@@ -114,10 +103,9 @@ System.out.println("bp");
     
     getService().addSessionInitListener(this);
     getService().addSessionDestroyListener(this);
-    initLogging();
+
     ServletContext context = getServletContext();
     appMaster = AppMaster.instance(this,context);// Initialize app master, global across on user sessions on this cluster node
-
     context.setAttribute(MmowgliConstants.APPLICATION_MASTER_ATTR_NAME, appMaster);
     appMaster.init(context);
     
