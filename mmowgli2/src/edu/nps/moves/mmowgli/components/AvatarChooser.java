@@ -75,7 +75,7 @@ public class AvatarChooser extends Window implements MmowgliComponent
     this.initSelectedID = selectedId;
     
     setWidth("745px");
-    setHeight("215px");
+    setHeight("225px");
     setResizable(true);
     setClosable(false);
   }
