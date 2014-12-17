@@ -200,12 +200,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     markingRadioGroup.setImmediate(true);
     markingRadioGroup.setDescription("Only game masters may change.");
     vl.addComponent(markingRadioGroup);
-/* in spec, but leave out per Jason    
-    NativeButton pointsButt = new NativeButton("manage card points");
-    pointsButt.addStyleName(BaseTheme.BUTTON_LINK);
-    vl.addComponent(pointsButt);
-    pointsButt.addListener(new GameMasterPointsListener());
-*/    
+
     NativeButton clearButt = new NativeButton("clear card marking");
     clearButt.addStyleName(BaseTheme.BUTTON_LINK);
     vl.addComponent(clearButt);
@@ -342,7 +337,9 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     Mmowgli2UI.getGlobals().getScoreManager().cardMarkingWillBeSetTL(card,cm);  // call this before hitting db
     card.getMarking().clear();        // Only one marking at a time
     card.getMarking().add(cm);
+    
     MSysOut.println("*************** setting card marking hidden bit to "+CardMarkingManager.isHiddenMarking(cm));
+    
     card.setHidden(CardMarkingManager.isHiddenMarking(cm));
     Card.updateTL(card);    
   }
