@@ -44,7 +44,6 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
-import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 
 /**
  * CardChainTree.java
@@ -212,7 +211,7 @@ public class CardChainTree extends TreeTable implements ItemClickListener
   
   private void loadTree()
   {
-    loadRootTL(DBGet.getCardFreshTL(rootId));  // Need to access children, so need a refresh
+    loadRootTL(DBGet.getCardTL(rootId)); //auto merge now //DBGet.getCardFreshTL(rootId));  // Need to access children, so need a refresh
   }
   private void loadRootTL(Card c)
   {
@@ -343,6 +342,7 @@ public class CardChainTree extends TreeTable implements ItemClickListener
         setParent(cw, parent);       
         addChildrenTL(cw);  // recurse
       }
+
       if(cw != null)
         setChildrenAllowed(cw, false);  // leaf
     }
