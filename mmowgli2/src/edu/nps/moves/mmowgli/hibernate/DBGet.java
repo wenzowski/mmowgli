@@ -120,32 +120,35 @@ public class DBGet
   
   public static User getUser(Object id, Session sess)
   {
-    if(USERCACHEDISABLED)
-      return (User)sess.get(User.class, (Serializable)id);
-      
+    if (USERCACHEDISABLED)
+      return (User) sess.get(User.class, (Serializable) id);
+
     User u;
     int retries = 3;
-    
-    if((u=userCache.getObjectForKey(id)) == null) {
+
+    if ((u = userCache.getObjectForKey(id)) == null) {
       retry:
-      while(true){
-        u = (User)sess.get(User.class, (Serializable)id);
-        if(u != null)
+        while (true) {
+        u = (User) sess.get(User.class, (Serializable) id);
+        if (u != null)
           break retry;
-        System.err.println("DBGet.getUser(id,sess) try " + retries+" failed");
-        if(retries-- <= 0) {
-          System.err.println("User with id "+id+" not found in db, stack trace:");
+        System.err.println("DBGet.getUser(id,sess) try " + retries + " failed");
+        if (retries-- <= 0) {
+          System.err.println("User with id " + id + " not found in db, stack trace:");
           new Exception().printStackTrace();
           break retry;
         }
-        try {Thread.sleep(500l);}catch(InterruptedException ex){}
+        try {
+          Thread.sleep(500l);
+        }
+        catch (InterruptedException ex) {
+        }
       }
+      if (u != null)
+        userCache.addToCache(id, u);
+      return u;
     }
-
-    if(u != null)
-      userCache.addToCache(id, u);
-
-    return (User)sess.merge(u);  
+    return (User) sess.merge(u);
   }
   
   public static User getUserFreshTL(Object id)
