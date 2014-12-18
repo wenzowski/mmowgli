@@ -511,7 +511,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     protected Criteria getBaseCriteriaTL()
     {
       Criteria crit = super.getBaseCriteriaTL();           // gets all cards
-      crit.add(Restrictions.eq("author", DBGet.getUserTL(uid)));// written by me
+      crit.add(Restrictions.eq("author", DBGet.getUserFreshTL(uid)));// written by me (tried to remove the fresh, but got unexplained hibernate exception
       crit.add(Restrictions.eq("factCard", false));      // which aren't fact cards
       crit.addOrder(Order.desc("creationDate"));   // newest first
       
