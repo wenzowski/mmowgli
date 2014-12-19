@@ -526,7 +526,7 @@ public class MCacheManager implements InterTomcatReceiver
         usersQuick.put(u.getUserName(), id);
     }
   }
-
+  
   private void newOrUpdatedCardTL(char messageType, String message)
   {
     long id = MMessage.MMParse(messageType, message).id;
@@ -683,6 +683,20 @@ public class MCacheManager implements InterTomcatReceiver
     if(idx >= maxIdx)
       return -1;
     return idx;
+  }
+
+  public void putQuickUser(User u)
+  {
+    synchronized (usersQuick) {
+      addOrUpdateUserInContainer(u);
+
+      // Smaller, previous quick list...todo merge with other
+      if (u.isViewOnly() || u.isAccountDisabled())
+        ; // don't add
+      else {
+        usersQuick.put(u.getUserName(), u.getId());
+      }
+    }
   }
 
   public void putCard(Card c)
