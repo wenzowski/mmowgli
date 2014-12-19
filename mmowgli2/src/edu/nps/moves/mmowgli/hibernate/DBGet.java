@@ -110,7 +110,40 @@ public class DBGet
   // Users
   public static User getUserTL(Object id)
   {
-    return getUser(id,HSess.get());
+    Session sess = HSess.get();
+    if (USERCACHEDISABLED)
+      return (User) sess.get(User.class, (Serializable) id);
+
+    User u;
+    int retries = 3;
+
+    if ((u = userCache.getObjectForKey(id)) == null) {
+      retry:
+        while (true) {
+        u = (User) sess.get(User.class, (Serializable) id);
+        if (u != null)
+          break retry;
+        System.err.println("DBGet.getUser(id,sess) try " + retries + " failed");
+        if (retries-- <= 0) {
+          System.err.println("User with id " + id + " not found in db, stack trace:");
+          new Exception().printStackTrace();
+          break retry;
+        }
+        HSess.close();
+        try {
+          Thread.sleep(500l);
+        }
+        catch (InterruptedException ex) {
+        }
+        HSess.init();
+      }
+      if (u != null)
+        userCache.addToCache(id, u);
+      return u;
+    }
+    else
+      return (User) sess.merge(u);  // merge cached value with this sess
+
   }
   
   public static void putUser(User u)
@@ -138,6 +171,7 @@ public class DBGet
           new Exception().printStackTrace();
           break retry;
         }
+        
         try {
           Thread.sleep(500l);
         }
