@@ -562,7 +562,8 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       final Window emailDialog = new Window("Email Confirmation");
       emailDialog.setModal(true);
       emailDialog.setClosable(false);
-      VerticalLayout vLay = (VerticalLayout)emailDialog.getContent();
+      VerticalLayout vLay = new VerticalLayout();
+      emailDialog.setContent(vLay);
       vLay.setMargin(true);
       vLay.setSpacing(true);
       vLay.setSizeUndefined();
