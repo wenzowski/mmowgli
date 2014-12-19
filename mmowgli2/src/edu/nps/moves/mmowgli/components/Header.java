@@ -402,6 +402,9 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   
   public boolean refreshUser(Object uid, Session sess)  // also called oob
   {
+    if(!uid.equals(Mmowgli2UI.getGlobals().getUserID()))
+       return false;
+    
     User u = DBGet.getUserFresh(uid, sess);  // needs Role
     userNameButt.setCaption(u.getUserName());
     userNameButt.setParam(uid);
