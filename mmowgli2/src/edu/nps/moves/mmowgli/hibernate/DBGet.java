@@ -123,7 +123,7 @@ public class DBGet
         u = (User) sess.get(User.class, (Serializable) id);
         if (u != null)
           break retry;
-        System.err.println("DBGet.getUser(id,sess) try " + retries + " failed");
+        System.err.println("DBGet.getUserTL(id,sess) try " + retries + " failed");
         if (retries-- <= 0) {
           System.err.println("User with id " + id + " not found in db, stack trace:");
           new Exception().printStackTrace();
