@@ -323,6 +323,7 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
         msgTyp = UPDATED_USER;
         msg = "" + ((User) obj).getId();
         DBGet.cacheUser((User)obj);
+        mcache.putQuickUser((User)obj);
       }
       else if (obj instanceof ActionPlan) {
         msgTyp = UPDATED_ACTIONPLAN;
