@@ -70,6 +70,7 @@ public class SignupWindow extends Window
     appUrl = appUrl.substring(0,appUrl.lastIndexOf("/"));
     
     setContent(new Content());
+    setHeight("90%");
     this.addCloseListener(new CloseListener()
     {
       @Override
@@ -100,9 +101,7 @@ public class SignupWindow extends Window
     {
       Label lab;
       Button submitButton;
-
       setMargin(true);
-
       lab = new Label();
       lab.setHeight("30px");
       addComponent(lab);
@@ -130,7 +129,7 @@ public class SignupWindow extends Window
       VerticalLayout vl = new VerticalLayout();
       addComponent(vl);
       setComponentAlignment(vl,Alignment.MIDDLE_CENTER);
-      vl.setWidth("700px"); //"66%");
+      vl.setWidth("800px"); //"66%");
       vl.addStyleName("m-greyborder");
       vl.setMargin(true);
       vl.setSpacing(true);
@@ -183,6 +182,8 @@ public class SignupWindow extends Window
       */
 
       vl.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
+      vl.addComponent(lab=new Label());
+      vl.setExpandRatio(lab, 1.0f);
     }
 
     @Override
