@@ -116,7 +116,7 @@ public class SignupHandler
     if(sess != null)
       sess.close();
     
-    if(tlis.size()<=0)
+    if(tlis == null || tlis.size()<=0)
       return null;
     
     return tlis.get(0);    
