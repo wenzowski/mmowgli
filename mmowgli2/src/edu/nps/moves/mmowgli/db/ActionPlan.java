@@ -125,7 +125,8 @@ public class ActionPlan implements Serializable
   
   boolean     superInteresting;
   
-  Integer      version = 0;   // used internally by hibernate for optimistic locking
+//  Integer      version = 0;   // used internally by hibernate for optimistic locking
+  // removed 29 dec 2014, causing problems with new merge code
 //@formatter:on
 
   public ActionPlan()
@@ -207,7 +208,7 @@ public class ActionPlan implements Serializable
   }
 
   /* Used to lock the table when we controlling editing */
-  @Version
+/*  @Version
   public Integer getVersion()
   {
     return version;
@@ -217,7 +218,7 @@ public class ActionPlan implements Serializable
   {
     this.version = version;
   }
-
+*/
   /**
    * @return the headline
    */
