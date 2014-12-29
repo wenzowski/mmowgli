@@ -238,6 +238,9 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   
   public static MmowgliSessionGlobals getGlobals()
   {
+    UI curr = UI.getCurrent();
+    if(!(curr instanceof Mmowgli2UI))
+      return null;
     Mmowgli2UI mui = (Mmowgli2UI)UI.getCurrent();
     if(mui != null)
       return mui.getSessionGlobals();
