@@ -107,7 +107,7 @@ public class AppMaster
   static {
     sysOutLogLevel &= ~MESSAGING_LOGS;  // turn off message logs
     sysOutLogLevel &= ~MCACHE_LOGS;     // turn off cache logs  
-    sysOutLogLevel &= ~TICK_LOGS;       // turn off tick display
+    //sysOutLogLevel &= ~TICK_LOGS;       // turn off tick display
     //sysOutLogLevel &= ~USER_UPDATE_LOGS; //turn off user updates displays
     MSysOut.println("System log level = "+sysOutLogLevel);
   }
