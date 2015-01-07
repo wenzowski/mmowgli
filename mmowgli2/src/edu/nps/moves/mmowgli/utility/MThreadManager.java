@@ -22,8 +22,11 @@
 
 package edu.nps.moves.mmowgli.utility;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.MESSAGING_LOGS;
+
 import java.util.concurrent.*;
 
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 public class MThreadManager
 {
   private MThreadManager(){} // not instanciable
@@ -38,7 +41,7 @@ public class MThreadManager
   
   public static void run(Runnable runner)
   {
-    pool.execute(new Preamble(runner));
+    pool.execute(new Preamble(runner,Thread.currentThread().getPriority()-2));
   }
   
   public static void run(Runnable runner, boolean wait)
@@ -58,19 +61,25 @@ public class MThreadManager
   private static class Preamble implements Runnable
   {
     private Runnable runner;
-
-    public Preamble(Runnable runner)
+    private int prior;
+    private static int seq=0;
+    
+    public Preamble(Runnable runner, int priority)
     {
       this.runner = runner;
+      prior = priority;
     }
     @Override
     public void run()
     {
+      int myseq = seq++;
+      MSysOut.println(MESSAGING_LOGS,"MThreadManager.Preamble start "+myseq);
       Thread thr = Thread.currentThread();
-      thr.setPriority(Thread.NORM_PRIORITY); 
-      //thr.setDaemon(true);
+      thr.setPriority(prior); 
       thr.setName("MThreadManagerPoolThread");
+      try{Thread.sleep(100L);}catch(InterruptedException ex){} //Thread.yield();
       runner.run();
+      MSysOut.println(MESSAGING_LOGS,"MThreadManager.Preamble end "+myseq);
     }
   }
   
