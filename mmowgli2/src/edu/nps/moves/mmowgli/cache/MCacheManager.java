@@ -36,7 +36,6 @@ import org.hibernate.criterion.Restrictions;
 import com.vaadin.data.util.BeanContainer;
 import com.vaadin.data.util.BeanItem;
 
-import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
@@ -82,7 +81,7 @@ public class MCacheManager implements InterTomcatReceiver
   private BeanContainer<Long,QuickUser> quickUsersContainer;
 
   public static int GAMEEVENTCAPACITY = 1000; // number cached, not all returned in a hunk to client
-  private static int myLogLevel = AppMaster.MCACHE_LOGS;
+  private static int myLogLevel = MCACHE_LOGS;
   
   //private Timer listsRefreshTimer;
 
@@ -612,7 +611,7 @@ public class MCacheManager implements InterTomcatReceiver
     /**
      * @return the cardCache
      */
-    public ObjectCache<Card> getCardCache()
+    private ObjectCache<Card> getCardCache()
     {
       return cardCache;
     }
@@ -708,10 +707,13 @@ public class MCacheManager implements InterTomcatReceiver
   {
     Card c;
     if((c=getCardCache().getObjectForKey(id)) == null) {
-      return getCardFresh(id,sess);
+      c = getCardFresh(id,sess);
+      MSysOut.println(myLogLevel,"MCacheManager.getCard() "+id.toString()+" Had to getCardFresh, text: "+c.getText());
+      return c;
     }
-    //return c;
-    return (Card)sess.merge(c);
+    MSysOut.println(myLogLevel,"MCacheManager.getCard() "+id.toString()+" Got card from cache, text: "+c.getText());
+    c = (Card)sess.merge(c);
+    return c;
   }
 
   public Card getCardFresh(Object id, Session sess)
