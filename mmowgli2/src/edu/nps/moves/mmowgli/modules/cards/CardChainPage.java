@@ -282,6 +282,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
           card.getMarking().clear();
           card.setHidden(false);
           Card.updateTL(card);
+          GameEventLogger.cardMarkedTL(card,Mmowgli2UI.getGlobals().getUserID());
         }
       }
       else {
@@ -289,11 +290,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
         boolean needWarning = (!card.getFollowOns().isEmpty() && CardMarkingManager.isHiddenMarking(cm));
         if(!needWarning) {
           setMarkingsTL(card,cm);
-//          globs.getScoreManager().cardMarkingWillBeSetTL(card,cm);  // call this before hitting db
-//          card.getMarking().clear();        // Only one marking at a time
-//          card.getMarking().add(cm);
-//          card.setHidden(CardMarkingManager.isHiddenMarking(cm));
-//          Card.updateTL(card);
+          GameEventLogger.cardMarkedTL(card,Mmowgli2UI.getGlobals().getUserID());
         }
         else {
           ConfirmDialog.show(CardChainPage.this.getUI(), "Child cards will also be hidden.  Continue?",
@@ -307,13 +304,13 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
                     Card c;
                     setMarkingsTL(c=DBGet.getCardTL(cardId),cmm);// Was getCardFresh, but the cache should be more recent
                     hideAllChildrenTL(c);
+                    GameEventLogger.cardMarkedTL(c,Mmowgli2UI.getGlobals().getUserID());
                     HSess.close();
                   }
                 }
           });
         }
       }
-      GameEventLogger.cardMarkedTL(cardId,Mmowgli2UI.getGlobals().getUserID());
       HSess.close();
     }
   }
@@ -338,7 +335,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     card.getMarking().clear();        // Only one marking at a time
     card.getMarking().add(cm);
     
-    MSysOut.println("*************** setting card marking hidden bit to "+CardMarkingManager.isHiddenMarking(cm));
+    MSysOut.println(MmowgliConstants.CARD_UPDATE_LOGS,"CardChainPage.setMarkingsTL() setting card marking hidden bit to "+CardMarkingManager.isHiddenMarking(cm));
     
     card.setHidden(CardMarkingManager.isHiddenMarking(cm));
     Card.updateTL(card);    
@@ -414,10 +411,11 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       EditCardTextWindow w = (EditCardTextWindow)e.getWindow();
       if(w.results != null) {
         HSess.init();
-        Card c = DBGet.getCardFreshTL(cardId);
+        Card c = DBGet.getCardTL(cardId);
         c.setText(w.results);
+        MSysOut.println(MmowgliConstants.CARD_UPDATE_LOGS,"CardChainPage.EditCardCloseListener.windowClose() updating card text to '"+w.results+"'");
         Card.updateTL(c);
-        GameEventLogger.cardTextEdittedTL(cardId, Mmowgli2UI.getGlobals().getUserID());
+        GameEventLogger.cardTextEdittedTL(c, Mmowgli2UI.getGlobals().getUserID());
         HSess.close();
       }
     }   
@@ -649,6 +647,8 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   {
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     Card parent = DBGet.getCardTL(cardId);
+    parent=Card.mergeTL(parent);
+    
     c.setParentCard(parent);
     
     if(parent.isHidden())  // hidden parents produce hidden children
@@ -657,9 +657,9 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     SortedSet<Card> set = parent.getFollowOns();
 
     if(set == null)
-      parent.setFollowOns(set = new TreeSet<Card>(new Card.DateDescComparator()));
+      set = new TreeSet<Card>(new Card.DateDescComparator());
     set.add(c);   
-    
+    parent.setFollowOns(set);
     // If the set has only one card, that's the one we added, so he had no children before.  We want to send an email
     // to the parent author saying that the first followon was played on his card.  But we only do that once -- each player
     // only gets one of this type of email.  Checked-for in mailmanager.
@@ -667,13 +667,14 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       AppMaster.instance().getMailManager().firstChildPlayedTL(parent,c);
     }
       
-    globs.getScoreManager().cardPlayedTL(c); // update score only from this app instance  
     // Now it used to be that we'd wait for the update listener, then fill out our list all over
     // Trying to optimize so we stick the new one on the top of the list and don' bother updateing ourselves
     // if the new card is already there.
-
+    
     Card.saveTL(c);
-    Card.updateTL(parent);      
+    Card.updateTL(parent);
+   
+    globs.getScoreManager().cardPlayedTL(c); // update score only from this app instance  
     GameEventLogger.cardPlayedTL(c.getId());
   }
 
@@ -702,7 +703,8 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // I'll handle it then when I receive the word that I've been
     // updated -- i.e., the child was attached to me.
     // not here, which says the card has been newly added to the db.
-    
+    MSysOut.println(MESSAGING_LOGS,"CardChainPage.cardPlayed_oobTL() (void method) externCardId = "+externCardId+" my cardId = "+cardId);
+
     return false; // don't need ui update
   }
   
@@ -722,28 +724,30 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // so you can't prohibit access. You could recode to pass along the session that we build when we
     // read the mcast, but that's clumsy. It doesn't see to cause a problem here. Keep a lookout.
     // We might have fixed this with the synchro in the mcast
-
+MSysOut.println(MESSAGING_LOGS,"CardChainPage.cardUpdated_oobTL() externCardId = "+externCardId+" my cardId = "+cardId);
     if (externCardId.equals(cardId)) {   // Don't do this: externCardId == cardId  !
       // game masters can change text and marking
-      MSysOut.println(AppMaster.CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL "+externCardId.toString());
-      Card c = DBGet.getCardTL(cardId); //DBGet.getCardFreshTL(cardId); test..cache should have it, maybe not db yet
-      MSysOut.println(AppMaster.CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL # children = "+(c.getFollowOns()==null?"0":c.getFollowOns().size()));
+      MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL "+externCardId.toString());
+      Card c = DBGet.getCardTL(externCardId); //DBGet.getCardFreshTL(cardId); test..cache should have it, maybe not db yet
 
-      //c = Card.mergeTL(c);
+      c = Card.mergeTL(c);     // enabling this causes loop
+      MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL # children = "+(c.getFollowOns()==null?"0":c.getFollowOns().size()));
+
       loadMarkingPanel_oobTL(c);
-      cardLg.update_oobTL(cardId);
+      cardLg.update_oobTL(externCardId);
       updateFollowers_oobTL(c);
       return true;              // ui
     }
     return false;
   }
+  
   /**
    * We only want to check to see if the user star has changed
    */
   @Override
   public boolean userUpdated_oobTL(Object uId)
   {
-    MSysOut.println(AppMaster.USER_UPDATE_LOGS,"CardChainPage.userUpdated_oobTL("+uId.toString()+")");
+    MSysOut.println(USER_UPDATE_LOGS,"CardChainPage.userUpdated_oobTL("+uId.toString()+")");
     return cardLg.updateUser_oobTL(uId);
   }
 
