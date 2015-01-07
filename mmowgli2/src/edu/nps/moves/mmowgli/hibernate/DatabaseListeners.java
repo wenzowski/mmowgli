@@ -52,7 +52,7 @@ public class DatabaseListeners
   public MySaveOrUpdateListener saveOrUpdateListener;
   public MyDeleteListener deleteListener;
   private MCacheManager mcache;
-  private static int myLogLevel = AppMaster.DB_LISTENER_LOGS;
+  private static int myLogLevel = DB_LISTENER_LOGS;
   
   public DatabaseListeners(ServiceRegistry sRegistry)
   {
@@ -87,13 +87,12 @@ public class DatabaseListeners
   public void enableListeners(boolean tf)
   {
     saveListener.enabled = tf;    
-    postInsertListener.enabled = tf;
+    postInsertListener.enabled = false; //tf;
     
     updateListener.enabled = tf;
-    postUpdateListener.enabled = tf;
+    postUpdateListener.enabled = false; //tf;
     
     saveOrUpdateListener.enabled = tf;
-
     deleteListener.enabled = tf;    
   }  
   
@@ -105,9 +104,9 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-/*      if(enabled) */MSysOut.println(myLogLevel,">>> Save db listener <<< "+false);
+      MSysOut.println(myLogLevel,">>> Save db listener "+(enabled?"":"(unused)") + " type = "+event.getEntity().getClass().getSimpleName()+" <<<");
       super.onSaveOrUpdate(event); // default behavior first
-/*      if (!enabled)
+      if (!enabled)
         return;
 
       Object obj = event.getObject();
@@ -117,9 +116,11 @@ public class DatabaseListeners
       
       if (obj instanceof Card) {
         msgTyp = NEW_CARD;
-        msg = "" + ((Card) obj).getId();
-        // DBGet.cacheCard((Card)obj);
-        mcache.putCard((Card) obj);
+        Card c = (Card)obj;
+        MSysOut.println(CARD_UPDATE_LOGS,"Save db listener got card with id = "+c.getId()+" text = "+c.getText());
+        msg = "" + c.getId();
+        // DBGet.cacheCard(c);
+        mcache.putCard(c);
       }
       else if (obj instanceof User) {
         msgTyp = NEW_USER;
@@ -155,8 +156,8 @@ public class DatabaseListeners
       }
       if(msgTyp != null)
         messageOut(event, msgTyp, msg);
-*/
- //     if(enabled) MSysOut.println("Out of save db listener");
+
+      MSysOut.println(myLogLevel,">>> Out of save db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
     }
   }
   @SuppressWarnings("serial")
@@ -167,21 +168,22 @@ public class DatabaseListeners
     @Override
     public void onPostInsert(PostInsertEvent event)
     {
-      MSysOut.println(myLogLevel,">>> PostInsert db listener type = "+event.getEntity().getClass().getSimpleName()+" <<< "+enabled);
-      //if(event.getEntity() instanceof User)
-      //   MSysOut.println(myLogLevel,"         user id = "+((User)event.getEntity()).getId());
-      
       if (!enabled)
         return;
+      
+      MSysOut.println(myLogLevel,">>> PostInsert db listener "+(enabled?"":"(unused)") + " type = "+event.getEntity().getClass().getSimpleName()+" <<<");
       Object obj = event.getEntity();
       Character msgTyp = null;
       String msg = "";
 
       if (obj instanceof Card) {
+        Card c = (Card)obj;
+        MSysOut.println(CARD_UPDATE_LOGS,"PostInsert db listener got card with id = "+c.getId()+" text = "+c.getText());
+
         msgTyp = NEW_CARD;
-        msg = "" + ((Card) obj).getId();
+        msg = "" + c.getId();
         // DBGet.cacheCard((Card)obj);
-        mcache.putCard((Card) obj);
+        mcache.putCard(c);
       }
       else if (obj instanceof User) {
         msgTyp = NEW_USER;
@@ -229,16 +231,16 @@ public class DatabaseListeners
     }
   } 
   @SuppressWarnings("serial")
-  class MyUpdateListener extends DefaultUpdateEventListener // implements SaveOrUpdateEventListener
+  class MyUpdateListener extends DefaultUpdateEventListener
   {
     boolean enabled = false;
 
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-/*     if(enabled)*/ MSysOut.println(myLogLevel,">>> Update db listener <<< "+false);
-      super.onSaveOrUpdate(event); // default behavior first
-   /*   if(!enabled)
+      MSysOut.println(myLogLevel,">>> Update db listener "+(enabled?"":"(unused)") + " type = "+event.getEntity().getClass().getSimpleName()+" <<<");
+      super.onSaveOrUpdate(event); // default behavior first      
+      if(!enabled)
         return;
 
       Object obj = event.getObject();
@@ -246,15 +248,19 @@ public class DatabaseListeners
       Character msgTyp = null;
       String msg = "";
       if (obj instanceof Card) {
+        Card c = (Card)obj;
+        MSysOut.println(CARD_UPDATE_LOGS,"Update db listener got card with id = "+c.getId()+" text = "+c.getText());
         msgTyp = UPDATED_CARD;
-        msg = "" + ((Card) obj).getId();
-        mcache.putCard((Card)obj);
+        msg = "" + c.getId();
+        mcache.putCard(c);
         //DBGet.cacheCard((Card)obj);
      }
       else if (obj instanceof User) {
+        User u = (User)obj;
         msgTyp = UPDATED_USER;
-        msg = "" + ((User) obj).getId();
-        DBGet.cacheUser((User)obj);
+        msg = "" + u.getId();
+        DBGet.cacheUser(u);
+        mcache.putQuickUser(u);
       }
       else if (obj instanceof ActionPlan) {
         msgTyp = UPDATED_ACTIONPLAN;
@@ -269,7 +275,7 @@ public class DatabaseListeners
         msg = "" + ((Media) obj).getId();
       }
       else if (obj instanceof Game) {
-        msgTyp = UPDATED_GAME;   // the Game object was changed in db
+        msgTyp = UPDATED_GAME;
         msg = "";
       }
       else if(obj instanceof CardType) {
@@ -286,12 +292,12 @@ public class DatabaseListeners
         msg = "" + ((MovePhase) obj).getId();
       }
       else {
-        //System.err.println("Unprocessed db update in ApplicationMaster: " + obj.getClass().getSimpleName());
+        MSysOut.println(myLogLevel,"Update db listener didn't understand "+obj.getClass().getSimpleName());
       }
       if(msgTyp != null)
         messageOut(event,msgTyp,msg);
-  */    
-//      if(enabled) MSysOut.println(">>> Out of update db listener <<<");
+    
+      MSysOut.println(myLogLevel,">>> Out of update db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
     }
   }
   
@@ -302,22 +308,21 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
   @Override
   public void onPostUpdate(PostUpdateEvent event)
   {
-      if(enabled) MSysOut.println(myLogLevel,">>> Postupdate db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<< "+enabled);
-//      if(enabled) if(event.getEntity() instanceof User)
-//                     MSysOut.println(myLogLevel,"       user id = "+((User)event.getEntity()).getId());
-
       if(!enabled)
         return;
 
+      MSysOut.println(myLogLevel,">>> Postupdate db listener "+(enabled?"":"(unused)") + " type = "+event.getEntity().getClass().getSimpleName()+" <<<");
       Object obj = event.getEntity();
 
       Character msgTyp = null;
       String msg = "";
       if (obj instanceof Card) {
+        Card c = (Card)obj;
+        MSysOut.println(CARD_UPDATE_LOGS,"Postupdate db listener got card with id = "+c.getId()+" text = "+c.getText());
         msgTyp = UPDATED_CARD;
-        msg = "" + ((Card) obj).getId();
-        mcache.putCard((Card)obj);
-        //DBGet.cacheCard((Card)obj);
+        msg = "" + c.getId();
+        mcache.putCard(c);
+        //DBGet.cacheCard(c);
      }
       else if (obj instanceof User) {
         msgTyp = UPDATED_USER;
