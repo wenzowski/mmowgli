@@ -22,9 +22,7 @@
 
 package edu.nps.moves.mmowgli;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.MMOWGLI_BUILD_ID;
-import static edu.nps.moves.mmowgli.MmowgliConstants.NO_LOGGEDIN_USER_ID;
-import static edu.nps.moves.mmowgli.MmowgliConstants.VAADIN_BUILD_VERSION;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -147,10 +145,12 @@ public class AbstractMmowgliControllerHelper
       final Mmowgli2UI mui = (Mmowgli2UI) ui;
       final Component comp = mui.getFrameContent();
 
+      MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper.iterateUIsAndContents--calling UI.access()");
       mui.access(new Runnable()
       {
         public void run()
         {
+          MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper.iterateUIsAndContents--in UI.access()");
           Object key = HSess.checkInit();
           if (handler.handle(mui, comp, obj)) {
             MSysOut.println("pushing");
@@ -172,10 +172,12 @@ public class AbstractMmowgliControllerHelper
         continue;
 
       final Mmowgli2UI mui = (Mmowgli2UI) ui;
+      MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper.iterateUIs--calling UI.access()");
       mui.access(new Runnable()
       {
         public void run()
         {
+          MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper.iterateUIs--in UI.access()");
           Object key = HSess.checkInit();
           if (handler.handle(mui, obj)){
             MSysOut.println("2pushing");
@@ -993,7 +995,7 @@ public class AbstractMmowgliControllerHelper
     Session sess = VHibPii.getASession();
 
     List<Query2Pii> lis = sess.createCriteria(Query2Pii.class)
-        .addOrder(Order.desc("date"))
+        .addOrder(Order.asc("date")) //desc("date"))
         .list();
 
     sb.append(title);
