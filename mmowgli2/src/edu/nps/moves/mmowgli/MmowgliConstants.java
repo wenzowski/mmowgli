@@ -97,6 +97,19 @@ public class MmowgliConstants
   public static final String TWEETBUTTON_WIDTH = "56px";
   public static final String TWEETBUTTON_HEIGHT = "20px";
 
+  // Logging
+  public static final int ALL_LOGS = -1;
+  public static final int MESSAGING_LOGS = 0x1;
+  public static final int DB_LISTENER_LOGS = 0x2;
+  public static final int MCACHE_LOGS = 0x04;
+  public static final int TICK_LOGS = 0x08;
+  public static final int USER_UPDATE_LOGS = 0x10;
+  public static final int CARD_UPDATE_LOGS = 0x20;
+  public static final int PUSH_LOGS = 0x40;
+  public static final int BROADCASTER_LOGS = 0x80;
+  public static final int HIBERNATE_LOGS = 0x100;
+  public static final int BADGEMANAGER_LOGS = 0x200;
+  
   // web.xml param names
 //@formatter:off
   public static String WEB_XML_DB_CLUSTERMASTER_KEY = "clusterMaster";
