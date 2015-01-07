@@ -35,6 +35,7 @@ import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * AbstractMmowgliControllerHelper2.java created on Nov 24, 2014
@@ -73,6 +74,7 @@ public class AbstractMmowgliControllerHelper2
     @Override
     public void run()
     {
+     // MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper2.UIAccessRunner running inside a call to ui.access()");
       Object sessKey = HSess.checkInit();
       Component comp = myUI.getFrameContent();
       boolean push = false;
@@ -84,9 +86,11 @@ public class AbstractMmowgliControllerHelper2
           push = actionPlanUpdated_TL(Long.parseLong(pkt.msg), comp);
           break;
         case NEW_CARD:
+          MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper2.UIAccessRunner calling cardPlayed_TL()");
           push = cardPlayed_TL(Long.parseLong(pkt.msg), comp);
           break;
         case UPDATED_CARD:
+          MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper2.UIAccessRunner calling cardUpdated_TL()");
           push = cardUpdated_TL(Long.parseLong(pkt.msg), comp);
           break;
         case UPDATED_CHAT:
@@ -189,12 +193,17 @@ public class AbstractMmowgliControllerHelper2
     // every instance would bump the same score!
     // app.globs().scoreManager().cardPlayed(card);
     boolean ret = false;
-    if(myUI instanceof WantsCardUpdates)
-      if(((WantsCardUpdates)myUI).cardPlayed_oobTL(cardId))
+    if(myUI instanceof WantsCardUpdates) {
+      MSysOut.println(MESSAGING_LOGS,"AbstractMmowgliControllerHelper2.cardPlayed_TL delivering cardid "+cardId+" to "+myUI.getClass().getSimpleName());
+      if(((WantsCardUpdates)myUI).cardPlayed_oobTL(cardId)) {
         ret = true;
-    if(visibleComponent instanceof WantsCardUpdates)
+      }
+    }
+    if(visibleComponent instanceof WantsCardUpdates) {
+      MSysOut.println(MESSAGING_LOGS,"AbstractMmowgliControllerHelper2.cardPlayed_TL delivering cardid "+cardId+" to "+visibleComponent.getClass().getSimpleName());
       if(((WantsCardUpdates)visibleComponent).cardPlayed_oobTL(cardId));
         ret = true;
+    }
     return ret;
   }  
   private boolean cardUpdated_TL(long cardId, Component visibleComponent)
