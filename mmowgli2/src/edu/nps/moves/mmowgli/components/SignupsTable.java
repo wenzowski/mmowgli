@@ -503,9 +503,9 @@ public class SignupsTable extends Table
     sb.append("<pre>");
 
     String linesep = System.getProperty("line.separator");
-    int count = 0;
+    int count = lis.size();
     for (Query2Pii q2 : lis) {
-      sb.append(count + 1);
+      sb.append(count);
       sb.append('\t');
       sb.append(q2.getEmail());
       sb.append('\t');
@@ -524,7 +524,7 @@ public class SignupsTable extends Table
       sb.append('\t');
       sb.append(q2.isIngame() ? "in-game" : "");
       sb.append(linesep);
-      count++;
+      count--;
     }
     sb.append("</pre>");
    // sb.append("</pre></body></html>");
