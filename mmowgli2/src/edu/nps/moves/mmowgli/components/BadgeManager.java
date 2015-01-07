@@ -181,7 +181,7 @@ public class BadgeManager implements Runnable
     Long now = System.currentTimeMillis();
     if(now > (lastLeaderboardCheck+LEADERBOARD_CHECK_INTERVAL_MS)) {
       lastLeaderboardCheck = now;
-      MSysOut.println("BadgeManager: leaderboard badge check started: "+now);
+      MSysOut.println(BADGEMANAGER_LOGS,"leaderboard badge check started: "+now);
       
       Session sess = HSess.get();
       // Got to have at least 100 reg. users non-gm
@@ -191,7 +191,7 @@ public class BadgeManager implements Runnable
       .setProjection(Projections.rowCount()).uniqueResult();
 
       if(num < leadUserCountTrigger) {   // not enough to fool with
-        MSysOut.println("BadgeManager: leaderboard badge check ended (< min users): "+System.currentTimeMillis());
+        MSysOut.println(BADGEMANAGER_LOGS,"leaderboard badge check ended (< min users): "+System.currentTimeMillis());
         return false;
       }
 
@@ -217,7 +217,7 @@ public class BadgeManager implements Runnable
 
       ret |= processLeadersTL(lis);
 
-      MSysOut.println("BadgeManager: leaderboard badge check ended: "+System.currentTimeMillis());
+      MSysOut.println(BADGEMANAGER_LOGS,"leaderboard badge check ended: "+System.currentTimeMillis());
     }
     return ret;
   }
