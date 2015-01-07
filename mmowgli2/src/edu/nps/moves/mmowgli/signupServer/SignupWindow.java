@@ -25,6 +25,7 @@ package edu.nps.moves.mmowgli.signupServer;
 import com.vaadin.event.MouseEvents;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Page;
+import com.vaadin.shared.Position;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -201,12 +202,13 @@ public class SignupWindow extends Window
       }
       Query2Pii q = SignupHandler.getQuery2WithEmail(email);
       if(q != null) {
-        Notification.show(
+        Notification not = new Notification(
             "We've already got you!",
             "This email address has already been submitted. Thanks!",
             Notification.Type.WARNING_MESSAGE);
+        not.setPosition(Position.TOP_CENTER); //to miss video
+        not.show(Page.getCurrent());
         return;
-        
       }
       SignupHandler.handle(email, interestTF.getValue().toString());
       
