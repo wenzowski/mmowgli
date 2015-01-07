@@ -29,6 +29,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import edu.nps.moves.mmowgli.AppMaster;
+import edu.nps.moves.mmowgli.MmowgliConstants;
 
 public class MiscellaneousMmowgliTimer
 {
@@ -61,10 +62,10 @@ public class MiscellaneousMmowgliTimer
     @Override
     public void run()
     {
-      MSysOut.immPrint(AppMaster.TICK_LOGS,"-tick-" + tickFormat.format(new Date()));
+      MSysOut.immPrint(MmowgliConstants.TICK_LOGS,"-tick-" + tickFormat.format(new Date()));
     }
   }
-
+ 
   public static class MSysOut extends TimerTask
   {
     public static long PERIOD_MS = 100; //todo back to 5 * 1000;
@@ -103,6 +104,8 @@ public class MiscellaneousMmowgliTimer
           for(String s : sa) {
             sb.append(msTimeStamp());
             sb.append(s);
+            sb.append(' ');
+            sb.append(Thread.currentThread().hashCode());
             if(indivNL)
               sb.append(nl);
           }
