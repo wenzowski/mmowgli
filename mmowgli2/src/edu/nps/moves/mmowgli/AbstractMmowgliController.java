@@ -59,8 +59,7 @@ import edu.nps.moves.mmowgli.modules.gamemaster.*;
 import edu.nps.moves.mmowgli.modules.maps.LeafletMap;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
 import edu.nps.moves.mmowgli.modules.userprofile.UserProfilePage3;
-import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
-import edu.nps.moves.mmowgli.utility.IDButtonIF;
+import edu.nps.moves.mmowgli.utility.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 /**
  * AbstractMmowgliController.java
@@ -487,6 +486,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
   @Override
   public void receiveMessage(MMessagePacket pkt)
   {
+    MSysOut.println(MESSAGING_LOGS,"AbstractMmowgliController.receiveMessage() handling msg type "+pkt.msgType);
     HSess.init();
     // First check session-global handlers
     switch (pkt.msgType) {
