@@ -26,7 +26,7 @@ import org.hibernate.*;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
-import edu.nps.moves.mmowgli.MmowgliConstants;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -70,7 +70,7 @@ public class HSess
     Session s = VHib.openSession();
     s.setFlushMode(FlushMode.COMMIT);
     s.beginTransaction();
-    s.getTransaction().setTimeout(MmowgliConstants.HIBERNATE_TRANSACTION_TIMEOUT_IN_SECONDS);
+    s.getTransaction().setTimeout(HIBERNATE_TRANSACTION_TIMEOUT_IN_SECONDS);
 
     set(s);
   }
@@ -82,17 +82,23 @@ public class HSess
   
   public static void close(boolean commit)
   {
+    Session sess = get();
+    Transaction trans = null;
     try {
-      Session sess = get();
-      Transaction trans = sess.getTransaction();
+      trans = sess.getTransaction();
       if(trans != null && trans.isActive() && commit)
         trans.commit();
-      sess.close();
-      unset();
     }
     catch(Throwable t) {
+      if(trans != null)
+        trans.rollback();
+      MSysOut.println(HIBERNATE_LOGS,"HSess.close() exception: "+t.getClass().getSimpleName()+" "+t.getLocalizedMessage());
       t.printStackTrace();
     }
+    finally {
+      sess.close();
+    }
+    unset();
   }
  
   // Use the following 2 methods as a pair for conditional establishment of a thread-local session
