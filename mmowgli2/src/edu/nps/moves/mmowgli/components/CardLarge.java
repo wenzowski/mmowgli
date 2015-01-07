@@ -23,7 +23,7 @@
 package edu.nps.moves.mmowgli.components;
 
 import static edu.nps.moves.mmowgli.MmowgliEvent.CARDAUTHORCLICK;
-
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 import java.text.SimpleDateFormat;
 import java.util.Set;
 
@@ -297,14 +297,6 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     //int spaceLoc = s.indexOf(' ', 40);
     //if(spaceLoc == -1 || spaceLoc > 50)
       return morphLinks(s,g,sess);
-    
-    //StringBuilder sb = new StringBuilder();
-    //sb.append("<b>");
-   // sb.append(morphLinks(s.substring(0, spaceLoc),g));
-   // sb.append("</b>");
-   // sb.append(morphLinks(s.substring(spaceLoc),g));
-    
-   // return sb.toString();
   }
   
   private String morphLinks(String txt, Game g, Session sess)
@@ -367,10 +359,11 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     if(!id.equals(cardId))  //; the card should be for us, but just to make sure
       return;
 
-    MSysOut.println(AppMaster.CARD_UPDATE_LOGS,"CardLarge.update_oobTL(), "+id.toString()+" "+cardId.toString());
     Session sess = HSess.get();
     
     Card c = DBGet.getCardTL(id); // was getFresh, but cache is probably more recent
+    MSysOut.println(CARD_UPDATE_LOGS, "CardLarge.update_oobTL(), card "+id.toString()+" text: "+c.getText());
+    
     // Only 2 things to update...text and marking
     Game g = Game.getTL();
     content.setValue(formatText(c.getText(),g,sess));
@@ -383,11 +376,11 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
   
   public boolean updateUser_oobTL(Object uid)
   {
-    //MSysOut.println(AppMaster.USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL("+uid.toString()+")"); 
+    MSysOut.println(USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL("+uid.toString()+")"); 
     if(uid.equals(Mmowgli2UI.getGlobals().getUserID())) {
       Card c = DBGet.getCardTL(cardId);// was getFresh, but cache is probably more recent
       boolean retb = checkStar(c,uid);
-      //MSysOut.println(AppMaster.USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL() checkStar() returned "+retb);
+      MSysOut.println(USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL() checkStar() returned "+retb);
       return retb;
     }
     else
