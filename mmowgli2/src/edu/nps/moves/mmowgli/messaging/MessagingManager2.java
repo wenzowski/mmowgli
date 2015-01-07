@@ -22,10 +22,11 @@
 
 package edu.nps.moves.mmowgli.messaging;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.MESSAGING_LOGS;
+
 import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.messaging.Broadcaster.BroadcastListener;
 import edu.nps.moves.mmowgli.utility.MThreadManager;
@@ -49,7 +50,7 @@ public class MessagingManager2 implements BroadcastListener
   private HashSet<MMMessageListener2> listenersInThisSession = new HashSet<MMMessageListener2>();
   private static int seq = 1;
   private int myseq = -1;
-  private static int myLogLevel = AppMaster.MESSAGING_LOGS;
+  private static int myLogLevel = MESSAGING_LOGS;
   
   public boolean alive = true;
   
@@ -88,7 +89,7 @@ public class MessagingManager2 implements BroadcastListener
 
   public void sendSessionMessage(MMessagePacket message, Mmowgli2UI ui)
   {
-    MSysOut.println(myLogLevel,"MessagingManager.sendSessionMessage() typ="+message.msgType);
+    MSysOut.println(myLogLevel,"MessagingManager2.sendSessionMessage() typ="+message.msgType);
     message.session_id = ui.getUserSessionUUID();
     Broadcaster.broadcast(message);
   }
@@ -100,7 +101,7 @@ public class MessagingManager2 implements BroadcastListener
   @Override
   public void handleIncomingSessionMessage(final MMessagePacket message)
   {
-    MSysOut.println(myLogLevel,"MessagingManager.handleIncomingSessionMessage() typ="+message.msgType);    
+    MSysOut.println(myLogLevel,"MessagingManager2.handleIncomingSessionMessage() typ="+message.msgType);    
     // If this message is from this session, we know we're in the session thread
     // try to deliver the message to us directly  
 
@@ -137,13 +138,17 @@ public class MessagingManager2 implements BroadcastListener
     {
       while (alive) {
         try {
+          //MSysOut.println(MESSAGING_LOGS, "MessageingManager2.queueReader() taking from queue (block here)");
           Object message = messageQueue.take();
+          //MSysOut.println(MESSAGING_LOGS, "MessagingManager2.queueReader() got "+((MMessagePacket)message).toString());
           for (MMMessageListener2 lis : listenersInThisSession) {
+            //MSysOut.println(MESSAGING_LOGS, "MessagingManager2.queueReader() delivering to "+lis.getClass().getSimpleName());
             lis.receiveMessage((MMessagePacket) message);
           }
         }
         catch (InterruptedException ex) { // | UIDetachedException ex) {
-          System.err.println(ex.getClass().getSimpleName() + " in MessagingManager.queueReader" + myseq);
+          System.err.println(ex.getClass().getSimpleName() + " in MessagingManager2.queueReader" + myseq);
+          MSysOut.println(ex.getClass().getSigners() + " in MessageingManager2.queueReader catch");
           if (!alive) {
             return; // End thread
           }
