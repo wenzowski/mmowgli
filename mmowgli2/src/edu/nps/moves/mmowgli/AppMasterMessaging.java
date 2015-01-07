@@ -62,7 +62,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   private JmsIO2     _jmsIO;
   private static int sequenceCount = 0;
   private int mysequence = -1;
-  private static final int myLogLevel = AppMaster.MESSAGING_LOGS;
+  private static final int myLogLevel = MESSAGING_LOGS;
   
   public AppMasterMessaging(AppMaster appMaster)
   {
@@ -274,20 +274,21 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
  */
   public void incomingDatabaseEvent(final MMessagePacket mMessagePacket)
   {
-    MSysOut.println(myLogLevel,"AppMasterMessaging.incomingDatabaseEvent()");
-    if(getMcache() != null) {
-      /* We're in the hibernate thread here.  Have to let it complete before we can look up the object */
-      MThreadManager.run( new Runnable(){
-        public void run()
-        {
-          HSess.init();
+    MSysOut.println(myLogLevel, "AppMasterMessaging.incomingDatabaseEvent()");
+    /* We're in the hibernate thread here. Have to let it complete before we can look up the object */
+    MThreadManager.run(new Runnable()
+    {
+      public void run()
+      {
+        MSysOut.println(myLogLevel, "AppMasterMessaging.incomingDatabaseEvent() running in new thread");
+        HSess.init();
+        if (getMcache() != null)
           mcache.handleIncomingTomcatMessageTL(mMessagePacket);
-          HSess.close();
-          Broadcaster.broadcast(mMessagePacket);  
-        }
-      });
-    }
+        HSess.close();
+        Broadcaster.broadcast(mMessagePacket);
+      }
+    });
     // This guy, however, gets run "inline" if appropriate
-    //Broadcaster.broadcast(mMessagePacket);    mike test
+    // Broadcaster.broadcast(mMessagePacket); mike test
   }
 }
