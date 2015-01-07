@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli.messaging;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.PUSH_LOGS;
+
 import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -142,6 +144,7 @@ public class MessagingManager implements BroadcastListener
       while (alive) {
         try {
           Object message = messageQueue.take();
+          MSysOut.println(PUSH_LOGS,"MessagingManager.queueRunner -- calling UI.access()");
           ui.access(new MessageRunner(message)); // this makes sure our access of the UI does not conflict with normal Vaadin
         }
         catch (InterruptedException | UIDetachedException ex) {
@@ -170,6 +173,7 @@ public class MessagingManager implements BroadcastListener
     @Override
     public void run()
     {
+      MSysOut.println(PUSH_LOGS,"MessagingManager.MessageRunner -- in UI.access()");
       try {
         boolean push = false;
         if (!listenersInThisSession.isEmpty()) {
