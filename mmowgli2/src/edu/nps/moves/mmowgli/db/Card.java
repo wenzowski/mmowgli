@@ -22,8 +22,9 @@
 
 package edu.nps.moves.mmowgli.db;
 
-import static edu.nps.moves.mmowgli.hibernate.DbUtils.forceUpdateEvent;
+import static edu.nps.moves.mmowgli.MmowgliConstants.CARD_UPDATE_LOGS;
 import static edu.nps.moves.mmowgli.hibernate.DbUtils.len255;
+//import static edu.nps.moves.mmowgli.hibernate.DbUtils.forceUpdateEvent;
 
 import java.io.Serializable;
 import java.util.*;
@@ -42,6 +43,7 @@ import com.vaadin.data.hbnutil.HbnContainer;
 
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * Card.java
@@ -131,15 +133,17 @@ public class Card implements Serializable
  
   public static void updateTL(Card c)
   {
-    forceUpdateEvent(c);
-    AppMaster.instance().getMcache().putCard(c);  // The update listener code seems to get run before the object is actually in the db.  This helps.
+   // forceUpdateEvent(c);
     HSess.get().update(c);
+    AppMaster.instance().getMcache().putCard(c);  // probably unneeded
+    MSysOut.println(CARD_UPDATE_LOGS,"Card.updateTL() just sess.updated card "+c.getId()+" with text: "+c.getText());
   }
  
   public static void saveTL(Card c)
   {
-    AppMaster.instance().getMcache().putCard(c);  // The update listener code seems to get run before the object is actually in the db.  This helps.
+   // AppMaster.instance().getMcache().putCard(c);  // The update listener code seems to get run before the object is actually in the db.  This helps.
     HSess.get().save(c);
+    MSysOut.println(CARD_UPDATE_LOGS,"Card.saveTL() just sess.saved card "+c.getId()+" with text: "+c.getText());
   }
 
   @Override
