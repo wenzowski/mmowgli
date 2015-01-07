@@ -27,8 +27,10 @@ import java.lang.reflect.Method;
 
 import org.hibernate.Session;
 
+import edu.nps.moves.mmowgli.MmowgliConstants;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -191,10 +193,63 @@ public class ComeBackWhenYouveGotIt
       this.cls = cls;
     }
   }
-
+  
+  // Separate thread not buying anything and increasing complexity.
   private static void fetchDbObjWhenPossible(final ObjHolder holder, boolean wait)
   {
-    MThreadManager.run(new Runnable()
+//    final Object waiter = new Object();
+//    Thread thrd = new Thread(new Runnable()
+//    {
+//      @Override
+//      public void run()
+//      {
+        for(int i=0; i<10; i++) { // try for 10 seconds
+          MSysOut.println(MmowgliConstants.MESSAGING_LOGS,"Top of fetchDbObjWhenPossible loop");
+          try{Thread.sleep(1000l);}catch(InterruptedException ex){}
+          
+          Session thisSess = VHib.getSessionFactory().openSession();
+          thisSess.beginTransaction();
+          
+          Object cd = thisSess.get(holder.cls, holder.id);
+          if(cd != null) {
+            if(i>0)
+              MSysOut.println("Delayed fetch of "+holder.cls.getSimpleName()+" from db, got it on try "+i);
+            holder.obj = cd;
+            thisSess.getTransaction().commit();
+            thisSess.close();
+//            MSysOut.println(AppMaster.MESSAGING_LOGS,"Try to get out of fetchDbObjWhenPossible loop");
+//            synchronized(waiter){waiter.notify();}
+            return;
+          }
+          thisSess.getTransaction().commit();
+          thisSess.close();
+        }
+        System.err.println("ERROR: Couldn't get "+holder.cls.getSimpleName() +" "+holder.id+" in 10 seconds");// give up
+//        MSysOut.println(AppMaster.MESSAGING_LOGS,"Try to get out of fetchDbObjWhenPossible loop");
+//        synchronized(waiter){waiter.notify();}
+//      }
+//    },"FetchDbObjWhenPossible()");
+/*
+    synchronized(waiter) {
+
+      thrd.start();
+      while(thrd.isAlive() )
+        try { 
+          MSysOut.println(AppMaster.MESSAGING_LOGS,"Waiting for fetchDbObjWhenPossible loop");
+          waiter.wait();
+          MSysOut.println(AppMaster.MESSAGING_LOGS,"Successfully out of fetchDbObjWhenPossible loop");
+        }
+        catch(InterruptedException ex){
+          MSysOut.println(AppMaster.MESSAGING_LOGS,"Exception waiting for fetchDbObjWhenPossible loop: "+ex.getLocalizedMessage());          
+        }
+    }
+    */
+  }
+
+/*
+  private static void oldfetchDbObjWhenPossible(final ObjHolder holder, boolean wait)
+  {
+    MThreadManager.run(new Runnable()  // this can cause a deadlock of caller is one of these too and only one in pool
     {
       @Override
       public void run()
@@ -218,4 +273,5 @@ public class ComeBackWhenYouveGotIt
       }
     }, wait);
   }
+  */
 }
