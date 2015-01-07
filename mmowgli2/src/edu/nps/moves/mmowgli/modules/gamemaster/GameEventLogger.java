@@ -93,20 +93,18 @@ public class GameEventLogger
     GameEvent.saveTL(ge);;
   }
 
-  public static void cardTextEdittedTL(Object cid, Object uid)
+  public static void cardTextEdittedTL(Card c, Object uid)
   {
-    cardChangedCommonTL(GameEvent.EventType.CARDTEXTEDITED,cid,uid);
+    cardChangedCommonTL(GameEvent.EventType.CARDTEXTEDITED,c,uid);
   }
    
-  public static void cardMarkedTL(Object cid, Object uid)
+  public static void cardMarkedTL(Card c, Object uid)
   {
-    cardChangedCommonTL(GameEvent.EventType.CARDMARKED,cid,uid);
+    cardChangedCommonTL(GameEvent.EventType.CARDMARKED,c,uid);
   }
   
-  private static void cardChangedCommonTL(GameEvent.EventType typ, Object cid, Object uid)
+  private static void cardChangedCommonTL(GameEvent.EventType typ, Card c, Object uid)
   {
-    Card c = DBGet.getCardTL(cid);
-    
     Set<CardMarking> cm = c.getMarking();
     StringBuilder sb = new StringBuilder();
     sb.append(" ");
