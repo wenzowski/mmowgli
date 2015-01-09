@@ -47,7 +47,7 @@ public class SetBlogHeadlineWindow extends Window implements ItemClickListener
 {
   private static final long serialVersionUID = -6407565039131287931L;
   private TextField textTF, toolTipTF, urlTF;
-  private Label textLab, toolTipLab, urlLab;
+  private Label infoLab,  textLab, toolTipLab, urlLab;
   private Table table;
   private Button cancelButt;
   private Button okButt;
@@ -55,7 +55,7 @@ public class SetBlogHeadlineWindow extends Window implements ItemClickListener
   
   public SetBlogHeadlineWindow()
   {
-    super("Set New Blog Headline");
+    super("Edit Blog Headline");
     cancelButt = new Button("Cancel");
     okButt = new Button("Update");
     nullCheckBox = new CheckBox("Do not show blog headline");
@@ -76,12 +76,18 @@ public class SetBlogHeadlineWindow extends Window implements ItemClickListener
   @Override
   public void attach()
   {
+    Panel p = new Panel();
+    setContent(p);
+    p.setSizeFull();
+    
     VerticalLayout layout = new VerticalLayout();
     layout.addStyleName("m-blogheadline");
     layout.setMargin(true);
     layout.setSpacing(true);
     layout.setSizeFull();
-    setContent(layout);
+    p.setContent(layout);
+    
+    layout.addComponent(infoLab=new Label("Game masters can communicate with players throughout the game.  Add a new headling, tooltip and link here."));
     
     layout.addComponent(textLab=new Label("Enter headline:"));
     textTF = new TextField();
@@ -123,7 +129,7 @@ public class SetBlogHeadlineWindow extends Window implements ItemClickListener
     layout.setComponentAlignment(buttHl, Alignment.TOP_RIGHT);
     layout.setExpandRatio(table, 1.0f); // gets all
     setWidth("675px");
-    setHeight("425px");
+    setHeight("455px");
   }
   
   @SuppressWarnings("rawtypes")
@@ -164,6 +170,7 @@ public class SetBlogHeadlineWindow extends Window implements ItemClickListener
     toolTipTF.setEnabled(!wh);
     urlTF.setEnabled(!wh);
 //test    table.setEnabled(!wh);
+    infoLab.setEnabled(!wh);
     textLab.setEnabled(!wh);
     toolTipLab.setEnabled(!wh);
     urlLab.setEnabled(!wh);
