@@ -211,7 +211,7 @@ public class UserPii implements Serializable
   /**
    * This user can have many email addressess
    */
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   public List<EmailPii> getEmailAddresses()
   {
     return emailAddresses;
