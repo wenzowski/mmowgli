@@ -133,7 +133,7 @@ public class RfeDialog extends Window
           Notification notif = new Notification("Cleared");
           notif.setDelayMsec(3000);
           notif.show(Page.getCurrent());
-          GameEventLogger.logHelpWantedTL(apId);
+          GameEventLogger.logHelpWantedTL(ap);
           notifyAuthorsOfChangeTL(ap);
         }
         HSess.close();
@@ -168,7 +168,7 @@ public class RfeDialog extends Window
           Notification notif = new Notification("Posted");
           notif.setDelayMsec(3000);
           notif.show(Page.getCurrent());
-          GameEventLogger.logHelpWantedTL(apId);
+          GameEventLogger.logHelpWantedTL(ap);
           notifyAuthorsOfChangeTL(ap);
         }
         HSess.close();
