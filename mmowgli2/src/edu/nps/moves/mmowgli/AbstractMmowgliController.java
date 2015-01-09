@@ -326,7 +326,8 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
       case SIGNOUTCLICK:
         Serializable uid = ui.getSessionGlobals().getUserID();
-        GameEventLogger.logUserLogoutTL(uid);
+        User u = DBGet.getUserTL(uid);
+        GameEventLogger.logUserLogoutTL(u);
         MessagingManager2 mgr = Mmowgli2UI.getGlobals().getMessagingManager();
         if(mgr != null) {
           mgr.sendSessionMessage(new MMessagePacket(USER_LOGOUT,""+uid),ui);
