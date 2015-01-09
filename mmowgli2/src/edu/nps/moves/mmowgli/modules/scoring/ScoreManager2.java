@@ -31,6 +31,8 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 /**
  * ScoreManager2.java
  * Created on Aug 8, 2013
@@ -80,7 +82,7 @@ public class ScoreManager2
   
   public void cardPlayedTL(Card newCard)
   {
-    MSysOut.println(marker+"ScoreManager2.cardPlayed()");
+    MSysOut.println(SCOREMANAGER_LOGS,marker+"ScoreManager2.cardPlayed()");
     refreshScoringParametersTL();
     
     awardCardAuthorPointsTL(newCard);
@@ -95,7 +97,7 @@ public class ScoreManager2
   public void cardMarkingWillBeClearedTL(Card card)
   //---------------------------------------------
   {
-    MSysOut.println(marker+"ScoreManager2.cardMarkingWillBeClearedTL()");
+    MSysOut.println(SCOREMANAGER_LOGS,marker+"ScoreManager2.cardMarkingWillBeClearedTL()");
     refreshScoringParametersTL();
     Set<CardMarking> mark = card.getMarking();
     if(mark==null || mark.size()<=0)
@@ -116,7 +118,7 @@ public class ScoreManager2
   public void cardMarkingWillBeSetTL(Card card, CardMarking cm)
   //---------------------------------------------------------
   {
-    MSysOut.println(marker+"ScoreManager2.cardMarkingWillBeSet()");
+    MSysOut.println(SCOREMANAGER_LOGS,marker+"ScoreManager2.cardMarkingWillBeSet()");
     refreshScoringParametersTL();
     Set<CardMarking> mark = card.getMarking();
     // First look as existing
@@ -151,7 +153,7 @@ public class ScoreManager2
   */
   public void actionPlanUserJoinsTL(ActionPlan ap, User usr)
   {
-    MSysOut.println(marker+"ScoreManager2.actionPlanUserJoins()");
+    MSysOut.println(SCOREMANAGER_LOGS,marker+"ScoreManager2.actionPlanUserJoins()");
     refreshScoringParametersTL();
     actionPlanNewAuthorPointsTL(usr,ap);
     actionPlanNewAuthorCommentPointsTL(usr,ap);
@@ -163,7 +165,7 @@ public class ScoreManager2
   // --------------------------------------------------------------------
   {
     // Little bump for making a comment
-    MSysOut.println(marker+"ScoreManager2.actionPlanCommentEntered()");
+    MSysOut.println(SCOREMANAGER_LOGS,marker+"ScoreManager2.actionPlanCommentEntered()");
     refreshScoringParametersTL();
     User writer = comment.getFromUser();
     writer = User.mergeTL(writer);
@@ -212,7 +214,7 @@ public class ScoreManager2
   public void actionPlanWasRatedTL(User me, ActionPlan ap, int count)
   //---------------------------------------------------------------
   {
-    MSysOut.println(marker+"ScoreManager2.actionPlanWasRated()");
+    MSysOut.println(SCOREMANAGER_LOGS,marker+"ScoreManager2.actionPlanWasRated()");
     refreshScoringParametersTL();
     // count not used, already given to ap
     Set<User> authors = ap.getAuthors();
@@ -235,7 +237,7 @@ public class ScoreManager2
   public void userCreatedTL(User user)
   //--------------------------------
   {
-    MSysOut.println(marker+"ScoreManager2.userCreated()");
+    MSysOut.println(SCOREMANAGER_LOGS,marker+"ScoreManager2.userCreated()");
     refreshScoringParametersTL();
     if(userSignupAnswerPoints == 0.0f)
       return;
