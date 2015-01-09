@@ -144,7 +144,7 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     ret.addItem("Broadcast message to game masters", new MCommand(MENUGAMEMASTERBROADCASTTOGMS)).setIcon(FontAwesome.BULLHORN);
     ret.addItem("Broadcast message to all players", new MCommand(MENUGAMEMASTERBROADCAST)).setIcon(FontAwesome.BULLHORN);
     
-    ret.addItem("Set blog headline", new MCommand(MENUGAMEMASTERBLOGHEADLINE));
+    ret.addItem("Edit blog headline", new MCommand(MENUGAMEMASTERBLOGHEADLINE));
     ret.addSeparator();
 
     if (Game.getTL().isActionPlansEnabled()) {
