@@ -210,7 +210,7 @@ public class MovePhase implements Serializable
   }
  
   // This move can have many allowed cardtypes, and each cardtype can be associated with many moves
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany
   public Set<CardType> getAllowedCards()
   {
     return allowedCards;

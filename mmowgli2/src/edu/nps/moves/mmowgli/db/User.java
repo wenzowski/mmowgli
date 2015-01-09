@@ -28,7 +28,6 @@ import java.io.Serializable;
 import java.util.*;
 
 import javax.persistence.*;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 
 import org.hibernate.Criteria;
@@ -329,7 +328,7 @@ public class User implements Serializable
   /**
    * This user can have many awards
    */
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   public Set<Award> getAwards()
   {
     return awards;
@@ -407,10 +406,10 @@ public class User implements Serializable
   }
 
   /**
-   * This user can have many authored plans, but each plan has one author (wrong...many authors) cascade means if the action plan is deleted, its also removed
+   * This user can have many authored plans, but each plan has one author (wrong...many authors) cascade.delete means if the action plan is deleted, its also removed
    * here
    */
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany
   @JoinTable(name = "User_AuthoredPlans", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "actionplan_id"))
   public Set<ActionPlan> getActionPlansAuthored()
   {
@@ -423,10 +422,10 @@ public class User implements Serializable
   }
 
   /**
-   * This user can have many badges, and each badge is shared. cascade means if the badge is deleted, its also removed here
+   * This user can have many badges, and each badge is shared. cascade.delete means if the badge is deleted, its also removed here
    */
 
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany
   @JoinTable(name = "User_Badges", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "badge_pk"))
   public Set<Badge> getBadges()
   {
@@ -441,7 +440,7 @@ public class User implements Serializable
   /**
    * each user can follow many plans, and each plan can be followed by multiple users
    */
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany
   @JoinTable(name = "User_FollowedPlans", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "actionplan_id"))
   public Set<ActionPlan> getActionPlansFollowing()
   {
@@ -453,7 +452,7 @@ public class User implements Serializable
     this.actionPlansFollowing = actionPlansFollowing;
   }
 
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany
   @JoinTable(name = "User_InvitedPlans", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "actionplan_id"))
   public Set<ActionPlan> getActionPlansInvited()
   {
@@ -465,7 +464,7 @@ public class User implements Serializable
     this.actionPlansInvited = actionPlansInvited;
   }
 
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany
   @JoinTable(name = "User_IsFollowing", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "is_following_user_id"))
   public Set<User> getImFollowing()
   {
@@ -480,7 +479,7 @@ public class User implements Serializable
   /**
    * many-to-many: each user can have many fav. cards, and each of them can be the favorite of multiple users
    */
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany
   @JoinTable(name = "User_FavoriteCards", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "card_id"))
   public Set<Card> getFavoriteCards()
   {
@@ -587,7 +586,7 @@ public class User implements Serializable
   }
 
   @SuppressWarnings("deprecation")
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   @JoinTable(name = "User_gameMessages", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "message_id"))
   @Sort(type = SortType.COMPARATOR, comparator = ChatLog.DateDescComparator.class)
   //@SortComparator(value = ChatLog.DateDescComparator.class)  hib 4 bug?

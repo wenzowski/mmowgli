@@ -130,7 +130,7 @@ public class Move implements Serializable
   /**
    * This move can have manyPhases
    */
-  @OneToMany(cascade = CascadeType.ALL) 
+  @OneToMany
   public List<MovePhase> getMovePhases()
   {
     return movePhases;
@@ -241,7 +241,7 @@ public class Move implements Serializable
     this.currentPhase = currentPhase;
   }
 
-  @ManyToOne(cascade = CascadeType.ALL)
+  @ManyToOne
   public Media getCallToActionVideoPreMove()
   {
     return callToActionVideoPreMove;
@@ -252,7 +252,7 @@ public class Move implements Serializable
     this.callToActionVideoPreMove = callToActionVideoPreMove;
   }
   
-  @ManyToOne(cascade = CascadeType.ALL)
+  @ManyToOne
   public Media getCallToActionVideoInMove()
   {
     return callToActionVideoInMove;
@@ -263,7 +263,7 @@ public class Move implements Serializable
     this.callToActionVideoInMove = callToActionVideoInMove;
   }
 
-  @ManyToOne(cascade = CascadeType.ALL)
+  @ManyToOne
   public Media getCallToActionVideoPostMove()
   {
     return callToActionVideoPostMove;

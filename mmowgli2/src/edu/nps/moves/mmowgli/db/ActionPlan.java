@@ -437,7 +437,7 @@ public class ActionPlan implements Serializable
    * @return the comments
    */
   @SuppressWarnings("deprecation")
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   @JoinTable(name="ActionPlan_Comments",
         joinColumns = @JoinColumn(name="actionplan_id"),
         inverseJoinColumns = @JoinColumn(name="message_id")
@@ -461,7 +461,7 @@ public class ActionPlan implements Serializable
    * @return the authorMessages
    */
   @SuppressWarnings("deprecation")
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   @JoinTable(name="ActionPlan_AuthorMessages",
         joinColumns = @JoinColumn(name="actionplan_id"),
         inverseJoinColumns = @JoinColumn(name="message_id")
@@ -871,7 +871,7 @@ public class ActionPlan implements Serializable
     this.sumThumbs = sumThumbs;
   }
 
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   public Set<Award> getAwards()
   {
     return awards;
@@ -963,7 +963,7 @@ public class ActionPlan implements Serializable
   }
   
   @SuppressWarnings("deprecation")
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   @JoinTable(name="ActionPlan_Titles_History",
         joinColumns = @JoinColumn(name="actionplan_id"),
         inverseJoinColumns = @JoinColumn(name="edits_id")
@@ -984,7 +984,7 @@ public class ActionPlan implements Serializable
   }
 
   @SuppressWarnings("deprecation")
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   @JoinTable(name="ActionPlan_SubTitles_History",
         joinColumns = @JoinColumn(name="actionplan_id"),
         inverseJoinColumns = @JoinColumn(name="edits_id")
@@ -1005,7 +1005,7 @@ public class ActionPlan implements Serializable
   }
 
   @SuppressWarnings("deprecation")
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   @JoinTable(name="ActionPlan_WhatIs_History",
         joinColumns = @JoinColumn(name="actionplan_id"),
         inverseJoinColumns = @JoinColumn(name="edits_id")
@@ -1027,7 +1027,7 @@ public class ActionPlan implements Serializable
   }
 
   @SuppressWarnings("deprecation")
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   @JoinTable(name="ActionPlan_WhatTake_History",
         joinColumns = @JoinColumn(name="actionplan_id"),
         inverseJoinColumns = @JoinColumn(name="edits_id")
@@ -1049,7 +1049,7 @@ public class ActionPlan implements Serializable
   }
 
   @SuppressWarnings("deprecation")
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   @JoinTable(name="ActionPlan_HowWork_History",
         joinColumns = @JoinColumn(name="actionplan_id"),
         inverseJoinColumns = @JoinColumn(name="edits_id")
@@ -1071,7 +1071,7 @@ public class ActionPlan implements Serializable
   }
 
   @SuppressWarnings("deprecation")
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   @JoinTable(name="ActionPlan_HowChange_History",
         joinColumns = @JoinColumn(name="actionplan_id"),
         inverseJoinColumns = @JoinColumn(name="edits_id")
