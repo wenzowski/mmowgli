@@ -304,7 +304,7 @@ public class Card implements Serializable
   }
   
   // This card can have many follow-on cards, but each follow-on has only one "parent"
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   @JoinTable(name="Card_FollowOnCards",
         joinColumns = @JoinColumn(name="card_id"),
         inverseJoinColumns = @JoinColumn(name="follow_on_card_id")

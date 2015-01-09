@@ -134,7 +134,7 @@ public class GoogleMap implements Serializable
     this.zoom = zoom;
   }
   
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   public List<GoogleMapMarker> getMarkers()
   {
     return markers;
@@ -144,7 +144,7 @@ public class GoogleMap implements Serializable
     this.markers = markers;
   }
   
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   public List<GoogleMapPolyOverlay> getOverlays()
   {
     return overlays;

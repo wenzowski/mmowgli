@@ -84,7 +84,7 @@ public class ChatLog implements Serializable
 
   // This card can have many follow-on cards, but each follow-on has only one "parent"
   @SuppressWarnings("deprecation")
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   @JoinTable(name="ChatLog_Messagess",
         joinColumns = @JoinColumn(name="chatlog_id"),
         inverseJoinColumns = @JoinColumn(name="message_id")

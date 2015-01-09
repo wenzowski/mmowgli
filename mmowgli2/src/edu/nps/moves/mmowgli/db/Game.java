@@ -413,7 +413,7 @@ public class Game implements Serializable
     HSess.get().update(g);
   }
  
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany
   public Set<ActionPlan> getTop5ActionPlans()
   {
     return top5ActionPlans;
@@ -523,7 +523,7 @@ public class Game implements Serializable
     this.backgroundImageLink = backgroundImageLink;
   }
 
-  @ManyToOne(cascade = CascadeType.ALL)
+  @ManyToOne
   public Media getHeaderBranding()
   {
     return headerBranding;
