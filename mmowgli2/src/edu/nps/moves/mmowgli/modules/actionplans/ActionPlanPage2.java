@@ -67,6 +67,7 @@ import edu.nps.moves.mmowgli.modules.gamemaster.CreateActionPlanPanel;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.*;
 import edu.nps.moves.mmowgli.utility.HistoryDialog.DoneListener;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * ActionPlanPage.java Created on Feb 8, 2011
@@ -1404,7 +1405,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   {
     if (apId.equals(this.apId)) {
       ActionPlan ap = ActionPlan.getTL(apId);
-
+      MSysOut.println(ACTIONPLAN_UPDATE_LOGS, "ActionPlanPage2.actionPlanUpdatedOobTL() apId = "+apId);
       if (!titleFocused) { // don't update while being edited
         boolean taRo = titleUnion.isRo();
         titleUnion.setRo(false);
