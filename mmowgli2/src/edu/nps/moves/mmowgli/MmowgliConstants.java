@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli;
 
+import java.util.HashMap;
+
 import com.vaadin.shared.ui.ui.Transport;
 
 /**
@@ -109,7 +111,28 @@ public class MmowgliConstants
   public static final int BROADCASTER_LOGS = 0x80;
   public static final int HIBERNATE_LOGS = 0x100;
   public static final int BADGEMANAGER_LOGS = 0x200;
+  public static final int SYSTEM_LOGS = 0x400;
+  public static final int SCOREMANAGER_LOGS = 0x800;
+  public static final int ACTIONPLAN_UPDATE_LOGS = 0x1000;
+  public static final int REPORT_LOGS = 0x2000;
   
+  public static HashMap<Integer,String> logTokens = new HashMap<Integer,String>();
+  static {
+    logTokens.put(MESSAGING_LOGS, "MSG");
+    logTokens.put(DB_LISTENER_LOGS,"DBL");
+    logTokens.put(MCACHE_LOGS,"CAC");
+    logTokens.put(TICK_LOGS,"TCK");
+    logTokens.put(USER_UPDATE_LOGS,"USR");
+    logTokens.put(CARD_UPDATE_LOGS,"CAR");
+    logTokens.put(PUSH_LOGS,"PSH");
+    logTokens.put(BROADCASTER_LOGS,"BRO");
+    logTokens.put(HIBERNATE_LOGS,"HIB");
+    logTokens.put(BADGEMANAGER_LOGS,"BAD"); 
+    logTokens.put(SYSTEM_LOGS, "SYS");
+    logTokens.put(SCOREMANAGER_LOGS, "SCO");
+    logTokens.put(ACTIONPLAN_UPDATE_LOGS, "ACT");
+    logTokens.put(REPORT_LOGS, "RPT");
+  }
   // web.xml param names
 //@formatter:off
   public static String WEB_XML_DB_CLUSTERMASTER_KEY = "clusterMaster";
