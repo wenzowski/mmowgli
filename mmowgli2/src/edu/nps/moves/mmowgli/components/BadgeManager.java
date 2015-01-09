@@ -411,7 +411,7 @@ public class BadgeManager implements Runnable
       Thread.sleep(FIRSTRUNDELAY_MS);
     } catch(InterruptedException ex) {}
 
-    MSysOut.println("BadgeManager: begin one-time sync of all badges.");
+    MSysOut.println(BADGEMANAGER_LOGS,"BadgeManager: begin one-time sync of all badges.");
 
     HSess.init();
 
