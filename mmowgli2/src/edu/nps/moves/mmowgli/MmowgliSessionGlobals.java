@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.SYSTEM_LOGS;
+
 import java.io.Serializable;
 import java.net.URL;
 import java.util.Collection;
@@ -101,7 +103,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   public void init(WebBrowser webBr)
   {
     deriveBrowserBooleans(webBr);
-    MSysOut.println("Login from "+browserIDString());
+    MSysOut.println(SYSTEM_LOGS,"Login from "+browserIDString());
   }
   
   private void deriveBrowserBooleans(WebBrowser webBr)
