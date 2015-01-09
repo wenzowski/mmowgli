@@ -22,7 +22,7 @@
 
 package edu.nps.moves.mmowgli;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.PUSHTRANSPORT;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -90,7 +90,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   @HibernateOpened
   protected void init(VaadinRequest request)
   {  
-    MSysOut.println("Into "+(firstUI?"Mmowgli2UILogin":"Mmowgli2UISubsequent") +".init()");
+    MSysOut.println(SYSTEM_LOGS,"Into "+(firstUI?"Mmowgli2UILogin":"Mmowgli2UISubsequent") +".init()");
     AppMaster.instance().oneTimeSetAppUrlFromUI();
     
     Object sessKey = HSess.checkInit();
@@ -135,7 +135,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     if(!globs.initted)
       globs.initted=true;
     
-    MSysOut.println("Out of "+(firstUI?"Mmowgli2UILogin":"Mmowgli2UISubsequent") +".init()");
+    MSysOut.println(SYSTEM_LOGS,"Out of "+(firstUI?"Mmowgli2UILogin":"Mmowgli2UISubsequent") +".init()");
   }
    
   public void setWindowTitleTL()
