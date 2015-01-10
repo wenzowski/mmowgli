@@ -63,9 +63,8 @@ public class GameEventLogger
     }
   }
 
-  public static void cardPlayedTL(Object cid)
+  public static void cardPlayedTL(Card cd)
   {
-    Card cd = DBGet.getCardTL(cid);
     CardType ct = cd.getCardType();
     GameEvent ge;
     StringBuilder sb = new StringBuilder();
@@ -90,20 +89,20 @@ public class GameEventLogger
     else
       ge = new GameEvent(GameEvent.EventType.CHILDCARDPLAYED, sb.toString());
 
-    GameEvent.saveTL(ge);;
+    GameEvent.saveTL(ge);
   }
 
-  public static void cardTextEdittedTL(Card c, Object uid)
+  public static void cardTextEdittedTL(Card c, User u)
   {
-    cardChangedCommonTL(GameEvent.EventType.CARDTEXTEDITED,c,uid);
+    cardChangedCommonTL(GameEvent.EventType.CARDTEXTEDITED,c,u);
   }
    
-  public static void cardMarkedTL(Card c, Object uid)
+  public static void cardMarkedTL(Card c, User u)
   {
-    cardChangedCommonTL(GameEvent.EventType.CARDMARKED,c,uid);
+    cardChangedCommonTL(GameEvent.EventType.CARDMARKED,c,u);
   }
   
-  private static void cardChangedCommonTL(GameEvent.EventType typ, Card c, Object uid)
+  private static void cardChangedCommonTL(GameEvent.EventType typ, Card c, User marker)
   {
     Set<CardMarking> cm = c.getMarking();
     StringBuilder sb = new StringBuilder();
@@ -112,7 +111,7 @@ public class GameEventLogger
     sb.append(" / ");
     sb.append("card "+c.getId());
     sb.append(" / user ");
-    User marker = DBGet.getUserTL(uid);
+
     sb.append(marker.getId());
     //sb.append(marker.getUserName());
     sb.append(" / ");
@@ -127,28 +126,29 @@ public class GameEventLogger
     GameEvent.saveTL(ev);;
   }
   
+  // Don't get User from db, because it might have just been updated in this thread and the get would reverse that
   public static void logGameDesignChangeTL(String field, String value, Object uid)
   {
-    User u = DBGet.getUserTL(uid);
-    GameEvent ev = new GameEvent(GameEvent.EventType.GAMEDESIGNEDITED,"/ "+svrName+" user "+u.getId()+ " / "+field+" / "+value);
+    GameEvent ev = new GameEvent(GameEvent.EventType.GAMEDESIGNEDITED,"/ "+svrName+" user "+uid+ " / "+field+" / "+value);
     GameEvent.saveTL(ev);
   }
-  
+
+  // Don't get User from db, because it might have just been updated in this thread and the get would reverse that
+
   public static void logUserNameChangedTL(Object uid, Object changer, String oldName, String newName)
   {
     GameEvent ev = new GameEvent(GameEvent.EventType.USERGAMENAMECHANGED,"/ "+svrName+" userId "+uid+" old: "+oldName+" new: "+newName+" by userId "+changer);    
     GameEvent.saveTL(ev);
   }
   
-  public static void logHelpWantedTL(Object apId)
+  public static void logHelpWantedTL(ActionPlan ap)
   {
-    ActionPlan ap = ActionPlan.getTL(apId);
     Serializable uid = Mmowgli2UI.getGlobals().getUserID();
     User me = DBGet.getUserTL(uid);
     String s = ap.getHelpWanted();
     if(s == null)
       s = "(removed)";
-    GameEvent ev = new GameEvent(GameEvent.EventType.ACTIONPLANHELPWANTED,"/ "+apId+" / user "+me.getId()+" / "+s);
+    GameEvent ev = new GameEvent(GameEvent.EventType.ACTIONPLANHELPWANTED,"/ "+ap.getId()+" / user "+me.getId()+" / "+s);
     GameEvent.saveTL(ev);
   }
   
@@ -171,16 +171,14 @@ public class GameEventLogger
     return sb.toString();
   }
   
-  public static void logUserLoginTL(Object uid)
+  public static void logUserLoginTL(User u)
   {
-    User u = DBGet.getUserTL(uid);
     GameEvent ev = new GameEvent(GameEvent.EventType.USERLOGIN, " "+getUserString(GameEvent.EventType.USERLOGIN,u));
-    GameEvent.saveTL(ev);;
+    GameEvent.saveTL(ev);
   }
 
-  public static void logUserLogoutTL(Object uid)
+  public static void logUserLogoutTL(User u)
   {
-    User u = DBGet.getUserTL(uid);
     GameEvent ev = new GameEvent(GameEvent.EventType.USERLOGOUT, " "+getUserString(GameEvent.EventType.USERLOGOUT,u));
     GameEvent.saveTL(ev);
   }
@@ -233,13 +231,10 @@ public class GameEventLogger
     GameEvent.saveTL(ev);    
   }
   
-  public static void logSessionEndTL(Object uId)
+  public static void logSessionEndTL(User u)
   {
-     if(uId != null) {
-       User u = DBGet.getUserTL(uId);
-       GameEvent ev = new GameEvent(GameEvent.EventType.SESSIONEND," "+svrName+" / user "+u.getId()+" / "+u.getLocation());
-       GameEvent.saveTL(ev);
-    }
+     GameEvent ev = new GameEvent(GameEvent.EventType.SESSIONEND," "+svrName+" / user "+u.getId()+" / "+u.getLocation());
+     GameEvent.saveTL(ev);
   }
 
   public static void logRegistrationAttemptTL(String email)
@@ -306,6 +301,7 @@ public class GameEventLogger
     GameEvent.saveTL(ev);   
   }
 
+  // Don't get ActionPlan from db, because it might have just been updated in this thread and the get would reverse that
   public static void commentMarkedSuperInterestingTL(String user, Object apId, Message msg, boolean superInteresting)
   {
     StringBuilder sb = new StringBuilder(user);
@@ -317,22 +313,24 @@ public class GameEventLogger
     GameEvent.saveTL(ev);    
   }
 
-  public static void commentTextEdittedTL(String userName, Object id, Message msg)
+  // Don't get ActionPlan from db, because it might have just been updated in this thread and the get would reverse that
+  public static void commentTextEdittedTL(String userName, Object apid, Message msg)
   {
     StringBuilder sb = new StringBuilder(userName);
     sb.append(" edited a comment in action plan ");
-    sb.append(id.toString());
+    sb.append(apid.toString());
     sb.append(": ");
     sb.append(msg.getText());
     GameEvent ev = new GameEvent(GameEvent.EventType.COMMENTEDITED,sb.toString());
     GameEvent.saveTL(ev);
   }
   
-  public static void chatTextEdittedTL(String userName, Object id, Message msg)
+  // Don't get ActionPlan from db, because it might have just been updated in this thread and the get would reverse that
+  public static void chatTextEdittedTL(String userName, Object apid, Message msg)
   {
     StringBuilder sb = new StringBuilder(userName);
     sb.append(" edited a chat in action plan ");
-    sb.append(id.toString());
+    sb.append(apid.toString());
     sb.append(": ");
     sb.append(msg.getText());
     GameEvent ev = new GameEvent(GameEvent.EventType.CHATEDITED,sb.toString());
