@@ -275,14 +275,15 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       Property<?> prop = event.getProperty();
       CardMarking cm = (CardMarking)prop.getValue();
       final Card card = DBGet.getCardTL(cardId); // Was getCardFresh, but the cache should be more recent
-
+      final User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      
       if(cm == null) { // markings have been cleared
         if(card.getMarking()!=null && card.getMarking().size()>0) {
           globs.getScoreManager().cardMarkingWillBeClearedTL(card);   // call this before hitting db
           card.getMarking().clear();
           card.setHidden(false);
           Card.updateTL(card);
-          GameEventLogger.cardMarkedTL(card,Mmowgli2UI.getGlobals().getUserID());
+          GameEventLogger.cardMarkedTL(card,u);
         }
       }
       else {
@@ -290,7 +291,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
         boolean needWarning = (!card.getFollowOns().isEmpty() && CardMarkingManager.isHiddenMarking(cm));
         if(!needWarning) {
           setMarkingsTL(card,cm);
-          GameEventLogger.cardMarkedTL(card,Mmowgli2UI.getGlobals().getUserID());
+          GameEventLogger.cardMarkedTL(card,u);
         }
         else {
           ConfirmDialog.show(CardChainPage.this.getUI(), "Child cards will also be hidden.  Continue?",
@@ -304,7 +305,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
                     Card c;
                     setMarkingsTL(c=DBGet.getCardTL(cardId),cmm);// Was getCardFresh, but the cache should be more recent
                     hideAllChildrenTL(c);
-                    GameEventLogger.cardMarkedTL(c,Mmowgli2UI.getGlobals().getUserID());
+                    GameEventLogger.cardMarkedTL(c,u);
                     HSess.close();
                   }
                 }
@@ -415,7 +416,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
         c.setText(w.results);
         MSysOut.println(MmowgliConstants.CARD_UPDATE_LOGS,"CardChainPage.EditCardCloseListener.windowClose() updating card text to '"+w.results+"'");
         Card.updateTL(c);
-        GameEventLogger.cardTextEdittedTL(c, Mmowgli2UI.getGlobals().getUserID());
+        GameEventLogger.cardTextEdittedTL(c, DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()));
         HSess.close();
       }
     }   
@@ -675,7 +676,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     Card.updateTL(parent);
    
     globs.getScoreManager().cardPlayedTL(c); // update score only from this app instance  
-    GameEventLogger.cardPlayedTL(c.getId());
+    GameEventLogger.cardPlayedTL(c);
   }
 
   @Override
