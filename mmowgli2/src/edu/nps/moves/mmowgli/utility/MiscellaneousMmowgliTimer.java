@@ -78,30 +78,34 @@ public class MiscellaneousMmowgliTimer
     public static void println(int logLevel, String...sa)
     {
       if((AppMaster.sysOutLogLevel & logLevel) == logLevel)
-        println(sa);
+        addToSb(logLevel,true,false,sa);
     }
     
     public static void println(String... sa)
     {
-      addToSb(true,false,sa);
+      addToSb(null,true,false,sa);
     }
 
     public static void print(int logLevel, String...sa)
     {
       if((AppMaster.sysOutLogLevel & logLevel) == logLevel)
-        print(sa);
+        addToSb(logLevel,false,false,sa);
     }
     
     public static void print(String... sa)
     {
-      addToSb(false,false,sa);
+      addToSb(null,false,false,sa);
     }
 
-    private static void addToSb(boolean indivNL, boolean endNL, String... sa)
+    private static void addToSb(Integer logLevel, boolean indivNL, boolean endNL, String... sa)
     {
       if (sb != null) {
         synchronized (sb) {
           for(String s : sa) {
+            if(logLevel != null) {
+              sb.append(MmowgliConstants.logTokens.get(logLevel));
+              sb.append(' ');
+            }
             sb.append(msTimeStamp());
             sb.append(s);
             sb.append(' ');
@@ -122,17 +126,16 @@ public class MiscellaneousMmowgliTimer
       return ""+t+" ";
     }
     
-    public static void immPrint(int logLevel, String... sa)
-    {
-      if((AppMaster.sysOutLogLevel & logLevel) == logLevel)
-        immPrint(sa);
-    }
     
     // immediate write
-    public static void immPrint(String... sa)
+    public static void immPrint(Integer logLevel,String... sa)
     {
       if (sb != null) {
         synchronized (sb) {
+          if(logLevel != null) {
+            sb.append(MmowgliConstants.logTokens.get(logLevel));
+            sb.append(' ');
+          }
           if (sb.length() > 0) {
             System.out.print(sb.toString());
             sb.setLength(0);
