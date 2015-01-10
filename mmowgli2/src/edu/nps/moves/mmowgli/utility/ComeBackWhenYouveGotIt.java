@@ -22,12 +22,12 @@
 
 package edu.nps.moves.mmowgli.utility;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+
 import java.io.Serializable;
-import java.lang.reflect.Method;
 
 import org.hibernate.Session;
 
-import edu.nps.moves.mmowgli.MmowgliConstants;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHib;
@@ -67,67 +67,20 @@ public class ComeBackWhenYouveGotIt
       System.err.println("ERROR: ComeBackWhenYouveGotIt.waitForGameEvent: "+e.getClass().getSimpleName()+": "+e.getLocalizedMessage());     
     }   
   }
-  
-  /* These methods only work on callbacks with the signature (Object id) */
-  @SuppressWarnings("unused")
-  private static void oldloopOnIt(final Class<?> hibernateObjectClass, final Object objId, final Method callback, final Object methodObj)
-  {
-    MThreadManager.run(new Runnable()
-    {
-      long firstRandomDelay = (long)Math.floor(Math.random()*1000);
-      @Override
-      public void run()
-      {
-        for(int i=0; i<10; i++) { // try for 10 seconds
-          try{Thread.sleep(1000l+firstRandomDelay);}catch(InterruptedException ex){}
-          HSess.init();
-          firstRandomDelay=0l;
-          Session sess = HSess.get();
-          Object dbObj = sess.get(hibernateObjectClass, (Serializable)objId);
-          if(dbObj != null) { 
-            MSysOut.println("Delayed fetch of "+hibernateObjectClass.getSimpleName()+" "+objId.toString()+" from db, got it on retry "+(i+1));            
-            try {
-              callback.invoke(methodObj, objId);
-            }
-            catch (Exception e) {
-              System.err.println("ERROR, ComBackWhenYouveGotIt.loopOnIt invoking callback: "+
-                                  e.getClass().getSimpleName()+" "+e.getLocalizedMessage());
-            }
-            HSess.close();
-            return;
-          }
-          HSess.close();
-        }
-        System.err.println("ERROR: Couldn't get "+hibernateObjectClass.getSimpleName()+ objId.toString()+" in 10 seconds");// give up
-      }      
-    });
-  }
 
   private static Object loopOnIt(final Class<?> hibernateObjectClass, final Object objId)//, final Method callback, final Object methodObj)
   {
-
-    long firstRandomDelay = (long) Math.floor(Math.random() * 1000);
-
     for (int i = 0; i < 10; i++) { // try for 10 seconds
-      sleep(1000l + firstRandomDelay);
-
       HSess.init();
-      firstRandomDelay = 0l;
       Session sess = HSess.get();
       Object dbObj = sess.get(hibernateObjectClass, (Serializable) objId);
       if (dbObj != null) {
-        MSysOut.println("Delayed fetch of " + hibernateObjectClass.getSimpleName() + " " + objId.toString() + " from db, got it on retry " + (i + 1));
-        // try {
-        // callback.invoke(methodObj, objId);
-        // }
-        // catch (Exception e) {
-        // System.err.println("ERROR, ComBackWhenYouveGotIt.loopOnIt invoking callback: "+
-        // e.getClass().getSimpleName()+" "+e.getLocalizedMessage());
-        // }
+        MSysOut.println(MESSAGING_LOGS, "Delayed fetch of " + hibernateObjectClass.getSimpleName() + " " + objId.toString() + " from db, got it on retry " + (i + 1));
         HSess.close();
         return dbObj;
       }
       HSess.close();
+      sleep(250l);
     }
     System.err.println("ERROR: Couldn't get " + hibernateObjectClass.getSimpleName() + objId.toString() + " in 10 seconds");// give
                                                                                                                            // up
@@ -197,81 +150,25 @@ public class ComeBackWhenYouveGotIt
   // Separate thread not buying anything and increasing complexity.
   private static void fetchDbObjWhenPossible(final ObjHolder holder, boolean wait)
   {
-//    final Object waiter = new Object();
-//    Thread thrd = new Thread(new Runnable()
-//    {
-//      @Override
-//      public void run()
-//      {
-        for(int i=0; i<10; i++) { // try for 10 seconds
-          MSysOut.println(MmowgliConstants.MESSAGING_LOGS,"Top of fetchDbObjWhenPossible loop");
-          try{Thread.sleep(1000l);}catch(InterruptedException ex){}
-          
-          Session thisSess = VHib.getSessionFactory().openSession();
-          thisSess.beginTransaction();
-          
-          Object cd = thisSess.get(holder.cls, holder.id);
-          if(cd != null) {
-            if(i>0)
-              MSysOut.println("Delayed fetch of "+holder.cls.getSimpleName()+" from db, got it on try "+i);
-            holder.obj = cd;
-            thisSess.getTransaction().commit();
-            thisSess.close();
-//            MSysOut.println(AppMaster.MESSAGING_LOGS,"Try to get out of fetchDbObjWhenPossible loop");
-//            synchronized(waiter){waiter.notify();}
-            return;
-          }
-          thisSess.getTransaction().commit();
-          thisSess.close();
-        }
-        System.err.println("ERROR: Couldn't get "+holder.cls.getSimpleName() +" "+holder.id+" in 10 seconds");// give up
-//        MSysOut.println(AppMaster.MESSAGING_LOGS,"Try to get out of fetchDbObjWhenPossible loop");
-//        synchronized(waiter){waiter.notify();}
-//      }
-//    },"FetchDbObjWhenPossible()");
-/*
-    synchronized(waiter) {
+    for (int i = 0; i < 10; i++) { // try for 10 seconds
+      MSysOut.println(MESSAGING_LOGS, "Top of fetchDbObjWhenPossible loop");
 
-      thrd.start();
-      while(thrd.isAlive() )
-        try { 
-          MSysOut.println(AppMaster.MESSAGING_LOGS,"Waiting for fetchDbObjWhenPossible loop");
-          waiter.wait();
-          MSysOut.println(AppMaster.MESSAGING_LOGS,"Successfully out of fetchDbObjWhenPossible loop");
-        }
-        catch(InterruptedException ex){
-          MSysOut.println(AppMaster.MESSAGING_LOGS,"Exception waiting for fetchDbObjWhenPossible loop: "+ex.getLocalizedMessage());          
-        }
-    }
-    */
-  }
+      Session thisSess = VHib.getSessionFactory().openSession();
+      thisSess.beginTransaction();
 
-/*
-  private static void oldfetchDbObjWhenPossible(final ObjHolder holder, boolean wait)
-  {
-    MThreadManager.run(new Runnable()  // this can cause a deadlock of caller is one of these too and only one in pool
-    {
-      @Override
-      public void run()
-      {
-        for(int i=0; i<10; i++) { // try for 10 seconds
-          try{Thread.sleep(1000l);}catch(InterruptedException ex){}
-          HSess.init();
-          Session thisSess = HSess.get();
-          
-          Object cd = thisSess.get(holder.cls, holder.id);
-          if(cd != null) {
-            if(i>0)
-              MSysOut.println("Delayed fetch of "+holder.cls.getSimpleName()+" from db, got it on try "+i);
-            holder.obj = cd;
-            HSess.close();
-            return;
-          }
-          HSess.close();
-        }
-        System.err.println("ERROR: Couldn't get "+holder.cls.getSimpleName() +" "+holder.id+" in 10 seconds");// give up
+      Object cd = thisSess.get(holder.cls, holder.id);
+      if (cd != null) {
+        if (i > 0)
+          MSysOut.println("Delayed fetch of " + holder.cls.getSimpleName() + " from db, got it on try " + i);
+        holder.obj = cd;
+        thisSess.getTransaction().commit();
+        thisSess.close();
+        return;
       }
-    }, wait);
+      thisSess.getTransaction().commit();
+      thisSess.close();
+      sleep(250l);
+    }
+    System.err.println("ERROR: Couldn't get " + holder.cls.getSimpleName() + " " + holder.id + " in 10 seconds");// give up
   }
-  */
 }
