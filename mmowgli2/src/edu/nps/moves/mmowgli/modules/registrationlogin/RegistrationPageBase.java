@@ -484,7 +484,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         HSess.checkClose(key);
         return;
       }
-      // That user is a transient instance, wrong..it is
+      // That user is detached from our session right now
       RegistrationPagePopupSecond p2 = new RegistrationPagePopupSecond(this,user);
       openPopup(p2,p2.getUsualWidth());
       HSess.checkClose(key);
@@ -513,6 +513,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         HSess.checkClose(key);
         return;
       }
+      user = User.mergeTL(user); // into this session
       doOtherUserInit(user);
       user.setOkSurvey(okSurvey);  // saved above
       Game g = Game.getTL();
@@ -522,7 +523,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       Mmowgli2UI.getGlobals().getScoreManager().userCreatedTL(user);  // give him his points if appropriate
 
       UI.getCurrent().setScrollTop(0);
-      wereInTL(user);
+      wereInTL();
       HSess.checkClose(key);
       return;
     }
@@ -548,7 +549,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
 
  // Check for email confirmation
   @SuppressWarnings("serial")
-  private void wereInTL(User u)
+  private void wereInTL()
   {
     Game g = Game.getTL();
     if(!g.isEmailConfirmation()) {
@@ -557,7 +558,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       wereInReallyTL();
     }
     else {
-      List<String>sLis = VHibPii.getUserPiiEmails(u.getId());
+      List<String>sLis = VHibPii.getUserPiiEmails(user.getId());
       String email = sLis.get(0);
       final Window emailDialog = new Window("Email Confirmation");
       emailDialog.setModal(true);
@@ -599,18 +600,21 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
           HSess.init();
           if(confirmed) {
             closePopup(emailDialog);
+            user = User.mergeTL(user); // into this session
             wereInReallyTL();
           }
           else {
-            HSess.get().refresh(user);
-            if(user.isEmailConfirmed()) {
+            User locUsr = DBGet.getUserFreshTL(user.getId());  // must get from db, since it's externally updated
+            if(locUsr.isEmailConfirmed()) {
               confirmed=true;
               event.getButton().setCaption("I'm ready to play mmowgli!");
+              user = locUsr;
             }
             else {
               Notification.show("Your email is not yet confirmed");
             }
           }
+          HSess.close();
         }
       });
       grid.addComponent(contButt);
@@ -649,11 +653,11 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       EmailConfirmation.saveTL(ec);
 
       String confirmUrl = buildConfirmUrl(ec);
-      AppMaster.instance().getMailManager().sendEmailConfirmationTL(email, u.getUserName(), confirmUrl);
-      HSess.close();
+      AppMaster.instance().getMailManager().sendEmailConfirmationTL(email, user.getUserName(), confirmUrl);
     } // else weren't confirmed
   }
 
+  // User is persistent in this session on entry here.
   private void wereInReallyTL()
   {
     if (currentPopup != null)
@@ -662,7 +666,6 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
     Mmowgli2UI.getGlobals().setLoggedIn(true);
 
     if (user != null) {
-      user = DBGet.getUserFreshTL(user.getId());
       if (!user.isWelcomeEmailSent()) {
         MailManager mmgr = AppMaster.instance().getMailManager();
         mmgr.onNewUserSignupTL(user);
@@ -678,8 +681,8 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       if(user.isAdministrator())
         sess.setMaxInactiveInterval(ADMINSTRATOR_SESSION_TIMEOUT_SECONDS);
       
-      MSysOut.println("Vaadin heartbeat interval (sec): "+vsess.getConfiguration().getHeartbeatInterval());
-      MSysOut.println("Tomcat timeout (\"maxInactiveInterval\") (sec): "+sess.getMaxInactiveInterval());
+      MSysOut.println(SYSTEM_LOGS,"Vaadin heartbeat interval (sec): "+vsess.getConfiguration().getHeartbeatInterval());
+      MSysOut.println(SYSTEM_LOGS,"Tomcat timeout (\"maxInactiveInterval\") (sec): "+sess.getMaxInactiveInterval());
 
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       if (globs != null) {
@@ -692,7 +695,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       else
         System.err.println("No globals in RegistrationPageBase.wereIn()");
 
-      GameEventLogger.logUserLoginTL(user.getId());
+      GameEventLogger.logUserLoginTL(user);
     }
   }
 

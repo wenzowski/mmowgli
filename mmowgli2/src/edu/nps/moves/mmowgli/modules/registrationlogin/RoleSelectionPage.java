@@ -51,17 +51,17 @@ public class RoleSelectionPage extends MmowgliDialog
  // private ComboBox rolesCb; //, expertiseCb;
   private TextField expertiseTf;
   
-  public NativeButton laterButt, continueButt;
+  private NativeButton continueButt;
   private TextArea ansTf;
   private GameQuestion ques;
-  private User user;
+  private User localUser;
   private CheckBox emailCb, messagesCb;
   
   public RoleSelectionPage(ClickListener listener, User u)
   {
     super(listener);
     super.initGui();
-    this.user = u;
+    this.localUser = u;
     
     setTitleString("Last Step: tell others of your interests"); //"Role Selection");
 
@@ -138,8 +138,9 @@ public class RoleSelectionPage extends MmowgliDialog
     public void buttonClick(ClickEvent event)
     {
       HSess.init();
-      user.setQuestion(ques);  // This is what was asked
-      User.updateTL(user);
+      localUser = User.mergeTL(localUser);
+      localUser.setQuestion(ques);  // This is what was asked
+      User.updateTL(localUser);
       HSess.close();
       listener.buttonClick(event);  // up the chain
     }   
@@ -152,22 +153,23 @@ public class RoleSelectionPage extends MmowgliDialog
     public void buttonClick(ClickEvent event)
     {
       HSess.init();
+      localUser = User.mergeTL(localUser);
 //      user.setRole((Role)rolesCb.getValue());
 //      o = expertiseCb.getValue();
 //      if(o != null)
 //        user.setExpertise(o.toString());
       Object o = expertiseTf.getValue();
       if(o != null)
-        user.setExpertise(o.toString());
+        localUser.setExpertise(o.toString());
       
-      user.setOkEmail(emailCb.getValue());
-      user.setOkGameMessages(messagesCb.getValue());
+      localUser.setOkEmail(emailCb.getValue());
+      localUser.setOkGameMessages(messagesCb.getValue());
       
-      user.setAnswer(checkValue(ansTf));
-      user.setQuestion(ques);
-      User.updateTL(user);
+      localUser.setAnswer(checkValue(ansTf));
+      localUser.setQuestion(ques);
+      User.updateTL(localUser);
       
-      GameEventLogger.logNewUserTL(user);
+      GameEventLogger.logNewUserTL(localUser);
       HSess.close();
       
       listener.buttonClick(event); // up the chain
@@ -189,13 +191,13 @@ public class RoleSelectionPage extends MmowgliDialog
   @Override
   public User getUser()
   {
-    return user;
+    return localUser;
   }
 
   @Override
   public void setUser(User u)
   {
-    this.user = u;   
+    this.localUser = u;   
   }
   
   // Used to center the dialog
