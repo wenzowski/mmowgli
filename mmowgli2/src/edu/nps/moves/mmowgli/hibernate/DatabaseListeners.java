@@ -108,7 +108,6 @@ public class DatabaseListeners
       super.onSaveOrUpdate(event); // default behavior first
       if (!enabled)
         return;
-
       Object obj = event.getObject();
 
       Character msgTyp = null;
@@ -239,6 +238,7 @@ public class DatabaseListeners
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
       MSysOut.println(myLogLevel,">>> Update db listener "+(enabled?"":"(unused)") + " type = "+event.getEntity().getClass().getSimpleName()+" <<<");
+      MSysOut.println(myLogLevel,">>> Update db listener, session = "+event.getSession().hashCode());
       super.onSaveOrUpdate(event); // default behavior first      
       if(!enabled)
         return;
@@ -298,6 +298,7 @@ public class DatabaseListeners
         messageOut(event,msgTyp,msg);
     
       MSysOut.println(myLogLevel,">>> Out of update db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
+      MSysOut.println(myLogLevel,">>> Out of update db listener, session = "+event.getSession().hashCode());
     }
   }
   
@@ -429,12 +430,22 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
       if(currUI instanceof Mmowgli2UI)
         session_id = ((Mmowgli2UI)currUI).getUserSessionUUID();
     }
-
+    
+    // The following lets the session.commit.close action return before trying to access the saved or updated db object
+    MMessagePacket mmp = new MMessagePacket(msgTyp,
+                           msg,
+                           ui_id,
+                           session_id,
+                           AppMaster.instance().getServerName());
+    HSess.queueDBMessage(mmp);
+  
+/*
     AppMaster.instance().incomingDatabaseEvent(
         new MMessagePacket(msgTyp,
                            msg,
                            ui_id,
                            session_id,
                            AppMaster.instance().getServerName()));
+*/
   }
 }
