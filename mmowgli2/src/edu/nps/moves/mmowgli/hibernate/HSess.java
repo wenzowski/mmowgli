@@ -22,11 +22,17 @@
 
 package edu.nps.moves.mmowgli.hibernate;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.HIBERNATE_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.HIBERNATE_TRANSACTION_TIMEOUT_IN_SECONDS;
+
+import java.util.ArrayList;
+
 import org.hibernate.*;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import edu.nps.moves.mmowgli.AppMaster;
+import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -44,15 +50,17 @@ public class HSess
 {
   private static final ThreadLocal<Session> threadLocal = new ThreadLocal<Session>();
   private static final ThreadLocal<StackTraceElement[]> dbgThreadLocal = new ThreadLocal<StackTraceElement[]>();
-  public static void set(Session sess)
+  private static void set(Session sess)
   {
     threadLocal.set(sess);
     dbgThreadLocal.set(Thread.currentThread().getStackTrace());
+    msgs.set(new ArrayList<MMessagePacket>());
   }
   
-  public static void unset()
+  private static void unset()
   {
     threadLocal.remove();
+    unsetDBEvents();
   }
   
   public static Session get()
@@ -72,6 +80,7 @@ public class HSess
     s.beginTransaction();
     s.getTransaction().setTimeout(HIBERNATE_TRANSACTION_TIMEOUT_IN_SECONDS);
 
+    MSysOut.println(HIBERNATE_LOGS,"HSess.open() of sess "+s.hashCode());
     set(s);
   }
   
@@ -98,6 +107,7 @@ public class HSess
     finally {
       sess.close();
     }
+    MSysOut.println(HIBERNATE_LOGS,"HSess.close() of sess "+sess.hashCode());
     unset();
   }
  
@@ -160,5 +170,21 @@ public class HSess
     for (StackTraceElement elem : stes)
       MSysOut.println(elem.toString());
     MSysOut.println(">>>>>>>>>>>>> End of stack dumps.");
+  }
+  
+  
+  private static ThreadLocal<ArrayList<MMessagePacket>> msgs = new ThreadLocal<ArrayList<MMessagePacket>>();
+  
+  public static void queueDBMessage(MMessagePacket mmp)
+  {
+    msgs.get().add(mmp);
+  }
+  private static void unsetDBEvents()
+  {
+    ArrayList<MMessagePacket> alis = msgs.get();
+    for(MMessagePacket mmp : alis)
+      AppMaster.instance().incomingDatabaseEvent(mmp);
+      //MSysOut.println(HIBERNATE_LOGS," I would pump a db event to Appmaster.incomingDatabaseEvent now, msg = "+mmp.toString());
+    msgs.remove();
   }
 }
