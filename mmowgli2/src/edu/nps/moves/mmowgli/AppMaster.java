@@ -46,10 +46,9 @@ import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.components.BadgeManager;
 import edu.nps.moves.mmowgli.components.KeepAliveManager;
 import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.export.ReportGenerator;
-import edu.nps.moves.mmowgli.hibernate.HSess;
-import edu.nps.moves.mmowgli.hibernate.VHib;
-import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.hibernate.*;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.messaging.*;
@@ -95,19 +94,21 @@ public class AppMaster
   private String userImagesUrlString;
   private URL    userImagesUrl;
   
-  public static int sysOutLogLevel = ALL_LOGS;
+  public static int sysOutLogLevel = 0; //ALL_LOGS;
   static {
-    // uncommented lines turn off logs
-    sysOutLogLevel &= ~BROADCASTER_LOGS;
-    sysOutLogLevel &= ~BADGEMANAGER_LOGS;
- // sysOutLogLevel &= ~CARD_UPDATE_LOGS;
- // sysOutLogLevel &= ~DB_LISTENER_LOGS;
-    sysOutLogLevel &= ~HIBERNATE_LOGS;
-    sysOutLogLevel &= ~MCACHE_LOGS;
-    sysOutLogLevel &= ~MESSAGING_LOGS;
- // sysOutLogLevel &= ~PUSH_LOGS;
-    sysOutLogLevel &= ~TICK_LOGS;
-    sysOutLogLevel &= ~USER_UPDATE_LOGS;
+    //sysOutLogLevel |= BROADCASTER_LOGS;
+    //sysOutLogLevel |= BADGEMANAGER_LOGS;
+    sysOutLogLevel |= CARD_UPDATE_LOGS;
+    sysOutLogLevel |= DB_LISTENER_LOGS;
+    sysOutLogLevel |= HIBERNATE_LOGS;
+    //sysOutLogLevel |= MCACHE_LOGS;
+    sysOutLogLevel |= MESSAGING_LOGS;
+    sysOutLogLevel |= PUSH_LOGS;
+    sysOutLogLevel |= TICK_LOGS;
+    sysOutLogLevel |= USER_UPDATE_LOGS;
+    sysOutLogLevel |= SYSTEM_LOGS;
+    sysOutLogLevel |= ACTIONPLAN_UPDATE_LOGS;
+    sysOutLogLevel |= REPORT_LOGS;
     
     MSysOut.println("System log level = "+sysOutLogLevel);
   }
@@ -476,7 +477,9 @@ public class AppMaster
   public void logSessionEnd(Serializable uId)
   {
     HSess.init();
-    GameEventLogger.logSessionEndTL(uId);
+    User u = DBGet.getUserTL(uId);
+    if(u != null)
+      GameEventLogger.logSessionEndTL(u);
     HSess.close();
   }
 
