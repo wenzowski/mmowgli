@@ -74,7 +74,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
 
   private AvatarPanel chooser;
 
-  User user = null;  // what gets returned
+  private User localUser = null;  // what gets returned
 
   @HibernateSessionThreadLocalConstructor
   public RegistrationPagePopupFirst(ClickListener listener)
@@ -418,14 +418,14 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
 
       // 5. No user already there with given username
       String uname = userIDTf.getValue().toString();
-      User _usr = checkUserNameTL(uname,email); //, pw);       // This saves the user and builds UserPii
+      User _usr = checkUserNameTL(uname,email);       // This saves the user and builds UserPii
       if(_usr == null) {
         errorOutTL("Existing user with that name/ID");
         HSess.close();
         return;
       }
 
-      user = _usr;
+      localUser = _usr;
 
       // 7. Something entered for first and last name
       String fName = firstNameTf.getValue().toString().trim();
@@ -435,18 +435,18 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
         return;
       }
  */
-      UserPii uPii = VHibPii.getUserPii(user.getId()); //new UserPii();
-      uPii.setUserObjectId(user.getId());
+      UserPii uPii = VHibPii.getUserPii(localUser.getId());
+      uPii.setUserObjectId(localUser.getId());
       uPii.setRealFirstName(fName);
       uPii.setRealLastName(lName);
       String hashedPassword = new StrongPasswordEncryptor().encryptPassword(pw);
       uPii.setPassword(hashedPassword);
       VHibPii.update(uPii);
 
-      user.setAvatar(Avatar.getTL(chooser.getSelectedAvatarId()));
-      User.updateTL(user);
+      localUser.setAvatar(Avatar.getTL(chooser.getSelectedAvatarId()));
+      User.updateTL(localUser);
 
-      VHibPii.markInGame(user);
+      VHibPii.markInGame(localUser);
       HSess.close();
 
       listener.buttonClick(event);
@@ -455,27 +455,27 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
     private void errorOutTL(String s)
     {
       new Notification("Could not register", s, Notification.Type.ERROR_MESSAGE,true).show(Page.getCurrent());
-      if (user != null) {
-        User.deleteTL(user);
-        UserPii uPii = VHibPii.getUserPii(user.getId());
+      if (localUser != null) {
+        User.deleteTL(localUser);
+        UserPii uPii = VHibPii.getUserPii(localUser.getId());
         VHibPii.delete(uPii);
         EmailPii epii = VHibPii.getUserPiiEmail(uPii.getUserObjectId());
         VHibPii.delete(epii);
       }
-      user = null;
+      localUser = null;
     }
   }
 
   @Override
   public User getUser()
   {
-    return user;
+    return localUser;
   }
 
   @Override
   public void setUser(User u)
   {
-    user = u;
+    localUser = u;
   }
 
   // Used to center the dialog

@@ -52,15 +52,15 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
   private FormLayout formLay;
   private TextField locTf;
   private BoundAffiliationCombo affilCombo;
-  private User user;
+  private User localUser;
   
   private String warning = "These fields are optional.  Please be careful that the combination of<br/>player ID, affiliation and location "+
   "do not reveal your actual identity.";
-  public RegistrationPagePopupSecond(Button.ClickListener listener, User user)
+  public RegistrationPagePopupSecond(Button.ClickListener listener, User u)
   {
     super(listener);
     super.initGui();
-    this.user = user;
+    localUser = u;
     setTitleString("Tell us about you");
  
     contentVLayout.setSpacing(true);
@@ -131,13 +131,14 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
 //        app.getMainWindow().showNotification("Login not complete.","Please enter at least an approximate location from where you are playing.",Notification.TYPE_ERROR_MESSAGE);
 //        return;
 //      }
-      user.setLocation(checkValue(locTf));
+      localUser = User.merge(localUser, HSess.get());
+      localUser.setLocation(checkValue(locTf));
       Affiliation afl = (Affiliation)affilCombo.getValue();
       String aflStr = afl.getAffiliation();
       if(aflStr.equalsIgnoreCase("optional") || aflStr.equalsIgnoreCase("required"))
         aflStr = "";
-      user.setAffiliation(aflStr);
-      User.updateTL(user);
+      localUser.setAffiliation(aflStr);
+      User.updateTL(localUser);
       HSess.close();
       
       listener.buttonClick(event); // up the chain
@@ -156,13 +157,13 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
   @Override
   public User getUser()
   {
-    return user;
+    return localUser;
   }
 
   @Override
   public void setUser(User u)
   {
-    this.user = u;  
+    this.localUser = u;  
   }
 
   // Used to center the dialog

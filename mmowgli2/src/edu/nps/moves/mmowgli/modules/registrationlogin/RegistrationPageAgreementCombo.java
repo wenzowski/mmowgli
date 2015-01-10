@@ -191,7 +191,7 @@ public class RegistrationPageAgreementCombo extends MmowgliDialog
     return u;
   }
 
-  // used by parent class when cancel is hit
+  // used by parent class to set u == null when cancel is hit
   public void setUser(User u)
   {
     this.u = u;
