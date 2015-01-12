@@ -139,11 +139,8 @@ public class MiscellaneousMmowgliTimer
           if (sb.length() > 0) {
             System.out.print(sb.toString());
             sb.setLength(0);
-            System.out.println();
-            SysoutVarargs(sa);
           }
-          else
-            SysoutVarargs(sa);
+          SysoutVarargs(sa);
         }
       }
       else
