@@ -100,15 +100,15 @@ public class AppMaster
     //sysOutLogLevel |= BADGEMANAGER_LOGS;
     sysOutLogLevel |= CARD_UPDATE_LOGS;
     sysOutLogLevel |= DB_LISTENER_LOGS;
-    sysOutLogLevel |= HIBERNATE_LOGS;
+    //sysOutLogLevel |= HIBERNATE_LOGS;
     //sysOutLogLevel |= MCACHE_LOGS;
     sysOutLogLevel |= MESSAGING_LOGS;
-    sysOutLogLevel |= PUSH_LOGS;
+    //sysOutLogLevel |= PUSH_LOGS;
     sysOutLogLevel |= TICK_LOGS;
     sysOutLogLevel |= USER_UPDATE_LOGS;
     sysOutLogLevel |= SYSTEM_LOGS;
-    sysOutLogLevel |= ACTIONPLAN_UPDATE_LOGS;
-    sysOutLogLevel |= REPORT_LOGS;
+    //sysOutLogLevel |= ACTIONPLAN_UPDATE_LOGS;
+    //sysOutLogLevel |= REPORT_LOGS;
     
     MSysOut.println("System log level = "+sysOutLogLevel);
   }
