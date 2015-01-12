@@ -362,7 +362,8 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     Session sess = HSess.get();
     
     Card c = DBGet.getCardTL(id); // was getFresh, but cache is probably more recent
-    MSysOut.println(CARD_UPDATE_LOGS, "CardLarge.update_oobTL(), card "+id.toString()+" text: "+c.getText());
+    
+    MSysOut.println(CARD_UPDATE_LOGS, "CardLarge.update_oobTL(), card "+id.toString()+" text: "+c.getText()+" hidden = "+c.isHidden()+" hash = "+hashCode());
     
     // Only 2 things to update...text and marking
     Game g = Game.getTL();
