@@ -291,6 +291,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
         boolean needWarning = (!card.getFollowOns().isEmpty() && CardMarkingManager.isHiddenMarking(cm));
         if(!needWarning) {
           setMarkingsTL(card,cm);
+          Card.updateTL(card);
           GameEventLogger.cardMarkedTL(card,u);
         }
         else {
@@ -302,8 +303,9 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
                   if(dialog.isConfirmed()) {
                     HSess.init();
                     CardMarking cmm = CardMarking.mergeTL((CardMarking)event.getProperty().getValue());
-                    Card c;
-                    setMarkingsTL(c=DBGet.getCardTL(cardId),cmm);// Was getCardFresh, but the cache should be more recent
+                    Card c= DBGet.getCardTL(cardId);// Was getCardFresh, but the cache should be more recent
+                    c = Card.mergeTL(c);
+                    setMarkingsTL(c,cmm);
                     hideAllChildrenTL(c);
                     GameEventLogger.cardMarkedTL(c,u);
                     HSess.close();
@@ -338,8 +340,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     
     MSysOut.println(MmowgliConstants.CARD_UPDATE_LOGS,"CardChainPage.setMarkingsTL() setting card marking hidden bit to "+CardMarkingManager.isHiddenMarking(cm));
     
-    card.setHidden(CardMarkingManager.isHiddenMarking(cm));
-    Card.updateTL(card);    
+    card.setHidden(CardMarkingManager.isHiddenMarking(cm));   
   }
   
   @SuppressWarnings("serial")
@@ -355,6 +356,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   @HibernateRead
   private boolean loadMarkingPanel_oobTL(Card c)
   {
+    MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.loadMarkingPanel_oobTL, card id = "+c.getId()+" hidden = "+c.isHidden());
     boolean ret=false; // no update required
     if(markingListener != null)
       markingRadioGroup.removeValueChangeListener(markingListener);
@@ -719,20 +721,15 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // Don't use any of the HbnContainer type calls, because they all use
     // HibernateContainers.getCurrentSession(), which is valid within a "Vaadin transaction" context.
     // We're called here from a thread which listens to the multicast (or equivalent asynch broadcast);
-
-    // Don't do any merges, saves, updates, etc., let the gui do that w/in a Vaadin transaction
-    // Correction to the last: the CardSummary class has to access the db with User.get(), etc.
-    // so you can't prohibit access. You could recode to pass along the session that we build when we
-    // read the mcast, but that's clumsy. It doesn't see to cause a problem here. Keep a lookout.
-    // We might have fixed this with the synchro in the mcast
-MSysOut.println(MESSAGING_LOGS,"CardChainPage.cardUpdated_oobTL() externCardId = "+externCardId+" my cardId = "+cardId);
+    
+    MSysOut.println(MESSAGING_LOGS,"CardChainPage.cardUpdated_oobTL() externCardId = "+externCardId+" my cardId = "+cardId+" hash = "+hashCode());
     if (externCardId.equals(cardId)) {   // Don't do this: externCardId == cardId  !
       // game masters can change text and marking
       MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL "+externCardId.toString());
       Card c = DBGet.getCardTL(externCardId); //DBGet.getCardFreshTL(cardId); test..cache should have it, maybe not db yet
-
+      MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL / hidden = "+c.isHidden());
       c = Card.mergeTL(c);     // enabling this causes loop
-      MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL # children = "+(c.getFollowOns()==null?"0":c.getFollowOns().size()));
+      MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL # children = "+(c.getFollowOns()==null?"0":c.getFollowOns().size()+" hidden = "+c.isHidden())+" hash = "+hashCode());
 
       loadMarkingPanel_oobTL(c);
       cardLg.update_oobTL(externCardId);
