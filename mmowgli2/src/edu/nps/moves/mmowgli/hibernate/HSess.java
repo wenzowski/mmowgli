@@ -182,9 +182,10 @@ public class HSess
   private static void unsetDBEvents()
   {
     ArrayList<MMessagePacket> alis = msgs.get();
-    for(MMessagePacket mmp : alis)
+    for(MMessagePacket mmp : alis) {
+      MSysOut.println(HIBERNATE_LOGS," Pumping a db event to Appmaster.incomingDatabaseEvent now, msg = "+mmp.toString());
       AppMaster.instance().incomingDatabaseEvent(mmp);
-      //MSysOut.println(HIBERNATE_LOGS," I would pump a db event to Appmaster.incomingDatabaseEvent now, msg = "+mmp.toString());
+    }
     msgs.remove();
   }
 }
