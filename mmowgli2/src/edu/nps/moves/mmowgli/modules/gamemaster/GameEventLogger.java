@@ -123,7 +123,7 @@ public class GameEventLogger
     sb.append(c.getText());
     
     GameEvent ev = new GameEvent(typ,sb.toString());
-    GameEvent.saveTL(ev);;
+    GameEvent.saveTL(ev);
   }
   
   // Don't get User from db, because it might have just been updated in this thread and the get would reverse that
