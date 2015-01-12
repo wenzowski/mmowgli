@@ -136,7 +136,7 @@ public class Card implements Serializable
    // forceUpdateEvent(c);
     HSess.get().update(c);
     AppMaster.instance().getMcache().putCard(c);  // probably unneeded
-    MSysOut.println(CARD_UPDATE_LOGS,"Card.updateTL() just sess.updated card "+c.getId()+" with text: "+c.getText());
+    MSysOut.println(CARD_UPDATE_LOGS,"Card.updateTL() just sess.updated card "+c.getId()+" with text: "+c.getText()+" hidden = "+c.isHidden());
   }
  
   public static void saveTL(Card c)
