@@ -249,7 +249,7 @@ public class DatabaseListeners
       String msg = "";
       if (obj instanceof Card) {
         Card c = (Card)obj;
-        MSysOut.println(CARD_UPDATE_LOGS,"Update db listener got card with id = "+c.getId()+" text = "+c.getText());
+        MSysOut.println(CARD_UPDATE_LOGS,"Update db listener got card with id = "+c.getId()+" text = "+c.getText()+" hidden = "+c.isHidden());
         msgTyp = UPDATED_CARD;
         msg = "" + c.getId();
         mcache.putCard(c);
