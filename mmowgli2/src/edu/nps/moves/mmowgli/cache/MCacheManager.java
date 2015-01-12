@@ -532,7 +532,6 @@ public class MCacheManager implements InterTomcatReceiver
     Card c = Card.getTL(id);
     if (c == null) {
       c = ComeBackWhenYouveGotIt.fetchCardWhenPossible(id);
-      c = Card.mergeTL(c);
     }
 
     getCardCache().addToCache(id, c);
