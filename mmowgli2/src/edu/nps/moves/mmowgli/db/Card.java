@@ -133,15 +133,12 @@ public class Card implements Serializable
  
   public static void updateTL(Card c)
   {
-   // forceUpdateEvent(c);
     HSess.get().update(c);
-    AppMaster.instance().getMcache().putCard(c);  // probably unneeded
     MSysOut.println(CARD_UPDATE_LOGS,"Card.updateTL() just sess.updated card "+c.getId()+" with text: "+c.getText()+" hidden = "+c.isHidden());
   }
  
   public static void saveTL(Card c)
   {
-   // AppMaster.instance().getMcache().putCard(c);  // The update listener code seems to get run before the object is actually in the db.  This helps.
     HSess.get().save(c);
     MSysOut.println(CARD_UPDATE_LOGS,"Card.saveTL() just sess.saved card "+c.getId()+" with text: "+c.getText());
   }
