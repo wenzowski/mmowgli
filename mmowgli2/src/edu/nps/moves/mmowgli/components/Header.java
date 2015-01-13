@@ -475,7 +475,6 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   }
   private IDNativeButton makePlayIdeaButt(Game g)
   {
-
     Resource res = mediaLoc.getPlayIdeaButt(g);
     if(res == null)
       return makeBigButt("PLAY AN IDEA", PLAYIDEACLICK);
