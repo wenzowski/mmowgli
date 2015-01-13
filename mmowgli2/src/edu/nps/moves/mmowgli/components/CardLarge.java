@@ -350,20 +350,28 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     }
   }
   
+  public void update_oobTL(Card c)
+  {
+    if(!((Long)c.getId()).equals(cardId))
+      return;
+    update_oobTL_common(c);
+  }
+  
   // OOB update
-  @HibernateOpened
-  @HibernateRead
-  @HibernateClosed
   public void update_oobTL(Object id)
   {
     if(!id.equals(cardId))  //; the card should be for us, but just to make sure
       return;
 
+    Card c = DBGet.getCardTL(id); // was getFresh, but cache is probably more recent
+    update_oobTL_common(c);
+  }
+  
+  private void update_oobTL_common(Card c)
+  {
     Session sess = HSess.get();
     
-    Card c = DBGet.getCardTL(id); // was getFresh, but cache is probably more recent
-    
-    MSysOut.println(CARD_UPDATE_LOGS, "CardLarge.update_oobTL(), card "+id.toString()+" text: "+c.getText()+" hidden = "+c.isHidden()+" hash = "+hashCode());
+    MSysOut.println(CARD_UPDATE_LOGS, "CardLarge.update_oobTL(), card "+c.getId()+" text: "+c.getText()+" hidden = "+c.isHidden()+" hash = "+hashCode());
     
     // Only 2 things to update...text and marking
     Game g = Game.getTL();
