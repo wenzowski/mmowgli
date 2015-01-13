@@ -455,8 +455,8 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     }    
     Card card = DBGet.getCardTL(cardId);
     Card parent = card.getParentCard();
+    VerticalLayout spacerVL = new VerticalLayout();
     if(parent != null) {
-      VerticalLayout spacerVL = new VerticalLayout();
       topHL.addComponent(spacerVL);
       topHL.setExpandRatio(spacerVL, 1.0f);
       spacerVL.setWidth("100%");
@@ -464,26 +464,24 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       spacerVL.addComponent(parentSumm);
       parentSumm.initGui();
       spacerVL.setComponentAlignment(parentSumm, Alignment.MIDDLE_CENTER);
-      parentSumm.setCaption("Parent Card");
-      
-      if(isGameMaster) {
-        spacerVL.addComponent(cardMarkingPanel); 
-        spacerVL.setComponentAlignment(cardMarkingPanel, Alignment.BOTTOM_LEFT);
-      }
+      parentSumm.setCaption("Parent Card");     
     }
     else {
-      VerticalLayout spacerVL = new VerticalLayout();
       topHL.addComponent(spacerVL);
       spacerVL.setHeight("100%");
       spacerVL.setWidth("100%");
       topHL.setExpandRatio(spacerVL, 1.0f);
       
-      if(isGameMaster) {
-        spacerVL.addComponent(cardMarkingPanel);
-        spacerVL.setComponentAlignment(cardMarkingPanel, Alignment.BOTTOM_LEFT);
-      }
+      /*in progress
+      spacerVL.addStyleName("m-redborder");
+      addPlayAnIdeaButtonTL(spacerVL);
+      */
     }
-
+    if(isGameMaster) {
+      spacerVL.addComponent(cardMarkingPanel);
+      spacerVL.setComponentAlignment(cardMarkingPanel, Alignment.BOTTOM_LEFT);
+    }
+    
     cardLg  = CardLarge.newCardLargeTL(card.getId());
     topHL.addComponent(cardLg);
     cardLg.initGuiTL();
@@ -526,7 +524,22 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
 
     listFollowers_oobTL(card.getId());  // gets current vaadin transaction session
   }
-  
+/*
+  private void addPlayAnIdeaButtonTL(VerticalLayout lay)
+  {
+    MediaLocator mediaLoc = Mmowgli2UI.getGlobals().getMediaLocator();
+    Game g = Game.getTL();
+
+    IDNativeButton butt = new IDNativeButton(null, PLAYIDEACLICK);
+    butt.addStyleName("borderless");
+    mediaLoc.decoratePlayIdeaButton(butt, g);
+    butt.addStyleName("m-playIdeaButton");
+    butt.setDescription("Review and play idea cards");
+
+    butt.setId(PLAY_AN_IDEA_BLUE_BUTTON);
+    lay.addComponent(butt);
+  }
+*/
   private void listFollowers_oobTL(Object id)
   {
     listFollowers_oob(HSess.get(),id);
