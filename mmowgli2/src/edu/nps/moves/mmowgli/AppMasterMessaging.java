@@ -274,7 +274,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
  */
   public void incomingDatabaseEvent(final MMessagePacket mMessagePacket)
   {
-    MSysOut.println(myLogLevel, "AppMasterMessaging.incomingDatabaseEvent()");
+    MSysOut.println(myLogLevel, "AppMasterMessaging.incomingDatabaseEvent() type: "+mMessagePacket.msgType+" msg: "+mMessagePacket.msg);
     /* We're in the hibernate thread here. Have to let it complete before we can look up the object */
     MThreadManager.run(new Runnable()
     {
@@ -283,7 +283,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
         MSysOut.println(myLogLevel, "AppMasterMessaging.incomingDatabaseEvent() running in new thread");
         HSess.init();
         if (getMcache() != null)
-          mcache.handleIncomingTomcatMessageTL(mMessagePacket);
+          mcache.handleIncomingDatabaseMessageTL(mMessagePacket);
         HSess.close();
         Broadcaster.broadcast(mMessagePacket);
       }
