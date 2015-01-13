@@ -99,10 +99,10 @@ public class AppMaster
     //sysOutLogLevel |= BROADCASTER_LOGS;
     //sysOutLogLevel |= BADGEMANAGER_LOGS;
     sysOutLogLevel |= CARD_UPDATE_LOGS;
-    sysOutLogLevel |= DB_LISTENER_LOGS;
+    //sysOutLogLevel |= DB_LISTENER_LOGS;
     //sysOutLogLevel |= HIBERNATE_LOGS;
     //sysOutLogLevel |= MCACHE_LOGS;
-    sysOutLogLevel |= MESSAGING_LOGS;
+    //sysOutLogLevel |= MESSAGING_LOGS;
     //sysOutLogLevel |= PUSH_LOGS;
     sysOutLogLevel |= TICK_LOGS;
     sysOutLogLevel |= USER_UPDATE_LOGS;
@@ -110,7 +110,7 @@ public class AppMaster
     //sysOutLogLevel |= ACTIONPLAN_UPDATE_LOGS;
     //sysOutLogLevel |= REPORT_LOGS;
     
-    MSysOut.println("System log level = "+sysOutLogLevel);
+    MSysOut.println(SYSTEM_LOGS,"System log level = "+sysOutLogLevel);
   }
   private static AppMaster myInstance = null;
 
@@ -476,11 +476,13 @@ public class AppMaster
   @HibernateClosed
   public void logSessionEnd(Serializable uId)
   {
-    HSess.init();
-    User u = DBGet.getUserTL(uId);
-    if(u != null)
-      GameEventLogger.logSessionEndTL(u);
-    HSess.close();
+    if(uId != null) {
+      HSess.init();
+      User u = DBGet.getUserTL(uId);
+      if(u != null)
+        GameEventLogger.logSessionEndTL(u);
+      HSess.close();
+    }
   }
 
   /*
