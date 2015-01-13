@@ -702,15 +702,16 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
   private String buildConfirmUrl(EmailConfirmation ec)
   {
     StringBuilder sb = new StringBuilder();
-    String gameUrl = VaadinServletService.getCurrentServletRequest().getRequestURI(); //app.getURL().toExternalForm();
+    String gameUrl = AppMaster.instance().getAppUrlString(); //VaadinServletService.getCurrentServletRequest().getRequestURI(); //app.getURL().toExternalForm();
     sb.append(gameUrl);
     if(!gameUrl.endsWith("/"))
       sb.append('/');
     sb.append("confirm?uid=");
     sb.append(ec.getConfirmationCode());
 
-    return sb.toString();
+    return sb.toString();  
   }
+  
   private void doOtherUserInit(User u)
   {
   }
