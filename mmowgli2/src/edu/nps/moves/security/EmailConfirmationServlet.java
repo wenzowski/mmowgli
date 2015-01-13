@@ -85,7 +85,6 @@ public class EmailConfirmationServlet extends HttpServlet
     MyResponse myresp = null;
 
     Object uid = req.getParameter(URI_PARAM);
-    System.out.println("uid = " + uid);
 
     if (uid == null) {
       System.out.println(error = "URL does not include uid parameter");
