@@ -306,7 +306,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
                     Card c= DBGet.getCardTL(cardId);// Was getCardFresh, but the cache should be more recent
                     c = Card.mergeTL(c);
                     setMarkingsTL(c,cmm);
-                    hideAllChildrenTL(c);
+                    hideAllChildrenTL(c);  // does the Card.update
                     GameEventLogger.cardMarkedTL(c,u);
                     HSess.close();
                   }
@@ -728,11 +728,11 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL "+externCardId.toString());
       Card c = DBGet.getCardTL(externCardId); //DBGet.getCardFreshTL(cardId); test..cache should have it, maybe not db yet
       MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL / hidden = "+c.isHidden());
-      c = Card.mergeTL(c);     // enabling this causes loop
+      c = Card.mergeTL(c);
       MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL # children = "+(c.getFollowOns()==null?"0":c.getFollowOns().size()+" hidden = "+c.isHidden())+" hash = "+hashCode());
 
       loadMarkingPanel_oobTL(c);
-      cardLg.update_oobTL(externCardId);
+      cardLg.update_oobTL(c);
       updateFollowers_oobTL(c);
       return true;              // ui
     }
