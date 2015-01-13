@@ -396,6 +396,29 @@ public class MCacheManager implements InterTomcatReceiver
     return usrs;
   }
 
+  public boolean handleIncomingDatabaseMessageTL(MMessagePacket packet)
+  {
+    MSysOut.println(myLogLevel,"MCacheManager.handleIncomingDatabaseMessageTL(), type = "+packet.msgType);
+    switch (packet.msgType) {
+      case NEW_CARD:
+      case UPDATED_CARD:
+        newOrUpdatedCardInCacheTL(packet.msgType,packet.msg);
+        break;
+      //case NEW_USER:
+      case UPDATED_USER:
+        newOrUpdatedUserInCacheTL(packet.msgType,packet.msg);
+        break;
+      case DELETED_USER:
+        deletedUserTL(packet.msgType,packet.msg);
+        break;
+      case GAMEEVENT:
+        newGameEventTL(packet.msgType,packet.msg);
+        break;
+      default:
+    }
+    return false; // don't want a retry    
+  }
+  
   @Override
   public boolean handleIncomingTomcatMessageTL(MMessagePacket packet)
   {
@@ -403,11 +426,11 @@ public class MCacheManager implements InterTomcatReceiver
     switch (packet.msgType) {
       case NEW_CARD:
       case UPDATED_CARD:
-        newOrUpdatedCardTL(packet.msgType,packet.msg);
+        externallyNewOrUpdatedCardTL(packet.msgType,packet.msg);
         break;
       //case NEW_USER:
       case UPDATED_USER:
-        newOrUpdatedUserTL(packet.msgType,packet.msg);
+        externallyNewOrUpdatedUserTL(packet.msgType,packet.msg);
         break;
       case DELETED_USER:
         deletedUserTL(packet.msgType,packet.msg);
@@ -508,34 +531,56 @@ public class MCacheManager implements InterTomcatReceiver
     this.deleteUserInContainer(id);
   }
 
-  private void newOrUpdatedUserTL(char messageType, String message)
+  private void newOrUpdatedUserInCacheTL(char messageType, String message)
   {
+    Long id = MMessage.MMParse(messageType, message).id;
+    newOrUpdatedUserTL_common(DBGet.getUserTL(id));
+  }
+  
+  private void externallyNewOrUpdatedUserTL(char messageType, String message)
+  {
+    Long id = MMessage.MMParse(messageType, message).id;
+    User u = DBGet.getUserTL(id);
+    if(u == null) {
+      u = ComeBackWhenYouveGotIt.fetchUserWhenPossible(id);
+    }
+    newOrUpdatedUserTL_common(u);
+  }
+  
+  private void newOrUpdatedUserTL_common(User u)
+  {
+    if(u == null) // will have gotten warnings in sys out
+      return;
+    
     synchronized(usersQuick) {
-      Long id = MMessage.MMParse(messageType, message).id;
-      User u = DBGet.getUserTL(id); //the fresh should not be required since the Obj cache should have been updated first
-      
-      if(u == null) // will have gotten warnings in sys out
-        return;
-      
       addOrUpdateUserInContainer(u);
 
       if(u.isViewOnly() || u.isAccountDisabled())
         ; // don't add
       else
-        usersQuick.put(u.getUserName(), id);
+        usersQuick.put(u.getUserName(), u.getId());
     }
   }
   
-  private void newOrUpdatedCardTL(char messageType, String message)
+  private void newOrUpdatedCardInCacheTL(char messageType, String message)
+  {
+    long id = MMessage.MMParse(messageType, message).id;
+    newOrUpdatedCardTL_common(getCardCache().getObjectForKey(id));
+  }
+  
+  private void externallyNewOrUpdatedCardTL(char messageType, String message)
   {
     long id = MMessage.MMParse(messageType, message).id;
     Card c = Card.getTL(id);
     if (c == null) {
       c = ComeBackWhenYouveGotIt.fetchCardWhenPossible(id);
     }
-
     getCardCache().addToCache(id, c);
+    newOrUpdatedCardTL_common(c);
+  }
 
+ private void newOrUpdatedCardTL_common(Card c)
+ {
     CardType ct = c.getCardType();
     long cardTypeId = ct.getId();
 
@@ -699,6 +744,7 @@ public class MCacheManager implements InterTomcatReceiver
 
   public void putCard(Card c)
   {
+    MSysOut.println(myLogLevel,"MCacheManager.putCard() id= "+c.getId()+"  text: "+c.getText()+" hidden = "+c.isHidden());
     getCardCache().addToCache(c.getId(), c);
   }
 
@@ -707,10 +753,10 @@ public class MCacheManager implements InterTomcatReceiver
     Card c;
     if((c=getCardCache().getObjectForKey(id)) == null) {
       c = getCardFresh(id,sess);
-      MSysOut.println(myLogLevel,"MCacheManager.getCard() "+id.toString()+" Had to getCardFresh, text: "+c.getText());
+      MSysOut.println(myLogLevel,"MCacheManager.getCard() "+id.toString()+" Had to getCardFresh, text: "+c.getText()+" hidden = "+c.isHidden());
       return c;
     }
-    MSysOut.println(myLogLevel,"MCacheManager.getCard() "+id.toString()+" Got card from cache, text: "+c.getText());
+    MSysOut.println(myLogLevel,"MCacheManager.getCard() "+id.toString()+" Got card from cache, text: "+c.getText()+" hidden = "+c.isHidden());
     c = (Card)sess.merge(c);
     return c;
   }
