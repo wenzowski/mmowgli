@@ -159,7 +159,7 @@ public class ComeBackWhenYouveGotIt
       Object cd = thisSess.get(holder.cls, holder.id);
       if (cd != null) {
         if (i > 0)
-          MSysOut.println("Delayed fetch of " + holder.cls.getSimpleName() + " from db, got it on try " + i);
+          MSysOut.println(HIBERNATE_LOGS,"Delayed fetch of " + holder.cls.getSimpleName() + " from db, got it on try " + i);
         holder.obj = cd;
         thisSess.getTransaction().commit();
         thisSess.close();

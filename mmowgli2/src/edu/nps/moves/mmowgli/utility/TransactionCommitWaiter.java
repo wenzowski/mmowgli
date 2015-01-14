@@ -27,7 +27,7 @@ import org.hibernate.event.spi.EventSource;
 
 import edu.nps.moves.mmowgli.messaging.InterTomcatIO;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
-
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 /**
  * TransactionCommitWaiter.java Created on Sep 5, 2013
  *
@@ -80,7 +80,7 @@ public class TransactionCommitWaiter implements Runnable
           pkt.interNodeIOSess.send(pkt.msgType, pkt.msg, ""); //todo ui_id
         }
         else {
-          MSysOut.println("TransactionCommitWaiter, waiting on session commit");
+          MSysOut.println(HIBERNATE_LOGS,"TransactionCommitWaiter, waiting on session commit");
           waitLoop: {
             int count = 20;
             while (count-- > 0) {
@@ -88,11 +88,11 @@ public class TransactionCommitWaiter implements Runnable
 
               if (pkt.sess.isClosed() || pkt.sess.getTransaction().wasCommitted()) {
                 pkt.interNodeIOSess.send(pkt.msgType, pkt.msg,""); //todo ui_id
-                MSysOut.println("TransactionCommitWaiter, msg sent, loop count: "+count);
+                MSysOut.println(HIBERNATE_LOGS,"TransactionCommitWaiter, msg sent, loop count: "+count);
                 break waitLoop;
               }
             }
-            MSysOut.println("Stuck session in ApplicationMaster.TransactionCommitWatcher(): message dropped: " + pkt.msgType + " " + pkt.msg);
+            MSysOut.println(HIBERNATE_LOGS,"Stuck session in ApplicationMaster.TransactionCommitWatcher(): message dropped: " + pkt.msgType + " " + pkt.msg);
           }
         }
       }

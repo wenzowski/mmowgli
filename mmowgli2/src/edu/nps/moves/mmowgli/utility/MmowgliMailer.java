@@ -34,6 +34,7 @@ import javax.mail.internet.*;
 import com.sun.mail.smtp.*;
 
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 public class MmowgliMailer implements Runnable
 {
@@ -162,12 +163,12 @@ public class MmowgliMailer implements Runnable
       }
       finally {
         if (debugAndVerbose)
-          MSysOut.println("Response: " + t.getLastServerResponse());
+          MSysOut.println(MAIL_LOGS,"Response: " + t.getLastServerResponse());
         t.close();
       }
 
       if (debugAndVerbose)
-        MSysOut.println("\nMail was sent successfully.");
+        MSysOut.println(MAIL_LOGS,"\nMail was sent successfully.");
 
       // return from here
     }
