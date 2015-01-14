@@ -104,7 +104,7 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-      MSysOut.println(myLogLevel,">>> Save db listener "+(enabled?"":"(unused)") + " type = "+event.getEntity().getClass().getSimpleName()+" <<<");
+      MSysOut.println(myLogLevel,">>> Into   save db listener "+(enabled?"":"(unused)") + " type = "+event.getEntity().getClass().getSimpleName()+" <<<");
       super.onSaveOrUpdate(event); // default behavior first
       if (!enabled)
         return;
@@ -237,8 +237,7 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-      MSysOut.println(myLogLevel,">>> Update db listener "+(enabled?"":"(unused)") + " type = "+event.getEntity().getClass().getSimpleName()+" <<<");
-      MSysOut.println(myLogLevel,">>> Update db listener, session = "+event.getSession().hashCode());
+      MSysOut.println(myLogLevel,">>> Into   update db listener "+(enabled?"":"(unused) ") +event.getEntity().getClass().getSimpleName()+" session = "+event.getSession().hashCode());
       super.onSaveOrUpdate(event); // default behavior first      
       if(!enabled)
         return;
@@ -253,7 +252,6 @@ public class DatabaseListeners
         msgTyp = UPDATED_CARD;
         msg = "" + c.getId();
         mcache.putCard(c);
-        //DBGet.cacheCard((Card)obj);
      }
       else if (obj instanceof User) {
         User u = (User)obj;
@@ -296,9 +294,8 @@ public class DatabaseListeners
       }
       if(msgTyp != null)
         messageOut(event,msgTyp,msg);
-    
-      MSysOut.println(myLogLevel,">>> Out of update db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
-      MSysOut.println(myLogLevel,">>> Out of update db listener, session = "+event.getSession().hashCode());
+      
+      MSysOut.println(myLogLevel,">>> Out of update db listener " +event.getEntity().getClass().getSimpleName()+" session = "+event.getSession().hashCode());
     }
   }
   
