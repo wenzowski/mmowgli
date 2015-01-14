@@ -22,7 +22,7 @@
 
 package edu.nps.moves.mmowgli.messaging;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.PUSH_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -95,7 +95,7 @@ public class MessagingManager implements BroadcastListener
 
   public void sendSessionMessage(MMessagePacket message)
   {
-    MSysOut.println("MessagingManager.sendSessionMessage() typ="+message.msgType);
+    MSysOut.println(MESSAGING_LOGS,"MessagingManager.sendSessionMessage() typ="+message.msgType);
     message.session_id = ui.getUserSessionUUID();
     Broadcaster.broadcast(message);
   }
@@ -106,7 +106,7 @@ public class MessagingManager implements BroadcastListener
   @Override
   public void handleIncomingSessionMessage(final MMessagePacket message)
   {
-    MSysOut.println("MessagingManager.handleIncomingSessionMessage() typ="+message.msgType);    
+    MSysOut.println(MESSAGING_LOGS,"MessagingManager.handleIncomingSessionMessage() typ="+message.msgType);    
     // If this message is from this session, we know we're in the session thread
     // try to deliver the message to us directly  
 
@@ -185,7 +185,6 @@ public class MessagingManager implements BroadcastListener
           HSess.close(); // commit
 
           if (push) {
-            MSysOut.println("calling push");
             try {
               ui.push();
             }

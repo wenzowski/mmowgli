@@ -22,7 +22,7 @@
 
 package edu.nps.moves.mmowgli.messaging;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.MESSAGING_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -148,7 +148,7 @@ public class MessagingManager2 implements BroadcastListener
         }
         catch (InterruptedException ex) { // | UIDetachedException ex) {
           System.err.println(ex.getClass().getSimpleName() + " in MessagingManager2.queueReader" + myseq);
-          MSysOut.println(ex.getClass().getSigners() + " in MessageingManager2.queueReader catch");
+          MSysOut.println(ERROR_LOGS,ex.getClass().getSigners() + " in MessageingManager2.queueReader catch");
           if (!alive) {
             return; // End thread
           }
