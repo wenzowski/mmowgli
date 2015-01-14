@@ -153,7 +153,6 @@ public class AbstractMmowgliControllerHelper
           MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper.iterateUIsAndContents--in UI.access()");
           Object key = HSess.checkInit();
           if (handler.handle(mui, comp, obj)) {
-            MSysOut.println("pushing");
             mui.push();
           }
           HSess.checkClose(key);
@@ -180,7 +179,6 @@ public class AbstractMmowgliControllerHelper
           MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper.iterateUIs--in UI.access()");
           Object key = HSess.checkInit();
           if (handler.handle(mui, obj)){
-            MSysOut.println("2pushing");
             mui.push();            
           }
           HSess.checkClose(key);
