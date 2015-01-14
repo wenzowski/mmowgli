@@ -97,7 +97,7 @@ public class JMSMessageUtil
   public static void dump(String s, Message mess)
   {
     try {
-      MSysOut.println(s +
+      MSysOut.println(JMS_LOGS, s +
                        mess.getStringProperty(JMS_MESSAGE_TYPE) + ", " +
                        mess.getStringProperty(JMS_MESSAGE_TEXT) + ", " +
                        mess.getStringProperty(JMS_MESSAGE_SOURCE_SESSION_ID) + ", " +
