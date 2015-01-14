@@ -439,6 +439,6 @@ public class BadgeManager implements Runnable
     checkLeaderBoardTL(); // top 50 of leader board
     
     HSess.close();
-    MSysOut.println("BadgeManager: end one-time sync of all badges.");
+    MSysOut.println(BADGEMANAGER_LOGS,"BadgeManager: end one-time sync of all badges.");
   }
 }

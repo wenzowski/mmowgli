@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 /**
  * MSuperActiveCacheManager.java
@@ -60,7 +61,7 @@ class MSuperActiveCacheManager
   @SuppressWarnings("unchecked")
   public void rebuild(Session sess)
   {
-    MSysOut.println("Building super-active list");
+    MSysOut.println(MCACHE_LOGS,"Building super-active list");
     cardMap.clear();
     List<Card> lis = (List<Card>)sess.createCriteria(Card.class).list();
     for(Card c : lis) {
@@ -70,7 +71,7 @@ class MSuperActiveCacheManager
       
       newCard(c);
     }
-    MSysOut.println("Finished building super-active list");
+    MSysOut.println(MCACHE_LOGS,"Finished building super-active list");
   }
   
   public void newCard(Card c)

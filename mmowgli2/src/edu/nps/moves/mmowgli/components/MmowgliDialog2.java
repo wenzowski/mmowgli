@@ -33,6 +33,7 @@ import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 /**
  * MmowgliDialog2.java
@@ -105,7 +106,7 @@ public abstract class MmowgliDialog2 extends Window implements MmowgliComponent
       User.deleteTL(u);
       UserPii uPii = VHibPii.getUserPii(u.getId());
       VHibPii.delete(uPii);
-      MSysOut.println("User deleted (didn't finish login) "+u.getId());
+      MSysOut.println(SYSTEM_LOGS,"User deleted (didn't finish login) "+u.getId());
     }
 
     setUser(null);
