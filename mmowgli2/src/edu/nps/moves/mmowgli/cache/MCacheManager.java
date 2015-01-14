@@ -565,7 +565,10 @@ public class MCacheManager implements InterTomcatReceiver
   private void newOrUpdatedCardInCacheTL(char messageType, String message)
   {
     long id = MMessage.MMParse(messageType, message).id;
-    newOrUpdatedCardTL_common(getCardCache().getObjectForKey(id));
+    
+    Card c = getCardCache().getObjectForKey(id);
+    c = Card.mergeTL(c);
+    newOrUpdatedCardTL_common(c);
   }
   
   private void externallyNewOrUpdatedCardTL(char messageType, String message)
@@ -597,7 +600,7 @@ public class MCacheManager implements InterTomcatReceiver
       newOrUpdatedAllMovesNegativeCard(c);
 
     // all cards are checked for turning a chain into superactive
-    supActMgr.newCard(c);
+    supActMgr.newCard(c,HSess.get());
   }
 
   private void newOrUpdatedAllMovesPositiveCard(Card c)
@@ -764,8 +767,11 @@ public class MCacheManager implements InterTomcatReceiver
   public Card getCardFresh(Object id, Session sess)
   {
     Card c = (Card)sess.get(Card.class, (Serializable)id);
+    if(c == null)
+      c = ComeBackWhenYouveGotIt.fetchCardWhenPossible((Long)id);
     if(c == null) {
       System.err.println("MCachedManager.getCard("+id+") returns null");
+      MSysOut.println(HIBERNATE_LOGS,"MCachedManager.getCard("+id+") returns null");
       return null;
     }
     getCardCache().addToCache(id, c);
