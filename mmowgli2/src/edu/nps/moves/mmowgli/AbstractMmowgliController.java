@@ -144,7 +144,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
        
       default:
-        MSysOut.println("TODO, AbstractMmowgliController.miscEvent(): "+mEv.toString());
+        MSysOut.println(SYSTEM_LOGS,"TODO, AbstractMmowgliController.miscEvent(): "+mEv.toString());
     }    
   }
 
@@ -297,7 +297,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
         
       default:
-        MSysOut.println("TODO, AbstractMmowgliController.menuEvent(): "+mEv);
+        MSysOut.println(SYSTEM_LOGS,"TODO, AbstractMmowgliController.menuEvent(): "+mEv);
     }
     HSess.close();
   }
@@ -381,7 +381,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
         
       default:
-        MSysOut.println("TODO, AbstractMmowgliController.buttonClick(): "+mEv);
+        MSysOut.println(SYSTEM_LOGS,"TODO, AbstractMmowgliController.buttonClick(): "+mEv);
     } 
     HSess.close(); // commit by default
   }
@@ -400,7 +400,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         helper.handleSearchClick(obj);
         break;
       default:
-        MSysOut.println("TODO, AbstractMmowgliController.handleEvent(): "+mEv);
+        MSysOut.println(SYSTEM_LOGS,"TODO, AbstractMmowgliController.handleEvent(): "+mEv);
     }
   }
   
