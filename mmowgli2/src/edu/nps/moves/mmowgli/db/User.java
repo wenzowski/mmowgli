@@ -98,7 +98,7 @@ public class User implements Serializable
   boolean firstChildEmailSent = false; // only get one of these
   boolean emailConfirmed      = false;
   
-  SortedSet<Message> gameMessages = new TreeSet<Message>();
+  SortedSet<Message> gameMessages = Collections.synchronizedSortedSet(new TreeSet<Message>());  // got concurrent mod excep here one
   String      location; // Physical location
   Avatar      avatar; // User avatar
   Level       level; // Level
