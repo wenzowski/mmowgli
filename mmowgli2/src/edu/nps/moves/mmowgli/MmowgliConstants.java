@@ -115,6 +115,11 @@ public class MmowgliConstants
   public static final int SCOREMANAGER_LOGS = 0x800;
   public static final int ACTIONPLAN_UPDATE_LOGS = 0x1000;
   public static final int REPORT_LOGS = 0x2000;
+  public static final int JMS_LOGS = 0x4000;
+  public static final int ERROR_LOGS = 0x8000;
+  public static final int MISC_LOGS = 0x10000;
+  public static final int MAIL_LOGS = 0x20000;
+  public static final int MOBILE_LOGS = 0x4000;
   
   public static HashMap<Integer,String> logTokens = new HashMap<Integer,String>();
   static {
@@ -132,6 +137,11 @@ public class MmowgliConstants
     logTokens.put(SCOREMANAGER_LOGS, "SCO");
     logTokens.put(ACTIONPLAN_UPDATE_LOGS, "ACT");
     logTokens.put(REPORT_LOGS, "RPT");
+    logTokens.put(JMS_LOGS, "JMS");
+    logTokens.put(ERROR_LOGS, "ERR");
+    logTokens.put(MISC_LOGS, "MSC");
+    logTokens.put(MAIL_LOGS, "MAI");
+    logTokens.put(MOBILE_LOGS,  "MOB");
   }
   // web.xml param names
 //@formatter:off

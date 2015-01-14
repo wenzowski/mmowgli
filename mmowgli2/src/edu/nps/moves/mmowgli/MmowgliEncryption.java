@@ -34,6 +34,7 @@ import org.jasypt.salt.RandomSaltGenerator;
 import org.jasypt.salt.SaltGenerator;
 
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 /**
  * MmowgliEncryption.java
@@ -69,11 +70,11 @@ public class MmowgliEncryption
       String msg;
       if(t instanceof ExceptionInInitializerError) {
         msg = "Error with encryptor key: "+((ExceptionInInitializerError)t).getException().getLocalizedMessage();
-        MSysOut.println(msg);
+        MSysOut.println(SYSTEM_LOGS,msg);
       }
       else {
         msg ="Error with encryptor key: "+t.getClass().getSimpleName()+": "+t.getLocalizedMessage();
-        MSysOut.println(msg);
+        MSysOut.println(SYSTEM_LOGS,msg);
       }
       context.setAttribute(MmowgliConstants.APPLICATION_STARTUP_ERROR_STRING, msg);
       return;
