@@ -327,7 +327,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   @Override
   public boolean movePhaseUpdatedOobTL(Serializable pId)
   {
-    MSysOut.println("Mmowgli2UI.movePhaseUpdated_oob.handle() UI = "+getClass().getSimpleName()+" "+hashCode());
+    MSysOut.println(MISC_LOGS,"Mmowgli2UI.movePhaseUpdated_oob.handle() UI = "+getClass().getSimpleName()+" "+hashCode());
 
     if(outerFr != null)
       outerFr.movePhaseUpdatedOobTL(pId);  // maybe a nop
