@@ -288,7 +288,7 @@ public class ActionPlanTable extends Table
         EntityItem ei = (EntityItem) obj;
         ap = (ActionPlan) ei.getPojo();
       }
-     // ap = ActionPlan.merge(ap, HSess.get());
+      ap = ActionPlan.mergeTL(ap);
       if (IDFORSORTING_COLUMN_NAME.equals(columnId)) {
         Label lab = new HtmlLabel(""+ap.getId());
         String hw=null;
