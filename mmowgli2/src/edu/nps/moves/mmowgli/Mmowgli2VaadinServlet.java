@@ -30,6 +30,7 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.*;
 
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 /**
  * Mmowgli2VaadinServlet.java
@@ -93,7 +94,7 @@ public class Mmowgli2VaadinServlet extends VaadinServlet implements SessionInitL
   // Both the constructor and the servletInitialized method get called first only on first browser access, unless load-on-startup=true
   public Mmowgli2VaadinServlet()
   {
-    MSysOut.println("Mmowgli2VaadinServlet().....");
+    MSysOut.println(SYSTEM_LOGS,"Mmowgli2VaadinServlet().....");
   }
   
   @Override
