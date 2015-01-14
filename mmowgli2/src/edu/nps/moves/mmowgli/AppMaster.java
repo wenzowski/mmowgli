@@ -109,6 +109,7 @@ public class AppMaster
     sysOutLogLevel |= SYSTEM_LOGS;
     //sysOutLogLevel |= ACTIONPLAN_UPDATE_LOGS;
     //sysOutLogLevel |= REPORT_LOGS;
+    sysOutLogLevel |= JMS_LOGS;
     
     MSysOut.println(SYSTEM_LOGS,"System log level = "+sysOutLogLevel);
   }
@@ -163,7 +164,7 @@ public class AppMaster
   private String getInitParameter(String s)
   {
     String ret = servletContext.getInitParameter(s);
-    MSysOut.println("Web.xml key "+s+" returns "+ret);
+    MSysOut.println(SYSTEM_LOGS,"Web.xml key "+s+" returns "+ret);
     return ret;
   }
   
@@ -321,7 +322,7 @@ public class AppMaster
     GameEventLogger.logApplicationLaunch();
 
     startThreads();
-    MSysOut.println("Out of AppMaster.init");
+    MSysOut.println(SYSTEM_LOGS,"Out of AppMaster.init");
 
   }
 
@@ -335,25 +336,25 @@ public class AppMaster
     String myClusterNode = getServerName();
     if (myClusterNode.contains(masterCluster)) { // servername may be long, db entry can be a unique portion of is, like web1
       badgeManager = new BadgeManager(this);
-      MSysOut.println("** Badge Manager instantiated on " + myClusterNode);
+      MSysOut.println(BADGEMANAGER_LOGS,"** Badge Manager instantiated on " + myClusterNode);
       // miscStartup(context);
     }
   }
 
   public void handleAutomaticReportGeneration()
   {
-    MSysOut.println("Check for automatic report generator launch");
+    MSysOut.println(REPORT_LOGS,"Check for automatic report generator launch");
     String masterCluster = getInitParameter(WEB_XML_DB_CLUSTERMASTER_KEY);
     String myClusterNode = getServerName();
-    MSysOut.println("  master (from web.xml) is " + masterCluster);
-    MSysOut.println("  this one (from InetAddress.getLocalHost().getAddress() is " + myClusterNode);
+    MSysOut.println(REPORT_LOGS,"  master (from web.xml) is " + masterCluster);
+    MSysOut.println(REPORT_LOGS,"  this one (from InetAddress.getLocalHost().getAddress() is " + myClusterNode);
     if (myClusterNode.contains(masterCluster) || masterCluster.contains(myClusterNode)) {
       // servername may be long, db entry can be a unique portion of it, like web1
       reportGenerator = new ReportGenerator(this);
-      MSysOut.println("Report generator launched");
+      MSysOut.println(REPORT_LOGS,"Report generator launched");
     }
     else
-      MSysOut.println("Report generator NOT launched");
+      MSysOut.println(REPORT_LOGS,"Report generator NOT launched");
   }
 
   private void startThreads()
@@ -501,7 +502,7 @@ public class AppMaster
         public boolean handleIncomingTomcatMessageTL(MMessagePacket pkt)
         {
           if (pkt.msgType == INSTANCEREPORT) {
-            MSysOut.println("Instance report received: " + pkt.msg);
+            MSysOut.println(SYSTEM_LOGS,"Instance report received: " + pkt.msg);
             AppMaster.this.logPollReport(pkt.msg);
           }
           return false;
@@ -524,7 +525,7 @@ public class AppMaster
           InterTomcatIO sessIO = getInterNodeIO();
           if (sessIO != null) {
             AppMaster me = AppMaster.instance();
-            MSysOut.println(me.getServerName() + " ApplicationMaster requesting instances to respond with \"YES-IM_AWAKE\"");
+            MSysOut.println(SYSTEM_LOGS,me.getServerName() + " ApplicationMaster requesting instances to respond with \"YES-IM_AWAKE\"");
             AppMaster.this.resetPollReports();
             // sessIO.send(INSTANCEREPORTCOMMAND, AppMaster.getServerName() +
             // "\n","");// add EOMessage token
