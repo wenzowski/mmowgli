@@ -96,8 +96,8 @@
             <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
                 <xsl:text>NAWCAD Strategic Cell</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'jctd') or contains(lower-case($gameTitle),'swan')">
-                <xsl:text>JCTD Black Swan</xsl:text>
+            <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
+                <xsl:text>blackswan</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                 <xsl:text>Unmanned Vehicle Digital Manufacturing (uxvdm)</xsl:text>
@@ -572,7 +572,7 @@
                                 <xsl:value-of select="."/>
                             </del>
                             <!-- link to game -->
-                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#65_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Card {@id}">
+                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Card {@id}">
                                 <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
                             </a>
                         </xsl:when>
@@ -594,7 +594,7 @@
                                 </xsl:call-template>
                             </b>
                             <!-- link to game -->
-                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#65_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Card {@id}">
+                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Card {@id}">
                                 <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
                             </a>
                         </xsl:when>
@@ -606,7 +606,7 @@
                                 </xsl:call-template>
                             </span>
                             <!-- link to game -->
-                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#65_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Card {@id}">
+                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Card {@id}">
                                 <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
                             </a>
                         </xsl:otherwise>
@@ -894,8 +894,8 @@ text-shadow:; /* off */
                         <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
                             <xsl:text>https://portal.mmowgli.nps.edu/nsc</xsl:text>
                         </xsl:when>
-                        <xsl:when test="contains($gameTitle,'jctd') or contains(lower-case($gameTitle),'swan')">
-                            <xsl:text>https://portal.mmowgli.nps.edu/jctd</xsl:text>
+                        <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
+                            <xsl:text>https://portal.mmowgli.nps.edu/blackswan</xsl:text>
                         </xsl:when>
                         <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                             <xsl:text>https://portal.mmowgli.nps.edu/uxvdm</xsl:text>

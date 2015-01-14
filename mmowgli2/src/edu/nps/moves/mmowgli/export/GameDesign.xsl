@@ -74,8 +74,8 @@
             <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
                 <xsl:text>NAWCAD Strategic Cell</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'jctd') or contains(lower-case($gameTitle),'swan')">
-                <xsl:text>JCTD Black Swan</xsl:text>
+            <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
+                <xsl:text>blackswan</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                 <xsl:text>Unmanned Vehicle Digital Manufacturing (uxvdm)</xsl:text>
@@ -134,8 +134,8 @@
             <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
                 <xsl:text>https://portal.mmowgli.nps.edu/nsc</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'jctd') or contains(lower-case($gameTitle),'swan')">
-                <xsl:text>https://portal.mmowgli.nps.edu/jctd</xsl:text>
+            <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
+                <xsl:text>https://portal.mmowgli.nps.edu/blackswan</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                 <xsl:text>https://portal.mmowgli.nps.edu/uxvdm</xsl:text>
