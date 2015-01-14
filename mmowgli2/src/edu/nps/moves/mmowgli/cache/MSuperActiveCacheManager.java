@@ -69,21 +69,21 @@ class MSuperActiveCacheManager
       if(CardTypeManager.isIdeaCard(c.getCardType()))
         continue; // will never be since we check backwards
       
-      newCard(c);
+      newCard(c,sess);
     }
     MSysOut.println(MCACHE_LOGS,"Finished building super-active list");
   }
   
-  public void newCard(Card c)
+  public void newCard(Card c, Session sess)
   {
-    if ((c = qualifies(c)) != null)
+    if ((c = qualifies(c,sess)) != null)
       cardMap.put(c.getId(), c);
     return;
   }
 
   private class TallyPkt {HashSet<Long> authors=new HashSet<Long>(); int numFourCardLevs=0;}
 
-  private Card qualifies(Card c)
+  private Card qualifies(Card c, Session sess)
   {
     TallyPkt pkt = new TallyPkt();
     
@@ -91,7 +91,8 @@ class MSuperActiveCacheManager
     while((tmp=c.getParentCard())!= null)
       c = tmp;
     
-    checkOneRoot(c,pkt);
+    c = Card.merge(c, sess);
+    checkOneRoot(c,pkt,sess);
     
     if (isSupAct(pkt))
       return c;
@@ -107,11 +108,14 @@ class MSuperActiveCacheManager
     return false;
   }
   
-  private void checkOneRoot(Card c, TallyPkt pkt)
+  private void checkOneRoot(Card c, TallyPkt pkt, Session sess)
   {
-    for(Card child : c.getFollowOns())
+    ArrayList<Card>mergedChildren = new ArrayList<Card>();
+    for(Card child : c.getFollowOns()) {
+      child = Card.merge(child,sess);
       pkt.authors.add(child.getAuthor().getId());
-    
+      mergedChildren.add(child);
+    }
     if(c.getFollowOns().size() >= 4)
       pkt.numFourCardLevs++;
     
@@ -119,7 +123,8 @@ class MSuperActiveCacheManager
     if(isSupAct(pkt))
       return;
     
-    for(Card child : c.getFollowOns())
-      checkOneRoot(child,pkt);
+    for(Card child : mergedChildren) {
+      checkOneRoot(child,pkt,sess);
+    }
   }
 }
