@@ -41,6 +41,8 @@ import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.markers.HibernateUpdate;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+
 /**
  * HeaderFooterGameDesignPanel.java
  * Created on Mar 28, 2013
@@ -130,7 +132,7 @@ public class ActionPlanChaptersGameDesignPanel extends AbstractGameBuilderPanel 
         Move.updateTL(editMove);
       }
       catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
-        MSysOut.println("Program error in ActionPlanChaptersGameDesignPanel.MyValueChangeListener: " + ex.getClass().getSimpleName() + " "
+        MSysOut.println(ERROR_LOGS,"Program error in ActionPlanChaptersGameDesignPanel.MyValueChangeListener: " + ex.getClass().getSimpleName() + " "
             + ex.getLocalizedMessage());
       }
       HSess.close();

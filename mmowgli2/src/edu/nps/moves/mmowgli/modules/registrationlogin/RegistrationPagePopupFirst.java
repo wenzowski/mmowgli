@@ -22,9 +22,7 @@
 
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.QUERY_END_MARKER;
-import static edu.nps.moves.mmowgli.MmowgliConstants.QUERY_MARKER_FIELD;
-import static edu.nps.moves.mmowgli.MmowgliConstants.QUERY_START_MARKER;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.util.Date;
 import java.util.List;
@@ -247,7 +245,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       if(u != null)
         try{ User.deleteTL(u); }catch(Throwable t) {}
 
-      MSysOut.println("Checking new user, name = "+uName+"; unexpected exception: "+ex.getClass().getSimpleName()+" "+ex.getLocalizedMessage());
+      MSysOut.println(ERROR_LOGS,"Checking new user, name = "+uName+"; unexpected exception: "+ex.getClass().getSimpleName()+" "+ex.getLocalizedMessage());
       return null;
     }
   }
