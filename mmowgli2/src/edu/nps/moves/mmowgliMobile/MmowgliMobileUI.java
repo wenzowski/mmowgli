@@ -34,6 +34,7 @@ import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 import edu.nps.moves.mmowgliMobile.ui.GameDataCategoriesView2;
 import edu.nps.moves.mmowgliMobile.ui.NotAllowedPopover;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 @SuppressWarnings("serial")
 @Theme("mmowglimobile")
@@ -45,7 +46,7 @@ public class MmowgliMobileUI extends UI
   @Override
   protected void init(VaadinRequest request)
   {
-    MSysOut.println("MM mmowgli mobile UI init v2");
+    MSysOut.println(MOBILE_LOGS,"MM mmowgli mobile UI init v2");
     setContent(new NavigationManager(new GameDataCategoriesView2()));
     
     HSess.init();

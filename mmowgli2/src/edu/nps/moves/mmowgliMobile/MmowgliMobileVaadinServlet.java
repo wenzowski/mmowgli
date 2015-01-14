@@ -32,6 +32,7 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.*;
 
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 /**
  * Mmowgli2VaadinServlet.java
@@ -60,7 +61,7 @@ public class MmowgliMobileVaadinServlet extends TouchKitServlet implements Sessi
   // These are to learn about operation and lifecycle, etc.
   public MmowgliMobileVaadinServlet()
   {
-    MSysOut.println("MmowgliMobileVaadinServlet().....");
+    MSysOut.println(MOBILE_LOGS,"MmowgliMobileVaadinServlet().....");
   }
 
   @Override
@@ -104,7 +105,7 @@ public class MmowgliMobileVaadinServlet extends TouchKitServlet implements Sessi
      */
     //Adding a custom icon
     String contextPath = context.getContextPath();
-    MSysOut.println("Mobile: contextPath: "+contextPath);
+    MSysOut.println(MOBILE_LOGS,"Mobile: contextPath: "+contextPath);
     //s.getApplicationIcons().addApplicationIcon(contextPath + "/VAADIN/themes/mobilemail/apple-touch-icon.png");
     s.getApplicationIcons().addApplicationIcon(contextPath + "/VAADIN/themes/mmowglimobile/mmowgli/mmowgli_w_dots_114x114.png");
 
