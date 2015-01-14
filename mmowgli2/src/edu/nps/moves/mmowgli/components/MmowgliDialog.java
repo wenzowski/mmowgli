@@ -36,6 +36,7 @@ import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 /**
  * MmowgliDialog.java Created on Feb 18, 2011
@@ -88,7 +89,7 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
     outerLayout.setSizeUndefined();
     outerLayout.addStyleName("m-transparent");
     setContent(outerLayout);
-
+   
     Label sp;
     sp = new Label();
     sp.setHeight("100px");
@@ -173,7 +174,7 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
       User.deleteTL(u);
       UserPii uPii = VHibPii.getUserPii(u.getId());
       VHibPii.delete(uPii);
-      MSysOut.println("User deleted (didn't finish login) "+u.getId());
+      MSysOut.println(MISC_LOGS,"User deleted (didn't finish login) "+u.getId());
       setUser(null);
     }
 
