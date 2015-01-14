@@ -71,8 +71,8 @@
             <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
                 <xsl:text>NAWCAD Strategic Cell</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'jctd') or contains(lower-case($gameTitle),'swan')">
-                <xsl:text>JCTD Black Swan</xsl:text>
+            <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
+                <xsl:text>blackswan</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                 <xsl:text>Unmanned Vehicle Digital Manufacturing (uxvdm)</xsl:text>
@@ -137,8 +137,8 @@
             <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
                 <xsl:text>https://mmowgli.nps.edu/nsc</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'jctd') or contains(lower-case($gameTitle),'swan')">
-                <xsl:text>https://mmowgli.nps.edu/jctd</xsl:text>
+            <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
+                <xsl:text>https://mmowgli.nps.edu/blackswan</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                 <xsl:text>https://mmowgli.nps.edu/uxvdm</xsl:text>
@@ -669,11 +669,11 @@
                             </xsl:choose>
                             <li>
                                 <!-- link to game -->
-                                <a href="https://mmowgli.nps.edu/{$gameAcronym}#69_{ID}" target="_{$gameAcronym}Game" title="play the game! go to Action Plan {ID}">
+                                <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{ID}" target="_{$gameAcronym}Game" title="play the game! go to Action Plan {ID}">
                                     <xsl:text>Go to game</xsl:text>
                                 </a>
                                 <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
-                                <a href="https://mmowgli.nps.edu/{$gameAcronym}#69_{ID}" target="_{$gameAcronym}Game" title="play the game! go to Action Plan {ID}">
+                                <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{ID}" target="_{$gameAcronym}Game" title="play the game! go to Action Plan {ID}">
                                     <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" width="16px"/>
                                 </a>
                             </li>
@@ -1393,8 +1393,8 @@ b.error {color: #CC0000}
                 <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
                     <xsl:text>https://portal.mmowgli.nps.edu/nsc</xsl:text>
                 </xsl:when>
-                <xsl:when test="contains($gameTitle,'jctd') or contains(lower-case($gameTitle),'swan')">
-                    <xsl:text>https://portal.mmowgli.nps.edu/jctd</xsl:text>
+                <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
+                    <xsl:text>https://portal.mmowgli.nps.edu/blackswan</xsl:text>
                 </xsl:when>
                 <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                     <xsl:text>https://portal.mmowgli.nps.edu/uxvdm</xsl:text>
@@ -1709,7 +1709,7 @@ b.error {color: #CC0000}
                                 <td align="right">
                                     <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
                                     <!-- link to game -->
-                                    <a href="https://mmowgli.nps.edu/{$gameAcronym}#69_{ID}" target="_{$gameAcronym}Game" title="play the game! go to Action Plan {ID}">
+                                    <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{ID}" target="_{$gameAcronym}Game" title="play the game! go to Action Plan {ID}">
                                         <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" width="16px" align="right"/>
                                     </a>
                                 </td>
