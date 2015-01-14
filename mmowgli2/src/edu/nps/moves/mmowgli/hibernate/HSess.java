@@ -22,8 +22,7 @@
 
 package edu.nps.moves.mmowgli.hibernate;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.HIBERNATE_LOGS;
-import static edu.nps.moves.mmowgli.MmowgliConstants.HIBERNATE_TRANSACTION_TIMEOUT_IN_SECONDS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.util.ArrayList;
 
@@ -154,13 +153,13 @@ public class HSess
 
   private static void dumpPreviousCallerTrace()
   {
-    MSysOut.println(">>>>>>>>>>>>>> Session leak, current stack:");
+    MSysOut.println(ERROR_LOGS,">>>>>>>>>>>>>> Session leak, current stack:");
     StackTraceElement[] elems = new Throwable().getStackTrace();
     dumpStackElements(elems);
 
     elems = dbgThreadLocal.get();
     if (elems != null) {
-      MSysOut.println(">>>>>>>>>>>>> Existing leaked session was created by the following:");
+      MSysOut.println(ERROR_LOGS,">>>>>>>>>>>>> Existing leaked session was created by the following:");
       dumpStackElements(elems);
     }
   }
@@ -169,7 +168,7 @@ public class HSess
   {
     for (StackTraceElement elem : stes)
       MSysOut.println(elem.toString());
-    MSysOut.println(">>>>>>>>>>>>> End of stack dumps.");
+    MSysOut.println(ERROR_LOGS,">>>>>>>>>>>>> End of stack dumps.");
   }
   
   

@@ -26,6 +26,7 @@ import org.hibernate.Session;
 
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 /**
  * Sess.java
@@ -77,7 +78,7 @@ public class Sess
       String mthName1= callingFrame1.getMethodName();
       int lnNum = callingFrame. getLineNumber();
       int lnNum1= callingFrame1.getLineNumber();
-      MSysOut.println(title+objName+" from "+clsName+ "."+mthName+ "/"+lnNum+
+      MSysOut.println(HIBERNATE_LOGS, title+objName+" from "+clsName+ "."+mthName+ "/"+lnNum+
                                             ","+clsName1+"."+mthName1+"/"+lnNum1+"("+AppMaster.instance().getServerName()+")");
     }
   }

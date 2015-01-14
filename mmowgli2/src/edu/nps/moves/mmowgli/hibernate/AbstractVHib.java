@@ -113,7 +113,7 @@ public abstract class AbstractVHib// implements SessionManager
     initted1=true;
 //@formatter:off    
     hib_fs_local_path       = ctx.getInitParameter(WEB_XML_HIBERNATE_SEARCH_KEY);
-    MSysOut.println(hib_fs_local_path+" read from web.xml param "+WEB_XML_HIBERNATE_SEARCH_KEY);
+    MSysOut.println(HIBERNATE_LOGS,hib_fs_local_path+" read from web.xml param "+WEB_XML_HIBERNATE_SEARCH_KEY);
     String dbUrl            = ctx.getInitParameter(WEB_XML_DB_URL_KEY);
     String dbName           = ctx.getInitParameter(WEB_XML_DB_NAME_KEY);
     String dbUser           = ctx.getInitParameter(WEB_XML_DB_USER_KEY);
@@ -121,11 +121,11 @@ public abstract class AbstractVHib// implements SessionManager
     String dbDropAndCreateS = ctx.getInitParameter(WEB_XML_DB_DROPCREATE_KEY);
     
     c3p0Params c3 = new c3p0Params();
-    c3.maxSize          = ctx.getInitParameter(WEB_XML_C3P0_MAX_SIZE);          MSysOut.println("db c3p0 max: "+c3.maxSize);
-    c3.minSize          = ctx.getInitParameter(WEB_XML_C3P0_MIN_SIZE);          MSysOut.println("db c3p0 min: "+c3.minSize);
-    c3.acquireIncrement = ctx.getInitParameter(WEB_XML_C3P0_ACQUIRE_INCREMENT); MSysOut.println("db c3p0 acquire incr: "+c3.acquireIncrement);
-    c3.timeout          = ctx.getInitParameter(WEB_XML_C3P0_TIMEOUT);           MSysOut.println("db c3p0 timeout: "+c3.timeout);
-    c3.idleTestPeriod   = ctx.getInitParameter(WEB_XML_C3P0_IDLE_TEST_PERIOD);  MSysOut.println("db c3p0 idletest: "+c3.idleTestPeriod);
+    c3.maxSize          = ctx.getInitParameter(WEB_XML_C3P0_MAX_SIZE);          MSysOut.println(HIBERNATE_LOGS,"db c3p0 max: "+c3.maxSize);
+    c3.minSize          = ctx.getInitParameter(WEB_XML_C3P0_MIN_SIZE);          MSysOut.println(HIBERNATE_LOGS,"db c3p0 min: "+c3.minSize);
+    c3.acquireIncrement = ctx.getInitParameter(WEB_XML_C3P0_ACQUIRE_INCREMENT); MSysOut.println(HIBERNATE_LOGS,"db c3p0 acquire incr: "+c3.acquireIncrement);
+    c3.timeout          = ctx.getInitParameter(WEB_XML_C3P0_TIMEOUT);           MSysOut.println(HIBERNATE_LOGS,"db c3p0 timeout: "+c3.timeout);
+    c3.idleTestPeriod   = ctx.getInitParameter(WEB_XML_C3P0_IDLE_TEST_PERIOD);  MSysOut.println(HIBERNATE_LOGS,"db c3p0 idletest: "+c3.idleTestPeriod);
 //@formatter:on
     try {
       cnf = new Configuration();
@@ -217,7 +217,7 @@ public abstract class AbstractVHib// implements SessionManager
   protected void _installDataBaseListeners()// AppMaster apMas)
   {
     DatabaseListeners dlis = new DatabaseListeners(sr);
-    MSysOut.println("Installing db listeners");
+    MSysOut.println(HIBERNATE_LOGS,"Installing db listeners");
     EventListenerRegistry registry = ((SessionFactoryImpl) sf).getServiceRegistry().getService(EventListenerRegistry.class);
     registry.addDuplicationStrategy(new DuplicationStrategy()
     {
@@ -242,7 +242,7 @@ public abstract class AbstractVHib// implements SessionManager
     //registry.getEventListenerGroup(EventType.MERGE).appendListener(dlis.mergeListener);
     registry.getEventListenerGroup(EventType.SAVE_UPDATE).appendListener(dlis.saveOrUpdateListener);
     registry.getEventListenerGroup(EventType.DELETE).appendListener(dlis.deleteListener);
-    MSysOut.println("db listeners installed");
+    MSysOut.println(HIBERNATE_LOGS,"db listeners installed");
     dlis.enableListeners(true); // may have to be moved later
   }
  
@@ -284,7 +284,7 @@ public abstract class AbstractVHib// implements SessionManager
           try {
             Class<?> c = Class.forName(full.substring(0, full.lastIndexOf('.')));
             cnf.addAnnotatedClass(c);
-            MSysOut.println(nm+" annotated Hibernate class handled");
+            MSysOut.println(HIBERNATE_LOGS,nm+" annotated Hibernate class handled");
             list.add(c);
           }
           catch (Exception ex) {
