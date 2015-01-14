@@ -33,6 +33,7 @@ import org.jasypt.digest.StandardStringDigester;
 import edu.nps.moves.mmowgli.db.pii.Query2Pii;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 /**
  * SignupHandler.java
@@ -111,7 +112,7 @@ public class SignupHandler
       tlis = (List<Query2Pii>)crit.list(); 
     }
     catch(Exception ex) {
-      MSysOut.println("***Exception in SignupHandler: "+ex.getClass().getSimpleName()+": "+ex.getLocalizedMessage());
+      MSysOut.println(ERROR_LOGS,"***Exception in SignupHandler: "+ex.getClass().getSimpleName()+": "+ex.getLocalizedMessage());
     }
     if(sess != null)
       sess.close();
