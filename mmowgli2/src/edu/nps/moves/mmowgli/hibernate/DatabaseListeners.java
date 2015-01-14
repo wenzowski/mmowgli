@@ -320,7 +320,6 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
         msgTyp = UPDATED_CARD;
         msg = "" + c.getId();
         mcache.putCard(c);
-        //DBGet.cacheCard(c);
      }
       else if (obj instanceof User) {
         msgTyp = UPDATED_USER;
