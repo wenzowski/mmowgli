@@ -110,6 +110,10 @@ public class AppMaster
     //sysOutLogLevel |= ACTIONPLAN_UPDATE_LOGS;
     //sysOutLogLevel |= REPORT_LOGS;
     sysOutLogLevel |= JMS_LOGS;
+    sysOutLogLevel |= ERROR_LOGS;
+    sysOutLogLevel |= MISC_LOGS;
+    sysOutLogLevel |= MAIL_LOGS;
+    sysOutLogLevel |= MOBILE_LOGS;
     
     MSysOut.println(SYSTEM_LOGS,"System log level = "+sysOutLogLevel);
   }
