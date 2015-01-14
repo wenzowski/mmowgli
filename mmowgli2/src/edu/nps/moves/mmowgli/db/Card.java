@@ -77,7 +77,7 @@ public class Card implements Serializable
   
   CardType    cardType;      //
   Card        parentCard;        // 
-  SortedSet<Card>   followOns = new TreeSet<Card>();
+  SortedSet<Card>   followOns = Collections.synchronizedSortedSet(new TreeSet<Card>());
   User        author;        // Author of the card
   String      authorName = "author-name";    // "Denormalized" for performance; gotten from author
   Date        creationDate;  // when made
