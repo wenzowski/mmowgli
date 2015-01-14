@@ -36,6 +36,8 @@ import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+
 /**
  * MmowgliOuterFrame.java
  * Created on Jan 27, 2014
@@ -148,11 +150,11 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
   @Override
   public boolean gameUpdatedExternallyTL(Object nullObj)
   {
-    MSysOut.println("MmowgliOuterFrame.gameUpdatedExternally()");
+    MSysOut.println(MESSAGING_LOGS,"MmowgliOuterFrame.gameUpdatedExternally()");
     boolean ret = false;
 
     boolean fouoShow = Game.getTL().isShowFouo();
-    MSysOut.println("Game object.isShowFouo = "+fouoShow);
+    MSysOut.println(MESSAGING_LOGS,"Game object.isShowFouo = "+fouoShow);
     if (fouoShow != fouoButton.isVisible()) {
       fouoButton.setVisible(fouoShow);
       ret = true;
