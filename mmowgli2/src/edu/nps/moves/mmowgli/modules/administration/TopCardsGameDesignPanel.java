@@ -495,7 +495,7 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
       if(tLine == null)
         return;
       
-      HSess.init();
+      Object key = HSess.checkInit();
 
       CardTypeFields fields = null;
       if (combo == positiveTypeSelect) {
@@ -531,7 +531,7 @@ public class TopCardsGameDesignPanel extends AbstractGameBuilderPanel implements
       fields.colorComp.setReadOnly(ro);
       
       fields.okToUpdateDbFlag = changingFlag;  
-      HSess.close();
+      HSess.checkClose(key);
     }
   }
   
