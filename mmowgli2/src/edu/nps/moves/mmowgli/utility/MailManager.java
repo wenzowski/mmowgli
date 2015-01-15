@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli.utility;
 
+import static edu.nps.moves.mmowgli.utility.MmowgliLogger.mLog;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -32,8 +34,6 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Pages.PagesData;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
-
-import static edu.nps.moves.mmowgli.utility.MmowgliLogger.*;
 
 public class MailManager
 {
