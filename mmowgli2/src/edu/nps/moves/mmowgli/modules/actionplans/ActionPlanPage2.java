@@ -1264,6 +1264,9 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     }
 
     AppMaster.instance().getMailManager().actionPlanInviteTL(ap, u);
+    
+    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    GameEventLogger.logActionPlanInvitationExtendedTL(ap, me.getUserName(), u.getUserName());
   }
 
   @SuppressWarnings("serial")
