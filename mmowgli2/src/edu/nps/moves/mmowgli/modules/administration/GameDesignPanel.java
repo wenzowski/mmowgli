@@ -466,7 +466,9 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
             @Override
             public void windowClose(CloseEvent e)
             {
+              Object key = HSess.checkInit();
               phaseSelector.fillCombo(moveBeingEdited);
+              HSess.checkClose(key);
             }
           });
           dial.showDialog();
@@ -507,8 +509,8 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
       moveBeingEdited = newMove;
       setTopLabelText(newMove);
 
-      phaseSelector.fillCombo(moveBeingEdited);
-      MovePhase mp = moveBeingEdited.getCurrentMovePhase();
+      phaseSelector.fillCombo(newMove);
+      MovePhase mp = newMove.getCurrentMovePhase();
       titlePan.movePhaseChanged(mp);
       signupPan.movePhaseChanged(mp);
       loginPan.movePhaseChanged(mp);
@@ -522,6 +524,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
       @Override
       public void valueChange(ValueChangeEvent event)
       {
+        Object key = HSess.checkInit();
         PWrap pw = (PWrap) event.getProperty().getValue();
         if (pw != null) {
           titlePan.movePhaseChanged(pw.mp);
@@ -533,6 +536,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
           propagateCB.setVisible(phaseBeingEdited.isPreparePhase());
           runningPhaseWarningLabel.setVisible(AbstractGameBuilderPanel.isRunningPhaseTL(phaseBeingEdited));
         }
+        HSess.checkClose(key);
       }
     }
 
@@ -579,9 +583,9 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     public void fillCombo(Move mm)
     {
       removeAllItems();
-      Move m = Move.getTL(mm.getId());
-      List<MovePhase> phases = m.getMovePhases();
-      MovePhase current = m.getCurrentMovePhase();
+      mm = Move.mergeTL(mm);
+      List<MovePhase> phases = mm.getMovePhases();
+      MovePhase current = mm.getCurrentMovePhase();
       PWrap selected = null;
       for (MovePhase ph : phases) {
         PWrap pw;
