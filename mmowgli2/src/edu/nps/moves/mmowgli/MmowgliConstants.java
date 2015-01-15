@@ -119,7 +119,7 @@ public class MmowgliConstants
   public static final int ERROR_LOGS = 0x8000;
   public static final int MISC_LOGS = 0x10000;
   public static final int MAIL_LOGS = 0x20000;
-  public static final int MOBILE_LOGS = 0x4000;
+  public static final int MOBILE_LOGS = 0x40000;
   
   public static HashMap<Integer,String> logTokens = new HashMap<Integer,String>();
   static {
