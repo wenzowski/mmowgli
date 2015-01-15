@@ -219,16 +219,49 @@ public class GameEventLogger
     GameEvent.saveTL(ev);
     HSess.close();   
   }
-
+/*  
+  private static String clampTitleLength(String s)
+  {
+    String ret = (s==null?"":s);
+    if(ret.length() > 70)
+      ret = ret.substring(0, 69)+"...";
+   return ret;
+  }
+*/  
   public static void logActionPlanUpdateTL(ActionPlan ap, String field, long id)
   {
-    String title = ap.getTitle();
-    title = (title==null?"":title);
-    if(title.length() > 70)
-      title = title.substring(0, 69)+"...";
-        
     GameEvent ev = new GameEvent(GameEvent.EventType.ACTIONPLANUPDATED," / action plan "+ap.getId()+" by user "+id+", "+field);
     GameEvent.saveTL(ev);    
+  }
+  
+  public static void logActionPlanInvitationExtendedTL(ActionPlan ap, String extender, String extendee)
+  {
+    GameEvent ev = new GameEvent(GameEvent.EventType.ACTIONPLANUPDATED," / action plan "+ap.getId()+" author invitation extended by user "+extender+" to "+extendee);
+    GameEvent.saveTL(ev);        
+  }
+  
+  public static void logActionPlanInvitationAcceptedTL(ActionPlan ap, String accepter)
+  {
+    GameEvent ev = new GameEvent(GameEvent.EventType.ACTIONPLANUPDATED," / action plan "+ap.getId()+" author invitation accepted by user "+accepter);
+    GameEvent.saveTL(ev);        
+  }
+  
+  public static void logActionPlanInvitationDeclinedTL(ActionPlan ap, String decliner)
+  {
+    GameEvent ev = new GameEvent(GameEvent.EventType.ACTIONPLANUPDATED," / action plan "+ap.getId()+" author invitation declined by user "+decliner);
+    GameEvent.saveTL(ev);        
+  }
+  
+  public static void logActionPlanImageAddedTL(ActionPlan ap, String adder, String title)
+  {
+    GameEvent ev = new GameEvent(GameEvent.EventType.ACTIONPLANUPDATED," / action plan "+ap.getId()+" image added by user "+adder);
+    GameEvent.saveTL(ev);        
+  }
+  
+  public static void logActionPlanVideoAddedTL(ActionPlan ap, String adder, String title)
+  {
+    GameEvent ev = new GameEvent(GameEvent.EventType.ACTIONPLANUPDATED," / action plan "+ap.getId()+" video added by user "+adder);
+    GameEvent.saveTL(ev);        
   }
   
   public static void logSessionEndTL(User u)
