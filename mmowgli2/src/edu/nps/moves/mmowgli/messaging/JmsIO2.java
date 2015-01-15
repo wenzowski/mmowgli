@@ -285,7 +285,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
           if( firstListener.doPreviewMessage(pkt))
             return; // consumed
 
-         doSysOut("R"+pkt.msgType);
+         //doSysOut("R"+pkt.msgType);
 
          deliverToReceivers(pkt, false); // I think we let the registered receivers handle it
          // Not this..
