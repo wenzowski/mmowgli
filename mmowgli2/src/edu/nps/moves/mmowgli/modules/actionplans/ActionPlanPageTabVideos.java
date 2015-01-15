@@ -298,7 +298,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
             ap.getMedia().add(med);
             ActionPlan.updateTL(ap);
             User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
-            GameEventLogger.logActionPlanUpdateTL(ap, "video added", u.getId()); //u.getUserName());
+            GameEventLogger.logActionPlanVideoAddedTL(ap, u.getUserName(), med.getTitle());
             HSess.close();
           }
         }

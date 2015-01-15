@@ -398,7 +398,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
             ap.getMedia().add(med);
             ActionPlan.updateTL(ap);
             User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
-            GameEventLogger.logActionPlanUpdateTL(ap, "image added", u.getId()); //u.getUserName());
+            GameEventLogger.logActionPlanImageAddedTL(ap, u.getUserName(), med.getTitle());
             HSess.close();
           }
         }
