@@ -38,6 +38,7 @@ import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
+import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 
 /**
  * AuthorThisPlanPopup.java
@@ -105,6 +106,9 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
         
         // User update here
         User.updateTL(me);
+        
+        GameEventLogger.logActionPlanInvitationDeclinedTL(ap, me.getUserName());
+
         HSess.close();
         
         AuthorThisPlanPopup.this.buttonClick(event);
@@ -159,6 +163,9 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
         }
         if(apNeedsUpdate)
           ActionPlan.updateTL(thisAp);
+        
+        GameEventLogger.logActionPlanInvitationAcceptedTL(thisAp, me.getUserName());
+
         HSess.close(); 
         
         AuthorThisPlanPopup.this.buttonClick(event);   // sets up its own session
