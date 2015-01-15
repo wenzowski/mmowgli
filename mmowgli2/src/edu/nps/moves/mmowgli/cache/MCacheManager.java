@@ -396,17 +396,18 @@ public class MCacheManager implements InterTomcatReceiver
     return usrs;
   }
 
+  // This was an attempt to treat locally generated message differently from remotely...couldn't get it to work, but we now loop on Hibernate.get until we get it.
   public boolean handleIncomingDatabaseMessageTL(MMessagePacket packet)
   {
     MSysOut.println(myLogLevel,"MCacheManager.handleIncomingDatabaseMessageTL(), type = "+packet.msgType);
     switch (packet.msgType) {
       case NEW_CARD:
       case UPDATED_CARD:
-        newOrUpdatedCardInCacheTL(packet.msgType,packet.msg);
+        externallyNewOrUpdatedCardTL(packet.msgType,packet.msg);  // newOrUpdatedCardInCacheTL(packet.msgType, packet.msg);
         break;
       //case NEW_USER:
       case UPDATED_USER:
-        newOrUpdatedUserInCacheTL(packet.msgType,packet.msg);
+        externallyNewOrUpdatedUserTL(packet.msgType, packet.msg);  //newOrUpdatedUserInCacheTL(packet.msgType,packet.msg);
         break;
       case DELETED_USER:
         deletedUserTL(packet.msgType,packet.msg);
@@ -531,6 +532,7 @@ public class MCacheManager implements InterTomcatReceiver
     this.deleteUserInContainer(id);
   }
 
+  @SuppressWarnings("unused")
   private void newOrUpdatedUserInCacheTL(char messageType, String message)
   {
     Long id = MMessage.MMParse(messageType, message).id;
@@ -562,6 +564,7 @@ public class MCacheManager implements InterTomcatReceiver
     }
   }
   
+  @SuppressWarnings("unused")
   private void newOrUpdatedCardInCacheTL(char messageType, String message)
   {
     long id = MMessage.MMParse(messageType, message).id;
