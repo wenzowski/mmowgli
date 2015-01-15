@@ -204,7 +204,9 @@ public class AdvanceMoveDialog extends Window
       };
 
       stopDialog.setModal(true);
-      VerticalLayout layout = (VerticalLayout) stopDialog.getContent();
+      
+      VerticalLayout layout = new VerticalLayout();
+      stopDialog.setContent(layout);
       layout.setMargin(true);
       layout.setSpacing(true);
       Label message = new Label("Restart mmowgli on cluster nodes now.");
