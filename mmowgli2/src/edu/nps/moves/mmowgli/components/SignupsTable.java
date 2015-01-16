@@ -364,6 +364,7 @@ public class SignupsTable extends Table
       @Override
       public void buttonClick(ClickEvent event)
       {
+        HSess.init();
         Set set = (Set)tab.getValue();
         ArrayList<String> emails = new ArrayList<String>(set.size());
         Iterator itr = set.iterator();
@@ -372,6 +373,7 @@ public class SignupsTable extends Table
           emails.add(wrap.getEmail());
         }
         new SendMessageWindow(emails);
+        HSess.close();
       }
     });
 
