@@ -36,6 +36,7 @@ package edu.nps.moves.mmowgli.messaging;
 public class MMessage extends MMessagePacket
 {
   public Long id = null;
+  public Long version = null;
   public String[] params = new String[0];
  
   public static String MMESSAGE_DELIM = "\t";
@@ -51,6 +52,8 @@ public class MMessage extends MMessagePacket
     params = s.split(MMESSAGE_DELIM);
     try {
       id = Long.parseLong(params[0]);
+      if(params.length>1)
+        version = Long.parseLong(params[1]);
     }
     catch(NumberFormatException t) {
     }
