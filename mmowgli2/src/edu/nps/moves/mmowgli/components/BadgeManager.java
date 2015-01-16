@@ -38,6 +38,7 @@ import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.messaging.MMessage;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
@@ -96,7 +97,13 @@ public class BadgeManager implements Runnable
   
   private void enQ(char msgTyp, String msg)
   {
-    long id = Long.parseLong(msg);   // db key
+    long id;
+    if(msgTyp == UPDATED_CARD) {
+      String[] sa = msg.split(MMessage.MMESSAGE_DELIM);
+      id = Long.parseLong(sa[0]);
+    }
+    else
+      id = Long.parseLong(msg);   // db key
     try {
       queue.put(new Pkt(msgTyp,id));
     }
