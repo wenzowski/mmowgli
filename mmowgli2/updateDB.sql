@@ -1,6 +1,9 @@
 # This is a list of SQL commands which may be useful to update old game databases. This file is not intended to be run in its entirety.
 # Remember to also update the MmowgliConstants field DATABASE_VERSION
 
+UPDATE `Game` SET `version` = '20150116' WHERE `id` = '1';
+ALTER TABLE `Card` ADD `version` BIGINT(20)  NOT NULL  DEFAULT '0';
+
 UPDATE `Game` SET `version` = '20141114' WHERE `id` = '1';
 ALTER TABLE `MovePhase` ADD `actionPlanWhoIsInvolvedHeader` VARCHAR(255)  CHARACTER SET utf8  COLLATE utf8_general_ci  NOT NULL  DEFAULT 'Who is involved?';
 ALTER TABLE `MovePhase` ADD `actionPlanWhatIsItHeader` VARCHAR(255)  CHARACTER SET utf8  COLLATE utf8_general_ci  NOT NULL  DEFAULT 'What is it?'  AFTER `actionPlanWhoIsInvolvedHeader`;
