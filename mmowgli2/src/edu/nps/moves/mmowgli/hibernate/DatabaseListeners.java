@@ -38,6 +38,7 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.markers.HasUUID;
+import edu.nps.moves.mmowgli.messaging.MMessage;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
@@ -248,9 +249,9 @@ public class DatabaseListeners
       String msg = "";
       if (obj instanceof Card) {
         Card c = (Card)obj;
-        MSysOut.println(CARD_UPDATE_LOGS,"Update db listener got card with id = "+c.getId()+" text = "+c.getText()+" hidden = "+c.isHidden());
+        MSysOut.println(CARD_UPDATE_LOGS,"Update db listener got card with id = "+c.getId()+" version = "+c.getVersion()+" text = "+c.getText()+" hidden = "+c.isHidden());
         msgTyp = UPDATED_CARD;
-        msg = "" + c.getId();
+        msg = "" + c.getId() + MMessage.MMESSAGE_DELIM + c.getVersion();
         mcache.putCard(c);
      }
       else if (obj instanceof User) {
@@ -318,7 +319,7 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
         Card c = (Card)obj;
         MSysOut.println(CARD_UPDATE_LOGS,"Postupdate db listener got card with id = "+c.getId()+" text = "+c.getText());
         msgTyp = UPDATED_CARD;
-        msg = "" + c.getId();
+        msg = "" + c.getId() + MMessage.MMESSAGE_DELIM + c.getVersion();
         mcache.putCard(c);
      }
       else if (obj instanceof User) {
