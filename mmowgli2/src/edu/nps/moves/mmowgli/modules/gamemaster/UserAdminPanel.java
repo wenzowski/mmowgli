@@ -901,8 +901,6 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
                               .add(Restrictions.eq("author", user)).list();
         for(Card c : cardList) {
           c.setAuthorName(newUname);  // It already has my name, but holding the author name in the card is an optimization
-          //Card.update(c);
-          //Sess.sessUpdate(c);
           Card.updateTL(c);;
         }
         
