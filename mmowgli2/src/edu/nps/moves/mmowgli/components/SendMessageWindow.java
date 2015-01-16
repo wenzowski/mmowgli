@@ -79,6 +79,7 @@ public class SendMessageWindow extends Window
   }
   
   // For signup emailing...no user accounts
+  // This assumes Threadlocal session
   @HibernateSessionThreadLocalConstructor
   public SendMessageWindow(List<String> emails)
   {
@@ -151,6 +152,7 @@ public class SendMessageWindow extends Window
     return sb.toString();
   }
   
+  /* This assumes a threadlocal session in place */
   public SendMessageWindow(User user, boolean ccSelf, MailManager.Channel channel, boolean showCcTroubleList)  
   {
     super("A message to " + user.getUserName());
