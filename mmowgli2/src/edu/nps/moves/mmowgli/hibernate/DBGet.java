@@ -48,9 +48,9 @@ public class DBGet
 {
   public static MCacheManager mCacheMgr;
   
-  //static ObjectCache<Card> cardCache;
-  static ObjectCache<User> userCache;
-  //static ObjectCache<GameEvent> gameEventCache;
+//static ObjectCache<Card>      cardCache;
+  static ObjectCache<User>      userCache;
+//static ObjectCache<GameEvent> gameEventCache;
   
   static
   {
@@ -61,9 +61,9 @@ public class DBGet
   
   private DBGet(){} // not instanciateable
   
-  //private static boolean CARDCACHEDISABLED = false;
+//private static boolean CARDCACHEDISABLED = false;
   private static boolean USERCACHEDISABLED = false;
-  //private static boolean GEVTCACHEDISABLED = false;
+//private static boolean GEVTCACHEDISABLED = false;
 
   // Card
    public static Card getCardTL(Object id)
@@ -96,16 +96,8 @@ public class DBGet
   public static Card getCardFresh(Object id, Session sess)
   {
     return mCacheMgr.getCardFresh(id, sess);
-    //cardCache.remove(id);
-    //return getCard(id,sess);
   }
-  
-/*  public static void cacheCard(Card c)
-  {
-    cardCache.addToCache(c.getId(), c);
-    //SysOut.print("(c+"+c.getId()+")");
-  }
-*/  
+
   /********************************************************/
   // Users
   public static User getUserTL(Object id)
@@ -141,9 +133,10 @@ public class DBGet
         userCache.addToCache(id, u);
       return u;
     }
-    else
-      return (User) sess.merge(u);  // merge cached value with this sess
-
+    else {
+      sess.refresh(u);  // get current data from db
+      return u;
+    }
   }
   
   public static void putUser(User u)
@@ -182,7 +175,8 @@ public class DBGet
         userCache.addToCache(id, u);
       return u;
     }
-    return (User) sess.merge(u);
+    sess.refresh(u);
+    return u;
   }
   
   public static User getUserFreshTL(Object id)
