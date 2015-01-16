@@ -402,8 +402,10 @@ public class MCacheManager implements InterTomcatReceiver
     MSysOut.println(myLogLevel,"MCacheManager.handleIncomingDatabaseMessageTL(), type = "+packet.msgType);
     switch (packet.msgType) {
       case NEW_CARD:
+        externallyNewCardTL(packet.msgType,packet.msg);
+        break;
       case UPDATED_CARD:
-        externallyNewOrUpdatedCardTL(packet.msgType,packet.msg);  // newOrUpdatedCardInCacheTL(packet.msgType, packet.msg);
+        externallyUpdatedCardTL(packet.msgType,packet.msg);  // newOrUpdatedCardInCacheTL(packet.msgType, packet.msg);
         break;
       //case NEW_USER:
       case UPDATED_USER:
@@ -426,8 +428,10 @@ public class MCacheManager implements InterTomcatReceiver
     MSysOut.println(myLogLevel,"MCacheManager.handleIncomingTomcatMessageTL(), type = "+packet.msgType);
     switch (packet.msgType) {
       case NEW_CARD:
+        externallyNewCardTL(packet.msgType,packet.msg);
+        break;
       case UPDATED_CARD:
-        externallyNewOrUpdatedCardTL(packet.msgType,packet.msg);
+        externallyUpdatedCardTL(packet.msgType,packet.msg);
         break;
       //case NEW_USER:
       case UPDATED_USER:
@@ -542,7 +546,7 @@ public class MCacheManager implements InterTomcatReceiver
   private void externallyNewOrUpdatedUserTL(char messageType, String message)
   {
     Long id = MMessage.MMParse(messageType, message).id;
-    User u = DBGet.getUserTL(id);
+    User u = DBGet.getUserFreshTL(id);
     if(u == null) {
       u = ComeBackWhenYouveGotIt.fetchUserWhenPossible(id);
     }
@@ -574,13 +578,30 @@ public class MCacheManager implements InterTomcatReceiver
     newOrUpdatedCardTL_common(c);
   }
   
-  private void externallyNewOrUpdatedCardTL(char messageType, String message)
+  private void externallyUpdatedCardTL(char messageType, String message)
+  {
+    MMessage msg = MMessage.MMParse(messageType, message);
+    long id = msg.id;
+    long version = msg.version;
+    
+    Card c = Card.getVersionTL(id,version);
+    if (c == null) {
+      c = ComeBackWhenYouveGotIt.fetchVersionedCardWhenPossible(id,version);
+      HSess.get().refresh(c);
+    }
+    MSysOut.println(MCACHE_LOGS,"externallyNewOrUpdated got card "+c.toString2());
+    getCardCache().addToCache(id, c);
+    newOrUpdatedCardTL_common(c);    
+  }
+  
+  private void externallyNewCardTL(char messageType, String message)
   {
     long id = MMessage.MMParse(messageType, message).id;
     Card c = Card.getTL(id);
     if (c == null) {
       c = ComeBackWhenYouveGotIt.fetchCardWhenPossible(id);
     }
+    MSysOut.println(MCACHE_LOGS,"externallyNewOrUpdated got card "+c.toString2());
     getCardCache().addToCache(id, c);
     newOrUpdatedCardTL_common(c);
   }
@@ -763,7 +784,7 @@ public class MCacheManager implements InterTomcatReceiver
       return c;
     }
     MSysOut.println(myLogLevel,"MCacheManager.getCard() "+id.toString()+" Got card from cache, text: "+c.getText()+" hidden = "+c.isHidden());
-    c = (Card)sess.merge(c);
+    sess.refresh(c);
     return c;
   }
 
