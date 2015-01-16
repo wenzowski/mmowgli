@@ -274,9 +274,9 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       Property<?> prop = event.getProperty();
       CardMarking cm = (CardMarking)prop.getValue();
-      final Card card = DBGet.getCardTL(cardId); // Was getCardFresh, but the cache should be more recent
+      Card card = DBGet.getCardTL(cardId); // Was getCardFresh, but the cache should be more recent
       final User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
-      
+    //  card = Card.mergeTL(card);
       if(cm == null) { // markings have been cleared
         if(card.getMarking()!=null && card.getMarking().size()>0) {
           globs.getScoreManager().cardMarkingWillBeClearedTL(card);   // call this before hitting db
@@ -287,7 +287,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
         }
       }
       else {
-        cm = CardMarking.mergeTL(cm);
+        HSess.get().refresh(cm);
         boolean needWarning = (!card.getFollowOns().isEmpty() && CardMarkingManager.isHiddenMarking(cm));
         if(!needWarning) {
           setMarkingsTL(card,cm);
@@ -302,9 +302,9 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
                 {
                   if(dialog.isConfirmed()) {
                     HSess.init();
-                    CardMarking cmm = CardMarking.mergeTL((CardMarking)event.getProperty().getValue());
+                    CardMarking cmm = (CardMarking)event.getProperty().getValue();
+                    HSess.get().refresh(cmm);
                     Card c= DBGet.getCardTL(cardId);// Was getCardFresh, but the cache should be more recent
-                    c = Card.mergeTL(c);
                     setMarkingsTL(c,cmm);
                     hideAllChildrenTL(c);  // does the Card.update
                     GameEventLogger.cardMarkedTL(c,u);
@@ -322,14 +322,14 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     c.getMarking().clear();
     c.getMarking().add(CardMarkingManager.getHiddenMarking());
     c.setHidden(true);
-    Card.updateTL(c);
     
     Set<Card> childs = c.getFollowOns();
     Iterator<Card> itr = childs.iterator();
     while(itr.hasNext()) {
       Card ch = itr.next();
       hideAllChildrenTL(ch); // recurse
-    }    
+    }
+    Card.updateTL(c);
   }
   
   private void setMarkingsTL(Card card, CardMarking cm)
@@ -593,6 +593,24 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     throw new RuntimeException("Program error in CardChainPageNewInProgress.java");
   }
   
+  private boolean isDescendent(Card c)
+  {
+    VerticalLayout vl = getCardColumnLayout(c);
+    int numChil = vl.getComponentCount();
+
+    for (int i=0;i<numChil; i++) {
+      Object comp = vl.getComponent(i);
+      if(comp instanceof CardSummary) {
+        CardSummary cs = (CardSummary)comp;
+        if(cs.getCardId().equals(c.getId())) {
+          cs.refreshContents(c);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
   /** This is an attempt to put more logic on the server and less into big client updates */
   private void updateFollowers_oobTL(Card card)
   {
@@ -663,8 +681,8 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   {
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     Card parent = DBGet.getCardTL(cardId);
-    parent=Card.mergeTL(parent);
-    
+    //parent=Card.mergeTL(parent);
+    HSess.get().refresh(parent);
     c.setParentCard(parent);
     
     if(parent.isHidden())  // hidden parents produce hidden children
@@ -726,30 +744,18 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   
   public boolean cardUpdated_oobTL(Serializable externCardId)
   {
-//    System.out.println("CardChainPage knows card was updated externally, app= "+app.toString());
-//    System.out.println("  My card (updated)= "+DBGet.getCard(cardId).getText()+" cardid: "+cardId);
-//    System.out.println("  Ext crd (updated)= "+DBGet.getCard(externCardId).getText()+ " extcardid: "+externCardId);
-    
-    // This method should be called outside of a hibernate session
-    // Don't use any of the HbnContainer type calls, because they all use
-    // HibernateContainers.getCurrentSession(), which is valid within a "Vaadin transaction" context.
-    // We're called here from a thread which listens to the multicast (or equivalent asynch broadcast);
-    
-    MSysOut.println(MESSAGING_LOGS,"CardChainPage.cardUpdated_oobTL() externCardId = "+externCardId+" my cardId = "+cardId+" hash = "+hashCode());
+    MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL() externCardId = "+externCardId+" my cardId = "+cardId+" hash = "+hashCode());
+    Card c = DBGet.getCardTL(externCardId);
     if (externCardId.equals(cardId)) {   // Don't do this: externCardId == cardId  !
-      // game masters can change text and marking
-      MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL "+externCardId.toString());
-      Card c = DBGet.getCardTL(externCardId); //DBGet.getCardFreshTL(cardId); test..cache should have it, maybe not db yet
-      MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL / hidden = "+c.isHidden());
-      c = Card.mergeTL(c);
-      MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL # children = "+(c.getFollowOns()==null?"0":c.getFollowOns().size()+" hidden = "+c.isHidden())+" hash = "+hashCode());
+      MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL / "+c.toString2());
 
       loadMarkingPanel_oobTL(c);
       cardLg.update_oobTL(c);
       updateFollowers_oobTL(c);
       return true;              // ui
     }
-    return false;
+    else 
+     return isDescendent(c) ; // child might have hidden or editted
   }
   
   /**
