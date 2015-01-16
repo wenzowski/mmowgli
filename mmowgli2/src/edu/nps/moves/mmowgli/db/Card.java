@@ -41,7 +41,6 @@ import org.hibernate.search.annotations.*;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
-import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -85,6 +84,8 @@ public class Card implements Serializable
   
   Set<CardMarking> marking = new HashSet<CardMarking>();       // optional marking by gamemasters, e.g., positive, negative, superinteresting
   boolean     hidden = false;  // duplicate of the CardMarking hidden, but used for Hibernate querying -- must be kept in sync
+  
+  Long       version = 0L;   // used internally by hibernate for optimistic locking, but not here
 //@formatter:on
   
   public Card()
@@ -117,6 +118,17 @@ public class Card implements Serializable
     return (Card)HSess.get().get(Card.class, (Serializable)id);
   }
   
+  public static Card getVersionTL(Serializable id, long version)
+  {
+    @SuppressWarnings("unchecked")
+    List<Card> lis = (List<Card>)HSess.get().createCriteria(Card.class)
+                     .add(Restrictions.eq("id", id))
+                     .add(Restrictions.gt("version", version)).list();
+    if(lis.size()>0)
+      return lis.get(0);
+    return null;
+  }
+  
   public static Card get(Serializable id, Session sess)
   {
     return (Card)sess.get(Card.class, id);
@@ -133,14 +145,15 @@ public class Card implements Serializable
  
   public static void updateTL(Card c)
   {
+    c.incrementVersion();
     HSess.get().update(c);
-    MSysOut.println(CARD_UPDATE_LOGS,"Card.updateTL() just sess.updated card "+c.getId()+" with text: "+c.getText()+" hidden = "+c.isHidden());
+    MSysOut.println(CARD_UPDATE_LOGS,"Card.updateTL() back from sess.update card "+c.getId()+" with text: "+c.getText()+" hidden = "+c.isHidden());
   }
  
   public static void saveTL(Card c)
   {
     HSess.get().save(c);
-    MSysOut.println(CARD_UPDATE_LOGS,"Card.saveTL() just sess.saved card "+c.getId()+" with text: "+c.getText());
+    MSysOut.println(CARD_UPDATE_LOGS,"Card.saveTL() back from sess.save card "+c.getId()+" with text: "+c.getText());
   }
 
   @Override
@@ -168,6 +181,22 @@ public class Card implements Serializable
     return sb.toString();
   }
   
+  public String toString2()
+  {
+    StringBuilder sb = new StringBuilder();
+    sb.append("id = ");
+    sb.append(getId());
+    sb.append("text = ");
+    sb.append(getText());
+    sb.append(" version = ");
+    sb.append(getVersion());
+    sb.append(" hidden = ");
+    sb.append(isHidden());
+    sb.append("# children = ");
+    sb.append(getFollowOns()==null?"0":getFollowOns().size());
+    return sb.toString();
+  }
+  
   @Id
   @DocumentId
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -182,7 +211,25 @@ public class Card implements Serializable
   {
     this.id = id;
   }
+  
+  // This screws up our code@Version
+  @Basic
+  public Long getVersion()
+  {
+    return version;
+  }
 
+  public void setVersion(Long version)
+  {
+    this.version = version;
+  }
+
+  public Long incrementVersion()
+  {
+    setVersion(version+1);
+    return getVersion();
+  }
+  
   // This field duplicates CardMarking.hidden and must be kept in sync
   @Basic
   public boolean isHidden()
