@@ -233,6 +233,16 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
     initGui(HSess.get());
   }
   
+  public void refreshContents(Card c)
+  {
+    content.removeStyleName(hiddenStyle);
+    if(c.isHidden())
+      content.addStyleName(hiddenStyle);     // red "HIDDEN" text background
+    content.setValue(formatText(c.getText()));
+    content.setDescription(c.getText());
+    user.setValue(c.getAuthorName()); //.getAuthor().getUserName());    
+  }
+  
   @SuppressWarnings("serial")
   public void initGui(Session sess)
   {
