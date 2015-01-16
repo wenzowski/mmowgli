@@ -91,7 +91,8 @@ public class AbstractMmowgliControllerHelper2
           break;
         case UPDATED_CARD:
           MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper2.UIAccessRunner calling cardUpdated_TL()");
-          push = cardUpdated_TL(Long.parseLong(pkt.msg), comp);
+          String[] sa = pkt.msg.split(MMessage.MMESSAGE_DELIM);
+          push = cardUpdated_TL(Long.parseLong(sa[0]), comp);
           break;
         case UPDATED_CHAT:
           push = chatLogUpdated_TL(Long.parseLong(pkt.msg),comp);
