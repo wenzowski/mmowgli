@@ -539,16 +539,20 @@ public class MCacheManager implements InterTomcatReceiver
   @SuppressWarnings("unused")
   private void newOrUpdatedUserInCacheTL(char messageType, String message)
   {
-    Long id = MMessage.MMParse(messageType, message).id;
+    MMessage msg = MMessage.MMParse(messageType, message);
+    Long id = msg.id;
+    Long version = msg.version;
     newOrUpdatedUserTL_common(DBGet.getUserTL(id));
   }
   
   private void externallyNewOrUpdatedUserTL(char messageType, String message)
   {
-    Long id = MMessage.MMParse(messageType, message).id;
-    User u = DBGet.getUserFreshTL(id);
+    MMessage msg = MMessage.MMParse(messageType, message);
+    Long id = msg.id;
+    Long version = msg.version;
+    User u = DBGet.getUserVersionTL(id,version);
     if(u == null) {
-      u = ComeBackWhenYouveGotIt.fetchUserWhenPossible(id);
+      u = ComeBackWhenYouveGotIt.fetchVersionedUserWhenPossible(id,version);
     }
     newOrUpdatedUserTL_common(u);
   }
