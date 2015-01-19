@@ -98,7 +98,7 @@ public class BadgeManager implements Runnable
   private void enQ(char msgTyp, String msg)
   {
     long id;
-    if(msgTyp == UPDATED_CARD) {
+    if(msgTyp == UPDATED_CARD  || msgTyp == UPDATED_USER) {
       String[] sa = msg.split(MMessage.MMESSAGE_DELIM);
       id = Long.parseLong(sa[0]);
     }

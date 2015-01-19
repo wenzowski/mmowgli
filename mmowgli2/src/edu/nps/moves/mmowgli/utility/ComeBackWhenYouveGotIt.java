@@ -98,6 +98,13 @@ public class ComeBackWhenYouveGotIt
     }
   }
   
+  public static User fetchVersionedUserWhenPossible(long id, long version)
+  {
+    ObjHolder oh = new ObjHolder(id,version,User.class);
+    fetchVersionedDbObjWhenPossible(oh,true);
+    return (User)oh.obj;
+  }
+  
   public static Card fetchVersionedCardWhenPossible(long id, long version)
   {
     ObjHolder oh = new ObjHolder(id,version,Card.class);

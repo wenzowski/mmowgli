@@ -77,6 +77,7 @@ public class AbstractMmowgliControllerHelper2
      // MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper2.UIAccessRunner running inside a call to ui.access()");
       Object sessKey = HSess.checkInit();
       Component comp = myUI.getFrameContent();
+      String[] sa;
       boolean push = false;
       try {
         switch (pkt.msgType) {
@@ -91,7 +92,7 @@ public class AbstractMmowgliControllerHelper2
           break;
         case UPDATED_CARD:
           MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper2.UIAccessRunner calling cardUpdated_TL()");
-          String[] sa = pkt.msg.split(MMessage.MMESSAGE_DELIM);
+          sa = pkt.msg.split(MMessage.MMESSAGE_DELIM);
           push = cardUpdated_TL(Long.parseLong(sa[0]), comp);
           break;
         case UPDATED_CHAT:
@@ -114,7 +115,8 @@ public class AbstractMmowgliControllerHelper2
           break;
         case UPDATED_USER:
           // probably a scoring change
-          push = userUpdated_TL(Long.parseLong(pkt.msg),comp);
+          sa = pkt.msg.split(MMessage.MMESSAGE_DELIM);          
+          push = userUpdated_TL(Long.parseLong(sa[0]),comp);
           break;
         case GAMEEVENT:
           push = gameEvent_TL(pkt.msgType, pkt.msg, comp); // messageType,message);

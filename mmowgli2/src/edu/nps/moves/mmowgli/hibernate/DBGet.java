@@ -107,7 +107,7 @@ public class DBGet
       return (User) sess.get(User.class, (Serializable) id);
 
     User u;
-    int retries = 3;
+    int retries = 10;
 
     if ((u = userCache.getObjectForKey(id)) == null) {
       retry:
@@ -121,13 +121,13 @@ public class DBGet
           new Exception().printStackTrace();
           break retry;
         }
-        HSess.close();
+       // HSess.close();
         try {
           Thread.sleep(500l);
         }
         catch (InterruptedException ex) {
         }
-        HSess.init();
+        //HSess.init();
       }
       if (u != null)
         userCache.addToCache(id, u);
@@ -138,7 +138,17 @@ public class DBGet
       return u;
     }
   }
-  
+  public static User getUserVersionTL(Object id, long version)
+  {
+    @SuppressWarnings("unchecked")
+    List<User> lis = (List<User>)HSess.get().createCriteria(User.class)
+                     .add(Restrictions.eq("id", id))
+                     .add(Restrictions.gt("version", version)).list();
+    if(lis.size()>0)
+      return lis.get(0);
+    return null;
+
+  }
   public static void putUser(User u)
   {
     userCache.addToCache(u.getId(), u);

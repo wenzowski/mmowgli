@@ -257,7 +257,7 @@ public class DatabaseListeners
       else if (obj instanceof User) {
         User u = (User)obj;
         msgTyp = UPDATED_USER;
-        msg = "" + u.getId();
+        msg = "" + u.getId() + MMessage.MMESSAGE_DELIM + u.getVersion();
         DBGet.cacheUser(u);
         mcache.putQuickUser(u);
       }
@@ -323,10 +323,11 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
         mcache.putCard(c);
      }
       else if (obj instanceof User) {
+        User u = (User)obj;
         msgTyp = UPDATED_USER;
-        msg = "" + ((User) obj).getId();
-        DBGet.cacheUser((User)obj);
-        mcache.putQuickUser((User)obj);
+        msg = "" + u.getId() + MMessage.MMESSAGE_DELIM + u.getVersion();
+        DBGet.cacheUser(u);
+        mcache.putQuickUser(u);
       }
       else if (obj instanceof ActionPlan) {
         msgTyp = UPDATED_ACTIONPLAN;
