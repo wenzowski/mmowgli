@@ -146,12 +146,14 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
  
     User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
     Set<Message> msgs = me.getGameMessages();
-    Message[] msgsAr = new Message[1];
-    msgsAr=msgs.toArray(msgsAr);   // avoid concurrent mod
-    int num = msgsAr.length;//.size();
-    int n = num;
-    for(Message m : msgsAr) {
-      addOneMessage(m,n--,num,null);
+    if (msgs.size() > 0) {
+      Message[] msgsAr = new Message[msgs.size()];
+      msgsAr = msgs.toArray(msgsAr); // avoid concurrent mod
+      int num = msgsAr.length;// .size();
+      int n = num;
+      for (Message m : msgsAr) {
+        addOneMessage(m, n--, num, null);
+      }
     }
   }
   
