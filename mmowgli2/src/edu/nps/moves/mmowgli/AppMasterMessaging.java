@@ -137,7 +137,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
         break;
 */
       case UPDATED_ACTIONPLAN:
-        srcobj = ActionPlan.getTL(MMessage.MMParse(pkt.msgType,pkt.msg));
+        srcobj = ActionPlan.getTL(MMessage.MMParse(pkt.msgType,pkt.msg).id);
         HSess.get().refresh(srcobj);
         break;
       default:
