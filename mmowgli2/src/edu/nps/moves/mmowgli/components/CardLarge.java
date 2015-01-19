@@ -336,7 +336,7 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     }  
   }
 
-  private boolean checkStar(Card c, Object uid)
+  private boolean checkStarTL(Card c, Object uid)
   {
     User u = DBGet.getUserTL(uid);
     Set<Card> set = u.getFavoriteCards();
@@ -388,7 +388,7 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     MSysOut.println(USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL("+uid.toString()+")"); 
     if(uid.equals(Mmowgli2UI.getGlobals().getUserID())) {
       Card c = DBGet.getCardTL(cardId);// was getFresh, but cache is probably more recent
-      boolean retb = checkStar(c,uid);
+      boolean retb = checkStarTL(c,uid);
       MSysOut.println(USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL() checkStar() returned "+retb);
       return retb;
     }
