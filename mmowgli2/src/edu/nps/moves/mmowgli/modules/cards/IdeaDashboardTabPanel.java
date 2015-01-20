@@ -78,7 +78,7 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
     
     leftAbsLay = new AbsoluteLayout();
     leftAbsLay.setWidth(IDEADASHBOARD_TABCONTENT_LEFT_W);
-    leftAbsLay.setHeight(IDEADASHBOARD_TABCONTENT_LEFT_H);
+    //leftAbsLay.setHeight(IDEADASHBOARD_TABCONTENT_LEFT_H);
     leftAbsLay.addStyleName("m-tabpanel-left");
     
     rightAbsLay = new AbsoluteLayout();
