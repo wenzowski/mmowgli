@@ -168,11 +168,13 @@ public class ComeBackWhenYouveGotIt
       this.version = version;
     }
   }
-  
-  // Separate thread not buying anything and increasing complexity.
+ 
+  // 10 secs
+  private static long VERSIONLOOP_SLEEP_MS = 500;
+  private static int  VERSIONLOOP_COUNT = 20;
   private static void fetchVersionedDbObjWhenPossible(final ObjHolder holder, boolean wait)
   {
-    for (int i = 0; i < 10; i++) { // try for 10 seconds
+    for (int i = 0; i < VERSIONLOOP_COUNT; i++) {
       MSysOut.println(MCACHE_LOGS, "Top of fetchVersionedDbObjWhenPossible loop");
 
       Session thisSess = VHib.getSessionFactory().openSession();
@@ -185,7 +187,7 @@ public class ComeBackWhenYouveGotIt
       
       if(list.size()>0){
         if (i > 0)
-          MSysOut.println(MCACHE_LOGS,"Delayed versioned fetch of " + holder.cls.getSimpleName() + " from db, got it on try " + i);
+          MSysOut.println(MCACHE_LOGS,"Delayed versioned fetch of " + holder.cls.getSimpleName() + " from db, got it on try " + (i+1));
         holder.obj = list.get(0);
         thisSess.getTransaction().commit();
         thisSess.close();
@@ -193,15 +195,19 @@ public class ComeBackWhenYouveGotIt
       }
       thisSess.getTransaction().commit();
       thisSess.close();
-      sleep(250l);
+      sleep(VERSIONLOOP_SLEEP_MS);
     }
-    System.err.println("ERROR: Couldn't get versioned " + holder.cls.getSimpleName() + " " + holder.id + " in 10 seconds");// give up
+    long secs = (VERSIONLOOP_SLEEP_MS * VERSIONLOOP_COUNT)/1000l;
+    System.err.println("ERROR: Couldn't get " + holder.cls.getSimpleName() + " " + holder.id + " version "+holder.version+" in "+secs+" seconds");// give up
   }
  
-  // Separate thread not buying anything and increasing complexity.
+  // 10 secs.
+  private static long LOOP_SLEEP_MS = 500;
+  private static int  LOOP_COUNT = 20;
+
   private static void fetchDbObjWhenPossible(final ObjHolder holder, boolean wait)
   {
-    for (int i = 0; i < 10; i++) { // try for 10 seconds
+    for (int i = 0; i < LOOP_COUNT; i++) {
       MSysOut.println(MCACHE_LOGS, "Top of fetchDbObjWhenPossible loop");
 
       Session thisSess = VHib.getSessionFactory().openSession();
@@ -210,7 +216,7 @@ public class ComeBackWhenYouveGotIt
       Object cd = thisSess.get(holder.cls, holder.id);
       if (cd != null) {
         if (i > 0)
-          MSysOut.println(MCACHE_LOGS,"Delayed fetch of " + holder.cls.getSimpleName() + " from db, got it on try " + i);
+          MSysOut.println(MCACHE_LOGS,"Delayed fetch of " + holder.cls.getSimpleName() + " from db, got it on try " + (i+1));
         holder.obj = cd;
         thisSess.getTransaction().commit();
         thisSess.close();
@@ -218,8 +224,9 @@ public class ComeBackWhenYouveGotIt
       }
       thisSess.getTransaction().commit();
       thisSess.close();
-      sleep(250l);
+      sleep(LOOP_SLEEP_MS);
     }
-    System.err.println("ERROR: Couldn't get " + holder.cls.getSimpleName() + " " + holder.id + " in 10 seconds");// give up
+    long secs = (LOOP_SLEEP_MS * LOOP_COUNT)/1000l;
+    System.err.println("ERROR: Couldn't get " + holder.cls.getSimpleName() + " " + holder.id + " in "+secs+" seconds");// give up
   }
 }
