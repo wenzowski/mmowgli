@@ -91,6 +91,9 @@ public class HSess
   public static void close(boolean commit)
   {
     Session sess = get();
+    if(sess == null || (!sess.isOpen()))
+      return;
+    
     Transaction trans = null;
     try {
       trans = sess.getTransaction();
@@ -101,10 +104,13 @@ public class HSess
       if(trans != null)
         trans.rollback();
       MSysOut.println(HIBERNATE_LOGS,"HSess.close() exception: "+t.getClass().getSimpleName()+" "+t.getLocalizedMessage());
+      // The printStackTrace will bypass the deferred logging scheme, so head it up with this:
+      System.out.println("Exception "+t.getClass().getSimpleName()+" "+t.getLocalizedMessage()+" / trapped in HSess.close()/ dump follows");
       t.printStackTrace();
     }
     finally {
-      sess.close();
+      if(sess.isOpen())
+        sess.close();
     }
     MSysOut.println(HIBERNATE_LOGS,"HSess.close() of sess "+sess.hashCode());
     unset();
