@@ -111,10 +111,9 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
     getLeftLayout().addComponent(vLay,"top:0px;left:0px");
     vLay.setSpacing(true);
     
-
     vLay.addComponent(new Label("Card Filters"));
     Label lab;
-    vLay.addComponent(lab=new HtmlLabel("<p>Card play can be fast and thoughtful.  Here are the most recent.  You can also filter and look for the cards most relevant to your thinking.</p>"));
+    vLay.addComponent(lab=new HtmlLabel("<p>Card play can be fast and thoughtful.  Here are the most recent.  Look for the cards most relevant to your thinking.</p>"));
     lab.addStyleName("m-font-12");
     //todo style here
     vLay.addComponent(allIdeasButt);
