@@ -553,6 +553,7 @@ public class MCacheManager implements InterTomcatReceiver
     User u = DBGet.getUserVersionTL(id,version);
     if(u == null) {
       u = ComeBackWhenYouveGotIt.fetchVersionedUserWhenPossible(id,version);
+      HSess.get().refresh(u); //
     }
     newOrUpdatedUserTL_common(u);
   }
@@ -604,12 +605,30 @@ public class MCacheManager implements InterTomcatReceiver
     Card c = Card.getTL(id);
     if (c == null) {
       c = ComeBackWhenYouveGotIt.fetchCardWhenPossible(id);
+      // gotten from a different session
+      HSess.get().refresh(c);  // Should 
     }
-    MSysOut.println(MCACHE_LOGS,"externallyNewOrUpdated got card "+c.toString2());
+    MSysOut.println(MCACHE_LOGS,"externallyNewOrUpdated got card "+c.toString2()); // causes lazy init error due to followons...why, I dont know
     getCardCache().addToCache(id, c);
     newOrUpdatedCardTL_common(c);
   }
+/* above dump
+eption in thread "MThreadManagerPoolThread" org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role: edu.nps.moves.mmowgli.db.Card.followOns, could not initialize proxy - no Session
+  at org.hibernate.collection.internal.AbstractPersistentCollection.throwLazyInitializationException(AbstractPersistentCollection.java:572)
+  at org.hibernate.collection.internal.AbstractPersistentCollection.withTemporarySessionIfNeeded(AbstractPersistentCollection.java:212)
+  at org.hibernate.collection.internal.AbstractPersistentCollection.readSize(AbstractPersistentCollection.java:153)
+  at org.hibernate.collection.internal.PersistentSet.size(PersistentSet.java:160)
+  at edu.nps.moves.mmowgli.db.Card.toString2(Card.java:196)
+  at edu.nps.moves.mmowgli.cache.MCacheManager.externallyNewCardTL(MCacheManager.java:608)
+  at edu.nps.moves.mmowgli.cache.MCacheManager.handleIncomingDatabaseMessageTL(MCacheManager.java:405)
+  at edu.nps.moves.mmowgli.AppMasterMessaging$1.run(AppMasterMessaging.java:286)
+  at edu.nps.moves.mmowgli.utility.MThreadManager$Preamble.run(MThreadManager.java:81)
+  at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+  at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+  at java.lang.Thread.run(Thread.java:744)
+CAR 3488574 CardChainPage.cardUpdated_oobTL() externCardId = 45 my cardId = 45 hash = 538021126 833049920
 
+ */
  private void newOrUpdatedCardTL_common(Card c)
  {
     CardType ct = c.getCardType();
@@ -802,6 +821,8 @@ public class MCacheManager implements InterTomcatReceiver
       MSysOut.println(HIBERNATE_LOGS,"MCachedManager.getCard("+id+") returns null");
       return null;
     }
+    // comes back from diff sess
+    sess.refresh(c);
     getCardCache().addToCache(id, c);
     return c;
   }
