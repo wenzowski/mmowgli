@@ -582,28 +582,31 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     }
   }
   
-   private VerticalLayout getCardColumnLayout(Card card)
+   private VerticalLayout getCardColumnLayout(Card childCard)
   {
     int col = -1;
     for(CardType ct : followOnTypes) {
       col++;
-      if(card.getCardType().equals(ct))
+      if(childCard.getCardType().equals(ct))
         return columnVLs.get(col);
     }
-    throw new RuntimeException("Program error in CardChainPageNewInProgress.java");
+    return null;
   }
   
-  private boolean isDescendent(Card c)
+  private boolean isDescendent(Card possibleChildCard)
   {
-    VerticalLayout vl = getCardColumnLayout(c);
+    VerticalLayout vl = getCardColumnLayout(possibleChildCard);
+    if(vl == null)
+      return false;
+    
     int numChil = vl.getComponentCount();
 
     for (int i=0;i<numChil; i++) {
       Object comp = vl.getComponent(i);
       if(comp instanceof CardSummary) {
         CardSummary cs = (CardSummary)comp;
-        if(cs.getCardId().equals(c.getId())) {
-          cs.refreshContents(c);
+        if(cs.getCardId().equals(possibleChildCard.getId())) {
+          cs.refreshContents(possibleChildCard);
           return true;
         }
       }
@@ -612,46 +615,48 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   }
   
   /** This is an attempt to put more logic on the server and less into big client updates */
-  private void updateFollowers_oobTL(Card card)
+  private void updateFollowers_oobTL(Card thisCard)
   {
     // Easiest to throw everything away and reload, but trying to increase performance here.
-    
-    // We've been informed that the parent card has been updated, the most obvious reason being that 
-    // some one has played a follow on card.  Cards are immutable, so the only thing to check is the addition
+
+    // We've been informed that the parent card has been updated, the most obvious reason being that
+    // some one has played a follow on card. Cards are immutable, so the only thing to check is the addition
     // of a new one -- i.e., don't have to worry about updated text or author, etc.
     // The follow-on list in a card is now maintained sorted by Hibernate, so start picking off the top until
-    // we get to one we have, then stop;  Then add the new ones to the top of the layout
+    // we get to one we have, then stop; Then add the new ones to the top of the layout
 
     Vector<Card> newCards = new Vector<Card>();
-      
-    for(Card c: card.getFollowOns() ) {
+
+    for (Card c : thisCard.getFollowOns()) {
       VerticalLayout vl = getCardColumnLayout(c);
-      int numChil = vl.getComponentCount();
-      if(numChil <= 1) {// want to miss header
-        newCards.add(c);
-      }
-      else {
-        CardSummary cs = (CardSummary)vl.getComponent(1);
-        if(!cs.getCardId().equals(c.getId())) {
+      if (vl != null) {
+        int numChil = vl.getComponentCount();
+        if (numChil <= 1) {// want to miss header
           newCards.add(c);
-          continue; // next card  
         }
         else {
-          break; // the card has been found already in the layout, we're done since they're already sorted
+          CardSummary cs = (CardSummary) vl.getComponent(1);
+          if (!cs.getCardId().equals(c.getId())) {
+            newCards.add(c);
+            continue; // next card
+          }
+          else {
+            break; // the card has been found already in the layout, we're done since they're already sorted
+          }
         }
-      }     
-    }
-   
-    // If we looked at all and found any new ones, add them to our
-    // Add from the bottom
-    int sz;
-    if((sz=newCards.size()) >0) {
-      for(int i=sz-1; i>=0;i--) {
-        Card cd = newCards.get(i);
-        VerticalLayout vl = getCardColumnLayout(cd);
-        CardSummary csum = CardSummary.newCardSummary_oobTL(cd.getId());
-        vl.addComponent(csum,1); // under the header
-        csum.initGui();
+      }
+
+      // If we looked at all and found any new ones, add them to our
+      // Add from the bottom
+      int sz;
+      if ((sz = newCards.size()) > 0) {
+        for (int i = sz - 1; i >= 0; i--) {
+          Card cd = newCards.get(i);
+          vl = getCardColumnLayout(cd);
+          CardSummary csum = CardSummary.newCardSummary_oobTL(cd.getId());
+          vl.addComponent(csum, 1); // under the header
+          csum.initGui();
+        }
       }
     }
   }
