@@ -389,7 +389,7 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     if(uid.equals(Mmowgli2UI.getGlobals().getUserID())) {
       Card c = DBGet.getCardTL(cardId);// was getFresh, but cache is probably more recent
       boolean retb = checkStarTL(c,uid);
-      MSysOut.println(USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL() checkStar() returned "+retb);
+      //MSysOut.println(USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL() checkStar() returned "+retb);
       return retb;
     }
     else
