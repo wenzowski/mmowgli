@@ -192,8 +192,8 @@ public class Card implements Serializable
     sb.append(getVersion());
     sb.append(" hidden = ");
     sb.append(isHidden());
-    sb.append("# children = ");
-    sb.append(getFollowOns()==null?"0":getFollowOns().size());
+    // temp sb.append("# children = ");
+    // temp sb.append(getFollowOns()==null?"0":getFollowOns().size());
     return sb.toString();
   }
   
