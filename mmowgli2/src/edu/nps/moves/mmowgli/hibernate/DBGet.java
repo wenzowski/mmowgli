@@ -134,7 +134,7 @@ public class DBGet
       return u;
     }
     else {
-      sess.refresh(u);  // get current data from db
+      u = User.mergeTL(u);//sess.refresh(u);  // get current data from db
       return u;
     }
   }
