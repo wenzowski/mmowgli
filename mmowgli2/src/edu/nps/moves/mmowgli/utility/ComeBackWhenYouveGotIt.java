@@ -48,10 +48,10 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  */
 public class ComeBackWhenYouveGotIt
 {
-  public static Message waitForMessage_oob(Object methodObject, Object messageId)
+  public static Message waitForMessage_oobTL(Object methodObject, Object messageId)
   {
     try {
-      return (Message)loopOnIt(Message.class,messageId);
+      return (Message)loopOnItTL(Message.class,messageId);
     }
     catch (Exception e) {
       System.err.println("ERROR: ComeBackWhenYouveGotIt.waitForMessage: "+e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
@@ -60,32 +60,33 @@ public class ComeBackWhenYouveGotIt
   }
   
   //not used (yet)
-  public static void waitForGameEvent_oob(Object methodObject, Object eventId)
+  public static void waitForGameEvent_oobTL(Object methodObject, Object eventId)
   {
     try {
-      loopOnIt(GameEvent.class, eventId);
+      loopOnItTL(GameEvent.class, eventId);
     }
     catch (Exception e) {
       System.err.println("ERROR: ComeBackWhenYouveGotIt.waitForGameEvent: "+e.getClass().getSimpleName()+": "+e.getLocalizedMessage());     
     }   
   }
+  // 10 secs
+  private static long LOOPONIT_SLEEP_MS = 500;
+  private static int  LOOPONIT_COUNT = 20;
 
-  private static Object loopOnIt(final Class<?> hibernateObjectClass, final Object objId)//, final Method callback, final Object methodObj)
+  private static Object loopOnItTL(final Class<?> hibernateObjectClass, final Object objId)//, final Method callback, final Object methodObj)
   {
-    for (int i = 0; i < 10; i++) { // try for 10 seconds
-      HSess.init();
+    for (int i = 0; i < LOOPONIT_COUNT; i++) { // try for 10 seconds
       Session sess = HSess.get();
       Object dbObj = sess.get(hibernateObjectClass, (Serializable) objId);
       if (dbObj != null) {
         MSysOut.println(MCACHE_LOGS, "Delayed fetch of " + hibernateObjectClass.getSimpleName() + " " + objId.toString() + " from db, got it on retry " + (i + 1));
-        HSess.close();
         return dbObj;
       }
-      HSess.close();
-      sleep(250l);
+      sleep(LOOPONIT_SLEEP_MS);
     }
-    System.err.println("ERROR: Couldn't get " + hibernateObjectClass.getSimpleName() + objId.toString() + " in 10 seconds");// give
-                                                                                                                           // up
+    long secs = (LOOPONIT_SLEEP_MS * LOOPONIT_COUNT)/1000l;
+
+    System.err.println("ERROR: Couldn't get " + hibernateObjectClass.getSimpleName() + objId.toString() + " in "+secs+" seconds");
     return null;
   }  
   
