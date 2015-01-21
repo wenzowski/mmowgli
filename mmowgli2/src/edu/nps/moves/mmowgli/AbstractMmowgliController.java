@@ -380,6 +380,11 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         BrowserWindowOpener.open(gl.getTroubleLink(),PORTALTARGETWINDOWNAME);
         break;
         
+      case ACTIONPLANREQUESTCLICK:
+        gl = GameLinks.getTL();
+        BrowserWindowOpener.open(gl.getActionPlanRequestLink(),PORTALTARGETWINDOWNAME);
+        break;
+  
       default:
         MSysOut.println(SYSTEM_LOGS,"TODO, AbstractMmowgliController.buttonClick(): "+mEv);
     } 
@@ -519,7 +524,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         }
       }
     }
-    HSess.close();
+    try { HSess.close(); } catch(Throwable t) {MSysOut.println(ERROR_LOGS,"AbstractMmowgliController.receiveMessage():"+t.getClass().getSimpleName()+" "+t.getLocalizedMessage());}
   }  
   
   // MessageReceiver interface for oob events
