@@ -625,9 +625,12 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // The follow-on list in a card is now maintained sorted by Hibernate, so start picking off the top until
     // we get to one we have, then stop; Then add the new ones to the top of the layout
 
-    Vector<Card> newCards = new Vector<Card>();
+    SortedSet<Card> children = thisCard.getFollowOns();
+    //MSysOut.println(CARD_UPDATE_LOGS, "CardChainPage.updateFollowers_oobTL(), num children = " + children.size());
 
-    for (Card c : thisCard.getFollowOns()) {
+    Vector<Card> newCards = new Vector<Card>();
+    for (Card c : children) {
+      //MSysOut.println(CARD_UPDATE_LOGS, "next child, id = " + c.getId());
       VerticalLayout vl = getCardColumnLayout(c);
       if (vl != null) {
         int numChil = vl.getComponentCount();
@@ -636,24 +639,34 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
         }
         else {
           CardSummary cs = (CardSummary) vl.getComponent(1);
+          //MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.updateFollers_oobTL(), cs.cardId vs c.getId returns " + cs.getCardId().equals(c.getId()) + " " + cs.getCardId() + " " + c.getId());
           if (!cs.getCardId().equals(c.getId())) {
             newCards.add(c);
+            //MSysOut.println(CARD_UPDATE_LOGS, "CardChainPage.updateFollers_oobTL(), added card " + c.getId() + " to column");
             continue; // next card
           }
           else {
+            //MSysOut.println(CARD_UPDATE_LOGS, "CardChainPage.updateFollers_oobTL(), card " + c.getId() + " already in layout!");
             break; // the card has been found already in the layout, we're done since they're already sorted
           }
         }
       }
-
-      // If we looked at all and found any new ones, add them to our
-      // Add from the bottom
-      int sz;
-      if ((sz = newCards.size()) > 0) {
-        for (int i = sz - 1; i >= 0; i--) {
-          Card cd = newCards.get(i);
-          vl = getCardColumnLayout(cd);
+      else {
+        //MSysOut.println(CARD_UPDATE_LOGS, "CardChainPage.updateFollowers_oobTL(), cant find card column for card " + c.getId());
+      }
+      //MSysOut.println(CARD_UPDATE_LOGS, "CardChainPage.updateFollowers_oobTL(), new cards found: " + newCards.size());
+    }
+    
+    // If we looked at all and found any new ones, add them to our
+    // Add from the bottom
+    int sz;
+    if ((sz = newCards.size()) > 0) {
+      for (int i = sz - 1; i >= 0; i--) {
+        Card cd = newCards.get(i);
+        VerticalLayout vl = getCardColumnLayout(cd);
+        if (vl != null) {
           CardSummary csum = CardSummary.newCardSummary_oobTL(cd.getId());
+          //MSysOut.println(CARD_UPDATE_LOGS, "CardChainPage.updateFollowers_oobTL(), new card added to layout, id: " + cd.getId());
           vl.addComponent(csum, 1); // under the header
           csum.initGui();
         }
@@ -668,19 +681,6 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     c.setHidden(true); 
   }
   
-  /*
-    MSysOut.println("!!!! CardChainPage.cardCreated (not saved yet) id = "+c.getId());
-    MSysOut.println("!!!! CardChainPage.cardCreated getting displayed card to be parent");
-    MSysOut.println("!!!! CardChainPage.cardCreated setting displayed card "+parent.getId()+" as parent in "+c.getId());
-    MSysOut.println("!!!! CardChainPage.cardCreated getting existing followons, size = "+(set==null?"0":""+set.size()));
-    MSysOut.println("!!!! CardChainPage.cardCreated adding new card to parents followons set");    
-    MSysOut.println("!!!! CardChainPage.cardCreated telling mailmanager about card");
-    MSysOut.println("!!!! CardChainPage.cardCreated telling scoremgr about new card");
-    MSysOut.println("!!!! CardChainPage.cardCreated updating db with new parent");
-    MSysOut.println("!!!! CardChainPage.cardCreated saving new card to db "+c.getId());
-    MSysOut.println("!!!! CardChainPage.cardCreated #children = "+(parent.getFollowOns()==null?0:parent.getFollowOns().size()));
-    MSysOut.println("!!!! CardChainPage.cardCreated logging game event");   
- */
   @Override
   public void cardCreatedTL(Card c)
   {
