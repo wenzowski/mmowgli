@@ -553,7 +553,12 @@ public class MCacheManager implements InterTomcatReceiver
     User u = DBGet.getUserVersionTL(id,version);
     if(u == null) {
       u = ComeBackWhenYouveGotIt.fetchVersionedUserWhenPossible(id,version);
-      HSess.get().refresh(u); //
+      if(u == null) {
+        // This should not happen, need to redesign DB interface to work properly
+        MSysOut.println(ERROR_LOGS,"MCacheManager.externallyNewOrUpdatedUserTL(), cant get user id = "+id);
+        return;
+      }
+      HSess.get().refresh(u);
     }
     newOrUpdatedUserTL_common(u);
   }
