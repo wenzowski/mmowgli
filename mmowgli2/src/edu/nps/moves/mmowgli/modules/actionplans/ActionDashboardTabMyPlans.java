@@ -44,6 +44,9 @@ import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.markers.HibernateClosed;
+import edu.nps.moves.mmowgli.markers.HibernateOpened;
+import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
 import edu.nps.moves.mmowgli.utility.IDButton;
 
@@ -180,8 +183,12 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
       };
     }
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
       Table newtable = new ActionPlanTable(hCont);
       newtable.setCaption(caption);
 
@@ -192,6 +199,7 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
       newtable.setWidth("100%");
       newtable.setHeight("680px");
       table = newtable;
+      HSess.close();
     }
   }
 
