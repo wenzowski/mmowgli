@@ -550,9 +550,11 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
 
   private void decorateBlogHeadlinesLink(MessageUrl mu)
   {
-    blogHeadlinesLink.setCaption(mu.getText());
-    blogHeadlinesLink.setResource(new ExternalResource(mu.getUrl()));
-    blogHeadlinesLink.setDescription(mu.getTooltip());
+   if(mu != null) {
+     blogHeadlinesLink.setCaption(mu.getText());
+     blogHeadlinesLink.setResource(new ExternalResource(mu.getUrl()));
+     blogHeadlinesLink.setDescription(mu.getTooltip());
+    }
   }
   
   public boolean gameEventLoggedOobTL(Object evId)
