@@ -368,6 +368,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
                "Woops, database error!",
                "A player account identified by id = "+qu.getId()+" is not in the database.",
                Notification.Type.ERROR_MESSAGE);
+            HSess.close();
             return;
           }
           VerticalLayout vl = new VerticalLayout();
