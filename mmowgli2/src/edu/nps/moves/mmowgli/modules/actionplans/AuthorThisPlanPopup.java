@@ -191,7 +191,7 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
   }
   
   @Override
-  public void buttonClick(ClickEvent event)
+  public void buttonClick(ClickEvent event)  // has TL session
   {
     UI.getCurrent().removeWindow(this);
   }
