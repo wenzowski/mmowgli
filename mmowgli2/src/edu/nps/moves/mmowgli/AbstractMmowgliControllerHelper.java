@@ -260,7 +260,7 @@ public class AbstractMmowgliControllerHelper
     HSess.checkClose(key);
     
     if(msg == null) // Here's a way to get the message when it's ready:
-      msg = ComeBackWhenYouveGotIt.waitForMessage_oob(/*"_newGameMessage_oobTL",*/ this, uid);
+      msg = ComeBackWhenYouveGotIt.waitForMessage_oobTL(/*"_newGameMessage_oobTL",*/ this, uid);
     if(msg == null)
       return;
     
