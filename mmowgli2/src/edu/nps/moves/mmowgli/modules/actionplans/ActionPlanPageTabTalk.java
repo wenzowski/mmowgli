@@ -176,17 +176,22 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
     comp.setWidth("99%");
     rightVL.setExpandRatio(comp, 1.0f);
     comp.setHeight("99%");
-    fillChatScroller();
+    fillChatScrollerTL();
   }
   
   @SuppressWarnings("serial")
   class ViewAllListener implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
       showingHiddenMsgs = true;
-      fillChatScroller();
+      fillChatScrollerTL();
+      HSess.close();
     }   
   }
   
@@ -194,14 +199,19 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
   class ViewUnhiddenOnlyListener implements ClickListener
   {
     @Override
+    @MmowgliCodeEntry
+    @HibernateOpened
+    @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
+      HSess.init();
       showingHiddenMsgs = false; 
-      fillChatScroller();
+      fillChatScrollerTL();
+      HSess.close();
     }    
   }
   
-  private void fillChatScroller()
+  private void fillChatScrollerTL()
   {
     ((VerticalLayout)chatScroller.getContent()).removeAllComponents();
     
@@ -356,6 +366,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
     {
       EditCardTextWindow w;
       @Override
+
       public void buttonClick(ClickEvent event)
       {
         EditCardTextWindow  w = new EditCardTextWindow(msg.getText(),Integer.MAX_VALUE);
