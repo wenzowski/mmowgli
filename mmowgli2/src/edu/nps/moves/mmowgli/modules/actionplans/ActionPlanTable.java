@@ -419,9 +419,9 @@ public class ActionPlanTable extends Table
         @HibernateClosed
         public void windowClose(CloseEvent e)
         {
-          HSess.init();
+          Object key = HSess.checkInit();  // can be entered in same thread as AuthorThisPlanPopup.buttonclick()
           Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(ACTIONPLANSHOWCLICK,ActionPlanTable.this,ap.getId())); 
-          HSess.close();
+          HSess.checkClose(key);
         }       
       });
     }   
