@@ -592,7 +592,7 @@ public class MCacheManager implements InterTomcatReceiver
     Card c = Card.getVersionTL(id,version);
     if (c == null) {
       c = ComeBackWhenYouveGotIt.fetchVersionedCardWhenPossible(id,version);
-      HSess.get().refresh(c);
+      c = Card.mergeTL(c);
     }
     MSysOut.println(MCACHE_LOGS,"externallyNewOrUpdated got card "+c.toString2());
     getCardCache().addToCache(id, c);
@@ -605,8 +605,8 @@ public class MCacheManager implements InterTomcatReceiver
     Card c = Card.getTL(id);
     if (c == null) {
       c = ComeBackWhenYouveGotIt.fetchCardWhenPossible(id);
-      // gotten from a different session
-      HSess.get().refresh(c);  // Should 
+     // HSess.get().refresh(c);  // except...try this:
+      //c = DBGet.getCardFreshTL(c.getId());
     }
     MSysOut.println(MCACHE_LOGS,"externallyNewOrUpdated got card "+c.toString2()); // causes lazy init error due to followons...why, I dont know
     getCardCache().addToCache(id, c);
@@ -807,7 +807,7 @@ CAR 3488574 CardChainPage.cardUpdated_oobTL() externCardId = 45 my cardId = 45 h
       return c;
     }
     MSysOut.println(myLogLevel,"MCacheManager.getCard() "+id.toString()+" Got card from cache, text: "+c.getText()+" hidden = "+c.isHidden());
-    sess.refresh(c);
+    c = Card.merge(c, sess); //sess.refresh(c);
     return c;
   }
 
@@ -822,7 +822,7 @@ CAR 3488574 CardChainPage.cardUpdated_oobTL() externCardId = 45 my cardId = 45 h
       return null;
     }
     // comes back from diff sess
-    sess.refresh(c);
+    c = (Card)sess.get(Card.class, (Serializable)id); // now try
     getCardCache().addToCache(id, c);
     return c;
   }
