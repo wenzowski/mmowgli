@@ -281,7 +281,7 @@ public class AbstractMmowgliControllerHelper2
     Message msg = (Message) HSess.get().get(Message.class, id);
 
     if (msg == null) // Here's a way to get the message when it's ready:
-      msg = ComeBackWhenYouveGotIt.waitForMessage_oob(this, id);
+      msg = ComeBackWhenYouveGotIt.waitForMessage_oobTL(this, id);
     if (msg == null)
       return false;
 
