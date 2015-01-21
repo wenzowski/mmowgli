@@ -200,7 +200,7 @@ public class HelpWantedDialog extends Window
           mmgr.mailToUserTL(me.getId(), me.getId(), subj.toString(), msg.toString(), cc.toString(), MailManager.Channel.BOTH);  // the cc is an email, not a user name
 
         UI.getCurrent().removeWindow(HelpWantedDialog.this); 
-        Notification.show("Message(s) sent",null);
+        Notification.show("Message(s) sent",Notification.Type.HUMANIZED_MESSAGE); // fixed 21 Jan 2015
 
         HSess.close();
       }
