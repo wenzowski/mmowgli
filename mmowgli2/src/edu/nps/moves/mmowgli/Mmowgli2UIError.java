@@ -58,10 +58,10 @@ public class Mmowgli2UIError extends UI implements HasUUID
     layout.setMargin(true);
     setContent(layout);
     Page.getCurrent().setTitle("Mmowgli Login Error");
-    layout.addComponent(new Label("Mmowgli thinks you have an incomplete log-in session pending."));
-    layout.addComponent(new Label("If this is the case, switch to that window or tab and continue with your log-in"));
-    layout.addComponent(new Label("If that window or tab is no longer available, you may begin a new session by clicking the following button."));
-    layout.addComponent(new Label("Any previously entered information will be discarded."));
+    layout.addComponent(new Label("You appear to have an incomplete log-in session pending in another tab or window."));
+    layout.addComponent(new Label("If this is the case, switch to that window or tab and continue with your log-in."));
+    layout.addComponent(new Label("If that window or tab is no longer available, begin a new Mmowgli session by clicking the following button."));
+    //layout.addComponent(new Label("Any previously entered information will be discarded."));
     
     Button button = new Button("Begin new Mmowgli session");
     button.addClickListener(new Button.ClickListener() {
