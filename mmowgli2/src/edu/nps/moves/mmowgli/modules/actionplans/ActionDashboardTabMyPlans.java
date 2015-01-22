@@ -188,7 +188,7 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
     @HibernateClosed
     public void buttonClick(ClickEvent event)
     {
-      HSess.init();
+      Object key = HSess.checkInit();
       Table newtable = new ActionPlanTable(hCont);
       newtable.setCaption(caption);
 
@@ -199,7 +199,7 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
       newtable.setWidth("100%");
       newtable.setHeight("680px");
       table = newtable;
-      HSess.close();
+      HSess.checkClose(key);
     }
   }
 
