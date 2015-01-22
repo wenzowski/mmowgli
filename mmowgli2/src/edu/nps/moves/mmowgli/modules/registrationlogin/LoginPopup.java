@@ -188,7 +188,9 @@ public class LoginPopup extends MmowgliDialog
         }
       }
       catch(Throwable t) {
-        errorOut("Error encrypting password.  Submit trouble report.");
+        errorOut("Password error. Try again.");
+        passwordTf.focus();
+        passwordTf.selectAll();
         HSess.close();
         return;
       }
