@@ -37,6 +37,7 @@ import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.UI;
 
 import edu.nps.moves.mmowgli.components.AppMenuBar;
+import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.messaging.MessagingManager2;
@@ -262,24 +263,40 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   {
     return gameReadOnly;
   }
-
+  
+  public void setGameReadOnly(boolean wh)
+  {
+    gameReadOnly = wh;
+  }
+  
   private boolean isCardsReadOnly()
   {
     return cardsReadOnly | gameReadOnly;
   }
-
+  
+  private void setCardsReadOnly(boolean wh)
+  {
+    cardsReadOnly = wh;
+  }
+  
   private boolean isTopCardsReadOnly()
   {
     return topCardsReadOnly | gameReadOnly;
   }
-
+  
+  private void setTopCardsReadOnly(boolean wh)
+  {
+    topCardsReadOnly = wh;
+    System.out.println("Sessionglob topcards r/o set to "+wh+" "+topCardsReadOnly);
+  }
+  
   public boolean isViewOnlyUser()
   {
     return viewOnlyUser;
   }
 
   
-  class CardPermission
+  public static class CardPermission
   {
     public boolean canCreate = true;
     public String whyNot = null;
@@ -300,8 +317,9 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     return cardPermissionsCommon(isTopCard).canCreate;
   }
 
-  private CardPermission cardPermissionsCommon(boolean isTopCard)
+  public CardPermission cardPermissionsCommon(boolean isTopCard)
   {
+    System.out.println("top card = "+isTopCard);
     if(isViewOnlyUser())
       return new CardPermission(false,"View-only account cannot create cards");
 
@@ -334,6 +352,8 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
         }
       }
     }
+
+    setGameBooleans(Game.getTL());
     return true;
   }
 
@@ -350,6 +370,14 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   public ServletContext getServletContext()
   {
     return servletContext;
+  }
+
+  public void setGameBooleans(Game g)
+  {
+    setGameReadOnly(g.isReadonly());
+    setCardsReadOnly(g.isCardsReadonly());
+    setTopCardsReadOnly(g.isTopCardsReadonly());
+    MSysOut.println(SYSTEM_LOGS,"Session game globals set to game r/o:"+g.isReadonly()+" cards r/o:"+g.isCardsReadonly()+" top cards r/o:"+g.isTopCardsReadonly());
   }
 
 }

@@ -110,6 +110,8 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
       MessagingManager2 mm = new MessagingManager2();
       globs.setMessagingManager(mm);
       globs.getMessagingManager().registerSession();
+      
+      globs.setGameBooleans(Game.getTL());
     }
     
     globals = globs;          
@@ -301,6 +303,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     return false;
     
   }
+  
   @Override
   public boolean gameEventLoggedOobTL(Object evId)
   {
@@ -308,6 +311,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
       return outerFr.gameEventLoggedOobTL(evId);
     return false;
   }
+  
   @Override
   public boolean gameUpdatedExternallyTL(Object nullObj)
   {
