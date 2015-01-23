@@ -7,51 +7,26 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
 	<info organisation="com.example" module="v7proj" />
-	<configurations>
-		<!-- The default configuration, which should be deployed to the server -->
-		<conf name="default" />
-		<!-- A configuration only needed when compiling the widget set. Should 
-			not be deployed to the server -->
-		<conf name="widgetset-compile" />
-		<!-- A configuration used in compilation of server side classes only.
-			Should be deployed to the server -->
-		<conf name="nodeploy" />
+	<configurations>		
+		<conf name="default" />           <!-- The default configuration, which should be deployed to the server -->		
+		<conf name="widgetset-compile" /> <!-- A configuration only needed when compiling the widget set. Should not be deployed to the server -->		
+		<conf name="nodeploy" />          <!-- A configuration used in compilation of server side classes only.Should be deployed to the server -->
 	</configurations>
 	
 	<dependencies defaultconf="default" defaultconfmapping="default->default">
-		<!-- The core server part of Vaadin -->
-       <dependency org="com.vaadin" name="vaadin-server" rev="&vaadin.version;" />
-		<!--
-		<dependency org="com.vaadin" name="vaadin-server" rev="&vaadin.version;" >
-		   this is since we incude guava below, see https://vaadin.com/forum#!/thread/5395743 
-		  <exclude org="com.vaadin.external.google" name="guava"/>
-        </dependency> -->
-         
-		<!-- Vaadin themes -->
-		<dependency org="com.vaadin" name="vaadin-themes" rev="&vaadin.version;" />
 
-		<!-- Push support -->
-		<dependency org="com.vaadin" name="vaadin-push" rev="&vaadin.version;" />
-        		
-		<dependency org="javax.validation" name="validation-api" rev="1.1.0.Final"/>
+        <dependency org="com.vaadin" name="vaadin-server"          rev="&vaadin.version;" />		<!-- The core server part of Vaadin -->       
+        <dependency org="com.vaadin" name="vaadin-themes"          rev="&vaadin.version;" />		<!-- Vaadin themes -->
+		<dependency org="com.vaadin" name="vaadin-push"            rev="&vaadin.version;" />		<!-- Push support -->       		
+		<dependency org="com.vaadin" name="vaadin-client-compiled" rev="&vaadin.version;" />		<!-- Precompiled DefaultWidgetSet -->
+		<dependency org="com.vaadin" name="vaadin-client"          rev="&vaadin.version;" conf="widgetset-compile->default" />  <!-- Vaadin client side, needed for widget set compilation -->
+		<dependency org="com.vaadin" name="vaadin-client-compiler" rev="&vaadin.version;" conf="widgetset-compile->default" />  <!-- Compiler for custom widget sets. Should not be deployed -->		
+		<dependency org="com.vaadin" name="vaadin-shared"          rev="&vaadin.version;" />		<!-- To get vaadin version -->
 		
-		<!-- Servlet 3.0 API -->
-		<dependency org="javax.servlet" name="javax.servlet-api" rev="3.0.1" conf="nodeploy->default" />
-
-		<!-- Precompiled DefaultWidgetSet -->
-		<dependency org="com.vaadin" name="vaadin-client-compiled" rev="&vaadin.version;" />
-
-		<!-- Vaadin client side, needed for widget set compilation -->
-		<dependency org="com.vaadin" name="vaadin-client" rev="&vaadin.version;" conf="widgetset-compile->default" />
-
-		<!-- Compiler for custom widget sets. Should not be deployed -->
-		<dependency org="com.vaadin" name="vaadin-client-compiler" rev="&vaadin.version;" conf="widgetset-compile->default" />
-		
-		<!-- To get vaadin version -->
-		<dependency org="com.vaadin" name="vaadin-shared" rev="&vaadin.version;" />	
-					
-		<!-- jpa container 
-		<dependency org="com.vaadin.addon" name="jpacontainer" rev="3.1.1" /> -->
+		<dependency org="javax.servlet"    name="javax.servlet-api" rev="3.0.1" conf="nodeploy->default" />		<!-- Servlet 3.0 API -->
+		<dependency org="javax.validation" name="validation-api"    rev="1.1.0.Final"/>
+							
+		<!--<dependency org="com.vaadin.addon" name="jpacontainer" rev="3.1.1" /> -->
 		<dependency org="xerces" name="xercesImpl" rev="2.11.0"/>
 		<dependency org="javax.mail" name="mail" rev="1.4.7"/>
 		<dependency org="javax.transaction" name="jta" rev="1.1"/>
@@ -81,11 +56,9 @@
  	    <dependency org="com.vaadin.addon" name="vaadin-touchkit-agpl" rev="4.0.0"/>
         <dependency org="org.vaadin.addon" name="ios7hotfixes" rev="6.0.2" />
         <!-- for hbncontainer -->
-        <dependency org="com.google.guava" name="guava" rev="16.0.1" />
         <dependency org="net.sf.saxon" name="Saxon-HE" rev="9.5.1-5"/>
         <dependency org="org.peimari" name="maddon" rev="1.15" />
-        <!-- won't work with V 7.* 
-        <dependency org="org.vaadin.vol" name="openlayers-wrapper" rev="1.3.1" />-->
+        <!--<dependency org="org.vaadin.vol" name="openlayers-wrapper" rev="1.3.1" />  won't work with V 7.* -->
         <dependency org="com.google.gdata" name="core" rev="1.47.1"/>
 	</dependencies>
 </ivy-module>
