@@ -38,15 +38,16 @@ import com.vaadin.ui.Window.CloseListener;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
+import edu.nps.moves.mmowgli.MmowgliSessionGlobals.CardPermission;
 import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.actionplans.AddAuthorDialog;
+import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
 import edu.nps.moves.mmowgli.utility.BaseCoroutine;
-import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 
 /**
  * CardSummaryListHeader.java Created on Feb 3, 2011
@@ -172,7 +173,11 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
       lab.addStyleName("m-click-to-add-new");
       if (textColorStyle != null)
         lab.addStyleName(textColorStyle);
+      markedAsNoCreate = false;
     }
+    else
+      markedAsNoCreate = true;
+    
     drawerComponent = new BuilderDrawer();
     addComponent(drawerComponent, CARDLISTHEADER_DRAWER_POS);
     drawerComponent.setVisible(false);
@@ -195,9 +200,11 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
           if (drawerComponent.isVisible())
             closeDrawer();
           else {
-            if (!globs.canCreateCard(ct.isIdeaCard())) {
+            CardPermission cp = globs.cardPermissionsCommon(ct.isIdeaCard());
+            if (!cp.canCreate) {
               if (!markedAsNoCreate)
                 handleNoCreate();
+              Notification.show(cp.whyNot);
             }
             else {
               showDrawer();
