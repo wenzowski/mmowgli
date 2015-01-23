@@ -287,7 +287,6 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   private void setTopCardsReadOnly(boolean wh)
   {
     topCardsReadOnly = wh;
-    System.out.println("Sessionglob topcards r/o set to "+wh+" "+topCardsReadOnly);
   }
   
   public boolean isViewOnlyUser()
@@ -319,7 +318,6 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
 
   public CardPermission cardPermissionsCommon(boolean isTopCard)
   {
-    System.out.println("top card = "+isTopCard);
     if(isViewOnlyUser())
       return new CardPermission(false,"View-only account cannot create cards");
 
