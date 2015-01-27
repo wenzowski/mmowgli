@@ -73,8 +73,13 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
     contentVLayout.setSpacing(true);
  
     Label lab;
+    contentVLayout.addComponent(lab = new Label());
+    lab.setHeight("5px");
+    
     contentVLayout.addComponent(lab = new Label("Become an author of this plan?"));
-    lab.addStyleName("m-dialog-label");
+    lab.addStyleName("m-dialog-text");
+    lab.setWidthUndefined();
+    contentVLayout.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
     
     HorizontalLayout buttHL = new HorizontalLayout();
     contentVLayout.addComponent(buttHL);
