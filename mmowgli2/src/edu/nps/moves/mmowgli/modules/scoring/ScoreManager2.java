@@ -411,7 +411,7 @@ public class ScoreManager2
     if(cardAncestorPoints == 0.0f)
       return;
     int numGens = ancestorFactors.length;
-    long authorId = c.getId();   
+    long authorId = c.getAuthor().getId();   
     
     int level = 0;
     while((c = c.getParentCard()) != null && level < numGens) {
