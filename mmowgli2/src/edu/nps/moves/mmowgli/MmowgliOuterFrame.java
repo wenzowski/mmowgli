@@ -22,9 +22,11 @@
 
 package edu.nps.moves.mmowgli;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.MESSAGING_LOGS;
+
 import java.io.Serializable;
 
-import org.vaadin.maddon.layouts.MHorizontalLayout;
+import org.vaadin.viritin.layouts.MHorizontalLayout;
 
 import com.vaadin.ui.*;
 
@@ -36,7 +38,6 @@ import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 /**
  * MmowgliOuterFrame.java
