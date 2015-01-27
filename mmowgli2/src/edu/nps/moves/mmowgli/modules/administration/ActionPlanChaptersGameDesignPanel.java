@@ -84,17 +84,18 @@ public class ActionPlanChaptersGameDesignPanel extends AbstractGameBuilderPanel 
     ta_change = addEditLine("5 (How will it change the situation?)", "MovePhase.actionPlanHowWillItChangeHeader");
     ta_change.addValueChangeListener(new MyValueChangeListener("setActionPlanHowWillItChangeHeader"));
     
-    loadPanels(ph);
+    loadPanels(ph,globs);
   }
   
-  private void loadPanels(MovePhase ph)
+  private void loadPanels(MovePhase ph, GameDesignGlobals globs)
   {
     commitOK = false;
-    ta_who.setValue(ph.getActionPlanWhoIsInvolvedHeader());    
-    ta_what.setValue(ph.getActionPlanWhatIsItHeader());    
-    ta_take.setValue(ph.getActionPlanWhatWillItTakeHeader());    
-    ta_work.setValue(ph.getActionPlanHowWillItWorkHeader());    
-    ta_change.setValue(ph.getActionPlanHowWillItChangeHeader());    
+    boolean glRo = globs.readOnlyCheck(false);
+    ta_who.setReadOnly(false);   ta_who.setValue(ph.getActionPlanWhoIsInvolvedHeader());     ta_who.setReadOnly(glRo);  
+    ta_what.setReadOnly(false);  ta_what.setValue(ph.getActionPlanWhatIsItHeader());         ta_what.setReadOnly(glRo);
+    ta_take.setReadOnly(false);  ta_take.setValue(ph.getActionPlanWhatWillItTakeHeader());   ta_take.setReadOnly(glRo);
+    ta_work.setReadOnly(false);  ta_work.setValue(ph.getActionPlanHowWillItWorkHeader());    ta_work.setReadOnly(glRo);
+    ta_change.setReadOnly(false);ta_change.setValue(ph.getActionPlanHowWillItChangeHeader());ta_change.setReadOnly(glRo);
     commitOK = true;
   }
   
@@ -143,7 +144,7 @@ public class ActionPlanChaptersGameDesignPanel extends AbstractGameBuilderPanel 
   public void moveChangedTL(Move move)
   {
     editMove = move;
-    loadPanels(move.getCurrentMovePhase());  // Although the headers are stored in the phase table, they're changed en masse...i.e., all phases in a move are identical   
+    loadPanels(move.getCurrentMovePhase(), globals);  // Although the headers are stored in the phase table, they're changed en masse...i.e., all phases in a move are identical   
   }
 
    @Override
