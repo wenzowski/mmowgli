@@ -30,5 +30,5 @@
     <inherits name="org.vaadin.addon.leaflet.draw.DrawWidgetset" />
     <inherits name="org.vaadin.jouni.dom.DomWidgetset" /> <!--  PlayAnIdeaPage2 -->
     <inherits name="org.vaadin.jouni.restrain.RestrainWidgetset" />  <!-- not used yet -->
-
- </module>
+    <inherits name="org.vaadin.addon.ios7fixes.Ios7HotFixesWidgetset" />
+</module>
