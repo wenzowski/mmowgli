@@ -568,16 +568,35 @@ div .v-nativebutton-m-signin-forgotButton {
   overflow:visible;
   padding:0px;
 }
-  
-.m-dialog-label {
+.m-login-form .v-textfield, .m-role-page .v-textfield{
+  color: #58595B;
+  font-family: helvetica;
+  font-size: 14px;
+  line-height: 100%;
+  background-color: #F1F1F1;	
+  border: 1px solid #CCCECF;
+  margin-left:0px;
+}
+.m-dialog-label{
   color: #58595B;
   font-family: helvetica;
   font-size: 14px;
   line-height: 100%;
   /*margin-top:8px;*/
-  margin-left:50px;
-  margin-bottom:5px;
+/* test  margin-left:50px; */
+padding-left:50px;
+  /*margin-bottom:5px;*/
+  padding-bottom:5px;
 }
+.m-dialog-entryfield, .v-verticallayout div .m-dialog-entryfield  {
+  color: #58595B;
+  font-family: helvetica;
+  font-size: 14px;
+  line-height: 100%;
+  margin-left:50px;
+  padding-bottom:5px;
+}
+
 .m-dialog-label-noindent {
   color: #58595B;
   font-family: helvetica;
@@ -607,23 +626,25 @@ div .v-nativebutton-m-signin-forgotButton {
   font-family: helvetica;
   font-size: 24px;
   line-height: 100%;
-  margin-left:30px;		
+ /* test margin-left:30px;	*/	
 }
 .m-dialog2-title-smaller {
   color: #677B74;
   font-family: helvetica;
   font-size: 20px;
   line-height: 100%;
-  margin-left:30px;		
+/* test  margin-left:30px;		 */
 }
-.m-dialog-toplabel {
+.m-dialog-toplabel, .m-dialog-textfield {
   color: #58595B;
   font-family: helvetica;
   font-size: 14px;
   line-height: 100%;
   margin-top:40px;
-  margin-left:50px;
-  margin-bottom:8px;
+/*  margin-left:50px; test */
+  padding-left:50px;
+/*  margin-bottom:8px; */
+  padding-bottom:8px;
 }
 .m-dialog-label {
   color: #58595B;
@@ -631,8 +652,10 @@ div .v-nativebutton-m-signin-forgotButton {
   font-size: 14px;
   line-height: 100%;
   /*margin-top:8px;*/
-  margin-left:50px;
-  margin-bottom:5px;
+ /* test margin-left:50px; */
+ padding-left:50px;
+ /* test margin-bottom:5px; */
+ padding-bottom:5px;
 }
 .m-dialog-content {
     background: transparent repeat-y;
@@ -649,7 +672,8 @@ div .v-nativebutton-m-signin-forgotButton {
   line-height: 100%;
   background-color: #F1F1F1;	
   border: 1px solid #CCCECF;
-  margin-left:50px;
+/*  margin-left:50px; */
+  padding-left:50px;
 }
 .m-dialog-content .v-caption{
   color: #58595B;
