@@ -76,9 +76,6 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
     setResizable(false);
     setStyleName("m-mmowglidialog");
     addStyleName("m-transparent");   // don't know why I need this, .mmowglidialog sets it too
-    // The following makes the scroll bars go away on vaadin 7
-    setWidth("700px");
-    setHeight("550px");
   }
  
   @Override
@@ -102,7 +99,6 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
     headerWrapper2.setWidth("592px");
     headerWrapper2.setSpacing(false);
     headerWrapper2.setMargin(false);
-    
     headerWrapper2.addComponent(sp = new Label());  // indent from left
     sp.setWidth("45px");
 
@@ -129,11 +125,10 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
 
     outerLayout.addComponent(contentVLayout);
 
-    Embedded footer = new Embedded(null, Mmowgli2UI.getGlobals().mediaLocator().getDialogFooterBackground());
+    Image footer = new Image(null, Mmowgli2UI.getGlobals().mediaLocator().getDialogFooterBackground());
     footer.setWidth("592px");
     footer.setHeight("36px");
     outerLayout.addComponent(footer);
-
   }
   
   protected Button makeCancelButton()
