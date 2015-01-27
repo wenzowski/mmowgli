@@ -94,27 +94,34 @@ public class LoginPopup extends MmowgliDialog
     setTitleString("Sign in please.");
 
     contentVLayout.setSpacing(true);
-
-    Label lab = new Label("User ID:");
-    lab.addStyleName(topLabelStyle);
+    Label lab = new Label();
+    lab.setHeight("20px");
     contentVLayout.addComponent(lab);
+        
+    VerticalLayout lay = new VerticalLayout();   
+    contentVLayout.addComponent(lay);
+    contentVLayout.setComponentAlignment(lay, Alignment.TOP_CENTER);
 
-    contentVLayout.addComponent(userIDTf = new TextField());
-    userIDTf.addStyleName("m-dialog-textfield");
-    userIDTf.setWidth("85%");
+    lay.addComponent(lab=new Label("Game name:"));
+    lab.addStyleName("m-dialog-label");
+    
+    lay.addComponent(userIDTf = new TextField());
+    userIDTf.setColumns(35);
     userIDTf.setTabIndex(100);
     userIDTf.setId(USER_NAME_TEXTBOX);
-
-    lab = new Label("Password:");
-    lab.addStyleName(labelStyle);
-    contentVLayout.addComponent(lab);
-
-    contentVLayout.addComponent(passwordTf = new PasswordField());
-    passwordTf.setWidth("85%");
-    passwordTf.setTabIndex(101);
-    passwordTf.setId(USER_PASSWORD_TEXTBOX);
-    contentVLayout.addComponent(lab=new Label());
+    userIDTf.addStyleName("m-dialog-entryfield");
+    
+    lay.addComponent(lab = new Label());
     lab.setHeight("15px");
+    
+    lay.addComponent(lab=new Label("Password:"));
+    lab.addStyleName("m-dialog-label");
+    
+    lay.addComponent(passwordTf = new PasswordField());
+    passwordTf.setColumns(35);
+    passwordTf.setTabIndex(101);
+    passwordTf.setId(USER_PASSWORD_TEXTBOX);  
+    passwordTf.addStyleName("m-dialog-entryfield");
 
     HorizontalLayout hl = new HorizontalLayout();
     hl.setWidth("100%");
