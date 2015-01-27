@@ -26,15 +26,19 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
+
+import javax.swing.text.NumberFormatter;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.vaadin.viritin.fields.MTextField;
 
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.Page;
@@ -901,6 +905,181 @@ public class AbstractMmowgliControllerHelper
     GameEvent.saveTL(ev);    
   }
 
+  private NumberFormatter formatter = new NumberFormatter(new DecimalFormat("############0.0"));
+
+  String allp = "All Players";
+  String grex = "Exploration points (current move) greater than value";
+  String lsex = "Exploration points (current move) less than value";
+  String grim = "Implementation points (current move) greater than value";
+  String lsim = "Implementation points (current move) less than value";
+  //String emai = "Email address ends with (e.g., \"army.mil\") value";
+  String[] opts = new String[]{allp,grex,lsex,grim,lsim /*,emai*/};  //too clumsy to do
+  
+  public void handleDumpEmailsTL()
+  {
+    final TextField tf;
+    
+    final Window dialog = new Window("Filter Player Email Dump");
+    dialog.setModal(true);
+    
+    VerticalLayout layout = new VerticalLayout();
+    dialog.setContent(layout);
+    layout.setMargin(true);
+    layout.setSpacing(true);
+
+    final OptionGroup radios = new OptionGroup(null,Arrays.asList(opts));
+    layout.addComponent(radios);
+    
+    layout.addComponent(tf = new MTextField().withWidth("50%"));
+    tf.setCaption("value"); 
+    
+    Label lab;
+   
+    layout.addComponent(lab = new Label());
+    lab.setHeight("10px");
+    
+    radios.setNullSelectionAllowed(false); // user can not 'unselect'
+    radios.select(allp); // select this by default
+    radios.setImmediate(false); // don't send the change to the server at once
+    radios.setMultiSelect(false);
+
+    HorizontalLayout hl = new HorizontalLayout();
+    hl.setSpacing(true);
+    @SuppressWarnings("serial")
+    Button cancelButt = new Button("Cancel", new Button.ClickListener()
+    {
+      public void buttonClick(ClickEvent event)
+      {
+        dialog.close();
+      }
+    });
+    
+    @SuppressWarnings("serial")
+    Button addButt = new Button("Dump", new Button.ClickListener()
+    {
+      public void buttonClick(ClickEvent event)
+      {
+        Float val= null;
+        String valS="";
+        boolean parseError = false;
+        try {
+          val = Float.parseFloat(tf.getValue());
+          valS = formatter.valueToString(val);
+        }
+        catch(Exception ex) { parseError = true;}
+          
+        HSess.init();
+        Object sel = radios.getValue();
+        Criteria crit = null;
+        String windowTitle = "";
+        boolean isExpl = true;
+        if(sel == allp) {
+          crit = HSess.get().createCriteria(User.class);
+          windowTitle = new String("All users");
+          isExpl = true;
+          if(parseError) {
+            Notification.show("Value ignored", Notification.Type.WARNING_MESSAGE);
+            System.out.println("Tried to show a Notification");
+          }
+        }
+        else if(sel == grex) {
+          crit = getExplorationGreaterThanTL(val);
+          windowTitle = "Users with exploration points greater than "+valS;
+          isExpl = true;
+        }
+        else if(sel == lsex) {
+          crit = getExplorationLessThanTL(val); 
+          windowTitle = "Users with exploration points less than "+valS;  
+          isExpl = true;
+        }
+        else if(sel == grim) {
+          crit = getImplementationGreaterThanTL(val); 
+          windowTitle = "Users with implementation points greater than "+valS;
+          isExpl = false;
+        }
+        else if(sel == lsim) {
+          crit = getImplementationLessThanTL(val);
+          windowTitle = "Users with implementation points less than "+valS;
+          isExpl = false;
+        }
+        
+        if(crit != null) {
+          @SuppressWarnings("unchecked" )
+          List<User> lis = (List<User>)crit.list();
+          StringBuilder sb = new StringBuilder();
+          handleEmailListNoHeader(lis,sb,isExpl);
+
+          String title = windowTitle+" - "+UUID.randomUUID();
+          BrowserWindowOpener.openWithInnerHTML(sb.toString(),title,"_blank");     
+        }
+        else {
+          Notification.show("Invalid value", Notification.Type.ERROR_MESSAGE);
+          HSess.close();
+          return;
+        }
+        
+        dialog.close();
+        HSess.close();
+      }
+    });
+    
+    hl.addComponent(cancelButt);
+    hl.addComponent(addButt);
+    hl.setComponentAlignment(cancelButt, Alignment.MIDDLE_RIGHT);
+    hl.setExpandRatio(cancelButt, 1.0f);
+
+    layout.addComponent(hl);
+
+    hl.setWidth("100%");
+    
+    layout.addComponent(lab=new Label());
+    layout.setExpandRatio(lab, 1.0f);
+    
+    UI.getCurrent().addWindow(dialog);
+    dialog.center();
+  }
+
+  private Criteria getExplorationGreaterThanTL(Float f)
+  {
+    if(f==null)
+      return null;
+    Criteria crit = HSess.get().createCriteria(User.class).
+      add(Restrictions.eq("gameMaster", false)).
+      add(Restrictions.gt("basicScore", f)).
+      addOrder(Order.desc("basicScore"));
+    return crit;
+  }
+  private Criteria getExplorationLessThanTL(Float f)
+  {
+    if(f==null)
+      return null;
+    Criteria crit = HSess.get().createCriteria(User.class).
+      add(Restrictions.eq("gameMaster", false)).
+      add(Restrictions.lt("basicScore", f)).
+      addOrder(Order.desc("basicScore"));
+    return crit;    
+  }
+  private Criteria getImplementationGreaterThanTL(Float f)
+  {
+    if(f==null)
+      return null;
+    Criteria crit =  HSess.get().createCriteria(User.class).
+      add(Restrictions.eq("gameMaster", false)).
+      add(Restrictions.gt("innovationScore", f)).
+      addOrder(Order.desc("innovationScore"));
+    return crit;
+  }
+  private Criteria getImplementationLessThanTL(Float f)
+  {
+    if(f==null)
+      return null;
+    Criteria crit = HSess.get().createCriteria(User.class).
+      add(Restrictions.eq("gameMaster", false)).
+      add(Restrictions.lt("innovationScore", f)).
+      addOrder(Order.desc("innovationScore"));
+    return crit;
+  }
+ 
   @SuppressWarnings("unchecked")
   public void handleDumpGameMasterEmailsTL()
   {
@@ -950,8 +1129,8 @@ public class AbstractMmowgliControllerHelper
     sb.append("</pre>");
   }
 
-  @SuppressWarnings("unchecked")
-  public void handleDumpEmailsTL()
+  @SuppressWarnings({ "unchecked", "unused" })
+  private void handleDumpEmailsTL_old()
   {
     StringBuilder sb = new StringBuilder();
 
@@ -1057,6 +1236,28 @@ public class AbstractMmowgliControllerHelper
     sb.append(subBuf.toString());
   }
   
+  private void handleEmailListNoHeader(List<User> lis, StringBuilder sb, boolean explorationScore)
+  {
+    sb.append("<pre>");
+    for(User usr : lis) {
+      String valS = "undef";
+      try { valS = formatter.valueToString(explorationScore?usr.getBasicScore():usr.getInnovationScore());}catch(Exception ex){}
+      
+      List<String> slis = VHibPii.getUserPiiEmails(usr.getId());
+      if(slis == null || slis.size()<=0)
+        sb.append("--no email--");
+      else
+        sb.append(slis.get(0));
+      sb.append("\t");
+      sb.append(usr.getId());
+      sb.append("\t");
+      sb.append(usr.getUserName());
+      sb.append("\t");
+      sb.append(valS);
+      sb.append("\n");
+    }
+    sb.append("</pre>");
+  }
   private void handleEmailList(List<User> lis, StringBuilder sb)
   {
     sb.append("<pre>");
