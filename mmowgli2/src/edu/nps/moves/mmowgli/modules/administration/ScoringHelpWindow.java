@@ -69,6 +69,8 @@ public class ScoringHelpWindow extends Window
 
   String gggggggparent = "</li>" + "<li>The ggggggg-parent author's by:&nbsp;&nbsp;&nbsp;";
 
+  String nopoints = "<br/><span style='font-size:smaller';><i>(No points are added for parent cards played by the current author.)</i></span>";
+  
   String superint = "</li>" + "</ol>" + "When a card is marked <b>\"super-interesting\"</b>:"
       + "<ul><li>The author's basic score changes by:&nbsp;&nbsp;&nbsp;";
 
@@ -140,12 +142,15 @@ public class ScoringHelpWindow extends Window
     if (factors.length > 7) {
       parentPart(gggggggparent, sb, 7, points, factors);
     }
+    sb.append(nopoints);
+    
     sb.append(superint);
     sb.append("<b>+");
     sb.append(game.getCardSuperInterestingPoints());
     sb.append("</b> (cardSuperInterestingPoints)");
 
     sb.append(tail);
+    
     Label lab = new HtmlLabel(sb.toString());
 
     VerticalLayout vl = new VerticalLayout();
