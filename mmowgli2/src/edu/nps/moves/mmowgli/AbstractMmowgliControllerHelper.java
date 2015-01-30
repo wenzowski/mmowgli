@@ -62,6 +62,7 @@ import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2;
 import edu.nps.moves.mmowgli.modules.actionplans.RfeDialog;
+import edu.nps.moves.mmowgli.modules.administration.SessionReportWindow;
 import edu.nps.moves.mmowgli.modules.cards.CardChainPage;
 import edu.nps.moves.mmowgli.modules.gamemaster.CreateActionPlanWindow;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
@@ -436,7 +437,16 @@ public class AbstractMmowgliControllerHelper
     svrCountWin.setPositionX(0);
     svrCountWin.setPositionY(0);
   }
-
+  
+  void handleShowPlayerReport(MenuBar menubar)
+  {
+//    String s = AppMaster.instance().getCompletePlayerReportHTML();
+//    String title = "Active Player Report"+" - "+UUID.randomUUID();
+//    BrowserWindowOpener.openWithInnerHTML(s,title,"_blank");
+    
+    SessionReportWindow.showSessionReport();
+  }
+  
   void handleShowActiveUsersActionTL(MenuBar menubar)
   {
     Session session =  HSess.get();
