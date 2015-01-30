@@ -663,7 +663,8 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
     if (currentPopup != null)
       UI.getCurrent().removeWindow(currentPopup); // app.getMainWindow().removeWindow(currentPopup);
     
-    Mmowgli2UI.getGlobals().setLoggedIn(true);
+    MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
+    globs.setLoggedIn(true);
 
     if (user != null) {
       if (!user.isWelcomeEmailSent()) {
@@ -684,7 +685,6 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       MSysOut.println(SYSTEM_LOGS,"Vaadin heartbeat interval (sec): "+vsess.getConfiguration().getHeartbeatInterval());
       MSysOut.println(SYSTEM_LOGS,"Tomcat timeout (\"maxInactiveInterval\") (sec): "+sess.getMaxInactiveInterval());
 
-      MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       if (globs != null) {
         MmowgliController cntlr = globs.getController();
         if (cntlr != null)
@@ -696,6 +696,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         System.err.println("No globals in RegistrationPageBase.wereIn()");
 
       GameEventLogger.logUserLoginTL(user);
+      AppMaster.instance().sendMySessionReport();
     }
   }
 
