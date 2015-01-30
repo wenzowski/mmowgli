@@ -236,13 +236,13 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
     singleNodeReport = singleNodeReport.replace(SESSION_REPORT_FIELD_DELIMITER, SESSION_REPORT_FIELD_DELIMITER_WIRE);
     InterTomcatIO sessIO = getInterTomcatIO();
     String msgStr = AppMaster.instance().getServerName() + SESSION_REPORT_ITEM_DELIMITER_WIRE + singleNodeReport;
-    if (sessIO != null)
+    if (sessIO != null) {
       sessIO.sendDelayed(SESSIONS_REPORT, msgStr, ""); // let this thread return 
-    System.out.println(AppMaster.instance().getServerName()+" SENT report: "+AppMaster.instance().getServerName() + SESSION_REPORT_ITEM_DELIMITER_WIRE + singleNodeReport);
-    
+      MSysOut.println(MESSAGING_LOGS,AppMaster.instance().getServerName()+" SENT report: "+AppMaster.instance().getServerName() + SESSION_REPORT_ITEM_DELIMITER_WIRE + singleNodeReport);    
+    }
   }
   
- private void handleSessionsReportMsg(String message)
+  private void handleSessionsReportMsg(String message)
   {
     String[] sa = message.split(SESSION_REPORT_ITEM_DELIMITER_WIRE);
     if(sa.length != 2)
