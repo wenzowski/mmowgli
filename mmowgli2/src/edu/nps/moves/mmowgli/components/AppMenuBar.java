@@ -155,7 +155,8 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     ret.addSeparator();
     ret.addItem("Show active player count overall", new MCommand(MENUGAMEMASTERACTIVECOUNTCLICK)).setIcon(FontAwesome.USER_MD);
     ret.addItem("Show active player count by server", new MCommand(MENUGAMEMASTERACTIVECOUNTBYSERVERCLICK)).setIcon(FontAwesome.USER_MD);
-    ret.addItem("Show user polling data for this server",  new MCommand(MENUGAMEMASTERUSERPOLLINGCLICK)).setIcon(FontAwesome.USER_MD);
+    ret.addItem("Show active player list",new MCommand(MENUGAMEMASTERACTIVEPLAYERREPORTCLICK)).setIcon(FontAwesome.USER_MD);
+   // this is non functional ret.addItem("Show user polling data for this server",  new MCommand(MENUGAMEMASTERUSERPOLLINGCLICK)).setIcon(FontAwesome.USER_MD);
     ret.addItem("Show card count", new MCommand(MENUGAMEMASTERCARDCOUNTCLICK));
     ret.addItem("Show registered users counts", new MCommand(MENUGAMEMASTERTOTALREGISTEREDUSERS)).setIcon(FontAwesome.USER_MD);
     ret.addItem("View game login permissions buttons", viewGamePermissionsClicked).setIcon(FontAwesome.SIGN_IN);
