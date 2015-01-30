@@ -261,9 +261,14 @@ public class MmowgliConstants
   public static final char UPDATE_SESSION_COUNT = 's';
   public static final char INSTANCEREPORTCOMMAND = 'P'; // uc
   public static final char INSTANCEREPORT = 'p'; // lc
-
+  public static final char SESSIONS_REPORT = 'n';
   public static final char JMSKEEPALIVE = 'K';
 
+  public static final String SESSION_REPORT_FIELD_DELIMITER_WIRE = "&euro;";
+  public static final String SESSION_REPORT_ITEM_DELIMITER_WIRE = "&yen;";
+  public static final String SESSION_REPORT_FIELD_DELIMITER = "\t";
+  public static final String SESSION_REPORT_ITEM_DELIMITER = "\n";
+  
   // Debug IDs for auto testing
   public static String GOOD_IDEA_CARD_OPEN_TEXT = "good_idea_card_open_text";
   public static String GOOD_IDEA_CARD_TEXTBOX = "good_idea_card_textbox";
