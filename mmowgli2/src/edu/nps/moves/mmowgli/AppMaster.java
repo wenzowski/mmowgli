@@ -37,8 +37,7 @@ import javax.servlet.ServletContext;
 
 import org.hibernate.Session;
 
-import com.vaadin.server.Page;
-import com.vaadin.server.VaadinServlet;
+import com.vaadin.server.*;
 import com.vaadin.shared.Version;
 import com.vaadin.shared.ui.ui.Transport;
 
@@ -477,19 +476,6 @@ public class AppMaster
     return miscTimer;
   }
 
-  @HibernateOpened
-  @HibernateClosed
-  public void logSessionEnd(Serializable uId)
-  {
-    if(uId != null) {
-      HSess.init();
-      User u = DBGet.getUserTL(uId);
-      if(u != null)
-        GameEventLogger.logSessionEndTL(u);
-      HSess.close();
-    }
-  }
-
   /*
    * Instance message format: servername, clientip, "userid " userid, uuid
    */
@@ -709,5 +695,125 @@ public class AppMaster
   public String getReportsUrl()
   {
     return REPORTS_URL;
+  }
+
+  @HibernateOpened
+  @HibernateClosed
+  public void logSessionEnd(Serializable uId)
+  {
+    if(uId != null) {
+      HSess.init();
+      User u = DBGet.getUserTL(uId);
+      if(u != null)
+        GameEventLogger.logSessionEndTL(u);
+      HSess.close();
+    }
+  }
+
+  private HashSet<VaadinSession> sessionsInThisMmowgliNode = new HashSet<VaadinSession>();
+  
+  // The synchronized methods below protect concurrent access to the hashset
+  /**
+   * Called from servlet
+   */
+  public synchronized void logSessionInit(SessionInitEvent event)
+  {
+    sessionsInThisMmowgliNode.add(event.getSession());
+    sendMySessionReport();
+  }
+
+  /**
+   * Called from servlet
+   */
+  public synchronized void logSessionDestroy(SessionDestroyEvent event)
+  {  
+    sessionsInThisMmowgliNode.remove(event.getSession());
+    sendMySessionReport();
+  }
+  
+  public void sendMySessionReport()
+  {    
+    appMasterMessaging.doSessionReportBroadcast(getLocalNodeReportRaw());
+  }
+  
+  /******* Player reports *********/
+/*  public synchronized String getCompletePlayerReportHTML()
+  {
+    //String s = getCompletePlayerReport();
+    // temp
+    return getSinglePlayerReportHTML();
+  }
+*/  
+/*  public synchronized String getCompletePlayerReport()
+  {
+    return null; //todo
+  }
+*/  
+  public synchronized StringBuilder getCompletePlayerReportRaw()
+  {
+    String[][] sa = appMasterMessaging.getSessionReportsByServer();
+    StringBuilder sb = new StringBuilder();
+    for(String[] row : sa) {
+      sb.append(row[0]); // servername
+      sb.append(SESSION_REPORT_ITEM_DELIMITER);
+      sb.append(row[1]); // report
+      sb.append(SESSION_REPORT_ITEM_DELIMITER);
+    }
+    return sb;
+  }
+ 
+  private String reportHTMLpre = "<html><head><style>td{padding:10px;}table {font-family:'Trebuchet MS',Arial,Helvetica,sans-serif;border:1px solid darkgrey;background-color:#CCCCCC;}</style></head><body><table><tr><td>";
+  private String reportHTMLpost = "</td></tr></table>";
+  public synchronized String getSinglePlayerReportHTML()
+  {
+    String s = getLocalNodeReport();
+    s=s.replace(SESSION_REPORT_FIELD_DELIMITER, "</td><td>");
+    s=s.replace(SESSION_REPORT_ITEM_DELIMITER, "</td></tr><tr><td>");
+    return reportHTMLpre + s + reportHTMLpost;
+  }
+  
+  public synchronized String getLocalNodeReport()
+  {
+    StringBuilder sb = getLocalNodeReportRaw();
+    sb.insert(0, getSessionReportHeader());
+    sb.insert(0, getServerName()+SESSION_REPORT_ITEM_DELIMITER);
+    return sb.toString();  
+  }
+  
+  int nuts=0;
+  public String getSessionReportHeader()
+  {
+    return "&nbsp;\t<b>User</b>\t<b>ID</b>\t<b>Start</b>\t<b>IP</b>\t<b>Browser</b>\t<b>Version</b>\t<b>OS</b>"+SESSION_REPORT_ITEM_DELIMITER;
+  }
+  
+  public synchronized StringBuilder getLocalNodeReportRaw()
+  {
+    StringBuilder sb = new StringBuilder();
+    Iterator<VaadinSession> itr = sessionsInThisMmowgliNode.iterator();
+
+    int n = 1;
+    while(itr.hasNext()) {
+      VaadinSession sess = itr.next();
+      MmowgliSessionGlobals sGlobs = sess.getAttribute(MmowgliSessionGlobals.class);
+      sb.append(n++);
+      sb.append(SESSION_REPORT_FIELD_DELIMITER); //" User ");
+      sb.append(sGlobs.getUserName());
+      sb.append(SESSION_REPORT_FIELD_DELIMITER);
+      Serializable id = sGlobs.getUserID();
+      sb.append(id==null?"not logged in":id);
+      sb.append(SESSION_REPORT_FIELD_DELIMITER); //" at ");
+      sb.append(sGlobs.getUserLoginTimeData());
+      sb.append(SESSION_REPORT_FIELD_DELIMITER); //" from ");
+      sb.append(sGlobs.getBrowserAddress());
+      sb.append(SESSION_REPORT_FIELD_DELIMITER); //" using ");
+      sb.append(sGlobs.getBrowserMiniType()); 
+      sb.append(SESSION_REPORT_FIELD_DELIMITER);
+      sb.append(sGlobs.getBrowserMajorVersion());
+      sb.append(SESSION_REPORT_FIELD_DELIMITER);
+      sb.append(sGlobs.getBrowserOS());
+      
+      sb.append(SESSION_REPORT_ITEM_DELIMITER);
+    }   
+    return sb;
   }
 }
