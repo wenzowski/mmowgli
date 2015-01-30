@@ -168,6 +168,9 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       case MENUGAMEMASTERACTIVECOUNTBYSERVERCLICK:
         helper.handleShowActiveUsersPerServer(menubar);
         break;
+      case MENUGAMEMASTERACTIVEPLAYERREPORTCLICK:
+        helper.handleShowPlayerReport(menubar);
+        break;
       case MENUGAMEMASTERMONITOREVENTS:
         EventMonitorPanel mpan = new EventMonitorPanel();
         Mmowgli2UI.getAppUI().setFrameContent(mpan);
