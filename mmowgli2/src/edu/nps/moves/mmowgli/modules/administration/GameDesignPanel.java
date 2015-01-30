@@ -318,8 +318,10 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
           largestMovePhase = m.getCurrentMovePhase();
         }
       }
-      if(largestMove == null || largestMovePhase == null)
+      if(largestMove == null || largestMovePhase == null) {
+        HSess.close();
         throw new RuntimeException("Program error in GameDesignPanel.NewMoveListener");
+      }
 
       largestNum++;
 
@@ -358,7 +360,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     {
       MWrap mw = (MWrap) event.getProperty().getValue();
       if (mw != null) {
-        HSess.init();
+        Object key = HSess.checkInit();
         Move mov = Move.mergeTL(mw.m);
         titlesPan.moveChangedTL(mov);
         topCardsPan.moveChangedTL(mov);
@@ -371,7 +373,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
 
         runningMoveWarningLabel.setVisible(AbstractGameBuilderPanel.isRunningMoveTL(mov));
         moveBeingEdited = mov;
-        HSess.close();
+        HSess.checkClose(key);
       }
     }
   }
