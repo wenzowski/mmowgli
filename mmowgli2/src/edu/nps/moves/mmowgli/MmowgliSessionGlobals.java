@@ -26,11 +26,8 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.SYSTEM_LOGS;
 
 import java.io.Serializable;
 import java.net.URL;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.UUID;
-
-import javax.servlet.ServletContext;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import com.vaadin.server.SessionInitEvent;
 import com.vaadin.server.WebBrowser;
@@ -64,17 +61,21 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   public boolean initted = false;
   
   private String browserApp="unk";
+  private String browserMiniType = "";
+  private String browserOS = "";
   private int browserMajVersion=0;
   private int browserMinVersion=0;
   private String browserAddress="unk";
   private boolean internetExplorer7 = false;
   private boolean internetExplorer  = false;
 
+  private String loginTimeStamp = "";
   private MmowgliController controller;
   private MessagingManager2 messagingManager;
   private MediaLocator mediaLoc;
   private ScoreManager2 scoreManager;
   private Serializable userId=null;
+  private String userName="unset";
   private Mmowgli2UI firstUI = null;
   private URL alternateVideoUrl;
   private boolean loggedIn = false;
@@ -89,8 +90,6 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
 
   private HashMap<Object,Object> panelState = new HashMap<Object,Object>();
   
-  private ServletContext servletContext;
-  
   public MmowgliSessionGlobals(SessionInitEvent event, Mmowgli2VaadinServlet servlet)
   {
     event.getSession().setAttribute(MmowgliSessionGlobals.class, this);  // store this for use across the app
@@ -98,7 +97,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     //appMaster = (AppMaster)servlet.getServletContext().getAttribute(MmowgliConstants.APPLICATION_MASTER_ATTR_NAME);
     
     scoreManager = new ScoreManager2();
-    servletContext = servlet.getServletContext();
+    loginTimeStamp = new SimpleDateFormat("EEE d MMM yyyy HH:mm:ss").format(new Date()).toString();
   }
   
   public void init(WebBrowser webBr)
@@ -110,6 +109,8 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   private void deriveBrowserBooleans(WebBrowser webBr)
   {
     browserApp = webBr.getBrowserApplication();
+    browserMiniType = returnBrowserType(webBr);
+    browserOS = returnBrowserOS(webBr);
     browserMajVersion = webBr.getBrowserMajorVersion();
     browserMinVersion = webBr.getBrowserMinorVersion();
     browserAddress    = webBr.getAddress();
@@ -120,6 +121,21 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
         internetExplorer7 = true;
     }
   }
+  
+  public String getBrowserMiniType()
+  {
+    return browserMiniType;
+  }
+  public String getBrowserOS()
+  {
+    return browserOS;
+  }
+  
+  public int getBrowserMajorVersion()
+  {
+    return browserMajVersion;
+  }
+  
   public String getBrowserAddress()
   {
     return browserAddress;
@@ -127,7 +143,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
 
   public String browserIDString()
   {
-    return browserApp+" "+browserMajVersion+" "+browserMinVersion+" at "+browserAddress;
+    return browserAddress+" with "+browserApp+" "+browserMajVersion+" "+browserMinVersion;
   }
 
   public boolean isIE()
@@ -176,14 +192,23 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
       gameAdministrator = me.isAdministrator();
       gameMaster = me.isGameMaster();
       viewOnlyUser = me.isViewOnly();
-    
+      userName = me.getUserName();
   }
   public Serializable getUserID()
   {
     return userId;
   }
-
+  
+  public String getUserName()
+  {
+    return userName;
+  }
  
+  public String getUserLoginTimeData()
+  {
+    return loginTimeStamp;
+  }
+  
   public MediaLocator mediaLocator()
   {
     return mediaLoc;
@@ -365,11 +390,6 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     return messagingManager;   
   }
 
-  public ServletContext getServletContext()
-  {
-    return servletContext;
-  }
-
   public void setGameBooleans(Game g)
   {
     setGameReadOnly(g.isReadonly());
@@ -377,5 +397,31 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     setTopCardsReadOnly(g.isTopCardsReadonly());
     MSysOut.println(SYSTEM_LOGS,"Session game globals set to game r/o:"+g.isReadonly()+" cards r/o:"+g.isCardsReadonly()+" top cards r/o:"+g.isTopCardsReadonly());
   }
+  private String returnBrowserType(WebBrowser webBr)
+  {
+    if( webBr.isFirefox() ) { return "Firefox"; }
+    if( webBr.isSafari() ) { return "Safari"; }
+    if( webBr.isIE() ) { return "IE"; }
+    if( webBr.isChrome() ) { return "Chrome"; }
+    if( webBr.isOpera() ) { return "Opera"; }
+    if( webBr.isLinux() ) { return "Linux"; }
+    if( webBr.isAndroid() ) { return "Android"; }
+    if( webBr.isIPhone() ) { return "IPhone"; }
+    if( webBr.isIPad() ) { return "IPad"; }
+    if( webBr.isIOS() ) { return "IOS"; }
+    return "";
+  }
 
+  private String returnBrowserOS(WebBrowser webBr)
+  {
+    if( webBr.isAndroid()) { return "Android"; }
+    if( webBr.isIOS()) { return "IOS"; }
+    if( webBr.isIPad()){ return "IPad"; }
+    if( webBr.isIPhone()) { return "IPhone"; }
+    if( webBr.isLinux()) { return "Linux"; }
+    if( webBr.isMacOSX()) { return "MacOSX"; }
+    if( webBr.isWindows()) { return "Windows"; }
+    if( webBr.isWindowsPhone()) { return "Windows Phone"; }
+    return "Unknown OS/platform";
+  }
 }
