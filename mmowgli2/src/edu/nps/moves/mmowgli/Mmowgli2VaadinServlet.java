@@ -131,7 +131,8 @@ public class Mmowgli2VaadinServlet extends VaadinServlet implements SessionInitL
     
     //MSysOut.println("JMETERdebug: Session created, id = "+event.getSession().hashCode());
     if(appMaster != null)  {// might be with error on startup
-      appMaster.doSessionCountUpdate(incrementSessionCount());
+      appMaster.doSessionCountUpdate(incrementSessionCount()); // remove after the following works
+      appMaster.logSessionInit(event);     
     }
   }
 
@@ -143,14 +144,18 @@ public class Mmowgli2VaadinServlet extends VaadinServlet implements SessionInitL
       appMaster.doSessionCountUpdate(decrementSessionCount());
 
       MmowgliSessionGlobals globs = event.getSession().getAttribute(MmowgliSessionGlobals.class);  // store this for use across the app
-      if(globs != null)
-        appMaster.logSessionEnd(globs.getUserID());
-    }   
+      if(globs != null) {
+        appMaster.logSessionEnd(globs.getUserID());// remove after the following works
+        appMaster.logSessionDestroy(event);
+      }
+    }  
   }
+  
   private int incrementSessionCount()
   {
     return ++sessionCount;
   }
+  
   private int decrementSessionCount()
   {
     if(sessionCount <= 0)
