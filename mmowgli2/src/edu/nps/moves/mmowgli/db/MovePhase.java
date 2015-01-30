@@ -149,11 +149,11 @@ public class MovePhase implements Serializable
   public static final String HOW_WILL_IT_WORK  = "How will it work?";
   public static final String HOW_WILL_IT_CHANGE_THE_SITUATION = "How will it change the situation?";
   
-  String actionPlanWhoIsInvolvedHeader;
-  String actionPlanWhatIsItHeader;
-  String actionPlanWhatWillItTakeHeader;
-  String actionPlanHowWillItWorkHeader;
-  String actionPlanHowWillItChangeHeader;
+  String actionPlanWhoIsInvolvedHeader=WHO_IS_INVOLVED;
+  String actionPlanWhatIsItHeader=WHAT_IS_IT;
+  String actionPlanWhatWillItTakeHeader=WHAT_WILL_IT_TAKE;
+  String actionPlanHowWillItWorkHeader=HOW_WILL_IT_WORK;
+  String actionPlanHowWillItChangeHeader=HOW_WILL_IT_CHANGE_THE_SITUATION;
 //@formatter:on
 
   public static MovePhase mergeTL(MovePhase ph)
