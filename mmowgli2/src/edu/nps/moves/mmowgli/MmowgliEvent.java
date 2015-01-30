@@ -153,7 +153,8 @@ public enum MmowgliEvent
   ACTIONPLANREQUESTCLICK,
   
   //Recent adds
-  MENUGAMEMASTERABOUTMMOWGLI;
+  MENUGAMEMASTERABOUTMMOWGLI,
+  MENUGAMEMASTERACTIVEPLAYERREPORTCLICK;
   
   public static final MmowgliEvent values[] = values();
 }
