@@ -112,25 +112,25 @@ public class ReportGenerator implements Runnable
           g = Game.getTL();
           reportPeriod = g.getReportIntervalMinutes() * 60 * 1000;
           
-          MSysOut.println(REPORT_LOGS,"Mmowgli report-generator generating card visualizer and action plan, card, user and game design reports to " + MmowgliConstants.REPORTS_FILESYSTEM_PATH + " at "
+          MSysOut.println(REPORT_LOGS,"Report-generator generating card visualizer and action plan, card, user and game design reports to " + MmowgliConstants.REPORTS_FILESYSTEM_PATH + " at "
                                + df.format(new Date()));
           GameEventLogger.logBeginReportGenerationTL();
           // don't put in game log...too many GameEventLogger.logBeginReportGeneration(ssm);
-          MSysOut.println(REPORT_LOGS,"Mmowgli report-generator building card visualizer");
+          MSysOut.println(REPORT_LOGS,"Report-generator building card visualizer");
           new CardVisualizerBuilder().build();
           
-          MSysOut.println(REPORT_LOGS,"Mmowgli report-generator exporting action plans");
+          MSysOut.println(REPORT_LOGS,"Report-generator exporting action plans");
           exportOneTL(new ActionPlanExporter());
-          MSysOut.println(REPORT_LOGS,"Mmowgli report-generator exporting cards");
+          MSysOut.println(REPORT_LOGS,"Report-generator exporting cards");
           exportOneTL(new CardExporter());
-          MSysOut.println(REPORT_LOGS,"Mmowgli report-generator exporting users");
+          MSysOut.println(REPORT_LOGS,"Report-generator exporting users");
           exportOneTL(new UserExporter());  // keep this last, uses the product of the 2 before
-          MSysOut.println(REPORT_LOGS,"Mmowgli report-generator exporting game");
+          MSysOut.println(REPORT_LOGS,"Report-generator exporting game");
           String gXmlPath = exportOneTL(new GameExporter());
 
           writeIndexDotHtml(MmowgliConstants.REPORTS_FILESYSTEM_PATH + "index.html", gXmlPath);
 
-          MSysOut.println(REPORT_LOGS,"Mmowgli report-generator finished");
+          MSysOut.println(REPORT_LOGS,"Report-generator finished");
           GameEventLogger.logEndReportGenerationTL();
         } // try
 
