@@ -233,7 +233,7 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
   {
     try {
       Flash ytp = new Flash();
-      ytp.setSource(new ExternalResource("http://www.youtube.com/v/" + m.getUrl()));
+      ytp.setSource(new ExternalResource("https://www.youtube.com/v/" + m.getUrl()));
       ytp.setParameter("allowFullScreen", "true");
       ytp.setParameter("showRelated", "false");
       ytp.setWidth(150.0f, Unit.PIXELS);

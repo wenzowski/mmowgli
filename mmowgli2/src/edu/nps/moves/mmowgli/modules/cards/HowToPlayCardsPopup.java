@@ -71,7 +71,7 @@ public class HowToPlayCardsPopup extends MmowgliDialog implements ClickListener
 
       try {
         Flash ytp = new Flash();
-        ytp.setSource(new ExternalResource("http://www.youtube.com/v/" + m.getUrl()));
+        ytp.setSource(new ExternalResource("https://www.youtube.com/v/" + m.getUrl()));
         ytp.setParameter("allowFullScreen", "true");
         ytp.setParameter("showRelated", "false");
         ytp.setWidth(CALLTOACTION_VIDEO_W);
