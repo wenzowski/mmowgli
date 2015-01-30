@@ -22,7 +22,7 @@
 
 package edu.nps.moves.mmowgli.utility;
 
-import static edu.nps.moves.mmowgli.utility.MmowgliLogger.mLog;
+import static edu.nps.moves.mmowgli.MmowgliConstants.ERROR_LOGS;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,6 +34,7 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Pages.PagesData;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 public class MailManager
 {
@@ -411,7 +412,7 @@ public class MailManager
       mailer.send(email, from, subj, body, true);
     }
     catch (Throwable t) {
-      mLog(t.getLocalizedMessage(),t);
+      MSysOut.println(ERROR_LOGS,"MailManager.sendPasswordResetEmailTL() exception: "+t.getLocalizedMessage());
     }
   }
 
@@ -431,7 +432,7 @@ public class MailManager
       mailer.send(data.gettroubleMailto(), from, subj, body, true);
     }
     catch (Throwable t) {
-      mLog(t.getLocalizedMessage(), t);
+      MSysOut.println(ERROR_LOGS,"MailManager.sendGameMasterRegisteredEmailTL() exception: "+t.getLocalizedMessage());;
     }
   }
 
