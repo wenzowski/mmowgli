@@ -170,7 +170,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   }
   
   private HashMap<String,Integer> serverSessionCounts = new HashMap<String,Integer>();
-  
+  private HashMap<String,String> serverSessionReports = new HashMap<String,String>();
   /**
    * Called from the servlet listener, which keeps track of our instance count
    * @param sessCount
@@ -216,7 +216,45 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
     }
     return oa;
   }
+  
+  public String[][] getSessionReportsByServer()
+  {
+    String[][] sa = new String[serverSessionReports.size()][2];
+    Set<String> keys = serverSessionReports.keySet();
+    int i = 0;
+    for(String s : keys) {
+      sa[i][0] = s;
+      sa[i][1] = serverSessionReports.get(s);
+      i++;
+    }
+    return sa;    
+  }
+  
+  public void doSessionReportBroadcast(StringBuilder singleNodeReportSB)
+  {
+    String singleNodeReport = singleNodeReportSB.toString();
+    singleNodeReport = singleNodeReport.replace(SESSION_REPORT_FIELD_DELIMITER, SESSION_REPORT_FIELD_DELIMITER_WIRE);
+    InterTomcatIO sessIO = getInterTomcatIO();
+    String msgStr = AppMaster.instance().getServerName() + SESSION_REPORT_ITEM_DELIMITER_WIRE + singleNodeReport;
+    if (sessIO != null)
+      sessIO.sendDelayed(SESSIONS_REPORT, msgStr, ""); // let this thread return 
+    System.out.println(AppMaster.instance().getServerName()+" SENT report: "+AppMaster.instance().getServerName() + SESSION_REPORT_ITEM_DELIMITER_WIRE + singleNodeReport);
     
+  }
+  
+ private void handleSessionsReportMsg(String message)
+  {
+    String[] sa = message.split(SESSION_REPORT_ITEM_DELIMITER_WIRE);
+    if(sa.length != 2)
+      serverSessionReports.remove(sa[0]);
+    else {
+      // first field server name
+      // second \n-separated list of sessions
+      sa[1] = sa[1].replace(SESSION_REPORT_FIELD_DELIMITER_WIRE, SESSION_REPORT_FIELD_DELIMITER);    
+      serverSessionReports.put(sa[0], sa[1]);
+    }
+  }
+  
   // edu.nps.moves.mmowgli.messaging.InterTomcatIO.Receiver
   // Handler of messages off the JmsIO2 object, which is receiving msgs from other custer nodes
   @Override 
@@ -239,7 +277,9 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
       case UPDATE_SESSION_COUNT:
         handleSessionCountMsg(pkt.msg);
         break;
-
+      case SESSIONS_REPORT:
+        handleSessionsReportMsg(pkt.msg);
+        break;
       default:
         Broadcaster.broadcast(pkt,this);  // last param means I don't want to hear my own messages
     }
