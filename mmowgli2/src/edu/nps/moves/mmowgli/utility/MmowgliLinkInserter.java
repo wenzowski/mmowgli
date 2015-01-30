@@ -49,6 +49,7 @@ public class MmowgliLinkInserter
   static enum linkType {CARD,ACTIONPLAN,USER};
 	// todo convert to Java regex
   public static final String USERLINK_REGEX   = "user\\s+(\\d+)";
+  public static final String ACTPLNLINK_2_REGEX = "ap\\s+(\\d+)";
   public static final String CARDLINK_REGEX   = "card\\s+(\\d+)"; //"(([Gg][Aa][Mm][Ee]\s*(\d|\.)+\s*)?([Ii][Dd][Ee][Aa]\s*)?[Cc][Aa][Rr][Dd]\s*#?\s*([Cc][Hh][Aa][Ii][Nn]\s*#?\s*)?(\d+))";
   public static final String ACTPLNLINK_REGEX = "(?:action\\s)?plan\\s+(\\d+)"; //(([Gg][Aa][Mm][Ee]\s*(\d|\.)+\s*)?([Aa][Cc][Tt][Ii][Oo][Nn]\s*#?\s*)?[Pp][Ll][Aa][Nn]\s*#?\s*(\d+))"
   
@@ -60,7 +61,7 @@ public class MmowgliLinkInserter
     "(?:"                           +
       "https?://"                   + // # http or https protocol
       "|"                           + // #   or
-      "www\\d{0,3}[.]"              + // # "www.", "www1.", "www2." ��� "www999."
+      "www\\d{0,3}[.]"              + // # "www.", "www1.", "www2.", "www999."
       "|"                           + // #   or
       "[a-z0-9.\\-]+[.][a-z]{2,4}/" + // # looks like domain name followed by a slash
     ")"                             +
@@ -84,6 +85,7 @@ public class MmowgliLinkInserter
   private static Pattern cardLinkPattern   = Pattern.compile(CARDLINK_REGEX,  Pattern.CASE_INSENSITIVE);
   private static Pattern actPlnLinkPattern = Pattern.compile(ACTPLNLINK_REGEX,Pattern.CASE_INSENSITIVE);
   private static Pattern urlLinkPattern    = Pattern.compile(URLLINK_REGEX,   Pattern.CASE_INSENSITIVE);
+  private static Pattern apLinkPattern     = Pattern.compile(ACTPLNLINK_2_REGEX,Pattern.CASE_INSENSITIVE);
  
   /**
    * Replaces strings of "user nnn" with game name
@@ -159,6 +161,9 @@ public class MmowgliLinkInserter
     loopMatcher(sb,matcher,CARD_EVENTNUM, linkType.CARD, sess);
     
     matcher = actPlnLinkPattern.matcher(sb);
+    loopMatcher(sb,matcher,ACTPLN_EVENTNUM, linkType.ACTIONPLAN, sess);
+    
+    matcher = apLinkPattern.matcher(sb);
     loopMatcher(sb,matcher,ACTPLN_EVENTNUM, linkType.ACTIONPLAN, sess);
     
     matcher = userLinkPattern.matcher(sb);
