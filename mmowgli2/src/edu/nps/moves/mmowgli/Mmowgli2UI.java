@@ -34,6 +34,7 @@ import org.vaadin.cssinject.CSSInject;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.components.AppMenuBar;
@@ -150,20 +151,25 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     Game game = Game.get(sess);
     boolean gameReadOnly = game.isReadonly();
     boolean cardsReadOnly = game.isCardsReadonly();
-
-    String title = Move.getCurrentMove(sess).getCurrentMovePhase().getWindowTitle();
     
-    ArrayList<UI> uis = new ArrayList<UI>(getSession().getUIs());
-    uis.add(this);// Set this one, since we may not be in the list yet
-    if(gameReadOnly)
-      title = title+" (Read-only)";
-    else if(cardsReadOnly)
-      title = title+" (Cards read-only)";
-    else
-      ;      
-    for(UI ui : uis) {
-      ui.getPage().setTitle(title);
-    }    
+    VaadinSession vsess = getSession();
+    if (vsess != null) {  // occasionally see null here
+      ArrayList<UI> uis = new ArrayList<UI>(vsess.getUIs());
+
+      String title = Move.getCurrentMove(sess).getCurrentMovePhase().getWindowTitle();
+
+      uis.add(this);// Set this one, since we may not be in the list yet
+      
+      if (gameReadOnly)
+        title = title + " (Read-only)";
+      else if (cardsReadOnly)
+        title = title + " (Cards read-only)";
+      else
+        ;
+      for (UI ui : uis) {
+        ui.getPage().setTitle(title);
+      }
+    }
   }
   
   public void setLoginContentTL()
