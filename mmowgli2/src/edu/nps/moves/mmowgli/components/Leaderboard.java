@@ -110,7 +110,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     tableVLayout.addComponent(sp = new Label());
     sp.setHeight("20px"); // to fit top of background
 
-    tableVLayout.addComponent(table = createTable());
+    tableVLayout.addComponent(table = createTableTL());
     tableVLayout.setComponentAlignment(table, Alignment.TOP_CENTER);
     table.setValue(globs.getUserID());
     tableVLayout.setExpandRatio(table, 1.0f);
@@ -180,9 +180,9 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
   
   // This is very close to the BuddyTable,
   // todo merge
-  Table createTable()
+  Table createTableTL()
   {
-    Table tab = UserTable.makeLeaderBoardTable();
+    Table tab = UserTable.makeLeaderBoardTableTL(Move.getCurrentMoveTL().getNumber());
     tab.setWidth("920px");
     tab.setHeight("100%");
     return tab;
@@ -200,7 +200,8 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
   
   private void setTableCommon(Table newTable)
   {
-    tableVLayout.removeComponent(table);
+    if(table != null)
+      tableVLayout.removeComponent(table);
     
     table = newTable;
     table.setWidth("920px");
