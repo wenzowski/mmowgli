@@ -88,9 +88,9 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
   private LTileLayer mapQstTiles = new LTileLayer();
 
   @HibernateSessionThreadLocalConstructor
-  public ActionPlanPageTabMap(Object apId, boolean isMockup)
+  public ActionPlanPageTabMap(Object apId, boolean isMockup, boolean readonly)
   {
-    super(apId, isMockup);
+    super(apId, isMockup, readonly);
   }
   
   @Override
@@ -289,7 +289,7 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
   
   private void toggleSaveButtPan(boolean enabled)
   {
-    savePanel.setVisible(enabled);
+    savePanel.setVisible(enabled & !isReadOnly);
     map.setHeight(enabled ? MAPHEIGHT_WITH_BUTTONS : MAPHEIGHT);
     //googleMapWidget.setHeight(enabled ? MAPHEIGHT_WITH_BUTTONS : MAPHEIGHT);
   }

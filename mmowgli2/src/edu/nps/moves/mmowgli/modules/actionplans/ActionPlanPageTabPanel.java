@@ -48,15 +48,17 @@ public abstract class ActionPlanPageTabPanel extends HorizontalLayout implements
   
   protected Object apId;
   protected boolean isMockup;
+  protected boolean isReadOnly;
   
   private VerticalLayout leftVertLay;
   private VerticalLayout rightVertLay;
     
-  public ActionPlanPageTabPanel(Object apId, boolean isMockup)
+  public ActionPlanPageTabPanel(Object apId, boolean isMockup, boolean isReadOnly)
   {
     this.apId = apId;
     this.isMockup = isMockup;
-
+    this.isReadOnly = isReadOnly;
+    
     setSpacing(true);
     setMargin(false);
     

@@ -41,7 +41,6 @@ import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.BaseTheme;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.ToggleLinkButton;
@@ -81,12 +80,12 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
   private Label nonAuthorLabel;
   private boolean showingHiddenMsgs = false;
   private boolean isGameMasterOrAdmin = false;
-  private boolean gameRO = false;
+
   
   @HibernateSessionThreadLocalConstructor
-  public ActionPlanPageTabTalk(Object apId, boolean isMockup)
+  public ActionPlanPageTabTalk(Object apId, boolean isMockup, boolean readonly)
   {
-    super(apId, isMockup);
+    super(apId, isMockup, readonly);
 
     submitButt = new NativeButton();
     discardButt = new NativeButton();
@@ -129,8 +128,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
     else {
       missionContentLab = new HtmlLabel(g.getDefaultActionPlanTalkText());
     }
-    gameRO = g.isReadonly();
-    
+
     leftVL.addComponent(missionContentLab);
     leftVL.setComponentAlignment(missionContentLab, Alignment.TOP_LEFT);
     leftVL.addStyleName("m-actionplan-mission-content-text");
@@ -301,14 +299,14 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
         superInterestingCB.addStyleName("m-actionplan-comment-superinteresting");
         superInterestingCB.setImmediate(true);
         superInterestingCB.addValueChangeListener(new SuperInterestingCheckBoxListener());
-        superInterestingCB.setEnabled(!gameRO);
+        superInterestingCB.setEnabled(!isReadOnly);
         hl.setComponentAlignment(superInterestingCB, Alignment.TOP_CENTER);
      
         final ToggleLinkButton tlb;
         hl.addComponent(tlb = new ToggleLinkButton("hide", "show", "m-actionplan-comment-text"));
         hl.setComponentAlignment(tlb, Alignment.MIDDLE_CENTER);
         tlb.setInitialState(!msg.isHidden());
-        tlb.setEnabled(!gameRO);
+        tlb.setEnabled(!isReadOnly);
         tlb.addOnListener(new Button.ClickListener()
         {         
           @Override
@@ -350,7 +348,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
         editButt.setDescription("Edit this text (game masters only)");
 
         editButt.addClickListener(new EditListener());
-        editButt.setEnabled(!gameRO);
+        editButt.setEnabled(!isReadOnly);
 
         editButt.setSizeUndefined();
         hl.addComponent(editButt);
@@ -433,10 +431,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
   
   private Component createChatEntryField()
   {
-    MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-    boolean gameRO = globs.isGameReadOnly() || globs.isViewOnlyUser();
-    
-    HorizontalLayout hl = new HorizontalLayout();
+     HorizontalLayout hl = new HorizontalLayout();
     chatTextField = new TextArea();
     chatTextField.setRows(3);
     chatTextField.setWordwrap(true);
@@ -444,13 +439,13 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
     hl.addComponent(chatTextField);
     chatTextField.setWidth("99%");
     hl.setExpandRatio(chatTextField, 1.0f);
-    chatTextField.setReadOnly(gameRO);
+    chatTextField.setReadOnly(isReadOnly);
     
     chatSubmitButt = new NativeButton();
     chatSubmitButt.setStyleName("m-submitButton");
     hl.addComponent(chatSubmitButt);
     chatSubmitButt.addClickListener(new ChatButtonListener());
-    chatSubmitButt.setEnabled(!gameRO);
+    chatSubmitButt.setEnabled(!isReadOnly);
     return hl;
   }
   
@@ -579,8 +574,8 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
   
   public void setICanChat(boolean yn)
   {
-    submitButt.setEnabled(yn);
-    discardButt.setEnabled(yn);
+    submitButt.setEnabled(yn & !isReadOnly);
+    discardButt.setEnabled(yn & !isReadOnly);
     chatEntryComponent.setVisible(yn);
     chatScroller.setVisible(yn || isGameMasterOrAdmin);
     nonAuthorLabel.setVisible(!yn);
