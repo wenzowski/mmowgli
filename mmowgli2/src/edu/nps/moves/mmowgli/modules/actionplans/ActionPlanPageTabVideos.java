@@ -71,9 +71,9 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
   private Label nonAuthorLabel;
   
   @HibernateSessionThreadLocalConstructor
-  public ActionPlanPageTabVideos(Object apId, boolean isMockup)
+  public ActionPlanPageTabVideos(Object apId, boolean isMockup, boolean isReadOnly)
   {
-    super(apId, isMockup);
+    super(apId, isMockup, isReadOnly);
     addVideoButt = new NativeButton();
     replaceLis = new VideoReplacer();
   }
@@ -115,7 +115,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     addVideoButt.addStyleName("borderless");
     addVideoButt.setIcon(globs.getMediaLocator().getActionPlanAddVideoButt());
     addVideoButt.addClickListener(new VideoAdder());
-    addVideoButt.setEnabled(!globs.isGameReadOnly() && !globs.isViewOnlyUser());
+    addVideoButt.setEnabled(!isReadOnly);
     
     flowLay.addComponent(nonAuthorLabel = new Label("Authors may add videos when editing the plan."));
     nonAuthorLabel.setVisible(false);
@@ -498,7 +498,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
   @Override
   public void setImAuthor(boolean yn)
   {
-    addVideoButt.setEnabled(yn);
+    addVideoButt.setEnabled(yn && !isReadOnly);
     nonAuthorLabel.setVisible(!yn);
     
     Iterator<Component> itr = ((AbstractLayout)rightScroller.getContent()).iterator();

@@ -77,9 +77,9 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
   static Class<?>[] STRCLSARR = new Class<?>[]{String.class};  // for reflection
 
   @HibernateSessionThreadLocalConstructor
-  public ActionPlanPageTabThePlan2(ActionPlanPage2 mother, Object apId, boolean isMockup)
+  public ActionPlanPageTabThePlan2(ActionPlanPage2 mother, Object apId, boolean isMockup, boolean readonly)
   {
-    super(apId, isMockup);
+    super(apId, isMockup, readonly);
     whatTA = new TextArea();           whatTA.addStyleName(ACTIONPLAN_TAB_THEPLAN_WHAT);
     whatWillItTakeTA = new TextArea(); whatTA.addStyleName(ACTIONPLAN_TAB_THEPLAN_TAKE);
     howWorkTA = new TextArea();        whatTA.addStyleName(ACTIONPLAN_TAB_THEPLAN_WORK);
@@ -535,19 +535,19 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
   public void setImAuthor(boolean yn)
   {
     //whoTA.setReadOnly(!yn);
-    whoGroup.setRo(!yn);
+    whoGroup.setRo(!yn || isReadOnly);
     whoGroup.getHistoryButton().setVisible(yn);
     //whatTA.setReadOnly(!yn);
-    whatGroup.setRo(!yn);
+    whatGroup.setRo(!yn || isReadOnly);
     whatGroup.getHistoryButton().setVisible(yn);
     //whatWillItTakeTA.setReadOnly(!yn);
-    whatTakeGroup.setRo(!yn);
+    whatTakeGroup.setRo(!yn || isReadOnly);
     whatTakeGroup.getHistoryButton().setVisible(yn);
     //howWorkTA.setReadOnly(!yn);
-    howGroup.setRo(!yn);
+    howGroup.setRo(!yn || isReadOnly);
     howGroup.getHistoryButton().setVisible(yn);
     //howChangeTA.setReadOnly(!yn); 
-    howChangeGroup.setRo(!yn);
+    howChangeGroup.setRo(!yn || isReadOnly);
     howChangeGroup.getHistoryButton().setVisible(yn);
   }
 }

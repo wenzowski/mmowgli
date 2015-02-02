@@ -72,9 +72,9 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
   private Label nonAuthorLabel;
   
   @HibernateSessionThreadLocalConstructor
-  public ActionPlanPageTabImages(Object apId, boolean isMockup)
+  public ActionPlanPageTabImages(Object apId, boolean isMockup, boolean readonly)
   {
-    super(apId, isMockup);
+    super(apId, isMockup, readonly);
 
     addImageButt = new NativeButton();
     replaceLis = new ImageReplacer();
@@ -117,7 +117,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     addImageButt.addStyleName("borderless");
     addImageButt.setIcon(globs.getMediaLocator().getActionPlanAddImageButt());
     addImageButt.addClickListener(new ImageAdder());
-    addImageButt.setEnabled(!globs.isGameReadOnly() && !globs.isViewOnlyUser());
+    addImageButt.setEnabled(!isReadOnly);
 
     flowLay.addComponent(nonAuthorLabel = new Label("Authors may add images when editing the plan."));
     nonAuthorLabel.setVisible(false);
@@ -493,7 +493,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
   @Override
   public void setImAuthor(boolean yn)
   {
-    addImageButt.setEnabled(yn);
+    addImageButt.setEnabled(yn && !isReadOnly);
     nonAuthorLabel.setVisible(!yn);
 
     Iterator<Component> itr = ((AbstractLayout)imageScroller.getContent()).iterator();

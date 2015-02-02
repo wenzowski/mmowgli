@@ -123,7 +123,8 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   private ThumbPanel thumbPanel;
   boolean imAuthor = false;
   SaveCancelPan saveCanPan;
-
+  boolean readonly = false;
+  
   ClickListener helpWantedListener, interestedListener;
 
   public ActionPlanPage2(Object actPlnId)
@@ -136,6 +137,15 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   {
     this.apId = actPlnId;
     ActionPlan actPln = ActionPlan.getTL(actPlnId);
+    Game g = Game.getTL();
+    MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
+    if(globs.isGameReadOnly())
+      readonly = true;
+    if(globs.isViewOnlyUser())
+      readonly = true;
+    if((actPln.getCreatedInMove().getNumber() != g.getCurrentMove().getNumber()) && globs.isPriorActionPlansReadOnly())
+      readonly = true;
+    
     ChatLog cl = actPln.getChatLog();
     if (cl != null)
       chatLogId = cl.getId();
@@ -146,13 +156,12 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     titleUnion = new TextAreaLabelUnion(null, null, scLis, "m-actionplan-title");
 
     commentPanel = new ActionPlanPageCommentPanel2(this, actPlnId);
-    MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     commentsButt = new NativeButton();
     envelopeButt = new NativeButton();
     addCommentButt = new NativeButton();
-    addCommentButt.setEnabled(!globs.isGameReadOnly() && !globs.isViewOnlyUser());
+    addCommentButt.setEnabled(!readonly);
     addCommentButtBottom = new NativeButton();
-    addCommentButtBottom.setEnabled(!globs.isGameReadOnly() && !globs.isViewOnlyUser());
+    addCommentButtBottom.setEnabled(!readonly);
 
     viewChainButt = new NativeButton();
     browseBackButt = new NativeButton();
@@ -162,11 +171,11 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     rfeButt.setParam(actPlnId);
     addAuthButton = new NativeButton();
 
-    thePlanTab = new ActionPlanPageTabThePlan2(this, actPlnId, isMockup);
-    talkTab = new ActionPlanPageTabTalk(actPlnId, isMockup);
-    imagesTab = new ActionPlanPageTabImages(actPlnId, isMockup);
-    videosTab = new ActionPlanPageTabVideos(actPlnId, isMockup);
-    mapTab = new ActionPlanPageTabMap(actPlnId, isMockup);
+    thePlanTab = new ActionPlanPageTabThePlan2(this, actPlnId, isMockup, readonly);
+    talkTab = new ActionPlanPageTabTalk(actPlnId, isMockup, readonly);
+    imagesTab = new ActionPlanPageTabImages(actPlnId, isMockup, readonly);
+    videosTab = new ActionPlanPageTabVideos(actPlnId, isMockup, readonly);
+    mapTab = new ActionPlanPageTabMap(actPlnId, isMockup, readonly);
     thePlanTabButt = new NativeButton();
     talkTabButt = new NativeButton();
     imagesTabButt = new NativeButton();
@@ -321,14 +330,14 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     titleHistoryButt.addStyleName("borderless");
     titleHistoryButt.addStyleName("m-actionplan-history-button");
     titleHistoryButt.addClickListener(new TitleHistoryListener());
-
+    titleHistoryButt.setEnabled(!readonly);
     vl.addComponent(titleHistoryButt);
     vl.setComponentAlignment(titleHistoryButt, Alignment.TOP_RIGHT);
     titleAndThumbsHL.addComponent(vl); //titleTA);
 
     titleUnion.setWidth(ACTIONPLAN_TITLE_W);
     titleUnion.setValueTL(actPln.getTitle());
-
+    
     titleUnion.addStyleName("m-lightgrey-border");
     // titleUnion.addStyleName("m-opacity-75");
     titleUnion.setHeight("95px"); // 120 px); must make it this way for alignment of r/o vs rw
@@ -1468,24 +1477,23 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   private void handleDisablements_oob(Session sess)
   {
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-    boolean ro = globs.isGameReadOnly() || globs.isViewOnlyUser();
     boolean au = amIAnAuthor(sess);
     imAuthor = au; // save locally
     boolean gm = DBGet.getUser(globs.getUserID(), sess).isGameMaster();
 
-    thePlanTab.setImAuthor(au && !ro);
+    thePlanTab.setImAuthor(au && !readonly);
 
-    talkTab.setICanChat((au || gm) && !ro); // temp until todo below
+    talkTab.setICanChat((au || gm) && !readonly); // temp until todo below
     talkTab.setImAuthor(au);
     talkTab.setImGM(gm);
 
-    imagesTab.setImAuthor(au && !ro); // todo, separate into author, gm and ro
-    videosTab.setImAuthor(au && !ro);
-    mapTab.setImAuthor(au && !ro);
+    imagesTab.setImAuthor(au && !readonly); // todo, separate into author, gm and ro
+    videosTab.setImAuthor(au && !readonly);
+    mapTab.setImAuthor(au && !readonly);
 
-    titleUnion.setRo(!au || ro); // titleTA.setReadOnly (!au || ro);
-    titleHistoryButt.setVisible(au && !ro);
-    addAuthButton.setEnabled((gm || au) && !ro);
+    titleUnion.setRo(!au || readonly); // titleTA.setReadOnly (!au || ro);
+    titleHistoryButt.setVisible(au && !readonly);
+    addAuthButton.setEnabled((gm || au) && !readonly);
 
     String helpWanted = helpWanted(sess);
     if (imAuthor) {
