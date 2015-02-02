@@ -53,6 +53,7 @@ import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.messaging.InterTomcatIO.InterTomcatReceiver;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
+import edu.nps.moves.mmowgli.modules.scoring.ScoreManager2;
 import edu.nps.moves.mmowgli.utility.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -318,7 +319,7 @@ public class AppMaster
     vaadinHibernate.installDataBaseListeners(); // this);
 
     mCacheManager = MCacheManager.instance();
-    // handleMoveSwitchScoring();
+    handleMoveSwitchScoring();
     handleBadgeManager();
     handleAutomaticReportGeneration();
 
@@ -358,6 +359,37 @@ public class AppMaster
     }
     else
       MSysOut.println(REPORT_LOGS,"Report generator NOT launched");
+  }
+  /**
+   * This puts all scores from the userscore/move table into the basicScore field in the user object.  They are duplicates, but the
+   * one in the table is required for table sorting.
+   * Done once per startup only on cluster master
+   * @param context
+   */
+  @SuppressWarnings("unchecked")
+  public void handleMoveSwitchScoring()
+  {
+    String masterCluster = servletContext.getInitParameter(WEB_XML_DB_CLUSTERMASTER_KEY);
+    String myClusterNode = getServerName();
+
+    if(myClusterNode.contains(masterCluster)) {    // servername may be long, db entry can be a unique portion of is, like web1
+      HSess.init();
+      Session sess = HSess.get();
+
+      Game game = (Game)sess.get(Game.class, 1L);
+      if(game.getCurrentMove().getNumber() != game.getLastMove().getNumber()) {
+        MSysOut.println(SYSTEM_LOGS,"AppMaster setting up user points for new move number "+game.getCurrentMove().getNumber());
+        List<User> users = (List<User>) sess.createCriteria(User.class).list();
+        for(User u : users) {
+          u.setBasicScoreOnly(ScoreManager2.getBasicPointsFromCurrentMove(u, sess)); // needed for table sorting
+          u.setInnovationScoreOnly(ScoreManager2.getInnovPointsFromCurrentMove(u, sess));
+          sess.update(u);
+         }
+        game.setLastMove(game.getCurrentMove());
+        sess.update(game);
+      }
+      HSess.close();
+    }
   }
 
   private void startThreads()
