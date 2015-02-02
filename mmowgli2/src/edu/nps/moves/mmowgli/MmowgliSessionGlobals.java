@@ -87,7 +87,8 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   private boolean gameReadOnly = false;
   private boolean cardsReadOnly = false;
   private boolean topCardsReadOnly = false;
-
+  private boolean priorActionPlansReadOnly = true;
+  
   private HashMap<Object,Object> panelState = new HashMap<Object,Object>();
   
   public MmowgliSessionGlobals(SessionInitEvent event, Mmowgli2VaadinServlet servlet)
@@ -318,7 +319,15 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   {
     return viewOnlyUser;
   }
-
+  private void setPriorActionPlansReadOnly(boolean wh)
+  {
+    priorActionPlansReadOnly = wh;
+  }
+  
+  public boolean isPriorActionPlansReadOnly()
+  {
+    return priorActionPlansReadOnly;
+  }
   
   public static class CardPermission
   {
@@ -395,6 +404,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     setGameReadOnly(g.isReadonly());
     setCardsReadOnly(g.isCardsReadonly());
     setTopCardsReadOnly(g.isTopCardsReadonly());
+    setPriorActionPlansReadOnly(!g.isEditPriorMovesActionPlans());
     MSysOut.println(SYSTEM_LOGS,"Session game globals set to game r/o:"+g.isReadonly()+" cards r/o:"+g.isCardsReadonly()+" top cards r/o:"+g.isTopCardsReadonly());
   }
   private String returnBrowserType(WebBrowser webBr)
