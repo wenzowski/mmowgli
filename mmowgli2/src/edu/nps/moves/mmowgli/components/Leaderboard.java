@@ -124,7 +124,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     refreshButt.setEnabled(false);
  */
   }
-  private static String TOTALS = "Totals";
+  private static String COMBINED = "Combined";
   private void maybeShowMoveSelector(HorizontalLayout hl)
   {
     Move m = Move.getCurrentMoveTL();
@@ -133,7 +133,7 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
       return;
 
     Label lab = null;
-    hl.addComponent(lab=new Label("Showing scores from Round "));
+    hl.addComponent(lab=new Label("Showing scores from "));
     lab.setSizeUndefined();
     hl.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
     hl.addComponent(lab = new Label());
@@ -142,14 +142,14 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
     ArrayList<String> mvLst = new ArrayList<String>();
     int i = 1;
     while(i<=thisMove) {
-      mvLst.add(""+i++);
+      mvLst.add("Round "+i++);
     }
-    mvLst.add(TOTALS);
+    mvLst.add(COMBINED);
     
     NativeSelect sel = new NativeSelect(null,mvLst);
 
     sel.setNullSelectionAllowed(false);
-    sel.setValue(""+thisMove);
+    sel.setValue("Round "+thisMove);
     sel.setImmediate(true);
     sel.addValueChangeListener(new MoveListener());
 
@@ -169,10 +169,12 @@ public class Leaderboard extends VerticalLayout implements MmowgliComponent, Wan
       HSess.init();
       
       String mv = (String)event.getProperty().getValue();
-      if(mv.equals(TOTALS))
+      if(mv.equals(COMBINED))
         setTableByCombinedScoreTL();
-      else
-        setTableByMoveNumberTL(Integer.parseInt(mv));
+      else {
+        String[] sa = mv.split(" ");  // format "Round n"
+        setTableByMoveNumberTL(Integer.parseInt(sa[1]));
+      }
       
       HSess.close();
     }   
