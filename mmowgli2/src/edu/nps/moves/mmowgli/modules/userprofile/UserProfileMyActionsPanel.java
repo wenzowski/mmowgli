@@ -32,7 +32,9 @@ import org.hibernate.criterion.Restrictions;
 import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.ui.Label;
 
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
@@ -119,11 +121,10 @@ public class UserProfileMyActionsPanel extends UserProfileTabPanel
         for(ActionPlan ap : imAuthor)
           dis.add(Restrictions.idEq(ap.getId()));
         crit.add(dis);
+        ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
       }
       else
         crit.add(Restrictions.idEq(-1L)); // will never pass, so we get an empty set
-      
-      Card.adjustCriteriaToOmitCardsTL(crit, me);
       return crit;
     }
   }
