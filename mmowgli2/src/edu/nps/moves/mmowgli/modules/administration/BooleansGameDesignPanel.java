@@ -55,17 +55,18 @@ public class BooleansGameDesignPanel extends AbstractGameBuilderPanel
     ta.setRows(1);
     addSeparator();
 //@formatter:off
-    addEditBoolean("Enable action plans for this game",            "Game.isActionPlansEnabled",      g, dbObjId, "ActionPlansEnabled", "For specific game requirements where Action Plans are desired");
-    addEditBoolean("Show action plans from prior rounds",          "Game.showPriorMovesActionPlans", g, dbObjId, "ShowPriorMovesActionPlans");
-    addEditBoolean("Allow edits on action plans from prior rounds","Game.editPriorMovesActionPlans", g, dbObjId, "EditPriorMovesActionPlans");
+    addEditBoolean("Set entire game read-only",                    "Game.readonly",                  g, dbObjId, "Readonly");
+    addEditBoolean("Require email confirmation",                   "Game.emailConfirmation",         g, dbObjId, "EmailConfirmation");
+    addEditBoolean("Show 2nd login permission page",               "Game.secondLoginPermissionPage", g, dbObjId, "SecondLoginPermissionPage");
+    addSeparator();
+    addEditBoolean("Set all cards read-only",                      "Game.cardsReadonly",             g, dbObjId, "CardsReadonly");
+    addEditBoolean("Set top cards read-only",                      "Game.topCardsReadonly",          g, dbObjId, "TopCardsReadonly");
     addEditBoolean("Show cards from prior rounds",                 "Game.showPriorMovesCards",       g, dbObjId, "ShowPriorMovesCards");
     addEditBoolean("Allow play on cards from prior rounds",        "Game.playOnPriorMovesCards",     g, dbObjId, "PlayOnPriorMovesCards");
     addSeparator();
-    addEditBoolean("Show 2nd login permission page",               "Game.secondLoginPermissionPage", g, dbObjId, "SecondLoginPermissionPage");
-    addEditBoolean("Set entire game read-only",                    "Game.readonly",                  g, dbObjId, "Readonly");
-    addEditBoolean("Set all cards read-only",                      "Game.cardsReadonly",             g, dbObjId, "CardsReadonly");
-    addEditBoolean("Set top cards read-only",                      "Game.topCardsReadonly",          g, dbObjId, "TopCardsReadonly");
-    addEditBoolean("Require email confirmation",                   "Game.emailConfirmation",         g, dbObjId, "EmailConfirmation");
+    addEditBoolean("Enable action plans for this game",            "Game.isActionPlansEnabled",      g, dbObjId, "ActionPlansEnabled", "For specific game requirements where Action Plans are desired");
+    addEditBoolean("Show action plans from prior rounds",          "Game.showPriorMovesActionPlans", g, dbObjId, "ShowPriorMovesActionPlans");
+    addEditBoolean("Allow edits on action plans from prior rounds","Game.editPriorMovesActionPlans", g, dbObjId, "EditPriorMovesActionPlans");
 //@formatter:on
   }
 
