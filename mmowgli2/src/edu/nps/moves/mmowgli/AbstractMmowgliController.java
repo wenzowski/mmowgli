@@ -328,12 +328,13 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         BrowserWindowOpener.open(gl.getImproveScoreLink(),PORTALTARGETWINDOWNAME);  //No hib
         break;
       case SIGNOUTCLICK:
-        Serializable uid = ui.getSessionGlobals().getUserID();
-        User u = DBGet.getUserTL(uid);
+        MmowgliSessionGlobals globs = ui.getSessionGlobals();
+        globs.loggingOut = true;
+        User u = DBGet.getUserTL(globs.getUserID());
         GameEventLogger.logUserLogoutTL(u);
         MessagingManager2 mgr = Mmowgli2UI.getGlobals().getMessagingManager();
         if(mgr != null) {
-          mgr.sendSessionMessage(new MMessagePacket(USER_LOGOUT,""+uid),ui);
+          mgr.sendSessionMessage(new MMessagePacket(USER_LOGOUT,""+globs.getUserID()),ui);
           mgr.unregisterSession();
         }
       /*  sendToBus(USER_LOGOUT, "" + uid, false);
@@ -496,11 +497,16 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
   public void receiveMessage(MMessagePacket pkt)
   {
     MSysOut.println(MESSAGING_LOGS,"AbstractMmowgliController.receiveMessage() handling msg type "+pkt.msgType);
+    // Our session might be down or going down, so check first
+    MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
+    if(globs == null || globs.stopping)
+      return;
+    
     HSess.init();
     // First check session-global handlers
     switch (pkt.msgType) {
     case UPDATED_GAME:
-      Mmowgli2UI.getGlobals().gameUpdatedExternallyTL(null);
+      globs.gameUpdatedExternallyTL(null);
       break;
     case UPDATED_CARDTYPE:
       CardType ct = (CardType) HSess.get().get(CardType.class, Long.parseLong(pkt.msg));
