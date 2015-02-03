@@ -52,7 +52,12 @@ public class MmowgliLinkInserter
   public static final String ACTPLNLINK_2_REGEX = "ap\\s+(\\d+)";
   public static final String CARDLINK_REGEX   = "card\\s+(\\d+)"; //"(([Gg][Aa][Mm][Ee]\s*(\d|\.)+\s*)?([Ii][Dd][Ee][Aa]\s*)?[Cc][Aa][Rr][Dd]\s*#?\s*([Cc][Hh][Aa][Ii][Nn]\s*#?\s*)?(\d+))";
   public static final String ACTPLNLINK_REGEX = "(?:action\\s)?plan\\s+(\\d+)"; //(([Gg][Aa][Mm][Ee]\s*(\d|\.)+\s*)?([Aa][Cc][Tt][Ii][Oo][Nn]\s*#?\s*)?[Pp][Ll][Aa][Nn]\s*#?\s*(\d+))"
-  
+
+  public static final String USER_TOKEN = ".,.,.";
+  public static final String ACPLN_TOKEN = ".nalp,,";
+  public static final String CARD_TOKEN = "!!DARC";
+  public static final String AP_TOKEN = "&&pa&&";
+
   // Gotten from http://daringfireball.net/2010/07/improved_regex_for_matching_urls
   public static final String URLLINK_REGEX = 
   "(?i)"                           +
@@ -146,7 +151,7 @@ public class MmowgliLinkInserter
   {
     if(s==null || s.length()<=0)
       return "";
-    
+
     StringBuilder sb = new StringBuilder(s);
     String news=null;
     if(g != null) {
@@ -159,13 +164,13 @@ public class MmowgliLinkInserter
 
     matcher = cardLinkPattern.matcher(sb);
     loopMatcher(sb,matcher,CARD_EVENTNUM, linkType.CARD, sess);
-    
+
     matcher = actPlnLinkPattern.matcher(sb);
     loopMatcher(sb,matcher,ACTPLN_EVENTNUM, linkType.ACTIONPLAN, sess);
-    
+
     matcher = apLinkPattern.matcher(sb);
     loopMatcher(sb,matcher,ACTPLN_EVENTNUM, linkType.ACTIONPLAN, sess);
-    
+   
     matcher = userLinkPattern.matcher(sb);
     loopMatcher(sb,matcher,USER_EVENTNUM, linkType.USER, sess);
     
@@ -267,14 +272,22 @@ public class MmowgliLinkInserter
   private static String buildToolTip(String ln, Object obj, Session sess)
   {
     if(obj instanceof ActionPlan)
-      return ((ActionPlan)obj).getTitle();
+      return avoidRegex(((ActionPlan)obj).getTitle());
 
     if(obj instanceof Card)
-      return ((Card)obj).getText();
+      return avoidRegex(((Card)obj).getText());
    
     if(obj instanceof User)
-      return ((User)obj).getUserName();
+      return avoidRegex(((User)obj).getUserName());
     return ln;
+  }
+  
+  private static String avoidRegex(String s)
+  {
+       s = s.replaceAll("[uU][sS][eE][rR]\\s", "usr. ");
+       s = s.replaceAll("[pP][lL][aA][nN]\\s", "pln. ");
+       s = s.replaceAll("[cC][aA][rR][dD]\\s", "crd. ");
+    return s.replaceAll("[aA][pP]\\s", "pln. ");
   }
 
   private static void urlLoopMatcher(StringBuilder sb, Matcher matcher)
