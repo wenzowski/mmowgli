@@ -2,7 +2,8 @@
 
 <project name="MMOWGLI Two Eclipse 2015" default="default" basedir=".">
     <description>Retrieve game data and build MMOWGLI game reports</description>
-    <import file="nbproject/build-impl.xml"/>
+    
+    <!-- <import file="nbproject/build-impl.xml"/> -->
 
     <property name="stylesheets.dir" location="src/edu/nps/moves/mmowgli/export"/>
     <property name=    "reports.dir" location="${stylesheets.dir}/reports"/>
@@ -20,7 +21,7 @@
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
 
     <property name="saxon.dir" location="${stylesheets.dir}/jar" description="relative path from stylesheets directory"/>
-    <property name="saxon.jar"           value="saxon9.jar"/>
+    <property name="saxon.jar"           value="saxon9B.jar"/>
 
     <target name="get.saxon" description="get saxon.jar if not checked out" depends="get.saxon.check"> <!-- unless="saxon.found" -->
         <echo message="get saxon.jar if not checked out"/>
@@ -38,6 +39,7 @@
     <!-- Ant macro definitions ===================================================================================== -->
 
     <!-- excerpted/adapted from "SAXON XSLT Processing with Ant" by James Fuller, http://ablog.apress.com/?p=753 -->
+    <!-- http://www.saxonica.com/documentation9.5/using-xsl/commandline.html -->
     <macrodef name="saxon9.XML" description="Invoke XSLT transformation on passed inputXML to produce outputFile using passed stylesheet">
         <attribute name="inputXML"/>
         <attribute name="outputFile"/>
@@ -46,7 +48,7 @@
         <attribute name="parameter1" default=""/>
         <attribute name="parameter2" default=""/>
         <attribute name="compiled"   default="false"/>
-        <attribute name="verbose"    default="false"/>
+        <attribute name="verbose"    default="true"/>
         <sequential>
             <if>
                 <equals arg1="@{verbose}" arg2="true" />
@@ -58,23 +60,26 @@
             <if>
                 <equals arg1="@{compiled}" arg2="true" />
                 <then>
-                    <java classname="net.sf.saxon.Transform" classpath="${saxon.dir}/saxon9.jar;." fork="true" failonerror="false">
+                    <java classname="net.sf.saxon.Transform" classpath="${saxon.dir}/${saxon.jar};." fork="true" failonerror="false">
                         <!--<arg value="-t"/> timing information -->
-                        <arg value="s:@{inputXML}"/>
-                        <arg value="-c:@{stylesheet}"/>  <!-- compiled stylesheet -->
-                        <arg value="-o:@{outputFile}"/>
                         <arg value="-warnings:recover"/> <!-- recover after writing a warning message -->
+                        <arg value="-c"/>  <!-- compiled stylesheet -->
+                        <arg value="-o"/>
+                        <arg value="@{outputFile}"/>
+                        <arg value="@{inputXML}"/>
+                        <arg value="@{stylesheet}"/>  <!-- compiled stylesheet -->
                         <arg value="@{parameter1}"/>
                         <arg value="@{parameter2}"/>
                     </java>
                 </then>
                 <else>
-                    <java classname="net.sf.saxon.Transform" classpath="${saxon.dir}/saxon9.jar;." fork="true" failonerror="false">
+                    <java classname="net.sf.saxon.Transform" classpath="${saxon.dir}/${saxon.jar};." fork="true" failonerror="false">
                         <!--<arg value="-t"/> timing information -->
-                        <arg value="-s:@{inputXML}"/>
-                        <arg value="-xsl:@{stylesheet}"/>
-                        <arg value="-o:@{outputFile}"/>
                         <arg value="-warnings:recover"/> <!-- recover after writing a warning message -->
+                        <arg value="-o"/>
+                        <arg value="@{outputFile}"/>
+                        <arg value="@{inputXML}"/>
+                        <arg value="@{stylesheet}"/>
                         <arg value="@{parameter1}"/>
                         <arg value="@{parameter2}"/>
                     </java>
@@ -121,11 +126,14 @@
         <!-- use antcall to enable property reset -->
         <antcall target="all.reports.am"/>
         <antcall target="all.reports.armyscitechfutures"/>
+        <antcall target="all.reports.blackswan"/>
         <antcall target="all.reports.bii"/>
         <antcall target="all.reports.cap2con"/>
         <antcall target="all.reports.darkportal"/>
+        <antcall target="all.reports.dd"/>
         <!-- TODO <antcall target="all.reports.em2"/>  requires game software update -->
         <antcall target="all.reports.nsc"/>
+        <antcall target="all.reports.pcc"/>
         <antcall target="all.reports.uxvdm"/>
         <echo message="build all.reports complete"/>
     </target>
@@ -135,7 +143,7 @@
         <echo message="clean.reports complete"/>
     </target>
 
-    <target name="get.reports" depends="get.reports.am,get.reports.armyscitechfutures,get.reports.bii,get.reports.cap2con,get.reports.darkportal,get.reports.nsc,get.reports.uxvdm,get.reports.em2" description="get all game reports from mmowgli.nps.edu server">
+    <target name="get.reports" depends="get.reports.am,get.reports.armyscitechfutures,get.reports.bii,get.reports.blackswan,get.reports.cap2con,get.reports.darkportal,get.reports.dd,get.reports.nsc,get.reports.pcc,get.reports.uxvdm,get.reports.em2" description="get all game reports from mmowgli.nps.edu server">
         <echo message="get.reports complete"/>
     </target>
 
@@ -144,9 +152,12 @@
         <antcall target="build.reports.am"/>
         <antcall target="build.reports.armyscitechfutures"/>
         <antcall target="build.reports.bii"/>
+        <antcall target="build.reports.blackswan"/>
         <antcall target="build.reports.cap2con"/>
         <antcall target="build.reports.darkportal"/>
+        <antcall target="build.reports.dd"/>
         <!-- TODO <antcall target="build.reports.em2"/> -->
+        <antcall target="build.reports.pcc"/>
         <antcall target="build.reports.uxvdm"/>
         <echo message="build.reports complete"/>
     </target>
@@ -156,9 +167,12 @@
         <antcall target="view.reports.am"/>
         <antcall target="view.reports.armyscitechfutures"/>
         <antcall target="view.reports.bii"/>
+        <antcall target="view.reports.blackswan"/>
         <antcall target="view.reports.cap2con"/>
         <antcall target="view.reports.darkportal"/>
+        <antcall target="view.reports.dd"/>
         <!-- TODO <antcall target="view.reports.em2"/> -->
+        <antcall target="view.reports.pcc"/>
         <antcall target="view.reports.uxvdm"/>
         <echo message="view.reports complete"/>
     </target>
@@ -403,6 +417,69 @@
         <!-- TODO implementation-independent approach if possible.  other Ant approaches have to be customized for each OS -->
     </target>
 
+    <!-- ========== blackswan ======================================================================== -->
+
+    <target name="all.reports.blackswan" depends="clean.reports.blackswan,get.reports.blackswan,build.reports.blackswan,view.reports.blackswan">
+        <echo message="all.reports.blackswan complete"/>
+    </target>
+
+    <target name="clean.reports.blackswan">
+        <property name="gameName"  value="blackswan"/>
+        <delete dir="${reports.dir}/${gameName}" verbose="true"/>
+        <echo message="clean.reports.blackswan complete"/>
+    </target>
+
+    <target name="get.reports.blackswan" description="get XML files from blackswan MMOWGLI game reports if not already available" depends="get.reports.blackswan.check"> <!--  unless="found.blackswan" -->
+        <getGameReportXmlFiles gameName="blackswan" gameTitle="blackswan"/>
+        <echo message="get.reports.blackswan complete"/>
+    </target>
+
+    <target name="get.reports.blackswan.check">
+        <property name="gameName"  value="blackswan"/>
+        <property name="gameTitle" value="blackswan"/>
+        <condition property="found.blackswan" else="false">
+            <available file="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml"/>
+        </condition>
+        <echo message="found ${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml: ${found.blackswan}"/>
+    </target>
+
+    <target name="build.reports.blackswan"> <!--  depends="build.reports.blackswan.IdeaCards,build.reports.blackswan.ActionPlans,build.reports.blackswan.GameDesign" -->
+        <property name="gameName"  value="blackswan"/>
+        <property name="gameTitle" value="blackswan"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/CardTree.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/ActionPlanList.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/GameDesign.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/ReportsIndex_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/ReportsIndex.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/PlayerProfiles_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/PlayerProfiles_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/PlayerProfiles.xsl"
+                     verbose="true"/>
+        <echo message="build.reports.blackswan complete"/>
+    </target>
+
+    <target name="view.reports.blackswan" description="view blackswan idea cards in web browser (via Netbeans only)">
+        <property name="gameName"  value="blackswan"/>
+        <property name="gameTitle" value="blackswan"/>
+        <nbbrowse file="${reports.dir}/${gameName}/ReportsIndex_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/PlayerProfiles_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.html" />
+        <!-- TODO implementation-independent approach if possible.  other Ant approaches have to be customized for each OS -->
+    </target>
+
     <!-- ========== cap2con ======================================================================== -->
 
     <target name="all.reports.cap2con" depends="clean.reports.cap2con,get.reports.cap2con,build.reports.cap2con,view.reports.cap2con">
@@ -530,6 +607,69 @@
         <!-- TODO implementation-independent approach if possible.  other Ant approaches have to be customized for each OS -->
     </target>
 
+    <!-- ========== dd ======================================================================== -->
+
+    <target name="all.reports.dd" depends="clean.reports.dd,get.reports.dd,build.reports.dd,view.reports.dd">
+        <echo message="all.reports.dd complete"/>
+    </target>
+
+    <target name="clean.reports.dd">
+        <property name="gameName"  value="dd"/>
+        <delete dir="${reports.dir}/${gameName}" verbose="true"/>
+        <echo message="clean.reports.dd complete"/>
+    </target>
+
+    <target name="get.reports.dd" description="get XML files from dd MMOWGLI game reports if not already available" depends="get.reports.dd.check"> <!--  unless="found.dd" -->
+        <getGameReportXmlFiles gameName="dd" gameTitle="dd"/>
+        <echo message="get.reports.dd complete"/>
+    </target>
+
+    <target name="get.reports.dd.check">
+        <property name="gameName"  value="dd"/>
+        <property name="gameTitle" value="dd"/>
+        <condition property="found.dd" else="false">
+            <available file="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml"/>
+        </condition>
+        <echo message="found ${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml: ${found.dd}"/>
+    </target>
+
+    <target name="build.reports.dd"> <!--  depends="build.reports.dd.IdeaCards,build.reports.dd.ActionPlans,build.reports.dd.GameDesign" -->
+        <property name="gameName"  value="dd"/>
+        <property name="gameTitle" value="dd"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/CardTree.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/ActionPlanList.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/GameDesign.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/ReportsIndex_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/ReportsIndex.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/PlayerProfiles_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/PlayerProfiles_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/PlayerProfiles.xsl"
+                     verbose="true"/>
+        <echo message="build.reports.dd complete"/>
+    </target>
+
+    <target name="view.reports.dd" description="view dd idea cards in web browser (via Netbeans only)">
+        <property name="gameName"  value="dd"/>
+        <property name="gameTitle" value="dd"/>
+        <nbbrowse file="${reports.dir}/${gameName}/ReportsIndex_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/PlayerProfiles_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.html" />
+        <!-- TODO implementation-independent approach if possible.  other Ant approaches have to be customized for each OS -->
+    </target>
+
     <!-- ========== em2 ======================================================================== -->
 
     <target name="all.reports.em2" depends="clean.reports.em2,get.reports.em2,build.reports.em2,view.reports.em2">
@@ -649,6 +789,69 @@
     <target name="view.reports.nsc" description="view nsc idea cards in web browser (via Netbeans only)">
         <property name="gameName"  value="nsc"/>
         <property name="gameTitle" value="nsc"/>
+        <nbbrowse file="${reports.dir}/${gameName}/ReportsIndex_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/PlayerProfiles_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.html" />
+        <!-- TODO implementation-independent approach if possible.  other Ant approaches have to be customized for each OS -->
+    </target>
+
+    <!-- ========== pcc ======================================================================== -->
+
+    <target name="all.reports.pcc" depends="clean.reports.pcc,get.reports.pcc,build.reports.pcc,view.reports.pcc">
+        <echo message="all.reports.pcc complete"/>
+    </target>
+
+    <target name="clean.reports.pcc">
+        <property name="gameName"  value="pcc"/>
+        <delete dir="${reports.dir}/${gameName}" verbose="true"/>
+        <echo message="clean.reports.pcc complete"/>
+    </target>
+
+    <target name="get.reports.pcc" description="get XML files from pcc MMOWGLI game reports if not already available" depends="get.reports.pcc.check"> <!--  unless="found.pcc" -->
+        <getGameReportXmlFiles gameName="pcc" gameTitle="pcc"/>
+        <echo message="get.reports.pcc complete"/>
+    </target>
+
+    <target name="get.reports.pcc.check">
+        <property name="gameName"  value="pcc"/>
+        <property name="gameTitle" value="pcc"/>
+        <condition property="found.pcc" else="false">
+            <available file="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml"/>
+        </condition>
+        <echo message="found ${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml: ${found.pcc}"/>
+    </target>
+
+    <target name="build.reports.pcc"> <!--  depends="build.reports.pcc.IdeaCards,build.reports.pcc.ActionPlans,build.reports.pcc.GameDesign" -->
+        <property name="gameName"  value="pcc"/>
+        <property name="gameTitle" value="pcc"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/CardTree.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/ActionPlanList.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/GameDesign.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/ReportsIndex_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/ReportsIndex.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/PlayerProfiles_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/PlayerProfiles_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/PlayerProfiles.xsl"
+                     verbose="true"/>
+        <echo message="build.reports.pcc complete"/>
+    </target>
+
+    <target name="view.reports.pcc" description="view pcc idea cards in web browser (via Netbeans only)">
+        <property name="gameName"  value="pcc"/>
+        <property name="gameTitle" value="pcc"/>
         <nbbrowse file="${reports.dir}/${gameName}/ReportsIndex_${gameTitle}MmowgliGame.html" />
         <nbbrowse file="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.html" />
         <nbbrowse file="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.html" />
