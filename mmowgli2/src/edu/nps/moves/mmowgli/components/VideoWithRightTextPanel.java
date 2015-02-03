@@ -24,8 +24,6 @@ package edu.nps.moves.mmowgli.components;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
 
-import java.net.URL;
-
 import com.vaadin.server.ExternalResource;
 import com.vaadin.shared.ui.BorderStyle;
 import com.vaadin.ui.*;
@@ -200,7 +198,7 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
     if(alternateUrl != null)
       link = new Link("Can't see the video?",new ExternalResource(alternateUrl));
     else {
-      URL url = Mmowgli2UI.getGlobals().getAlternateVideoUrl();
+      String url = Mmowgli2UI.getGlobals().getAlternateVideoUrlTL();
       if(url == null)
         return null;
       link = new Link("Can't see the video?",new ExternalResource(url));
