@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="MMOWGLI Two Eclipse 2015" default="default" basedir=".">
+<project name="MMOWGLI Two Eclipse 2015" default="build.reports.blackswan" basedir=".">
     <description>Retrieve game data and build MMOWGLI game reports</description>
     
     <!-- <import file="nbproject/build-impl.xml"/> -->
