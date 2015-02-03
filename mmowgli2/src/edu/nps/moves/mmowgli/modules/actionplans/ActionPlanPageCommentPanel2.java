@@ -234,7 +234,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
     private String normalStyle = "m-actionplan-comment";
     private CheckBox superInterestingCB;
     private ActionPlan ap;  // null if no superinteresting markings
-    private Game game;
+
     private Label textLabel;
     private boolean readonly;
     
@@ -252,7 +252,6 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
       this.showHideButton = showHideButton;
       this.ap = ap;
       this.setSpacing(false);  
-      this.game = Game.get(sess);
       this.readonly = readonly;
     }
     
