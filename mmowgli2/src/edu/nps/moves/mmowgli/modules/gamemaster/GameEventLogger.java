@@ -264,7 +264,7 @@ public class GameEventLogger
     GameEvent.saveTL(ev);        
   }
   
-  public static void logSessionEndTL(User u)
+  public static void logSessionTimeoutL(User u)
   {
      GameEvent ev = new GameEvent(GameEvent.EventType.SESSIONEND," "+svrName+" / user "+u.getId()+" / "+u.getLocation());
      GameEvent.saveTL(ev);
