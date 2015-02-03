@@ -815,7 +815,7 @@ public class AppMaster
   int nuts=0;
   public String getSessionReportHeader()
   {
-    return "&nbsp;\t<b>User</b>\t<b>ID</b>\t<b>Start</b>\t<b>IP</b>\t<b>Browser</b>\t<b>Version</b>\t<b>OS</b>"+SESSION_REPORT_ITEM_DELIMITER;
+    return "<b>Server</b>\t<b>User</b>\t<b>ID</b>\t<b>Start</b>\t<b>IP</b>\t<b>Browser</b>\t<b>Version</b>\t<b>OS</b>"+SESSION_REPORT_ITEM_DELIMITER;
   }
   
   public synchronized StringBuilder getLocalNodeReportRaw()
@@ -823,16 +823,16 @@ public class AppMaster
     StringBuilder sb = new StringBuilder();
     Iterator<VaadinSession> itr = sessionsInThisMmowgliNode.iterator();
 
-    int n = 1;
     while(itr.hasNext()) {
       VaadinSession sess = itr.next();
       MmowgliSessionGlobals sGlobs = sess.getAttribute(MmowgliSessionGlobals.class);
-      sb.append(n++);
+      // empty first is servername
       sb.append(SESSION_REPORT_FIELD_DELIMITER); //" User ");
-      sb.append(sGlobs.getUserName());
+      String uname = sGlobs.getUserName();
+      sb.append(uname.length()<=0?"not logged in":uname);
       sb.append(SESSION_REPORT_FIELD_DELIMITER);
       Serializable id = sGlobs.getUserID();
-      sb.append(id==null?"not logged in":id);
+      sb.append(id==null?" ":id);
       sb.append(SESSION_REPORT_FIELD_DELIMITER); //" at ");
       sb.append(sGlobs.getUserLoginTimeData());
       sb.append(SESSION_REPORT_FIELD_DELIMITER); //" from ");
@@ -840,7 +840,7 @@ public class AppMaster
       sb.append(SESSION_REPORT_FIELD_DELIMITER); //" using ");
       sb.append(sGlobs.getBrowserMiniType()); 
       sb.append(SESSION_REPORT_FIELD_DELIMITER);
-      sb.append(sGlobs.getBrowserMajorVersion());
+      sb.append(sGlobs.getBrowserMajorVersionString());
       sb.append(SESSION_REPORT_FIELD_DELIMITER);
       sb.append(sGlobs.getBrowserOS());
       
