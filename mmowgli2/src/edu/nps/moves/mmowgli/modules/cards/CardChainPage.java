@@ -356,7 +356,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   @HibernateRead
   private boolean loadMarkingPanel_oobTL(Card c)
   {
-    MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.loadMarkingPanel_oobTL, card id = "+c.getId()+" hidden = "+c.isHidden());
+    //MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.loadMarkingPanel_oobTL, card id = "+c.getId()+" hidden = "+c.isHidden());
     boolean ret=false; // no update required
     if(markingListener != null)
       markingRadioGroup.removeValueChangeListener(markingListener);
