@@ -29,6 +29,8 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.hibernate.Session;
+
 import com.vaadin.server.SessionInitEvent;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.UI;
@@ -80,7 +82,6 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   private Serializable userId=null;
   private String userName="";
   private Mmowgli2UI firstUI = null;
-  private URL alternateVideoUrl;
   private boolean loggedIn = false;
   private UUID userSessionIdentifier = UUID.randomUUID();
   
@@ -259,12 +260,6 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     return AppMaster.instance().getSessionCountByServer();
   }
 
-
-  public URL getAlternateVideoUrl()
-  {
-    return alternateVideoUrl;
-  }
-  
   public void setLoggedIn(boolean b)
   {
     loggedIn = b;
@@ -442,5 +437,26 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     if( webBr.isWindows()) { return "Windows"; }
     if( webBr.isWindowsPhone()) { return "Windows Phone"; }
     return "Unknown OS/platform";
+  }
+  
+  public String getAlternateVideoUrlTL()
+  {
+    return getAlternateVideoUrl(HSess.get());
+  }
+
+  public String getAlternateVideoUrl(Session sess)
+  {
+    Game g = Game.get(sess);
+    StringBuilder sb = new StringBuilder();
+    sb.append("http://portal.mmowgli.nps.edu/");
+
+    String acro = g.getAcronym();
+    if(acro == null || acro.isEmpty())
+      sb.append("game-wiki/-/wiki/PlayerResources/Video+Resources");
+    else {
+      sb.append(acro);
+      sb.append("-videos");
+    }
+    return sb.toString();
   }
 }
