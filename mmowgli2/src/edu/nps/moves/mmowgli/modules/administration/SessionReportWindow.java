@@ -65,8 +65,13 @@ public class SessionReportWindow extends Window
     String[] _headerArr = header.split("\t");
     widestRowSize=_headerArr.length;
     
+    String svrName = AppMaster.instance().getServerName();
+    int idx;
+    if((idx=svrName.indexOf('.')) != -1)
+      svrName = svrName.substring(0, idx);
+    
     String me = AppMaster.instance().getLocalNodeReportRaw().toString();
-    me = AppMaster.instance().getServerName()+"\n"+me;
+    me = svrName+"\n"+me;
     String[][] localReport = parseReport(me);
         
     String all = AppMaster.instance().getCompletePlayerReportRaw().toString();
@@ -107,6 +112,7 @@ public class SessionReportWindow extends Window
     }    
   }
   
+  int count = 0;
   String[][] parseReport(String s)
   {
     String[] rows = s.split("\n");
@@ -117,6 +123,8 @@ public class SessionReportWindow extends Window
       if(cols.length > widestRowSize)
         widestRowSize = cols.length;
       grid[r++]=cols;
+      if(cols.length >1)
+        cols[0] = ""+ ++count;
     }
     return grid;
   }
