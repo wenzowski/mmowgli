@@ -60,12 +60,13 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
 
   public boolean initted = false;
   
-  private String browserApp="unk";
+  private String browserApp="";
   private String browserMiniType = "";
   private String browserOS = "";
   private int browserMajVersion=0;
+  private String browserMajVersionString="";
   private int browserMinVersion=0;
-  private String browserAddress="unk";
+  private String browserAddress="";
   private boolean internetExplorer7 = false;
   private boolean internetExplorer  = false;
 
@@ -75,7 +76,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   private MediaLocator mediaLoc;
   private ScoreManager2 scoreManager;
   private Serializable userId=null;
-  private String userName="unset";
+  private String userName="";
   private Mmowgli2UI firstUI = null;
   private URL alternateVideoUrl;
   private boolean loggedIn = false;
@@ -113,6 +114,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     browserMiniType = returnBrowserType(webBr);
     browserOS = returnBrowserOS(webBr);
     browserMajVersion = webBr.getBrowserMajorVersion();
+    browserMajVersionString = ""+browserMajVersion;
     browserMinVersion = webBr.getBrowserMinorVersion();
     browserAddress    = webBr.getAddress();
 
@@ -135,6 +137,11 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   public int getBrowserMajorVersion()
   {
     return browserMajVersion;
+  }
+  
+  public String getBrowserMajorVersionString()
+  {
+    return browserMajVersionString;
   }
   
   public String getBrowserAddress()
