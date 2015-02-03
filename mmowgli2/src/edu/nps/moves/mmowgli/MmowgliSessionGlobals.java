@@ -59,6 +59,8 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   private static final long serialVersionUID = -2942884991365648347L;
 
   public boolean initted = false;
+  public boolean stopping = false;
+  public boolean loggingOut = false;
   
   private String browserApp="";
   private String browserMiniType = "";
