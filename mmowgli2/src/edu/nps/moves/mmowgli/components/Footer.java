@@ -51,7 +51,8 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
 {
   private static final long serialVersionUID = -5343489408165893669L;
 
-  private Link aboutButt, faqsButt, glossaryButt, creditsButt, troubleButt, termsButt, fixesButt, twitterButt, reportsButt;
+  private Link aboutButt, faqsButt, glossaryButt, creditsButt, 
+               troubleButt, termsButt, fixesButt, twitterButt, reportsButt, videosButt;
   private Link fouoLink;
 
   //@formatter:off
@@ -68,6 +69,7 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
     fixesButt    = makeLink("Fixes",               gl.getFixesLink(),    "Common game fixes and workarounds"); //"https://portal.mmowgli.nps.edu/fixes", "Common game fixes and workarounds");
     twitterButt  = makeLink("Twitter",             getTwitterLink(),     "The Mmowgli twitter feed");
     reportsButt  = makeLink("Reports",             getReportsLink(),     "Game play reports page");
+    videosButt   = makeLink("Videos",              getVideosLinkTL(),    "Game videos");
   }
   //@formatter:on
 
@@ -112,7 +114,9 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
     innerHorLay.addComponent(troubleButt);
     innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
     innerHorLay.addComponent(twitterButt);
-    
+    innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
+    innerHorLay.addComponent(videosButt);
+   
     GameLinks gl = GameLinks.getTL();
     if(gl.getFixesLink().toLowerCase().contains("armyscitech") || gl.getGlossaryLink().toLowerCase().contains("armyscitech")) {
       ;  // This is a hack, but I don't want to pollute the db with a bogus boolean...this is a special case just for these folks.
@@ -156,7 +160,12 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
   {
     return "http://twitter.com/MMOWGLI";
   }
-
+  
+  private String getVideosLinkTL()
+  {
+    return Mmowgli2UI.getGlobals().getAlternateVideoUrlTL();
+  }
+  
   @Override
   public boolean gameUpdatedExternallyTL(Object nullObj)
   {
