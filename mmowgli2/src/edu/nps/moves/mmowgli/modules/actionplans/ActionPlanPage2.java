@@ -155,7 +155,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
     titleUnion = new TextAreaLabelUnion(null, null, scLis, "m-actionplan-title");
 
-    commentPanel = new ActionPlanPageCommentPanel2(this, actPlnId);
+    commentPanel = new ActionPlanPageCommentPanel2(this, actPlnId, readonly);
     commentsButt = new NativeButton();
     envelopeButt = new NativeButton();
     addCommentButt = new NativeButton();

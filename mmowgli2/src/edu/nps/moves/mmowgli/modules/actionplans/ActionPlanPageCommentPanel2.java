@@ -85,12 +85,13 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
   private ActionPlanPage2 mother;
   private ClickListener addCommentClicked;
   private boolean showingHiddenMsgs = false;
-  
+  private boolean readonly = false;
   @HibernateSessionThreadLocalConstructor  
-  public ActionPlanPageCommentPanel2(ActionPlanPage2 page, Object apId)
+  public ActionPlanPageCommentPanel2(ActionPlanPage2 page, Object apId, boolean readonly)
   {
     this.apId = apId;
     this.mother = page;
+    this.readonly = readonly;
   }
 
   @Override
@@ -173,7 +174,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
     
     int i = total;
     for (Message m : lis) {
-      ActionPlanComment apc =new MyActionPlanComment(null,total,m,isGameMaster,ap, sess); // dont show order new ActionPlanComment(i, total, m));
+      ActionPlanComment apc =new MyActionPlanComment(null,total,m,isGameMaster,ap, sess, readonly); // dont show order new ActionPlanComment(i, total, m));
       commentListVL.addComponent(apc);
       apc.initGui(sess);
 
@@ -207,9 +208,9 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
   @SuppressWarnings("serial")
   class MyActionPlanComment extends ActionPlanComment
   {
-    public MyActionPlanComment(Integer order, Integer total, Message msg, boolean showHideButton, ActionPlan ap, Session sess)
+    public MyActionPlanComment(Integer order, Integer total, Message msg, boolean showHideButton, ActionPlan ap, Session sess, boolean readonly)
     {
-      super(order,total,msg,showHideButton,ap,sess);
+      super(order,total,msg,showHideButton,ap,sess,readonly);
     }
 
     @Override
@@ -235,14 +236,15 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
     private ActionPlan ap;  // null if no superinteresting markings
     private Game game;
     private Label textLabel;
+    private boolean readonly;
     
     @HibernateSessionThreadLocalConstructor
-    public ActionPlanComment(Integer order, Integer total, Message msg, boolean showHideButton, ActionPlan ap)
+    public ActionPlanComment(Integer order, Integer total, Message msg, boolean showHideButton, ActionPlan ap, boolean readonly)
     {
-      this(order,total,msg,showHideButton,ap,HSess.get());
+      this(order,total,msg,showHideButton,ap,HSess.get(),readonly);
     }
     
-    public ActionPlanComment(Integer order, Integer total, Message msg, boolean showHideButton, ActionPlan ap, Session sess)
+    public ActionPlanComment(Integer order, Integer total, Message msg, boolean showHideButton, ActionPlan ap, Session sess, boolean readonly)
     {
       this.order = order;
       this.total = total;
@@ -251,6 +253,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
       this.ap = ap;
       this.setSpacing(false);  
       this.game = Game.get(sess);
+      this.readonly = readonly;
     }
     
     public void setTotal(int t)
@@ -338,7 +341,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
           superInterestingCB.setValue(msg.isSuperInteresting());
           superInterestingCB.addStyleName("m-actionplan-comment-superinteresting");
           superInterestingCB.setImmediate(true);
-          superInterestingCB.setEnabled(!game.isReadonly());
+          superInterestingCB.setEnabled(!readonly);
           superInterestingCB.addValueChangeListener(new SuperInterestingCheckBoxListener());
           topHL.setComponentAlignment(superInterestingCB, Alignment.TOP_CENTER);
         }
@@ -348,7 +351,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
         tlb.setInitialState(!msg.isHidden());
         tlb.addOnListener(new HideClickedListener());
         tlb.addOffListener(new ShowClickedListener());
-        tlb.setEnabled(!game.isReadonly());
+        tlb.setEnabled(!readonly);
         tlb.setToolTips("Hide this message in this list", "Show this message in this list");
         
         if (DBGet.getUserTL(globs.getUserID()).isGameMaster()) {
@@ -358,7 +361,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
           editButt.addStyleName("borderless");
           editButt.addStyleName("m-actionplan-comment-text");
           editButt.setDescription("Edit this text (game masters only)");
-          editButt.setEnabled(!game.isReadonly());
+          editButt.setEnabled(!readonly);
           editButt.addClickListener(new EditListener());
           editButt.setSizeUndefined();
           topHL.addComponent(editButt);
