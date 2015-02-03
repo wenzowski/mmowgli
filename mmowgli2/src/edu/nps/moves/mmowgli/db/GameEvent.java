@@ -90,7 +90,7 @@ public class GameEvent implements Serializable
         case GAMEREADONLY: return "Game set to read-only";
         case GAMEREADWRITE: return "Game set to read-write";
         case ACTIONPLANUPDATED: return "Action plan updated";
-        case SESSIONEND: return "Explicit logout or timeout";
+        case SESSIONEND: return "Session timeout";
         case GAMESIGNUPRESTRICTED: return "Set new user sign-up restricted to Query entries";
         case GAMESIGNUPOPEN: return "Removed new user sign-up restriction to Query entries";
         case GAMESIGNUPINTERVALRESTRICTED: return "Set new user sign-up restricted to Query database markers";
