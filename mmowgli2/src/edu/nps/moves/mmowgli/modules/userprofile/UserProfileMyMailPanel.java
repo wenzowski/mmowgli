@@ -162,7 +162,7 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
   {
     public MyActionPlanComment(Integer order, Integer total, Message msg, boolean showHideButton)
     {
-      super(order,total,msg,showHideButton, null);
+      super(order,total,msg,showHideButton, null, true);
     }
 
     @Override
