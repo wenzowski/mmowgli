@@ -165,8 +165,8 @@ public class GameEventLogger
     String browAddr = Mmowgli2UI.getGlobals().getBrowserAddress();
     sb.append(browAddr==null?"null":browAddr);
     
-    if(typ == GameEvent.EventType.USERLOGIN && u.isViewOnly())  // guest
-      sb.append(" (Cannot see current cards if PREPARE phase and round > 1)");
+   // if(typ == GameEvent.EventType.USERLOGIN && u.isViewOnly())  // guest
+   //   sb.append(" (Cannot see current cards if PREPARE phase and round > 1)");
     
     return sb.toString();
   }
