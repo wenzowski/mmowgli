@@ -55,7 +55,10 @@ public class SessionReportWindow extends Window
   public SessionReportWindow(String caption)
   {
     super(caption);
+    setWidth("700px");
+    setHeight("400px");
     VerticalLayout vLay = new VerticalLayout();
+    vLay.setSizeFull();
     setContent(vLay);
     
     String header = AppMaster.instance().getSessionReportHeader();
@@ -80,6 +83,7 @@ public class SessionReportWindow extends Window
       headerArr = _headerArr;
     
     table = new Table();
+    table.setSizeFull();
     
     for(int col=0; col<headerArr.length; col++)
       table.addContainerProperty(headerArr[col], String.class, null);
