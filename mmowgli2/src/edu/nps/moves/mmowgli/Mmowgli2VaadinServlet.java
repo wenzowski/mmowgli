@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.SYSTEM_LOGS;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -30,7 +32,6 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.*;
 
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 /**
  * Mmowgli2VaadinServlet.java
@@ -129,25 +130,26 @@ public class Mmowgli2VaadinServlet extends VaadinServlet implements SessionInitL
     new MmowgliSessionGlobals(event,this);   // Initialize global object across all users windows, gets stored in VaadinSession object referenced in event
     event.getSession().addUIProvider(new Mmowgli2UIProvider());
     
-    //MSysOut.println("JMETERdebug: Session created, id = "+event.getSession().hashCode());
+    MSysOut.println(SYSTEM_LOGS,"JMETERdebug: Session created, id = "+event.getSession().hashCode());
     if(appMaster != null)  {// might be with error on startup
       appMaster.doSessionCountUpdate(incrementSessionCount()); // remove after the following works
       appMaster.logSessionInit(event);     
     }
   }
 
+  /*
+   This gets entered 1) after user actively quits and session.close() is called; and 2) when a timeout event from tomcat happens.
+   */
   @Override
   public void sessionDestroy(SessionDestroyEvent event)
   {
-    //MSysOut.println("JMETERdebug: Session destroyed, id = "+event.getSession().hashCode()); 
+    MSysOut.println(SYSTEM_LOGS,"JMETERdebug: Session destroyed, id = "+event.getSession().hashCode()); 
     if(appMaster != null) { // might be with error on startup
       appMaster.doSessionCountUpdate(decrementSessionCount());
 
-      MmowgliSessionGlobals globs = event.getSession().getAttribute(MmowgliSessionGlobals.class);  // store this for use across the app
-      if(globs != null) {
-        appMaster.logSessionEnd(globs.getUserID());// remove after the following works
-        appMaster.logSessionDestroy(event);
-      }
+      MmowgliSessionGlobals globs = event.getSession().getAttribute(MmowgliSessionGlobals.class);
+      if(globs != null)
+        appMaster.sessionEndingFromTimeoutOrLogout(globs, event.getSession());
     }  
   }
   

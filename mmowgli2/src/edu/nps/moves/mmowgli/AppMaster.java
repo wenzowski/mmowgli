@@ -729,38 +729,50 @@ public class AppMaster
     return REPORTS_URL;
   }
 
-  @HibernateOpened
-  @HibernateClosed
-  public void logSessionEnd(Serializable uId)
-  {
-    if(uId != null) {
-      HSess.init();
-      User u = DBGet.getUserTL(uId);
-      if(u != null)
-        GameEventLogger.logSessionEndTL(u);
-      HSess.close();
-    }
-  }
-
   private HashSet<VaadinSession> sessionsInThisMmowgliNode = new HashSet<VaadinSession>();
   
-  // The synchronized methods below protect concurrent access to the hashset
-  /**
+  // The synchronized methods below protect concurrent access to the hashset  
+  private synchronized void removeVaadinSession(VaadinSession sess)
+  {
+    sessionsInThisMmowgliNode.remove(sess);   
+  }
+  
+  private synchronized void addVaadinSession(VaadinSession sess)
+  {
+    sessionsInThisMmowgliNode.add(sess);    
+  }
+   /**
    * Called from servlet
    */
-  public synchronized void logSessionInit(SessionInitEvent event)
+  public void logSessionInit(SessionInitEvent event)
   {
-    sessionsInThisMmowgliNode.add(event.getSession());
+    addVaadinSession(event.getSession());
     sendMySessionReport();
   }
-
+  
   /**
    * Called from servlet
-   */
-  public synchronized void logSessionDestroy(SessionDestroyEvent event)
-  {  
-    sessionsInThisMmowgliNode.remove(event.getSession());
+   * Might be entered as a result of session.close() from controller, in which case we're mostly done.
+   */ 
+  @HibernateOpened
+  @HibernateClosed
+  public void sessionEndingFromTimeoutOrLogout(MmowgliSessionGlobals globs, VaadinSession sess)
+  {
+    globs.stopping=true;
+    HSess.init();
+    
+    removeVaadinSession(sess);
     sendMySessionReport();
+    if(!globs.loggingOut) {
+      User u = DBGet.getUserTL(globs.getUserID());
+      if(u != null)
+        GameEventLogger.logSessionTimeoutL(u);
+    }
+    MessagingManager2 mgr = globs.getMessagingManager();
+    if(mgr != null)
+      mgr.unregisterSession();
+    
+    HSess.close();  
   }
   
   public void sendMySessionReport()
@@ -818,6 +830,7 @@ public class AppMaster
     return "<b>Server</b>\t<b>User</b>\t<b>ID</b>\t<b>Start</b>\t<b>IP</b>\t<b>Browser</b>\t<b>Version</b>\t<b>OS</b>"+SESSION_REPORT_ITEM_DELIMITER;
   }
   
+  // Synchronized to protect hashmap
   public synchronized StringBuilder getLocalNodeReportRaw()
   {
     StringBuilder sb = new StringBuilder();
