@@ -42,6 +42,7 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsGameEventUpdates;
@@ -67,7 +68,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
   private String PANEL_HEIGHT = "490px";
   private StringBuilder sb;
   private Label newEventLabel;
-  
+  private TextArea messageTA;
   @HibernateSessionThreadLocalConstructor
   public EventMonitorPanel()
   {
@@ -102,9 +103,47 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
     addComponent(moreButt);
     setComponentAlignment(moreButt,Alignment.TOP_RIGHT);
 
+    Label lab;
+    addComponent(lab=new Label());
+    lab.setHeight("10px");
+    
+    addComponent(new Label("Broadcast message to game masters"));
+    
+    
+    messageTA = new TextArea();
+    messageTA.setRows(2);
+    messageTA.setWidth("100%");
+
+    addComponent(messageTA);
+    
+    NativeButton sendButt = new NativeButton("Send",new SendListener());
+    addComponent(sendButt);
+    
     loadEvents();
    }
 
+  class SendListener implements ClickListener
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public void buttonClick(ClickEvent event)
+    {
+      String msg = messageTA.getValue();
+      if(msg.length()<5)
+        Notification.show("Message not sent.", "Your message is too short to be useful.", Notification.Type.ERROR_MESSAGE);
+      else if(msg.length()>255)
+        Notification.show("Message not sent.", "Limit your message to 255 characters. ("+msg.length()+")", Notification.Type.ERROR_MESSAGE);
+       
+      else {
+        HSess.init();
+        User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+        GameEventLogger.logGameMasterBroadcastTL(GameEvent.EventType.MESSAGEBROADCASTGM, msg, u);
+        HSess.close();
+      }
+    }    
+  }
+  
   // Want to see more
   @Override
   @MmowgliCodeEntry
