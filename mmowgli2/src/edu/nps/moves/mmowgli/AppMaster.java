@@ -759,20 +759,23 @@ public class AppMaster
   public void sessionEndingFromTimeoutOrLogout(MmowgliSessionGlobals globs, VaadinSession sess)
   {
     globs.stopping=true;
-    HSess.init();
+    Object key = HSess.checkInit();
     
     removeVaadinSession(sess);
     sendMySessionReport();
     if(!globs.loggingOut) {
-      User u = DBGet.getUserTL(globs.getUserID());
-      if(u != null)
-        GameEventLogger.logSessionTimeoutL(u);
+      Serializable id = globs.getUserID();
+      if(id != null) {
+        User u = DBGet.getUserTL(globs.getUserID());
+        if(u != null)
+          GameEventLogger.logSessionTimeoutL(u);
+      }
     }
     MessagingManager2 mgr = globs.getMessagingManager();
     if(mgr != null)
       mgr.unregisterSession();
     
-    HSess.close();  
+    HSess.checkClose(key);  
   }
   
   public void sendMySessionReport()
@@ -861,4 +864,14 @@ public class AppMaster
     }   
     return sb;
   }
+  public static int SESS_RPT_SERVER_COLUMN = 0;
+  public static int SESS_RPT_NAME_COLUMN = 1;
+  public static int SESS_RPT_ID_COLUMN = 2;
+  public static int SESS_RPT_START_COLUMN = 3;
+  public static int SESS_RPT_IP_COLUMN = 4;
+  public static int SESS_RPT_BROWSER_COLUMN = 5;
+  public static int SESS_RPT_VERSION_COLUMN = 6;
+  public static int SESS_RPT_OS_COLUMN = 7;
+  
+  public static int SESSION_REPORT_MAX_WIDTH = 8;
 }
