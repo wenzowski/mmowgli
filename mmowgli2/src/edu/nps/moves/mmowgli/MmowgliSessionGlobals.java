@@ -25,7 +25,6 @@ package edu.nps.moves.mmowgli;
 import static edu.nps.moves.mmowgli.MmowgliConstants.SYSTEM_LOGS;
 
 import java.io.Serializable;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
