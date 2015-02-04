@@ -22,12 +22,23 @@
 
 package edu.nps.moves.mmowgli.modules.administration;
 
+import static edu.nps.moves.mmowgli.AppMaster.SESSION_REPORT_MAX_WIDTH;
+import static edu.nps.moves.mmowgli.AppMaster.SESS_RPT_ID_COLUMN;
+
 import java.util.Arrays;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.vaadin.viritin.layouts.MHorizontalLayout;
+
 import com.vaadin.data.Item;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.AppMaster;
+import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * SessionReportWindow.java created on Jan 29, 2015
@@ -96,7 +107,9 @@ public class SessionReportWindow extends Window
     addReportToTable(headerArr, localReport);
     addReportToTable(headerArr, remoteReports);
     
+    vLay.addComponent(makeTopSummary(localReport,remoteReports));
     vLay.addComponent(table);
+    vLay.setExpandRatio(table, 1.0f);
   }
   
   @SuppressWarnings("unchecked")
@@ -127,5 +140,46 @@ public class SessionReportWindow extends Window
         cols[0] = ""+ ++count;
     }
     return grid;
+  }
+  
+  private Component makeTopSummary(String[][] localRpt, String[][] remoteRpts)
+  {
+    Object key = HSess.checkInit();
+    HorizontalLayout hLay = new MHorizontalLayout().withMargin(new MarginInfo(false,true,false,true));
+    totals tots = new totals();
+    
+    count(localRpt,tots);
+    count(remoteRpts,tots);
+    
+    Criteria criteria = HSess.get().createCriteria(User.class);
+    criteria.setProjection(Projections.rowCount());
+    criteria.add(Restrictions.eq("accountDisabled", false));
+    int totcount = ((Long)criteria.list().get(0)).intValue();
+        
+    hLay.addComponent(new Label("Logged-in players: "+tots.loggedin));
+    hLay.addComponent(new Label("   Total open sessions: "+tots.total));
+    hLay.addComponent(new Label("   Total registered players: "+totcount));
+    hLay.addStyleName("m-margintop-5");
+    hLay.addStyleName("m-marginbottom-5");
+    
+    HSess.checkClose(key);
+    return hLay;
+  }
+  
+  class totals {
+    public int total;
+    public int loggedin;
+  }
+  
+  private void count(String[][] rpt, totals tots)
+  {
+    for(String[] row : rpt) {
+      if(row.length != SESSION_REPORT_MAX_WIDTH)
+        continue;  // thats the server name
+      tots.total++;
+      if(row[SESS_RPT_ID_COLUMN].trim().length()>0)
+        tots.loggedin++;      
+    }
+    
   }
 }
