@@ -144,29 +144,29 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     ret.addItem("Broadcast message to game masters", new MCommand(MENUGAMEMASTERBROADCASTTOGMS)).setIcon(FontAwesome.BULLHORN);
     ret.addItem("Broadcast message to all players", new MCommand(MENUGAMEMASTERBROADCAST)).setIcon(FontAwesome.BULLHORN);
     
-    ret.addItem("Edit blog headline", new MCommand(MENUGAMEMASTERBLOGHEADLINE));
+    ret.addItem("Edit blog headline", new MCommand(MENUGAMEMASTERBLOGHEADLINE)).setIcon(FontAwesome.EXCLAMATION_CIRCLE);
     ret.addSeparator();
 
     if (Game.getTL().isActionPlansEnabled()) {
-        ret.addItem("Create Action Plan", new MCommand(MENUGAMEMASTERCREATEACTIONPLAN));
+        ret.addItem("Create Action Plan", new MCommand(MENUGAMEMASTERCREATEACTIONPLAN)).setIcon(FontAwesome.FILE_TEXT_O);
         ret.addItem("Invite additional players to be Action Plan authors", new MCommand(MENUGAMEMASTERINVITEAUTHORSCLICK)).setIcon(FontAwesome.USER_MD);
     }
 
     ret.addSeparator();
-    ret.addItem("Show active player count overall", new MCommand(MENUGAMEMASTERACTIVECOUNTCLICK)).setIcon(FontAwesome.USER_MD);
-    ret.addItem("Show active player count by server", new MCommand(MENUGAMEMASTERACTIVECOUNTBYSERVERCLICK)).setIcon(FontAwesome.USER_MD);
-    ret.addItem("Show active player list",new MCommand(MENUGAMEMASTERACTIVEPLAYERREPORTCLICK)).setIcon(FontAwesome.USER_MD);
+    ret.addItem("Show active players",new MCommand(MENUGAMEMASTERACTIVEPLAYERREPORTCLICK)).setIcon(FontAwesome.USER_MD);
+    //ret.addItem("Show active player count overall", new MCommand(MENUGAMEMASTERACTIVECOUNTCLICK)).setIcon(FontAwesome.USER_MD);
+    //ret.addItem("Show active player count by server", new MCommand(MENUGAMEMASTERACTIVECOUNTBYSERVERCLICK)).setIcon(FontAwesome.USER_MD);
    // this is non functional ret.addItem("Show user polling data for this server",  new MCommand(MENUGAMEMASTERUSERPOLLINGCLICK)).setIcon(FontAwesome.USER_MD);
-    ret.addItem("Show card count", new MCommand(MENUGAMEMASTERCARDCOUNTCLICK));
-    ret.addItem("Show registered users counts", new MCommand(MENUGAMEMASTERTOTALREGISTEREDUSERS)).setIcon(FontAwesome.USER_MD);
+    ret.addItem("Show registered user counts", new MCommand(MENUGAMEMASTERTOTALREGISTEREDUSERS)).setIcon(FontAwesome.USER_MD);
+    ret.addItem("Show card count", new MCommand(MENUGAMEMASTERCARDCOUNTCLICK)).setIcon(FontAwesome.LIGHTBULB_O);
     ret.addItem("View game login permissions buttons", viewGamePermissionsClicked).setIcon(FontAwesome.SIGN_IN);
 
     ret.addSeparator();
 
     if (Game.getTL().isActionPlansEnabled())
-        ret.addItem("Show displayed Action Plan as html", new MCommand(MENUGAMEMASTER_EXPORT_SELECTED_ACTIONPLAN));
+        ret.addItem("Show displayed Action Plan as html", new MCommand(MENUGAMEMASTER_EXPORT_SELECTED_ACTIONPLAN)).setIcon(FontAwesome.FILE_TEXT_O);
     
-    ret.addItem("Show displayed Idea Card tree as html", new MCommand(MENUGAMEMASTER_EXPORT_SELECTED_CARD));
+    ret.addItem("Show displayed Idea Card tree as html", new MCommand(MENUGAMEMASTER_EXPORT_SELECTED_CARD)).setIcon(FontAwesome.LIGHTBULB_O);
     ret.addItem("Open game Reports Index page", new MCommand(MENUGAMEMASTEROPENREPORTSPAGE)).setIcon(FontAwesome.FILE_TEXT_O);
     ret.addSeparator();
     ret.addItem("View (read-only) game designer values", new MCommand(MENUGAMEADMIN_BUILDGAMECLICK_READONLY));
