@@ -47,16 +47,28 @@ import edu.nps.moves.mmowgli.hibernate.*;
 public class MmowgliLinkInserter
 {
   static enum linkType {CARD,ACTIONPLAN,USER};
+  
 	// todo convert to Java regex
   public static final String USERLINK_REGEX   = "user\\s+(\\d+)";
   public static final String ACTPLNLINK_2_REGEX = "ap\\s+(\\d+)";
   public static final String CARDLINK_REGEX   = "card\\s+(\\d+)"; //"(([Gg][Aa][Mm][Ee]\s*(\d|\.)+\s*)?([Ii][Dd][Ee][Aa]\s*)?[Cc][Aa][Rr][Dd]\s*#?\s*([Cc][Hh][Aa][Ii][Nn]\s*#?\s*)?(\d+))";
   public static final String ACTPLNLINK_REGEX = "(?:action\\s)?plan\\s+(\\d+)"; //(([Gg][Aa][Mm][Ee]\s*(\d|\.)+\s*)?([Aa][Cc][Tt][Ii][Oo][Nn]\s*#?\s*)?[Pp][Ll][Aa][Nn]\s*#?\s*(\d+))"
 
-  public static final String USER_TOKEN = ".,.,.";
-  public static final String ACPLN_TOKEN = ".nalp,,";
-  public static final String CARD_TOKEN = "!!DARC";
-  public static final String AP_TOKEN = "&&pa&&";
+  // This allows us to avoid linkifying the above sequences when they appear in tooltips; we would build bogus html otherwise
+  // One for each of the 4 above; avoid using strings which would match above
+  // The commented lines would more closely match the case of the original, but at the expense of doubling the compute time
+  private static String[][] regexSubs = {
+    //{"user\\s", "usr "},
+    //{"USER\\s", "USR "},
+    {"[uU][sS][eE][rR]\\s", "USR "},
+    //{"plan\\s", "pln "},
+    //{"PLAN\\s", "PLN "},
+    {"[pP][lL][aA][nN]\\s", "PLN "},
+    //{"card\\s", "crd "},
+    //{"CARD\\s", "CRD "},
+    {"[cC][aA][rR][dD]\\s", "CRD "},
+    {"[aA][pP]\\s",         "PLN "}
+ };
 
   // Gotten from http://daringfireball.net/2010/07/improved_regex_for_matching_urls
   public static final String URLLINK_REGEX = 
@@ -138,10 +150,6 @@ public class MmowgliLinkInserter
     return insertLinksCommon(s,g,sess);
   }
   
-//  public static String insertLinks(String s, Game g)
-//  {
-//    return insertLinksCommon(s,g,VHib.getVHSession());
-//  }
   public static String insertLinksTL(String s, Game g)
   {
     return insertLinksCommon(s,g,HSess.get());
@@ -284,10 +292,10 @@ public class MmowgliLinkInserter
   
   private static String avoidRegex(String s)
   {
-       s = s.replaceAll("[uU][sS][eE][rR]\\s", "usr. ");
-       s = s.replaceAll("[pP][lL][aA][nN]\\s", "pln. ");
-       s = s.replaceAll("[cC][aA][rR][dD]\\s", "crd. ");
-    return s.replaceAll("[aA][pP]\\s", "pln. ");
+    for(String[] pair : regexSubs) {
+      s = s.replaceAll(pair[0], pair[1]);
+    }
+    return s;
   }
 
   private static void urlLoopMatcher(StringBuilder sb, Matcher matcher)
