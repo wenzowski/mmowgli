@@ -212,6 +212,12 @@ div .m-textarea-greyborder, .m-greyborder {
   .m-marginleft-60 {
 	margin-left: 60px;
   } 
+  .m-margintop-5 {
+    margin-top: 5px;
+  }
+  .m-marginbottom-5 {
+    margin-bottom: 5px;
+  }
   .m-header-link a span {
     text-decoration: none !important;
   }
@@ -1214,6 +1220,17 @@ div .v-nativebutton-m-userprofile3-changeemailbutt {
 	overflow: hidden;
 	line-height:normal;
 }
+/* these two should have equal specificity, so the latter one wins; i.e., the following one */
+.m-actiondashboard-table .v-table-body .v-table-table .v-table-row     .v-table-cell-content .v-table-cell-wrapper .m-actionplan-redtext,
+.m-actiondashboard-table .v-table-body .v-table-table .v-table-row-odd .v-table-cell-content .v-table-cell-wrapper .m-actionplan-redtext {
+	color: #CB0613;
+    font-weight: bold;
+}
+
+.m-actiondashboard-table .v-table-body .v-table-table .v-table-row     .v-table-cell-content .v-table-cell-wrapper .m-actionplan-highlighted_background,
+.m-actiondashboard-table .v-table-body .v-table-table .v-table-row-odd .v-table-cell-content .v-table-cell-wrapper .m-actionplan-highlighted_background {
+    background-color: #FFD300; /* yellow */
+}
 .m-actiondashboard-table .v-table-header-wrap .v-table-header .v-table-caption-container{
 	color: #58595B;
 	font-family: helvetica;
@@ -1462,10 +1479,6 @@ div .v-nativebutton-m-link-button-18 .v-nativebutton-caption{
 	color: #58595B;
 	font-family: helvetica;
 	font-size: 18px;
-}
-.m-actionplan-redtext {
-	color: #CB0613;
-    font-weight: bold;
 }
 .m-actionplan-searchlibrary-butt {
 	width: 188px;
