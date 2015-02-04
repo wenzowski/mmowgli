@@ -43,6 +43,7 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -238,14 +239,14 @@ public class ActionPlanTable extends Table
   
   private void setAllColumnWidths()
   {
-    setColumnWidth(IDFORSORTING_COLUMN_NAME,30);
+    setColumnWidth(IDFORSORTING_COLUMN_NAME,35);
     setColumnWidth(AUTHORS_COLUMN_NAME,165);
     setColumnWidth(MYTHUMBS_COLUMN_NAME,60);
     setColumnWidth(AVGTHUMBS_COLUMN_NAME,32);
   }
   private void setAllColumnWidthsWithRound()
   {
-    setColumnWidth(IDFORSORTING_COLUMN_NAME,30);
+    setColumnWidth(IDFORSORTING_COLUMN_NAME,35);
     setColumnWidth(ROUND_COLUMN_NAME,30);
     setColumnWidth(AUTHORS_COLUMN_NAME,140);
     setColumnWidth(MYTHUMBS_COLUMN_NAME,60);
@@ -254,12 +255,12 @@ public class ActionPlanTable extends Table
   
   private void setAllColumnWidthsHelpWanted()
   {
-    setColumnWidth(IDFORSORTING_COLUMN_NAME,30);
+    setColumnWidth(IDFORSORTING_COLUMN_NAME,35);
     setColumnWidth(TITLE_COLUMN_NAME,266); 
   }
   private void setAllColumnWidthsHelpWantedWithRound()
   {
-    setColumnWidth(IDFORSORTING_COLUMN_NAME,30);
+    setColumnWidth(IDFORSORTING_COLUMN_NAME,35);
     setColumnWidth(ROUND_COLUMN_NAME,30);
     setColumnWidth(TITLE_COLUMN_NAME,236); 
   }
@@ -297,7 +298,7 @@ public class ActionPlanTable extends Table
           lab.setDescription("Help wanted: "+hw);
         }
         if(ap.isHidden()) {
-          lab.setValue(lab.getValue().toString()+"<span style='color:red'>(H)</span>");
+          lab.setValue(lab.getValue().toString()+"<span style='color:#CB0613'>(H)</span>");
           lab.setDescription("hidden");
         } 
         HSess.checkClose(sessKey);
@@ -310,9 +311,16 @@ public class ActionPlanTable extends Table
         return lab;
       }
       if(TITLE_COLUMN_NAME.equals(columnId)) {
-        Label lab = new Label(ap.getTitle());
-        lab.setDescription(lab.getValue().toString());
-        //lab.addStyleName(ACTIONPLAN_TABLE_TITLE_CELL);
+        Label lab = null;     
+        if(ap.isSuperInteresting()) {
+          lab = new HtmlLabel("<b>"+FontAwesome.STAR.getHtml()+"&nbsp;"+ap.getTitle()+"</b>");
+          lab.addStyleName("m-actionplan-highlighted_background");
+          lab.setDescription("SUPER INTERESTING: "+ap.getTitle());
+        }
+        else {
+          lab = new Label(ap.getTitle());
+          lab.setDescription(lab.getValue().toString());
+        }
         HSess.checkClose(sessKey);
         return lab;
       }
