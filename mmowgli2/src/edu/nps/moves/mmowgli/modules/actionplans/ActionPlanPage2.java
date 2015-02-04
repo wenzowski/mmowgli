@@ -703,7 +703,6 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     Label lab;
     hl.addComponent(lab = new Label());
     lab.setWidth("270px");
-
     hl.addComponent(lab = new Label("ID " + ap.getId()));
     hl.setComponentAlignment(lab, Alignment.BOTTOM_LEFT);
 
@@ -716,14 +715,14 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   {
     User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
 
-    if (me.isAdministrator()) {
+    if (me.isAdministrator() || me.isGameMaster()) {
       Label sp;
       hl.addComponent(sp = new Label());
-      sp.setWidth("100px");
+      sp.setWidth("80px");
 
       final CheckBox hidCb = new CheckBox("hidden");
       hidCb.setValue(ap.isHidden());
-      hidCb.setDescription("Only game admins see this");
+      hidCb.setDescription("Only game masters see this");
       hidCb.setImmediate(true);
       hl.addComponent(hidCb);
       hl.setComponentAlignment(hidCb, Alignment.BOTTOM_RIGHT);
@@ -747,9 +746,9 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
         }
       });
 
-      final CheckBox supIntCb = new CheckBox("sup. interest.");
+      final CheckBox supIntCb = new CheckBox("super interesting");
       supIntCb.setValue(ap.isSuperInteresting());
-      supIntCb.setDescription("Mark plan super-interesting (only game admins see this)");
+      supIntCb.setDescription("Mark plan super-interesting (only game masters see this)");
       supIntCb.setImmediate(true);
       hl.addComponent(supIntCb);
       hl.setComponentAlignment(supIntCb, Alignment.BOTTOM_RIGHT);
