@@ -114,13 +114,14 @@ public class SessionReportWindow extends Window
   
   @SuppressWarnings("unchecked")
   private void addReportToTable(String[] header, String[][] report)
-  {
-    
+  {    
     for(int r=0;r<report.length;r++) {
-      Item row = table.getItem(table.addItem());    
       String[] rowArray = report[r];
-      for(int col=0; col<rowArray.length;col++) {
-        row.getItemProperty(header[col]).setValue(rowArray[col]);
+      if(rowArray.length>0) {
+        Item row = table.getItem(table.addItem());    
+        for(int col=0; col<rowArray.length;col++) {
+          row.getItemProperty(header[col]).setValue(rowArray[col]);
+        }
       }
     }    
   }
@@ -128,6 +129,9 @@ public class SessionReportWindow extends Window
   int count = 0;
   String[][] parseReport(String s)
   {
+    if(s.trim().length()<=0)
+      return new String[0][];
+    
     String[] rows = s.split("\n");
     String[][] grid = new String[rows.length][];
     int r=0;
