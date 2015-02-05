@@ -221,6 +221,8 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   {
     String[][] sa = new String[serverSessionReports.size()][2];
     Set<String> keys = serverSessionReports.keySet();
+    if(keys.isEmpty())
+      return new String[0][];
     int i = 0;
     for(String s : keys) {
       sa[i][0] = s;
@@ -244,7 +246,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
     String msgStr = svrName + SESSION_REPORT_ITEM_DELIMITER_WIRE + singleNodeReport;
     if (sessIO != null) {
       sessIO.sendDelayed(SESSIONS_REPORT, msgStr, ""); // let this thread return 
-      MSysOut.println(MESSAGING_LOGS,AppMaster.instance().getServerName()+" SENT report: "+AppMaster.instance().getServerName() + SESSION_REPORT_ITEM_DELIMITER_WIRE + singleNodeReport);    
+      MSysOut.println(MESSAGING_LOGS,svrName+" SENT report: "+svrName + SESSION_REPORT_ITEM_DELIMITER_WIRE + singleNodeReport);    
     }
   }
   
