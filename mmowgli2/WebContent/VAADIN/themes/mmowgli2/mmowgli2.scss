@@ -289,6 +289,20 @@ div .m-textarea-greyborder, .m-greyborder {
   width:205px;
   height:158px;
 }
+.v-nativebutton-m-gotoTopLevelButton {
+  background: transparent no-repeat;
+  background-image: url('#{$imageRepo}/toplevelcards222w80h.png');
+  border-style:none;
+  width:222px;
+  height:80px;
+}
+.v-nativebutton-m-gotoTopLevelButton:hover {
+  background: transparent no-repeat;
+  background-image: url('#{$imageRepo}/toplevelcardshilight222w80h.png');
+  border-style:none;
+  width:222px;
+  height:80px;
+}
 .v-nativebutton-m-viewCardChainButton {
   background: transparent no-repeat;
   background-image: url('#{$imageRepo}/viewCardChain132w124h.png');
