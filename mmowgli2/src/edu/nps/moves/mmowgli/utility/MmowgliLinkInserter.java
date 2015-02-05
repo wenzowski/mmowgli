@@ -50,6 +50,8 @@ public class MmowgliLinkInserter
   
 	// todo convert to Java regex
   public static final String USERLINK_REGEX   = "user\\s+(\\d+)";
+  public static final String USERLINK_REGEX2  = "player\\s+(\\d+)";
+  public static final String USERLINK_REGEX3  = "@(\\d+)";
   public static final String ACTPLNLINK_2_REGEX = "ap\\s+(\\d+)";
   public static final String CARDLINK_REGEX   = "card\\s+(\\d+)"; //"(([Gg][Aa][Mm][Ee]\s*(\d|\.)+\s*)?([Ii][Dd][Ee][Aa]\s*)?[Cc][Aa][Rr][Dd]\s*#?\s*([Cc][Hh][Aa][Ii][Nn]\s*#?\s*)?(\d+))";
   public static final String ACTPLNLINK_REGEX = "(?:action\\s)?plan\\s+(\\d+)"; //(([Gg][Aa][Mm][Ee]\s*(\d|\.)+\s*)?([Aa][Cc][Tt][Ii][Oo][Nn]\s*#?\s*)?[Pp][Ll][Aa][Nn]\s*#?\s*(\d+))"
@@ -58,6 +60,8 @@ public class MmowgliLinkInserter
   // One for each of the 4 above; avoid using strings which would match above
   // The commented lines would more closely match the case of the original, but at the expense of doubling the compute time
   private static String[][] regexSubs = {
+    {"@", "USR "},
+    {"[pP][lL][aA][yY][eE][rR]\\s","USR "},
     //{"user\\s", "usr "},
     //{"USER\\s", "USR "},
     {"[uU][sS][eE][rR]\\s", "USR "},
@@ -99,6 +103,8 @@ public class MmowgliLinkInserter
   public static final String USER_EVENTNUM    = "" + SHOWUSERPROFILECLICK.ordinal();
   
   private static Pattern userLinkPattern   = Pattern.compile(USERLINK_REGEX,  Pattern.CASE_INSENSITIVE);
+  private static Pattern userLinkPattern2  = Pattern.compile(USERLINK_REGEX2, Pattern.CASE_INSENSITIVE);
+  private static Pattern userLinkPattern3  = Pattern.compile(USERLINK_REGEX3, Pattern.CASE_INSENSITIVE);
   private static Pattern cardLinkPattern   = Pattern.compile(CARDLINK_REGEX,  Pattern.CASE_INSENSITIVE);
   private static Pattern actPlnLinkPattern = Pattern.compile(ACTPLNLINK_REGEX,Pattern.CASE_INSENSITIVE);
   private static Pattern urlLinkPattern    = Pattern.compile(URLLINK_REGEX,   Pattern.CASE_INSENSITIVE);
@@ -182,6 +188,12 @@ public class MmowgliLinkInserter
     matcher = userLinkPattern.matcher(sb);
     loopMatcher(sb,matcher,USER_EVENTNUM, linkType.USER, sess);
     
+    matcher = userLinkPattern2.matcher(sb);
+    loopMatcher(sb,matcher,USER_EVENTNUM, linkType.USER, sess);
+    
+    matcher = userLinkPattern3.matcher(sb);
+    loopMatcher(sb,matcher,USER_EVENTNUM, linkType.USER, sess);
+    
     return sb.toString();
   }
     
@@ -214,9 +226,9 @@ public class MmowgliLinkInserter
     int start = 0;
     while(matcher.find(start)) {
       String idnum = matcher.group(1);  // since we matched, I know there is a group 1 which is the card/ap id
-      Object cardOrAp = checkExistence(lTyp,idnum,sess);
-      if(cardOrAp != null ) {
-        String link = buildLink(lTyp,matcher.group(),idnum,eventNum,sess,cardOrAp);
+      Object cardOrApOrUser = checkExistence(lTyp,idnum,sess);
+      if(cardOrApOrUser != null ) {
+        String link = buildLink(lTyp,matcher.group(),idnum,eventNum,sess,cardOrApOrUser);
         sb.replace(matcher.start(), matcher.end(), link);
         start = matcher.start()+link.length();
       }
@@ -268,7 +280,7 @@ public class MmowgliLinkInserter
     }
     sb.append(">");
     if(lTyp == linkType.USER) {
-      User u = DBGet.getUser(Long.parseLong(objectId), sess);
+      User u = DBGet.getUser(Long.parseLong(objectId), sess);  //todo get from quickuser cache
       if(u != null)
         original = u.getUserName();
     }
