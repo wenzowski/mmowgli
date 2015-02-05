@@ -120,8 +120,8 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
     summ.headerWidthStr     = "100px";
     summ.headerHeightStr    = "10px";
     
-    summ.movePositionStr    = "top:19px;left:10px";
-    summ.moveWidthStr       = "100px";
+    summ.movePositionStr    = "top:9px;left:20px"; //"top:19px;left:10px";
+    summ.moveWidthStr       = "95px";//"100px";
     summ.moveHeightStr      = "8px";
     summ.moveStyleStr       = "m-cardsummary-movelabel-small";  
     
