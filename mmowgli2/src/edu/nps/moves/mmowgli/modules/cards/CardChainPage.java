@@ -464,7 +464,8 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       spacerVL.addComponent(parentSumm);
       parentSumm.initGui();
       spacerVL.setComponentAlignment(parentSumm, Alignment.MIDDLE_CENTER);
-      parentSumm.setCaption("Parent Card");     
+      parentSumm.setCaption("Parent Card"); 
+      parentSumm.addStyleName("m-parent-card-summary");
     }
     else {
       topHL.addComponent(spacerVL);
