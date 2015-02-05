@@ -26,6 +26,7 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 import static edu.nps.moves.mmowgli.MmowgliEvent.CARDCHAINPOPUPCLICK;
 import static edu.nps.moves.mmowgli.MmowgliEvent.CARDCREATEACTIONPLANCLICK;
 import static edu.nps.moves.mmowgli.MmowgliEvent.IDEADASHBOARDCLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.PLAYIDEACLICK;
 
 import java.io.Serializable;
 import java.net.URLEncoder;
@@ -83,7 +84,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   private CardSummary parentSumm;
   private CardLarge cardLg;
   private Button chainButt;
-  private IDNativeButton gotoIdeaDashButt;
+  private IDNativeButton gotoIdeaDashButt, gotoTopLevelButt;
   private HorizontalLayout listsHL;  // card columns
   private HorizontalLayout topHL;    // master card at top
   private GhostVerticalLayoutWrapper cardMarkingPanel;
@@ -97,6 +98,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     this.cardId = cardId;
     chainButt = new NativeButton();
     gotoIdeaDashButt = new IDNativeButton(null,IDEADASHBOARDCLICK);
+    gotoTopLevelButt = new IDNativeButton(null,PLAYIDEACLICK);
     isGameMaster = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).isGameMaster();
   }
   
@@ -456,10 +458,12 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     Card card = DBGet.getCardTL(cardId);
     Card parent = card.getParentCard();
     VerticalLayout spacerVL = new VerticalLayout();
+
     if(parent != null) {
       topHL.addComponent(spacerVL);
       topHL.setExpandRatio(spacerVL, 1.0f);
       spacerVL.setWidth("100%");
+      
       parentSumm=CardSummary.newCardSummarySmallTL(parent.getId());
       spacerVL.addComponent(parentSumm);
       parentSumm.initGui();
@@ -469,14 +473,16 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     }
     else {
       topHL.addComponent(spacerVL);
-      spacerVL.setHeight("100%");
-      spacerVL.setWidth("100%");
       topHL.setExpandRatio(spacerVL, 1.0f);
-      
-      /*in progress
-      spacerVL.addStyleName("m-redborder");
-      addPlayAnIdeaButtonTL(spacerVL);
-      */
+      spacerVL.setWidth("100%");
+
+      gotoTopLevelButt.setStyleName("m-gotoTopLevelButton");
+      gotoTopLevelButt.setDescription(idea_dash_tt);
+      gotoTopLevelButt.setId(PLAY_AN_IDEA_BLUE_BUTTON);
+      gotoTopLevelButt.setDescription("Show two top-level card rows");
+      spacerVL.addComponent(gotoTopLevelButt);
+      spacerVL.setComponentAlignment(gotoTopLevelButt, Alignment.MIDDLE_CENTER);
+
     }
     if(isGameMaster) {
       spacerVL.addComponent(cardMarkingPanel);
