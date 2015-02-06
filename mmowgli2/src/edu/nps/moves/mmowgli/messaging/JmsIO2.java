@@ -242,8 +242,8 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
     if (jmsExternalSession == null) // no inter-node comms.
       return;
 
-    if (isLocalMessageOnly(pkt.msgType))
-      return;
+    //if (isLocalMessageOnly(pkt.msgType))
+    //  return;
 
 
     String whichException = "";
@@ -306,12 +306,12 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
       t.printStackTrace();
     }
   }
-  
+  /*
   private boolean isLocalMessageOnly(char typ)
   {
     return (typ == INSTANCEREPORTCOMMAND || typ == INSTANCEREPORT); // these stay local
   }
-  
+  */
   public static interface FirstListener
   {
     public boolean doPreviewMessage(MMessagePacket pkt);
