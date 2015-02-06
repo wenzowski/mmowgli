@@ -136,10 +136,11 @@ public class AbstractMmowgliControllerHelper2
           // User usr = DBGet.getUser(id,sessMgr.getSession());
           // broadcastNews_oob(sessMgr,"User " + usr.getUserName() + " / " + usr.getLocation() + " went offline");
           break;
-
+/* Not used with new session report
         case INSTANCEREPORTCOMMAND:
           doSessionReport(pkt.msg);
           break;
+*/
         }
         if(push)
           myUI.push();
@@ -156,10 +157,9 @@ public class AbstractMmowgliControllerHelper2
       HSess.checkClose(sessKey);
     }
   }
+  /* Not used with new session report
   void doSessionReport(String message)
   {
-    //todo
-    /*
     String svrNm = ApplicationSessionGlobals.SERVERNAME;
     if(!message.trim().equals(svrNm))
       return;
@@ -176,9 +176,8 @@ public class AbstractMmowgliControllerHelper2
     //System.out.println("YES-IM-AWAKE, "+msg);
     InterTomcatIO sessIO = getSessIO();
     sessIO.sendDelayed(INSTANCEREPORT, msg);
-    */
   }
-
+*/
   private boolean actionPlanUpdated_TL(long apId, Component visibleComponent)
   {
     boolean ret = false;

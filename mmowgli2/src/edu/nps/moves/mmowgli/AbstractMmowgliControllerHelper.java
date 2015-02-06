@@ -192,10 +192,10 @@ public class AbstractMmowgliControllerHelper
     }
   }
  
+  /* not used with new session report
   void doSessionReport(String message)
   {
-    //todo
-    /*
+
     String svrNm = ApplicationSessionGlobals.SERVERNAME;
     if(!message.trim().equals(svrNm))
       return;
@@ -212,8 +212,8 @@ public class AbstractMmowgliControllerHelper
     //System.out.println("YES-IM-AWAKE, "+msg);
     InterTomcatIO sessIO = getSessIO();
     sessIO.sendDelayed(INSTANCEREPORT, msg);
-    */
   }
+  */
   void mediaUpdated_oob(Object medId)
   {
     iterateUIsAndContents(medId,mediaUpdateHandler);
@@ -634,7 +634,7 @@ public class AbstractMmowgliControllerHelper
     subWin.setCancelListener(canLis);
     subWin.setOkListener(okLis);
   }
-  
+  /* Not used with new session report
   String[] hdrs = new String[]{"<b>player</b>","<b>server</b>","<b>client ip</b>","<b>browser</b>"};
   private static int SERVER = 0;
   private static int BROWSER = 1;
@@ -694,7 +694,7 @@ public class AbstractMmowgliControllerHelper
     lab.setWidth(null);
     return lab;
   }
-  
+*/  
   public void handleShowNumberCardsActionTL(MenuBar mbar)
   {
     Session session =  HSess.get();

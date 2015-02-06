@@ -29,8 +29,6 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.net.ssl.*;
 import javax.servlet.ServletContext;
@@ -50,8 +48,9 @@ import edu.nps.moves.mmowgli.export.ReportGenerator;
 import edu.nps.moves.mmowgli.hibernate.*;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
-import edu.nps.moves.mmowgli.messaging.*;
-import edu.nps.moves.mmowgli.messaging.InterTomcatIO.InterTomcatReceiver;
+import edu.nps.moves.mmowgli.messaging.InterTomcatIO;
+import edu.nps.moves.mmowgli.messaging.MMessagePacket;
+import edu.nps.moves.mmowgli.messaging.MessagingManager2;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.modules.scoring.ScoreManager2;
 import edu.nps.moves.mmowgli.utility.*;
@@ -70,7 +69,7 @@ public class AppMaster
 {
   private ServletContext servletContext;
   
-  private InstancePollerThread instancePollerThread;
+  //private InstancePollerThread instancePollerThread;
   private MiscellaneousMmowgliTimer miscTimer;
   private BadgeManager badgeManager;
   private MailManager mailManager;
@@ -395,12 +394,13 @@ public class AppMaster
   private void startThreads()
   {
     getInterNodeIO(); // may fail will get retried in sender thread
-    // poller
-    instancePollerThread = new InstancePollerThread("Instance Poller");
-    instancePollerThread.setPriority(Thread.NORM_PRIORITY);
-    instancePollerThread.setDaemon(true); // allow tomcat to kill the app w/ no
-                                          // warnings
-    instancePollerThread.start();
+    
+    // poller  no longer used with new session report
+//    instancePollerThread = new InstancePollerThread("Instance Poller");
+//    instancePollerThread.setPriority(Thread.NORM_PRIORITY);
+//    instancePollerThread.setDaemon(true); // allow tomcat to kill the app w/ no
+//                                          // warnings
+//    instancePollerThread.start();
   }
 
   private void trustAllCerts()
@@ -510,7 +510,9 @@ public class AppMaster
 
   /*
    * Instance message format: servername, clientip, "userid " userid, uuid
+   * Not used with new session report
    */
+  /*
   class InstancePollerThread extends Thread
   {
     public boolean killed = false;
@@ -628,7 +630,7 @@ public class AppMaster
       this.userid = userid;
     }
   }
-
+*/
   public void pokeReportGenerator()
   {
     if (reportGenerator != null)
