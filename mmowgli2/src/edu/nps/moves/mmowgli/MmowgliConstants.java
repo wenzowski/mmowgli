@@ -259,8 +259,10 @@ public class MmowgliConstants
   public static final char USER_LOGOUT = 'l';
   
   public static final char UPDATE_SESSION_COUNT = 's';
+  /*
   public static final char INSTANCEREPORTCOMMAND = 'P'; // uc
   public static final char INSTANCEREPORT = 'p'; // lc
+  */
   public static final char SESSIONS_REPORT = 'n';
   public static final char JMSKEEPALIVE = 'K';
 

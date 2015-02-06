@@ -188,9 +188,9 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       case MENUGAMEMASTERBLOGHEADLINE:
         helper.handleSetBlogHeadlineAction(menubar);
         break;
-      case MENUGAMEMASTERUSERPOLLINGCLICK:
-        helper.handleShowPollingResults(menubar);
-        break;
+//      case MENUGAMEMASTERUSERPOLLINGCLICK:
+//        helper.handleShowPollingResults(menubar);
+//        break;
       case MENUGAMEMASTERCARDCOUNTCLICK:
         helper.handleShowNumberCardsActionTL(menubar);
         break;
@@ -512,9 +512,11 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       CardType ct = (CardType) HSess.get().get(CardType.class, Long.parseLong(pkt.msg));
       CardTypeManager.updateCardType(ct);
       break;
+ /* Not used with new session report
     case INSTANCEREPORTCOMMAND:
       helper.doSessionReport(pkt.msg);
       break;
+*/
     }
 
     // Now check each UI
@@ -599,10 +601,11 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         // User usr = DBGet.getUser(id,sessMgr.getSession());
         // broadcastNews_oob(sessMgr,"User " + usr.getUserName() + " / " + usr.getLocation() + " went offline");
         break;
-
+/* not used with new session report
       case INSTANCEREPORTCOMMAND:
         helper.doSessionReport(pkt.msg);
         break;
+ */
       case UPDATED_CARDTYPE:
         Object key = HSess.checkInit();
         CardType ct = (CardType) HSess.get().get(CardType.class, Long.parseLong(pkt.msg));
