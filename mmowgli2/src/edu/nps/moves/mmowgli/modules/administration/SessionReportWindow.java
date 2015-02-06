@@ -37,6 +37,7 @@ import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.AppMaster;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 
@@ -101,12 +102,15 @@ public class SessionReportWindow extends Window
     table = new Table();
     table.setSizeFull();
     
-    for(int col=0; col<headerArr.length; col++)
-      table.addContainerProperty(headerArr[col], String.class, null);
-    
+    for(int col=0; col<headerArr.length; col++) {
+      if(col==0)
+        table.addContainerProperty(headerArr[col], Label.class, null);
+      else
+        table.addContainerProperty(headerArr[col], String.class, null);
+    }       
     addReportToTable(headerArr, localReport);
     addReportToTable(headerArr, remoteReports);
-    
+
     vLay.addComponent(makeTopSummary(localReport,remoteReports));
     vLay.addComponent(table);
     vLay.setExpandRatio(table, 1.0f);
@@ -120,7 +124,10 @@ public class SessionReportWindow extends Window
       if(rowArray.length>0) {
         Item row = table.getItem(table.addItem());    
         for(int col=0; col<rowArray.length;col++) {
-          row.getItemProperty(header[col]).setValue(rowArray[col]);
+          if(col == 0)
+            row.getItemProperty(header[col]).setValue(new HtmlLabel(rowArray[col]));
+          else
+            row.getItemProperty(header[col]).setValue(rowArray[col]);
         }
       }
     }    
@@ -141,7 +148,7 @@ public class SessionReportWindow extends Window
         widestRowSize = cols.length;
       grid[r++]=cols;
       if(cols.length >1)
-        cols[0] = ""+ ++count;
+        cols[0]= "<div style='text-align:right;width:inherit'>"+ ++count+"</div>";
     }
     return grid;
   }
@@ -183,7 +190,6 @@ public class SessionReportWindow extends Window
       tots.total++;
       if(row[SESS_RPT_ID_COLUMN].trim().length()>0)
         tots.loggedin++;      
-    }
-    
+    }    
   }
 }
