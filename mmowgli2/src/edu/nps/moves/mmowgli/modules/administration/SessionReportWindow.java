@@ -56,7 +56,7 @@ public class SessionReportWindow extends Window
 
   public static void showSessionReport()
   {
-    Window me = new SessionReportWindow("Logged-in Player Report");
+    Window me = new SessionReportWindow("Active Players");
     UI.getCurrent().addWindow(me);
     me.center();
   }
