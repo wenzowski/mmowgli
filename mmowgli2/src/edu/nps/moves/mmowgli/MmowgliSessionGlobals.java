@@ -175,8 +175,6 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   {
     return controller;
   }
-  
-
 
   public MediaLocator getMediaLocator()
   {
@@ -188,25 +186,25 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     this.mediaLoc = mediaLocator;    
   }
 
-
-  public void setUserIDTL(Serializable userId)
+  public void setUserIDTL(Object userId)
   {
-    this.userId = userId;  
+    this.userId = (Serializable)userId;  
     
-//todo
-    /*
-      userKey = o;
-      linkSessionToUser(webAppContext);
-*/
-      User me = User.getTL(userId);
-      gameAdministrator = me.isAdministrator();
-      gameMaster = me.isGameMaster();
-      viewOnlyUser = me.isViewOnly();
-      userName = me.getUserName();
+    User me = User.getTL(userId);
+    gameAdministrator = me.isAdministrator();
+    gameMaster = me.isGameMaster();
+    viewOnlyUser = me.isViewOnly();
+    userName = me.getUserName();
   }
+  
   public Serializable getUserID()
   {
     return userId;
+  }
+  
+  public User getUserTL()
+  {
+    return User.getTL(getUserID());
   }
   
   public String getUserName()

@@ -44,7 +44,6 @@ import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.shared.Position;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -261,19 +260,18 @@ public class AbstractMmowgliControllerHelper
   void newGameMessage_oob(Object uid)
   {
     Object key = HSess.checkInit();
-    Message msg = (Message)HSess.get().get(Message.class, (Serializable)uid);
-    HSess.checkClose(key);
-    
-    if(msg == null) // Here's a way to get the message when it's ready:
-      msg = ComeBackWhenYouveGotIt.waitForMessage_oobTL(/*"_newGameMessage_oobTL",*/ this, uid);
-    if(msg == null)
+    Message msg = DB.getRetry(Message.class, uid, null, HSess.get()); 
+    if(msg == null) {
+      HSess.checkClose(key);
       return;
-    
+    }
     User toUser = msg.getToUser(); // null if Act. Pln comment
-    if(toUser == null || toUser.getId() != (Long)Mmowgli2UI.getGlobals().getUserID())
+    if(toUser == null || toUser.getId() != (Long)Mmowgli2UI.getGlobals().getUserID()) {
+      HSess.checkClose(key);
       return;
-
+    }
     iterateUIsAndContents(uid,this.messageUpdateHandler);
+    HSess.checkClose(key);
   }
 
   void newUser_oob(Object uId)
@@ -322,18 +320,14 @@ public class AbstractMmowgliControllerHelper
         return ret;  // Don't display messages during login sequence
       }
       GameEvent ge = (GameEvent) HSess.get().get(GameEvent.class, MSG.id);
-      if(ge == null)
-        ge = ComeBackWhenYouveGotIt.fetchGameEventWhenPossible(MSG.id);
-      
       if(ge == null) {
-        System.err.println("Can't get Game Event from database: id="+MSG.id+", MmowgliOneApplicationController on "+AppMaster.instance().getServerName());
+        MSysOut.println(MESSAGING_LOGS,"Can't get Game Event from database: id="+MSG.id+", MmowgliOneApplicationController on "+AppMaster.instance().getServerName());
         HSess.checkClose(key);
         return ret;
       }
 
       String bdcstMsg = ge.getDescription();
       bdcstMsg = MmowgliLinkInserter.insertUserName_oobTL(bdcstMsg);
-      HSess.checkClose(key);
       
       if(eventType == GameEvent.EventType.MESSAGEBROADCAST) {
         showNotifInAllBrowserWindows(bdcstMsg, "IMPORTANT!!", "m-yellow-notification");
@@ -347,6 +341,8 @@ public class AbstractMmowgliControllerHelper
         }
       }
     }
+    HSess.checkClose(key);
+
     return ret;
   }
   
@@ -571,11 +567,11 @@ public class AbstractMmowgliControllerHelper
             HSess.init();
             if (msg.length() > 255) // clamp to 255 to avoid db exception
               msg = msg.substring(0, 254);
-            User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+            User u = Mmowgli2UI.getGlobals().getUserTL();
             if (typ == GameEvent.EventType.GAMEMASTERNOTE)
               GameEventLogger.logGameMasterCommentTL(msg, u);
             else
-              GameEventLogger.logGameMasterBroadcastTL(typ, msg, u); // GameEvent.save(new GameEvent(typ,msg));
+              GameEventLogger.logGameMasterBroadcastTL(typ, msg, u);
             HSess.close();
           }
         }
@@ -611,7 +607,7 @@ public class AbstractMmowgliControllerHelper
       {
         HSess.init();
         
-        User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+        User me = Mmowgli2UI.getGlobals().getUserTL();
         if(subWin.getNullHeadline()) {
           GameEventLogger.updateBlogHeadlineTL(null, null, null, me.getId());
           UI.getCurrent().removeWindow(subWin);
@@ -869,7 +865,7 @@ public class AbstractMmowgliControllerHelper
     Game g = Game.getTL();
     g.setTopCardsReadonly(ro);
     Game.updateTL();
-    User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User u = Mmowgli2UI.getGlobals().getUserTL();
     GameEvent ev = new GameEvent(evt,"by "+u.getUserName());
     GameEvent.saveTL(ev);    
   }
@@ -879,7 +875,7 @@ public class AbstractMmowgliControllerHelper
     Game g = Game.getTL();
     g.setCardsReadonly(ro);
     Game.updateTL();
-    User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User u = Mmowgli2UI.getGlobals().getUserTL();
     GameEvent ev = new GameEvent(evt,"by "+u.getUserName());
     GameEvent.saveTL(ev);        
   }
@@ -889,7 +885,7 @@ public class AbstractMmowgliControllerHelper
     Game g = Game.getTL();
     g.setReadonly(ro);
     Game.updateTL();
-    User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User u = Mmowgli2UI.getGlobals().getUserTL();
     GameEvent ev = new GameEvent(evt,"by "+u.getUserName());
     GameEvent.saveTL(ev);        
   }
@@ -910,7 +906,7 @@ public class AbstractMmowgliControllerHelper
     Game g = Game.getTL();
     g.setEmailConfirmation(tf);
     Game.updateTL();
-    User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User u = Mmowgli2UI.getGlobals().getUserTL();
     GameEvent ev = new GameEvent(evt,"by "+u.getUserName());
     GameEvent.saveTL(ev);    
   }

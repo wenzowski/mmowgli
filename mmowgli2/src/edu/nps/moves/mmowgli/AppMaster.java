@@ -45,7 +45,9 @@ import edu.nps.moves.mmowgli.components.KeepAliveManager;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.export.ReportGenerator;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.VHib;
+import edu.nps.moves.mmowgli.hibernate.VHibPii;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.messaging.InterTomcatIO;
@@ -100,6 +102,7 @@ public class AppMaster
     sysOutLogLevel |= CARD_UPDATE_LOGS;
     //sysOutLogLevel |= DB_LISTENER_LOGS;
     //sysOutLogLevel |= HIBERNATE_LOGS;
+    //sysOutLogLevel |= HIBERNATE_SESSION_LOGS;
     //sysOutLogLevel |= MCACHE_LOGS;
     //sysOutLogLevel |= MESSAGING_LOGS;
     //sysOutLogLevel |= PUSH_LOGS;
@@ -110,9 +113,9 @@ public class AppMaster
     sysOutLogLevel |= REPORT_LOGS;
     //sysOutLogLevel |= JMS_LOGS;
     sysOutLogLevel |= ERROR_LOGS;
-    sysOutLogLevel |= MISC_LOGS;
-    sysOutLogLevel |= MAIL_LOGS;
-    sysOutLogLevel |= MOBILE_LOGS;
+    //sysOutLogLevel |= MISC_LOGS;
+    //sysOutLogLevel |= MAIL_LOGS;
+    //sysOutLogLevel |= MOBILE_LOGS;
     
     MSysOut.println(SYSTEM_LOGS,"System log level = "+sysOutLogLevel);
   }
@@ -520,7 +523,7 @@ public class AppMaster
     public InstancePollerThread(String name)
     {
       super(name);
-      getInterNodeIO().addReceiver(new InterTomcatReceiver()
+      getInterNodeIO().addReceiver(new JmsReceiver()
       {
         @Override
         public boolean handleIncomingTomcatMessageTL(MMessagePacket pkt)
@@ -768,7 +771,7 @@ public class AppMaster
     if(!globs.loggingOut) {
       Serializable id = globs.getUserID();
       if(id != null) {
-        User u = DBGet.getUserTL(globs.getUserID());
+        User u = globs.getUserTL(); //feb refactorDBGet.getUserTL(globs.getUserID());
         if(u != null)
           GameEventLogger.logSessionTimeoutL(u);
       }
