@@ -43,7 +43,6 @@ import edu.nps.moves.mmowgli.components.CardTable;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
@@ -71,7 +70,7 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
   @HibernateSessionThreadLocalConstructor
   public IdeaDashboardTabPanel()
   {
-    isGameMaster = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).isGameMaster();
+    isGameMaster = Mmowgli2UI.getGlobals().getUserTL().isGameMaster();
 
     setWidth(IDEADASHBOARD_TABCONTENT_W);
     setHeight(IDEADASHBOARD_TABCONTENT_H);
@@ -128,7 +127,7 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
 
   protected void buildCardClassTable(CardType ct)
   {
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     CardTable ctab = new CardTable(null,new CardClassContainer<Card>(ct.getCardClass(),me),true,false,false);
     ctab.setPageLength(40);
     ctab.setWidth("679px");

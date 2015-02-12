@@ -51,9 +51,7 @@ import edu.nps.moves.mmowgli.*;
 import edu.nps.moves.mmowgli.components.*;
 import edu.nps.moves.mmowgli.components.CardSummaryListHeader.NewCardListener;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.HSess;
-import edu.nps.moves.mmowgli.hibernate.Sess;
+import edu.nps.moves.mmowgli.hibernate.*;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsCardUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsUserUpdates;
@@ -99,7 +97,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     chainButt = new NativeButton();
     gotoIdeaDashButt = new IDNativeButton(null,IDEADASHBOARDCLICK);
     gotoTopLevelButt = new IDNativeButton(null,PLAYIDEACLICK);
-    isGameMaster = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).isGameMaster();
+    isGameMaster = Mmowgli2UI.getGlobals().getUserTL().isGameMaster();
   }
   
   @Override
@@ -120,15 +118,10 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     outerVl.setSpacing(true);
     
     cardMarkingPanel = makeCardMarkingPanelTL();
-    Card c = DBGet.getCardFreshTL(cardId);
+    Card c = Card.getTL(cardId);
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-    User me = DBGet.getUserTL(globs.getUserID());
+    User me = globs.getUserTL();
     
-    if(c == null)
-      System.err.println("ERROR!!!! Null card in CardChainPage.initGui(cardId = "+cardId+")");
-    if(me == null)
-      System.err.println("ERROR!!!! Null user in CardChainPage.initGui(userId = "+globs.getUserID()+")");
-
     if(c.isHidden() && !me.isAdministrator() && !me.isGameMaster()) {
       // This case should only come into play when a non-gm user is showing this page
       // by explicitly using the url.  Not too frequent an occurance.
@@ -221,7 +214,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     if(hiddencm != null)
       markingRadioGroup.addItem(hiddencm);
     
-    Card card = DBGet.getCardTL(cardId);
+      Card card = Card.getTL(cardId); // feb refactor DBGet.getCardTL(cardId);
       vl.addComponent(lab = new Label());
       lab.setHeight("5px");
       
@@ -229,7 +222,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       newActionPlanButt.addStyleName(BaseTheme.BUTTON_LINK);
       vl.addComponent(newActionPlanButt);
       
-    if (DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).isTweeter()) {
+    if (Mmowgli2UI.getGlobals().getUserTL().isTweeter()) {
       String tweet = TWEETBUTTONEMBEDDED_0 + buildTweet(card) + TWEETBUTTONEMBEDDED_1;
       Label tweeter = new HtmlLabel(tweet);
       tweeter.setHeight(TWEETBUTTON_HEIGHT);
@@ -276,8 +269,8 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       Property<?> prop = event.getProperty();
       CardMarking cm = (CardMarking)prop.getValue();
-      Card card = DBGet.getCardTL(cardId); // Was getCardFresh, but the cache should be more recent
-      final User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      Card card = Card.getTL(cardId);
+      final User u = Mmowgli2UI.getGlobals().getUserTL();
     //  card = Card.mergeTL(card);
       if(cm == null) { // markings have been cleared
         if(card.getMarking()!=null && card.getMarking().size()>0) {
@@ -306,7 +299,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
                     HSess.init();
                     CardMarking cmm = (CardMarking)event.getProperty().getValue();
                     HSess.get().refresh(cmm);
-                    Card c= DBGet.getCardTL(cardId);// Was getCardFresh, but the cache should be more recent
+                    Card c= Card.getTL(cardId);
                     setMarkingsTL(c,cmm);
                     hideAllChildrenTL(c);  // does the Card.update
                     GameEventLogger.cardMarkedTL(c,u);
@@ -396,7 +389,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     public void buttonClick(ClickEvent event)
     {
       HSess.init();
-      Card c = DBGet.getCardFreshTL(cardId);
+      Card c = Card.getTL(cardId);
       EditCardTextWindow w = new EditCardTextWindow(c.getText());
       w.addCloseListener(new EditCardCloseListener());
       HSess.close(false);  // no commit
@@ -416,11 +409,11 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       EditCardTextWindow w = (EditCardTextWindow)e.getWindow();
       if(w.results != null) {
         HSess.init();
-        Card c = DBGet.getCardTL(cardId);
+        Card c = Card.getTL(cardId);
         c.setText(w.results);
         MSysOut.println(MmowgliConstants.CARD_UPDATE_LOGS,"CardChainPage.EditCardCloseListener.windowClose() updating card text to '"+w.results+"'");
         Card.updateTL(c);
-        GameEventLogger.cardTextEdittedTL(c, DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()));
+        GameEventLogger.cardTextEdittedTL(c, Mmowgli2UI.getGlobals().getUserTL());
         HSess.close();
       }
     }   
@@ -431,7 +424,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
 
   private void addChildListsTL()
   {
-    MovePhase phase = MovePhase.getCurrentMovePhase(HSess.get());
+    MovePhase phase = MovePhase.getCurrentMovePhaseTL();
     Set<CardType> allowedTypes = phase.getAllowedCards();
     followOnTypes = new ArrayList<CardType>();
     for (CardType ct : allowedTypes)
@@ -455,7 +448,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       columnVLs.add(vl);
       listsHL.addComponent(vl);
     }    
-    Card card = DBGet.getCardTL(cardId);
+    Card card = Card.getTL(cardId);
     Card parent = card.getParentCard();
     VerticalLayout spacerVL = new VerticalLayout();
 
@@ -552,13 +545,13 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     listFollowers_oob(HSess.get(),id);
   }
   
-  // This routine can be used by threads w/in the vaadin transaction and the external asynch ones that have their own session
+
   private void listFollowers_oob(Session sess, Object badboyId)
   {
-    Card badboy = DBGet.getCardFresh(badboyId, sess);
+    Card badboy = Card.get(badboyId, sess);
     Set<Card> children = badboy.getFollowOns();
     Vector<CardSummary> vec = new Vector<CardSummary>();
-    User me = DBGet.getUserFresh(Mmowgli2UI.getGlobals().getUserID(), sess);
+    User me = User.get(Mmowgli2UI.getGlobals().getUserID(), sess);
     int col = -1;
 
     for (CardType ct : followOnTypes) {
@@ -692,20 +685,19 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
   public void cardCreatedTL(Card c)
   {
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-    Card parent = DBGet.getCardTL(cardId);
-    //parent=Card.mergeTL(parent);
-    HSess.get().refresh(parent);
-    c.setParentCard(parent);
+    Card parent = Card.getTL(cardId);
+    c.setParentCard(parent);   
+    Card.saveTL(c);
     
     if(parent.isHidden())  // hidden parents produce hidden children
       markHidden(c);
     
     SortedSet<Card> set = parent.getFollowOns();
 
-    if(set == null)
+    if(set == null)  // I don't think this happens
       set = new TreeSet<Card>(new Card.DateDescComparator());
     set.add(c);   
-    parent.setFollowOns(set);
+    parent.setFollowOns(set);  // and I don't think this is required
     // If the set has only one card, that's the one we added, so he had no children before.  We want to send an email
     // to the parent author saying that the first followon was played on his card.  But we only do that once -- each player
     // only gets one of this type of email.  Checked-for in mailmanager.
@@ -716,8 +708,6 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // Now it used to be that we'd wait for the update listener, then fill out our list all over
     // Trying to optimize so we stick the new one on the top of the list and don' bother updateing ourselves
     // if the new card is already there.
-    
-    Card.saveTL(c);
     Card.updateTL(parent);
    
     globs.getScoreManager().cardPlayedTL(c); // update score only from this app instance  
@@ -749,25 +739,27 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     // I'll handle it then when I receive the word that I've been
     // updated -- i.e., the child was attached to me.
     // not here, which says the card has been newly added to the db.
-    MSysOut.println(MESSAGING_LOGS,"CardChainPage.cardPlayed_oobTL() (void method) externCardId = "+externCardId+" my cardId = "+cardId);
+    
+    //MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardPlayed_oobTL() (void method) externCardId = "+externCardId+" my cardId = "+cardId);
 
     return false; // don't need ui update
   }
   
-  public boolean cardUpdated_oobTL(Serializable externCardId)
+  public boolean cardUpdated_oobTL(Serializable externCardId, long revision)
   {
-    MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL() externCardId = "+externCardId+" my cardId = "+cardId+" hash = "+hashCode());
-    Card c = DBGet.getCardTL(externCardId);
+    MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL() externCardId/rev = "+externCardId+"/"+revision+" my cardId = "+cardId+" hash = "+hashCode());
+
+    Card c = Card.getRevisionTL(externCardId, revision);
     if (externCardId.equals(cardId)) {   // Don't do this: externCardId == cardId  !
       MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL / "+c.toString2());
-
+      MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL / num children: "+c.getFollowOns().size());
       loadMarkingPanel_oobTL(c);
-      cardLg.update_oobTL(c);
+      cardLg.update_oobTL(c); 
       updateFollowers_oobTL(c);
       return true;              // ui
     }
     else 
-     return isDescendent(c) ; // child might have hidden or editted
+     return isDescendent(c) ; // child might have hidden or edited
   }
   
   /**
