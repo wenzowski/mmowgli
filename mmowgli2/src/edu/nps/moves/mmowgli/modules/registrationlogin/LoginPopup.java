@@ -172,7 +172,7 @@ public class LoginPopup extends MmowgliDialog
       HSess.init();
       
       String uname = userIDTf.getValue().toString();
-      user = User.getUserWithUserName(HSess.get(), uname);
+      user = User.getUserWithUserNameTL(uname);
       if(user == null) {
         errorOut("No registered user with that name/ID");
         HSess.close();
@@ -302,7 +302,7 @@ public class LoginPopup extends MmowgliDialog
     {
       HSess.init();
       String uname = userIDTf.getValue().toString();
-      user = User.getUserWithUserName(HSess.get(), uname);
+      user = User.getUserWithUserNameTL(uname);
 
       if (user == null) {
         errorOut("No registered user with that User ID");

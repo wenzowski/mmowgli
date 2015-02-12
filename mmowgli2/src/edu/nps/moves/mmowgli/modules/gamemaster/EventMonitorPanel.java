@@ -22,7 +22,6 @@
 
 package edu.nps.moves.mmowgli.modules.gamemaster;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 
 import org.hibernate.Criteria;
@@ -42,11 +41,10 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsGameEventUpdates;
-import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
 /**
  * CreateActionPlanPanel.java Created on Mar 30, 2011
@@ -137,7 +135,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
        
       else {
         HSess.init();
-        User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+        User u = Mmowgli2UI.getGlobals().getUserTL();
         GameEventLogger.logGameMasterBroadcastTL(GameEvent.EventType.MESSAGEBROADCASTGM, msg, u);
         HSess.close();
       }
@@ -347,15 +345,10 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
   @Override
   public boolean gameEventLoggedOobTL(Object evId)
   {
-    GameEvent ev = (GameEvent)HSess.get().get(GameEvent.class, (Serializable)evId);
+    GameEvent ev = DB.getRetry(GameEvent.class, evId, null, HSess.get());
     if(ev == null) {
-      ev = ComeBackWhenYouveGotIt.fetchGameEventWhenPossible((Long)evId);
-      if(ev != null)
-        ev = (GameEvent)HSess.get().merge(ev);
-      else {
-        System.err.println("ERROR: EventMonitorPanel.gameEventLoggedOob(): GameEvent matching id "+evId+" not found in db.");
-        return false;
-      }
+      System.err.println("ERROR: EventMonitorPanel.gameEventLoggedOobTL(): GameEvent matching id "+evId+" not found in db.");
+      return false;
     }
     addEventOobTL(ev);
     setCaptionPrivate();
