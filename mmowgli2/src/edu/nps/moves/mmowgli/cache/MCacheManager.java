@@ -24,28 +24,20 @@ package edu.nps.moves.mmowgli.cache;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
-import java.io.Serializable;
 import java.util.*;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 
 import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.BeanItem;
 
+import edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.db.pii.UserPii;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
-import edu.nps.moves.mmowgli.hibernate.VHibPii;
-import edu.nps.moves.mmowgli.messaging.InterTomcatIO.InterTomcatReceiver;
+import edu.nps.moves.mmowgli.messaging.InterTomcatIO.JmsReceiver;
 import edu.nps.moves.mmowgli.messaging.MMessage;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
-import edu.nps.moves.mmowgli.utility.BeanContainerWithCaseInsensitiveSorter;
-import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
+import edu.nps.moves.mmowgli.modules.cards.CardDbHelper;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -59,8 +51,11 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class MCacheManager implements InterTomcatReceiver
+public class MCacheManager implements JmsReceiver
 {
+  private MCacheGameEventHelper gameEventHelper;
+  private MCacheUserHelper      userHelper;
+  
   private SortedMap<Long,Card> allNegativeIdeaCardsCurrentMove;
   private SortedMap<Long,Card> unhiddenNegativeIdeaCardsCurrentMove;
   private SortedMap<Long,Card> allNegativeIdeaCards;
@@ -71,20 +66,11 @@ public class MCacheManager implements InterTomcatReceiver
   private SortedMap<Long,Card> allPositiveIdeaCards;
   private SortedMap<Long,Card> unhiddenPositiveIdeaCardsAll;
 
-  private ObjectCache<Card> cardCache;
-
   private CardType negativeTypeCurrentMove;
   private CardType positiveTypeCurrentMove;
 
-  private List<GameEvent> gameEvents;
-  private SortedMap<String,Long> usersQuick;
-  private BeanContainer<Long,QuickUser> quickUsersContainer;
-
-  public static int GAMEEVENTCAPACITY = 1000; // number cached, not all returned in a hunk to client
   private static int myLogLevel = MCACHE_LOGS;
   
-  //private Timer listsRefreshTimer;
-
   private MSuperActiveCacheManager supActMgr;
 
   private static MCacheManager me;
@@ -100,8 +86,10 @@ public class MCacheManager implements InterTomcatReceiver
     MSysOut.println(myLogLevel,"Enter MCacheManager constructor");
     try {
       Session sess = HSess.getSessionFactory().openSession();
+      gameEventHelper = new MCacheGameEventHelper(sess);
+      userHelper = new MCacheUserHelper(sess);
+      
       supActMgr = new MSuperActiveCacheManager();
-      cardCache = new ObjectCache<Card>(null); // no timeout
 
       negativeTypeCurrentMove = CardType.getNegativeIdeaCardType(sess);
       positiveTypeCurrentMove = CardType.getPositiveIdeaCardType(sess);
@@ -118,308 +106,54 @@ public class MCacheManager implements InterTomcatReceiver
       unhiddenNegativeIdeaCardsAll = Collections.synchronizedSortedMap(new TreeMap<Long, Card>(new ReverseIdComparator()));
       unhiddenPositiveIdeaCardsAll = Collections.synchronizedSortedMap(new TreeMap<Long, Card>(new ReverseIdComparator()));
 
-      usersQuick = Collections.synchronizedSortedMap(new TreeMap<String, Long>(new UserNameCaseInsensitiveComparator()));
-      quickUsersContainer = new BeanContainerWithCaseInsensitiveSorter<Long, QuickUser>(QuickUser.class);
-      gameEvents = Collections.synchronizedList(new Vector<GameEvent>(GAMEEVENTCAPACITY + 1));
-
-      _rebuildEvents(sess);
       _rebuildCards(sess);
-      _rebuildUsers(sess);
+
       supActMgr.rebuild(sess);
 
       sess.close();
 
-      DBGet.mCacheMgr = this;
       MSysOut.println(myLogLevel,"Exit MCacheManager constructor");
     }
     catch (Throwable t) {
       System.err.println("Exception in MCacheManager: "+t.getClass().getSimpleName()+" "+t.getLocalizedMessage());
       t.printStackTrace();
     }
-
-    // Note: I think I did this just because our event messaging was flaky. Should be possible to remove it.
-    // listsRefreshTimer = new Timer("MCacheMgrTimer", true); //daemon
-    // listsRefreshTimer.schedule(new CardRefreshTask(), 120*1000l, 60*1000l); // every minute
-    // listsRefreshTimer.schedule(new UserRefreshTask(), 120*1000l, 60*1000l); // every minute
-    // //listsRefreshTimer.schedule(new EvntRefreshTask(), 120*1000l, 30*1000l); // every .5 minute
-  }
-
-//@formatter:off
-//  class CardRefreshTask extends TimerTask { @Override public void run(){ rebuildCards(); }}
-//  class UserRefreshTask extends TimerTask { @Override public void run(){ rebuildUsers(); }}
-  //class EvntRefreshTask extends TimerTask { @Override public void run(){ rebuildEvents(); }}
-//@formatter:on
-
-/*
-  private void rebuildEvents()
-  {
-    Session sess  = HibernateContainers.sessionFactory.openSession();
-    try {
-      _rebuildEvents(sess);
-    }
-    catch(Throwable t) {
-      System.out.println("Can't rebuild event cache list ("+t.getClass().getSimpleName()+" "+t.getLocalizedMessage()+")...normally see this only under Eclipse");
-      t.printStackTrace();
-    }
-    sess.close();
-  }
-*/
-  private void _rebuildEvents(Session sess)
-  {
-    synchronized(gameEvents) {
-      List<GameEvent> events = eventsQuery(sess);
-      gameEvents.clear();
-      for(GameEvent ev : events)
-        gameEvents.add(ev);
-    }
-  }
-/*
-  private void rebuildUsers()
-  {
-    Session sess  = HibernateContainers.sessionFactory.openSession();
-    try {
-      _rebuildUsers(sess);
-    }
-    catch(Throwable t) {
-      System.out.println("Can't rebuild user cache list ("+t.getClass().getSimpleName()+" "+t.getLocalizedMessage()+")...normally see this only under Eclipse");
-      t.printStackTrace();
-    }
-    sess.close();
- }
-*/
-  private void _rebuildUsers(Session sess)
-  {
-    synchronized(usersQuick) {
-      List<User> usrs = usersQuery(sess);
-      for(User u : usrs) {
-        //System.out.println("**** "+u.getUserName());
-        if(u.getUserName() == null) {
-          System.err.println("User in db with null userName: "+u.getId());
-          continue;
-        }
-        addOrUpdateUserInContainer(u);
-
-        // Smaller, previous quick list...todo merge with other
-        if(u.isViewOnly() || u.isAccountDisabled())
-          ; // don't add
-        else {
-          usersQuick.put(u.getUserName(),u.getId());
-        }
-      }
-    }
-  }
-
-  private void addOrUpdateUserInContainer(User u)
-  {
-    if(u == null) {
-      MSysOut.println(myLogLevel,"Null user in addOrUpdateUserInContainer()!!!!!! Exception trapped, dump:");
-      new Exception().printStackTrace();
-      return;
-    }
-    BeanItem<QuickUser> bi = quickUsersContainer.getItem(u.getId());
-    if(bi == null)
-      quickUsersContainer.addItem(u.getId(),new QuickUser(u));
-    else
-      bi.getBean().update(u);
-  }
-  private void deleteUserInContainer(long id)
-  {
-    quickUsersContainer.removeItem(id);
-  }
- /*
-  private void rebuildCards()
-  {
-    Session sess = HibernateContainers.sessionFactory.openSession();
-    try {
-      _rebuildCards(sess);
-    }
-    catch (Throwable t) {
-      System.out.println("Can't rebuild event cache list (" + t.getClass().getSimpleName() + " " + t.getLocalizedMessage()
-          + ")...normally see this only under Eclipse");
-      t.printStackTrace();
-    }
-    sess.close();
-  }
- */
-  private void _rebuildCards(Session sess)
-  {
-    getCardCache().clearCache();
-    List<Card> allCards = allCardsQuery(sess);
-    for(Card c : allCards){
-      getCardCache().addToCache(c.getId(), c);
-    }
-
-    synchronized (allNegativeIdeaCardsCurrentMove) {
-      synchronized (unhiddenNegativeIdeaCardsCurrentMove) {
-        unhiddenNegativeIdeaCardsCurrentMove.clear();
-        List<Card> risks = negativeCardsCurrentMoveOnly(sess); //negativeCardsCurrentMoveQuery(sess);
-        for (Card c : risks) {
-          allNegativeIdeaCardsCurrentMove.put(c.getId(), c);
-          if (!c.isHidden())
-            unhiddenNegativeIdeaCardsCurrentMove.put(c.getId(), c);
-        }
-      }
-    }
-
-    synchronized (allPositiveIdeaCardsCurrentMove) {
-      synchronized (unhiddenPositiveIdeaCardsCurrentMove) {
-        unhiddenPositiveIdeaCardsCurrentMove.clear();
-        List<Card> resources = positiveCardsCurrentMoveOnly(sess); //positiveCardsCurrentMoveQuery(sess);
-        for (Card c : resources) {
-          allPositiveIdeaCardsCurrentMove.put(c.getId(), c);
-          if (!c.isHidden())
-            unhiddenPositiveIdeaCardsCurrentMove.put(c.getId(), c);
-        }
-      }
-    }
-
-    /* all-moves maps: */
-    synchronized (allPositiveIdeaCards) {
-      synchronized (unhiddenPositiveIdeaCardsAll) {
-        unhiddenPositiveIdeaCardsAll.clear();
-        List<Card>posLis = cardsByCardClassQuery(sess, CardType.CardClass.POSITIVEIDEA);
-        for(Card c : posLis) {
-          allPositiveIdeaCards.put(c.getId(), c);
-          if(!c.isHidden())
-            unhiddenPositiveIdeaCardsAll.put(c.getId(), c);
-        }
-      }
-    }
-    synchronized (allNegativeIdeaCards) {
-      synchronized (unhiddenNegativeIdeaCardsAll) {
-        unhiddenNegativeIdeaCardsAll.clear();
-        List<Card>negLis = cardsByCardClassQuery(sess, CardType.CardClass.NEGATIVEIDEA);
-        for(Card c : negLis) {
-          allNegativeIdeaCards.put(c.getId(), c);
-          if(!c.isHidden())
-            unhiddenNegativeIdeaCardsAll.put(c.getId(), c);
-        }
-      }
-    }
-  }
-/*
-  private List<Card> negativeCardsCurrentMoveQuery(Session sess)
-  {
-    return cardsByTypeQuery(sess,negativeTypeCurrentMove);
-  }
-
-  private List<Card> positiveCardsCurrentMoveQuery(Session sess)
-  {
-    return cardsByTypeQuery(sess,positiveTypeCurrentMove);
-  }
-*/
-  @SuppressWarnings("unchecked")
-  private List<GameEvent> eventsQuery(Session sess)
-  {
-    // Attempt to speed up query
-    Long num =  (Long)sess.createCriteria(GameEvent.class)
-        //.setProjection(Projections.rowCount()).uniqueResult();
-        .setProjection(Projections.max("id")).uniqueResult();
-
-    List<GameEvent> evs = null;
-    if(num != null) {
-      long lowlimit = Math.max(0L, num.longValue()-GAMEEVENTCAPACITY);
-      evs = (List<GameEvent>) sess.createCriteria(GameEvent.class).
-                             add(Restrictions.gt("id", lowlimit)).
-                             addOrder(Order.desc("dateTime")).list();
-    }
-    else
-      evs = new ArrayList<GameEvent>();
-
-    // Old version
-//    List<GameEvent> evs = (List<GameEvent>) sess.createCriteria(GameEvent.class).
-//    addOrder(Order.desc("dateTime")).
-//    setMaxResults(GAMEEVENTCAPACITY).list();
-    return evs;
-  }
-/*
-  @SuppressWarnings("unchecked")
-  private List<Card> cardsByTypeQuery(Session sess, CardType resourceType)
-  {
-    List<Card> cards = (List<Card>) sess.createCriteria(Card.class).
-    add(Restrictions.eq("cardType", resourceType)).
-    add(Restrictions.eq("factCard", false)).
-    addOrder(Order.desc("creationDate")).list();
-    return cards;
-  }
-*/
-  @SuppressWarnings("unchecked")
-  private List<Card> cardsByCardClassQuery(Session sess, CardType.CardClass cls)
-  {
-    Criteria crit = sess.createCriteria(Card.class).
-        add(Restrictions.eq("factCard", false)).
-        addOrder(Order.desc("creationDate"));
-    crit = crit.createCriteria("cardType")
-        .add(Restrictions.eq("cardClass",cls));
-    return (List<Card>)crit.list();
   }
 
   private List<Card> positiveCardsCurrentMoveOnly(Session sess)
   {
-    return cardsCurrentMoveOnly(sess,positiveTypeCurrentMove);
+    return CardDbHelper.getCardsCurrentMoveOnly(sess,positiveTypeCurrentMove);
   }
 
   private List<Card> negativeCardsCurrentMoveOnly(Session sess)
   {
-    return cardsCurrentMoveOnly(sess,negativeTypeCurrentMove);
-  }
-/*  Criteria criteria = session.createCriteria(Card.class)
-      .createAlias("createdInMove", "MOVE")
-      .add(Restrictions.gt("MOVE.number", 1))
-      .setProjection(Projections.rowCount());
-*/
-  @SuppressWarnings("unchecked")
-  private List<Card> cardsCurrentMoveOnly(Session sess, CardType typ)
-  {
-    Move mov = Game.get(sess).getCurrentMove();
-    List<Card> cards = (List<Card>) sess.createCriteria(Card.class).
-    add(Restrictions.eq("cardType", typ)).
-    add(Restrictions.eq("factCard", false)).
-    createAlias("createdInMove","MOVE").
-    add(Restrictions.eq("MOVE.number", mov.getNumber())).
-    addOrder(Order.desc("creationDate")).list();
-    return cards;
-
-  }
-  @SuppressWarnings("unchecked")
-  private List<Card> allCardsQuery(Session sess)
-  {
-    List<Card> cards = (List<Card>) sess.createCriteria(Card.class).list();
-    return cards;
+    return CardDbHelper.getCardsCurrentMoveOnly(sess,negativeTypeCurrentMove);
   }
 
-  @SuppressWarnings("unchecked")
-  private List<User> usersQuery(Session sess)
-  {
-    List<User> usrs = (List<User>) sess.createCriteria(User.class).
-    addOrder(Order.desc("userName")).list();
-    return usrs;
-  }
-
-  // This was an attempt to treat locally generated message differently from remotely...couldn't get it to work, but we now loop on Hibernate.get until we get it.
-  public boolean handleIncomingDatabaseMessageTL(MMessagePacket packet)
+  // Feb 2015 Before leaving this method, make sure that the referenced object can be read from the db. It's easy to out race Hibernate it seems
+  public boolean handleIncomingDatabaseMessage(MMessagePacket packet)
   {
     MSysOut.println(myLogLevel,"MCacheManager.handleIncomingDatabaseMessageTL(), type = "+packet.msgType);
     switch (packet.msgType) {
       case NEW_CARD:
-        externallyNewCardTL(packet.msgType,packet.msg);
+        dbNewCard(packet.msgType,packet.msg);
         break;
       case UPDATED_CARD:
-        externallyUpdatedCardTL(packet.msgType,packet.msg);  // newOrUpdatedCardInCacheTL(packet.msgType, packet.msg);
-        break;
-      //case NEW_USER:
-      case UPDATED_USER:
-        externallyNewOrUpdatedUserTL(packet.msgType, packet.msg);  //newOrUpdatedUserInCacheTL(packet.msgType,packet.msg);
-        break;
-      case DELETED_USER:
-        deletedUserTL(packet.msgType,packet.msg);
+        dbUpdatedCard(packet.msgType,packet.msg);
         break;
       case GAMEEVENT:
-        newGameEventTL(packet.msgType,packet.msg);
+        dbNewGameEvent(packet.msgType,packet.msg);
+        break;
+    //case NEW_USER:
+      case UPDATED_USER:
+        userHelper.dbUpdatedUser(packet.msgType,packet.msg);
+        break;
+      case DELETED_USER:
+        userHelper.dbDeleteUser(packet.msgType,packet.msg);
         break;
       default:
     }
-    return false; // don't want a retry    
+    return false;  
   }
   
   @Override
@@ -433,209 +167,71 @@ public class MCacheManager implements InterTomcatReceiver
       case UPDATED_CARD:
         externallyUpdatedCardTL(packet.msgType,packet.msg);
         break;
-      //case NEW_USER:
+      case GAMEEVENT:
+        externallyNewGameEventTL(packet.msgType,packet.msg);
+        break;
+    //case NEW_USER:    // will be incomplete
       case UPDATED_USER:
-        externallyNewOrUpdatedUserTL(packet.msgType,packet.msg);
+        userHelper.externallyNewOrUpdatedUserTL(packet.msgType,packet.msg);
         break;
       case DELETED_USER:
-        deletedUserTL(packet.msgType,packet.msg);
-        break;
-      case GAMEEVENT:
-        newGameEventTL(packet.msgType,packet.msg);
+        userHelper.externallyDeletedUser(packet.msgType,packet.msg);
         break;
       default:
     }
-    return false; // don't want a retry    
-  }
-
-  @Override
-  public void handleIncomingTomcatMessageEventBurstCompleteTL()
-  {
-  }
-
-  private void newGameEventTL(char messageType, String message)
-  {
-    Long id = MMessage.MMParse(messageType,message).id;
-    GameEvent ev = GameEvent.getTL(id); 
-
-    // Here's the check for receiving notification that an event has been created, but it ain't in the db yet.
-    if(ev == null) {
-      ev = new GameEvent(GameEvent.EventType.UNSPECIFIED,"/ event not yet in database");
-      ev.setId(id);
-      updateGameEventWhenPossible(ev);
-    }
-    synchronized(gameEvents) {
-      gameEvents.add(0, ev);  // The original but was here, you CAN add a null to position 0
-      int i;
-      while((i=gameEvents.size()) > GAMEEVENTCAPACITY)
-        gameEvents.remove(i-1);
-    }
-  }
-  public GameEvent getGameEventWhenPossible(Long id)
-  {
-     GameEvent ev = new GameEvent();
-     ev.setId(id);
-     updateGameEventWhenPossible(ev,true);
-     
-     return ev;
+    return false;
   }
   
-  private void updateGameEventWhenPossible(final GameEvent evorig)
-  {
-    updateGameEventWhenPossible(evorig,false);
-  }
-  
-  private void updateGameEventWhenPossible(final GameEvent evorig, boolean wait)
-  {
-    Thread thr = new Thread(new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        for(int i=0; i<10; i++) { // try for 10 seconds
-          try{Thread.sleep(1000l);}catch(InterruptedException ex){}
-          HSess.init();
-          Session sess = HSess.get();
-          GameEvent ge = (GameEvent)sess.get(GameEvent.class, evorig.getId());
-          if(ge != null) {
-            if(i>0)
-              MSysOut.println(myLogLevel,"(MCacheManager)Delayed fetch of GameEvent from db, got it on try "+i);
-            evorig.clone(ge); // get its data
-            HSess.close();
-            return;
-          }
-          HSess.close();
-        }
-        System.err.println("ERROR: Couldn't get game event "+evorig.getId()+" in 10 seconds");// give up
-      }
-    });
-    thr.setPriority(Thread.NORM_PRIORITY);
-    thr.setDaemon(true);
-    thr.setName("GameEventDbGetter");
-    thr.start();
-    
-    if(wait){
-      try {
-        thr.join();
-      }
-      catch(InterruptedException ex) {
-
-      }
-    }
-  }
-
-  private void deletedUserTL(char messageType, String message)
-  {
-    Long id = MMessage.MMParse(messageType, message).id; //Long.parseLong(message);
-    removeUser(id);
-  }
-
-  public void removeUser(Long id)
-  {
-    DBGet.removeUser(id);
-    this.deleteUserInContainer(id);
-  }
-
-  @SuppressWarnings("unused")
-  private void newOrUpdatedUserInCacheTL(char messageType, String message)
-  {
-    MMessage msg = MMessage.MMParse(messageType, message);
-    Long id = msg.id;
-    Long version = msg.version;
-    newOrUpdatedUserTL_common(DBGet.getUserTL(id));
-  }
-  
-  private void externallyNewOrUpdatedUserTL(char messageType, String message)
-  {
-    MMessage msg = MMessage.MMParse(messageType, message);
-    Long id = msg.id;
-    Long version = msg.version;
-    User u = DBGet.getUserVersionTL(id,version);
-    if(u == null) {
-      u = ComeBackWhenYouveGotIt.fetchVersionedUserWhenPossible(id,version);
-      if(u == null) {
-        // This should not happen, need to redesign DB interface to work properly
-        MSysOut.println(ERROR_LOGS,"MCacheManager.externallyNewOrUpdatedUserTL(), cant get user id = "+id);
-        return;
-      }
-      HSess.get().refresh(u);
-    }
-    newOrUpdatedUserTL_common(u);
-  }
-  
-  private void newOrUpdatedUserTL_common(User u)
-  {
-    if(u == null) // will have gotten warnings in sys out
-      return;
-    
-    synchronized(usersQuick) {
-      addOrUpdateUserInContainer(u);
-
-      if(u.isViewOnly() || u.isAccountDisabled())
-        ; // don't add
-      else
-        usersQuick.put(u.getUserName(), u.getId());
-    }
-  }
-  
-  @SuppressWarnings("unused")
-  private void newOrUpdatedCardInCacheTL(char messageType, String message)
-  {
-    long id = MMessage.MMParse(messageType, message).id;
-    
-    Card c = getCardCache().getObjectForKey(id);
-    c = Card.mergeTL(c);
-    newOrUpdatedCardTL_common(c);
-  }
-  
+  // From another cluster node
   private void externallyUpdatedCardTL(char messageType, String message)
   {
-    MMessage msg = MMessage.MMParse(messageType, message);
-    long id = msg.id;
-    long version = msg.version;
-    
-    Card c = Card.getVersionTL(id,version);
-    if (c == null) {
-      c = ComeBackWhenYouveGotIt.fetchVersionedCardWhenPossible(id,version);
-      c = Card.mergeTL(c);
-    }
-    MSysOut.println(MCACHE_LOGS,"externallyNewOrUpdated got card "+c.toString2());
-    getCardCache().addToCache(id, c);
-    newOrUpdatedCardTL_common(c);    
+    dbUpdatedCard(messageType,message); // no difference
   }
   
+  // From the database listener, local to this cluster node
+  private void dbUpdatedCard(char messageType, String message)
+  {
+    Object key = HSess.checkInit();
+    MMessage msg = MMessage.MMParse(messageType, message);
+    long id = msg.id;
+    long revision = msg.version;
+    MSysOut.println(MCACHE_LOGS,"MCacheManger.reportUpdatedCardTL() handling card "+id+" revision "+revision);  
+    Card c = DB.getRetry(Card.class, id, revision, HSess.get());
+    if (c == null) {
+      MSysOut.println(ERROR_LOGS, "MCacheManger.reportUpdatedCardTL() card with id "+id+" can't be read from db.");
+      HSess.checkClose(key);
+      return;
+    }
+    newOrUpdatedCardTL_common(c); 
+    MSysOut.println(MCACHE_LOGS,"MCacheManger.reportUpdatedCardTL() given to card caches "+c.toString2());
+    HSess.checkClose(key);
+  }
+  
+  // From another cluster node
   private void externallyNewCardTL(char messageType, String message)
   {
-    long id = MMessage.MMParse(messageType, message).id;
-    Card c = Card.getTL(id);
-    if (c == null) {
-      c = ComeBackWhenYouveGotIt.fetchCardWhenPossible(id);
-     // HSess.get().refresh(c);  // except...try this:
-      //c = DBGet.getCardFreshTL(c.getId());
-    }
-    MSysOut.println(MCACHE_LOGS,"externallyNewOrUpdated got card "+c.toString2()); // causes lazy init error due to followons...why, I dont know
-    getCardCache().addToCache(id, c);
-    newOrUpdatedCardTL_common(c);
+    dbNewCard(messageType, message); // no difference
   }
-/* above dump
-eption in thread "MThreadManagerPoolThread" org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role: edu.nps.moves.mmowgli.db.Card.followOns, could not initialize proxy - no Session
-  at org.hibernate.collection.internal.AbstractPersistentCollection.throwLazyInitializationException(AbstractPersistentCollection.java:572)
-  at org.hibernate.collection.internal.AbstractPersistentCollection.withTemporarySessionIfNeeded(AbstractPersistentCollection.java:212)
-  at org.hibernate.collection.internal.AbstractPersistentCollection.readSize(AbstractPersistentCollection.java:153)
-  at org.hibernate.collection.internal.PersistentSet.size(PersistentSet.java:160)
-  at edu.nps.moves.mmowgli.db.Card.toString2(Card.java:196)
-  at edu.nps.moves.mmowgli.cache.MCacheManager.externallyNewCardTL(MCacheManager.java:608)
-  at edu.nps.moves.mmowgli.cache.MCacheManager.handleIncomingDatabaseMessageTL(MCacheManager.java:405)
-  at edu.nps.moves.mmowgli.AppMasterMessaging$1.run(AppMasterMessaging.java:286)
-  at edu.nps.moves.mmowgli.utility.MThreadManager$Preamble.run(MThreadManager.java:81)
-  at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
-  at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
-  at java.lang.Thread.run(Thread.java:744)
-CAR 3488574 CardChainPage.cardUpdated_oobTL() externCardId = 45 my cardId = 45 hash = 538021126 833049920
+  
+  // From the database listener, local to this cluster node
+  private void dbNewCard(char messageType, String message)
+  {
+    Object key = HSess.checkInit();
+    long id = MMessage.MMParse(messageType, message).id;
+    MSysOut.println(MCACHE_LOGS,"MCacheManger.reportNewCardTL() handling card "+id);
+    Card c = DB.getRetry(Card.class, id, null, HSess.get());
+    if(c == null) {
+      MSysOut.println(ERROR_LOGS, "MCacheManger.reportNewCardTL() card with id "+id+" can't be read from db.");
+      HSess.checkClose(key);
+      return;
+    }
+    newOrUpdatedCardTL_common(c);
+    MSysOut.println(MCACHE_LOGS,"MCacheManger.reportNewCardTL() given to card caches "+c.toString2()); // causes lazy init error due to followons...why, I dont know
+    HSess.checkClose(key);
+  }
 
- */
- private void newOrUpdatedCardTL_common(Card c)
- {
+  private void newOrUpdatedCardTL_common(Card c)
+  {
     CardType ct = c.getCardType();
     long cardTypeId = ct.getId();
 
@@ -707,14 +303,6 @@ CAR 3488574 CardChainPage.cardUpdated_oobTL() externCardId = 45 my cardId = 45 h
     }
   }
 
-    /**
-     * @return the cardCache
-     */
-    private ObjectCache<Card> getCardCache()
-    {
-      return cardCache;
-    }
-
   class ReverseIdComparator implements Comparator<Long>
   {
     @Override
@@ -723,119 +311,67 @@ CAR 3488574 CardChainPage.cardUpdated_oobTL() externCardId = 45 my cardId = 45 h
       return (int)(arg1 - arg0);   // highest first
     }
   }
-  class UserNameCaseInsensitiveComparator implements Comparator<String>
+   
+  /******* GameEvents ***********/
+  private void putGameEvent(GameEvent ge)
   {
-    @Override
-    public int compare(String s1, String s2)
-    {
-      return s1.compareToIgnoreCase(s2);
-    }
+    gameEventHelper.putGameEvent(ge);
   }
-  //"Public" interface
-
+  
+  private void dbNewGameEvent(char messageType, String message)
+  {
+    Object key = HSess.checkInit();
+    externallyNewGameEventTL(messageType,message);
+    HSess.checkClose(key);
+  }
+  
+  private void externallyNewGameEventTL(char messageType, String message)
+  {
+    gameEventHelper.newGameEventTL(messageType, message);
+  }
+    
   public GameEvent[] getRecentGameEvents()
   {
-    synchronized(gameEvents) {
-      return gameEvents.toArray(new GameEvent[0]);
-    }
+    return gameEventHelper.getRecentGameEvents();
   }
 
   public GameEvent[] getNextGameEvents(Integer lastIndexGotten, Long lastIdGotten, int numToReturn)
   {
-    int indexToGet = -1;
-    if(lastIndexGotten == null)
-      indexToGet = 0;
-    else
-      indexToGet = calcStartingPlace(lastIndexGotten, lastIdGotten);
-
-    if(indexToGet != -1) {
-      int numToGet = Math.min(gameEvents.size()-indexToGet, numToReturn);
-      GameEvent[] arr = new GameEvent[numToGet];
-      return gameEvents.subList(indexToGet, indexToGet + numToGet).toArray(arr);
-    }
-    else
-      return new GameEvent[0];
+    return gameEventHelper.getNextGameEvents(lastIndexGotten, lastIdGotten, numToReturn);
   }
 
-  /*
-   * For the calling code in EventMonitorPanel, this is not really needed, since when an event comes in OOB, the vLay count of components, which serves as
-   * the event index, gets updated automatically, so we stay in sync.
-   */
-  private int calcStartingPlace(int lastIndex,long lastId)
+  /********** Users ***********/
+  public void putUser(User u)  // from db listener
   {
-    // Normally, we return lastIndex+1, but if we were updated, don't want to return what we already returned
-    int maxIdx = gameEvents.size()-1;
-
-    if(lastIndex >= maxIdx)
-      return -1;
-
-    int idx=lastIndex;
-    while(idx < gameEvents.size()) {
-      GameEvent ge = gameEvents.get(idx);
-      if(ge.getId() == lastId) {
-        idx++;
-        break;
-      }
-      idx++;
-    }
-    if(idx >= maxIdx)
-      return -1;
-    return idx;
+    userHelper.putUser(u);
   }
-
-  public void putQuickUser(User u)
+  
+  public void removeUser(User u)
   {
-    synchronized (usersQuick) {
-      addOrUpdateUserInContainer(u);
-
-      // Smaller, previous quick list...todo merge with other
-      if (u.isViewOnly() || u.isAccountDisabled())
-        ; // don't add
-      else {
-        usersQuick.put(u.getUserName(), u.getId());
-      }
-    }
+    userHelper.removeUser(u);
   }
-
-  public void putCard(Card c)
+  
+  // Only used by add authordialog; list won't include guest account(s) or banished accounts
+  public List<QuickUser> getUsersQuickList()
   {
-    MSysOut.println(myLogLevel,"MCacheManager.putCard() id= "+c.getId()+"  text: "+c.getText()+" hidden = "+c.isHidden());
-    getCardCache().addToCache(c.getId(), c);
+    return userHelper.getUsersQuickList();
   }
 
-  public Card getCard(Object id, Session sess)
+  public BeanContainer<Long,QuickUser> getQuickUsersContainer()
   {
-    Card c;
-    if((c=getCardCache().getObjectForKey(id)) == null) {
-      c = getCardFresh(id,sess);
-      MSysOut.println(myLogLevel,"MCacheManager.getCard() "+id.toString()+" Had to getCardFresh, text: "+c.getText()+" hidden = "+c.isHidden());
-      return c;
-    }
-    MSysOut.println(myLogLevel,"MCacheManager.getCard() "+id.toString()+" Got card from cache, text: "+c.getText()+" hidden = "+c.isHidden());
-    c = Card.merge(c, sess); //sess.refresh(c);
-    return c;
+    return userHelper.getQuickUsersContainer();
   }
 
-  public Card getCardFresh(Object id, Session sess)
+
+  public void putObject(Object obj)
   {
-    Card c = (Card)sess.get(Card.class, (Serializable)id);
-    if(c == null)
-      c = ComeBackWhenYouveGotIt.fetchCardWhenPossible((Long)id);
-    if(c == null) {
-      System.err.println("MCachedManager.getCard("+id+") returns null");
-      MSysOut.println(HIBERNATE_LOGS,"MCachedManager.getCard("+id+") returns null");
-      return null;
-    }
-    // comes back from diff sess
-    c = (Card)sess.get(Card.class, (Serializable)id); // now try
-    getCardCache().addToCache(id, c);
-    return c;
+    if(obj.getClass().equals(GameEvent.class))
+      putGameEvent((GameEvent)obj);
+    
+    else if(obj.getClass().equals(User.class))
+      putUser((User)obj);
   }
 
-  /*
-   * @param card Says, "I'm calling to get the cache list because I was told this card has been updated,
-   *  be sure to include him in the list you return;"
-   */
   public  MCacheData<Card> getIdeaCards(CardType ct, Card c, int start, Integer count)
   {
     return getIdeaCards(ct,c,start,count,false);
@@ -911,8 +447,8 @@ CAR 3488574 CardChainPage.cardUpdated_oobTL() externCardId = 45 my cardId = 45 h
       v = new Vector<Card>(unhiddenNegativeIdeaCardsCurrentMove.values());
     }
     return v;
-    //return unhiddenRiskCards.values();
   }
+  
   public  MCacheData<Card> getIdeaCards(CardType ct, Card c, int start, Integer count, boolean unhiddenOnly)
   {
     if(ct.getId() == positiveTypeCurrentMove.getId())
@@ -954,127 +490,62 @@ CAR 3488574 CardChainPage.cardUpdated_oobTL() externCardId = 45 my cardId = 45 h
     }
   }
 
-  /** returns an array of userids and names, intended to be a quick way to avoid a db hit */
-  public Object[][] getUsersQuick()
+  private void _rebuildCards(Session sess)
   {
-    synchronized (usersQuick) {
-      Object[][] arr = new Object[usersQuick.size()][];
-      Set<String> keySet = usersQuick.keySet();
-      int i = 0;
-      for (String key : keySet) {
-        long id = usersQuick.get(key);
-        arr[i] = new Object[2];
-        arr[i][0] = id;
-        arr[i][1] = key;
-        i++;
+    synchronized (allNegativeIdeaCardsCurrentMove) {
+      synchronized (unhiddenNegativeIdeaCardsCurrentMove) {
+        unhiddenNegativeIdeaCardsCurrentMove.clear();
+        List<Card> risks = negativeCardsCurrentMoveOnly(sess); //negativeCardsCurrentMoveQuery(sess);
+        for (Card c : risks) {
+          allNegativeIdeaCardsCurrentMove.put(c.getId(), c);
+          if (!c.isHidden())
+            unhiddenNegativeIdeaCardsCurrentMove.put(c.getId(), c);
+        }
       }
-      return arr;
     }
-  }
 
-  // Only used by add authordialog; list won't include guest account(s) or banished accounts
-  public List<QuickUser> getUsersQuickList()
-  {
-    synchronized (usersQuick) {
-      ArrayList<QuickUser> lis = new ArrayList<QuickUser>(usersQuick.size());
-      Set<String> keySet = usersQuick.keySet();
-      for (String key : keySet) {
-        long id = usersQuick.get(key);
-        lis.add(new QuickUser(id, key));
+    synchronized (allPositiveIdeaCardsCurrentMove) {
+      synchronized (unhiddenPositiveIdeaCardsCurrentMove) {
+        unhiddenPositiveIdeaCardsCurrentMove.clear();
+        List<Card> resources = positiveCardsCurrentMoveOnly(sess); //positiveCardsCurrentMoveQuery(sess);
+        for (Card c : resources) {
+          allPositiveIdeaCardsCurrentMove.put(c.getId(), c);
+          if (!c.isHidden())
+            unhiddenPositiveIdeaCardsCurrentMove.put(c.getId(), c);
+        }
       }
-      return lis;
     }
-  }
 
-  public BeanContainer<Long,QuickUser> getQuickUsersContainer()
-  {
-    return this.quickUsersContainer;
+    /* all-moves maps: */
+    synchronized (allPositiveIdeaCards) {
+      synchronized (unhiddenPositiveIdeaCardsAll) {
+        unhiddenPositiveIdeaCardsAll.clear();
+        List<Card>posLis = CardDbHelper.getCardsByCardClass(sess, CardType.CardClass.POSITIVEIDEA);
+        for(Card c : posLis) {
+          allPositiveIdeaCards.put(c.getId(), c);
+          if(!c.isHidden())
+            unhiddenPositiveIdeaCardsAll.put(c.getId(), c);
+        }
+      }
+    }
+    synchronized (allNegativeIdeaCards) {
+      synchronized (unhiddenNegativeIdeaCardsAll) {
+        unhiddenNegativeIdeaCardsAll.clear();
+        List<Card>negLis = CardDbHelper.getCardsByCardClass(sess, CardType.CardClass.NEGATIVEIDEA);
+        for(Card c : negLis) {
+          allNegativeIdeaCards.put(c.getId(), c);
+          if(!c.isHidden())
+            unhiddenNegativeIdeaCardsAll.put(c.getId(), c);
+        }
+      }
+    }
   }
 
   public List<Card> getSuperActiveChainRoots()
   {
     return supActMgr.getSuperInterestingRoots();
   }
-
-  public static class QuickUser
-  {
-    public long id;
-    public String uname;
-    public boolean lockedOut, gm, admin, tweeter, designer, confirmed, multipleEmails;;
-    public String realFirstName, realLastName;
-    public String email;
-
-    public static String QUICKUSER_ID = "id";
-    public static String QUICKUSER_DESIGNER = "designer";
-    public static String QUICKUSER_UNAME = "uname";
-    public static String QUICKUSER_LOCKEDOUT = "lockedOut";
-    public static String QUICKUSER_GM = "gm";
-    public static String QUICKUSER_ADMIN = "admin";
-    public static String QUICKUSER_TWEETER = "tweeter";
-    public static String QUICKUSER_REALFIRSTNAME = "realFirstName";
-    public static String QUICKUSER_REALLASTNAME = "realLastName";
-    public static String QUICKUSER_EMAIL = "email";
-    public static String QUICKUSER_CONFIRMED = "confirmed";
-
-    public QuickUser(long id, String uname)
-    {
-      this.id = id;
-      this.uname = uname;
-    }
-    public QuickUser(User u)
-    {
-      update(u);
-    }
-    public void update(User u)
-    {
-      setId(u.getId());
-      setDesigner(u.isDesigner());
-      setUname(u.getUserName());
-      setLockedOut(u.isAccountDisabled());
-      setGm(u.isGameMaster());
-      setTweeter(u.isTweeter());
-      setAdmin(u.isAdministrator());
-      setConfirmed(u.isEmailConfirmed());
-
-      UserPii upii = VHibPii.getUserPii(u.getId());
-      if(upii != null) {
-        setRealFirstName(upii.getRealFirstName());
-        setRealLastName(upii.getRealLastName());
-        List<String> lisPii = VHibPii.getUserPiiEmails(u.getId());
-        if(lisPii != null && lisPii.size()>0) {
-          setEmail(lisPii.get(0));
-          setMultipleEmails(lisPii.size()>1);
-        }
-      }
-    }
-
-    public long getId()             {return id;}
-    public String getUname()        {return uname;}
-    public String getRealFirstName(){return realFirstName;}
-    public String getRealLastName() {return realLastName;}
-    public String getEmail()        {return email;}
-    public boolean isDesigner()     {return designer;}
-    public boolean isLockedOut()    {return lockedOut;}
-    public boolean isGm()           {return gm;}
-    public boolean isTweeter()      {return tweeter;}
-    public boolean isAdmin()        {return admin;}
-    public boolean isConfirmed()    {return confirmed;}
-    public boolean isMultipleEmails() {return multipleEmails;}
-
-    public void setId(long id)                        {this.id = id;}
-    public void setDesigner(boolean designer)         {this.designer = designer;}
-    public void setUname(String uname)                {this.uname = uname;}
-    public void setLockedOut(boolean lockedOut)       {this.lockedOut = lockedOut;}
-    public void setGm(boolean gm)                     {this.gm = gm;}
-    public void setTweeter(boolean tweeter)           {this.tweeter = tweeter;}
-    public void setRealFirstName(String realFirstName){this.realFirstName = realFirstName;}
-    public void setRealLastName(String realLastName)  {this.realLastName = realLastName;}
-    public void setEmail(String email)                {this.email = email;}
-    public void setAdmin(boolean admin)               {this.admin = admin;}
-    public void setConfirmed(boolean confirmed)       {this.confirmed = confirmed;}
-    public void setMultipleEmails(boolean yn)         {this.multipleEmails = yn;}
-  }
-
+  
   public static class MCacheData<T>
   {
     public T[] data;  // returned piece of data
