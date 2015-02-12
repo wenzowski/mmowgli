@@ -22,9 +22,12 @@
 
 package edu.nps.moves.mmowgli.hibernate;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import static edu.nps.moves.mmowgli.MmowgliConstants.ERROR_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.HIBERNATE_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.HIBERNATE_TRANSACTION_TIMEOUT_IN_SECONDS;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.*;
 
@@ -32,6 +35,7 @@ import com.vaadin.data.hbnutil.HbnContainer;
 
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
+import edu.nps.moves.mmowgli.utility.MThreadManager;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -49,6 +53,8 @@ public class HSess
 {
   private static final ThreadLocal<Session> threadLocal = new ThreadLocal<Session>();
   private static final ThreadLocal<StackTraceElement[]> dbgThreadLocal = new ThreadLocal<StackTraceElement[]>();
+  private static final ThreadLocal<ArrayList<MMessagePacket>> msgs = new ThreadLocal<ArrayList<MMessagePacket>>();
+  
   private static void set(Session sess)
   {
     threadLocal.set(sess);
@@ -112,8 +118,8 @@ public class HSess
       if(sess.isOpen())
         sess.close();
     }
-    MSysOut.println(HIBERNATE_LOGS,"HSess.close() of sess "+sess.hashCode());
     unset();
+    MSysOut.println(HIBERNATE_LOGS,"HSess.close() of sess "+sess.hashCode());
   }
  
   // Use the following 2 methods as a pair for conditional establishment of a thread-local session
@@ -177,20 +183,47 @@ public class HSess
     MSysOut.println(ERROR_LOGS,">>>>>>>>>>>>> End of stack dumps.");
   }
   
-  
-  private static ThreadLocal<ArrayList<MMessagePacket>> msgs = new ThreadLocal<ArrayList<MMessagePacket>>();
-  
   public static void queueDBMessage(MMessagePacket mmp)
   {
     msgs.get().add(mmp);
   }
+  
   private static void unsetDBEvents()
   {
+    if(msgs.get().isEmpty())
+      return;
+    
     ArrayList<MMessagePacket> alis = msgs.get();
-    for(MMessagePacket mmp : alis) {
-      MSysOut.println(HIBERNATE_LOGS," Pumping a db event to Appmaster.incomingDatabaseEvent now, msg = "+mmp.toString());
-      AppMaster.instance().incomingDatabaseEvent(mmp);
-    }
+      
+//  for(MMessagePacket mmp : alis) {
+//    MSysOut.println(HIBERNATE_LOGS," Pumping a db event to Appmaster.incomingDatabaseEvent now, msg = "+mmp.toString());
+//    AppMaster.instance().incomingDatabaseEvent(mmp);
+//  }
+    
+    MThreadManager.run(new DBMessageSender(alis));
     msgs.remove();
+  }
+  
+  static class DBMessageSender implements Runnable
+  {
+    List<MMessagePacket> myLis;
+    DBMessageSender(List<MMessagePacket> lis)
+    {
+      myLis = new ArrayList<MMessagePacket>(lis.size());
+      for(int i=0;i<lis.size();i++)
+        myLis.add(lis.get(i));
+    }
+    public void run()
+    {
+      //sleep(1000L); //test
+      for(int i=0;i<myLis.size();i++) {
+        MSysOut.println(HIBERNATE_LOGS,"Pumping a db event to Appmaster.incomingDatabaseEvent now, msg = "+myLis.get(i).toString());
+        AppMaster.instance().incomingDatabaseEvent(myLis.get(i));
+      }
+    }
+//    private void sleep(long ms)
+//    {
+//      try {Thread.sleep(ms);}catch(InterruptedException ex){}
+//    }
   }
 }

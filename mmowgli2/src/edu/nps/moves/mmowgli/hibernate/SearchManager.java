@@ -162,14 +162,14 @@ public class SearchManager
 	  {
 	  	case NEW_CARD: //C':
 	  		Long cardId = MMessage.MMParse(messageType,message).id;
-	  		Card aCard = DBGet.getCardFreshTL(cardId);  // need obj associated with this session
+	  		Card aCard = Card.getTL(cardId);
 		    SearchManager.indexHibernateObject(aCard, session);
 		    break;
 		 
 	  	case NEW_USER: //'U':
 	  	case UPDATED_USER: //'u':
 	  	  Long userId = MMessage.MMParse(messageType,message).id; 
-	  		User aUser = DBGet.getUserFreshTL(userId);
+	  		User aUser = User.getTL(userId);
 	  		SearchManager.indexHibernateObject(aUser, session);
 	  		break;
 	  		
