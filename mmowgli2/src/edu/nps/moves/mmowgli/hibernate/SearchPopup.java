@@ -26,7 +26,6 @@ import static edu.nps.moves.mmowgli.MmowgliEvent.ACTIONPLANSHOWCLICK;
 import static edu.nps.moves.mmowgli.MmowgliEvent.CARDCLICK;
 import static edu.nps.moves.mmowgli.MmowgliEvent.SHOWUSERPROFILECLICK;
 
-import java.io.Serializable;
 import java.util.*;
 
 import org.getopt.luke.TermInfo;
@@ -391,8 +390,7 @@ public class SearchPopup extends Window implements ClickListener
 
     String [] tokenArray = terms.trim().split("\\s+");
     Object sessKey = HSess.checkInit();
-    Serializable meId = Mmowgli2UI.getGlobals().getUserID();
-    User me = DBGet.getUserFreshTL(meId);
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     
     // test Do it in another thread
     /*

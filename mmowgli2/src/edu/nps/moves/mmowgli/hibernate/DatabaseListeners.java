@@ -35,7 +35,6 @@ import com.vaadin.ui.UI;
 
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.markers.HasUUID;
 import edu.nps.moves.mmowgli.messaging.MMessage;
@@ -45,29 +44,32 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 public class DatabaseListeners
 {
-  public MySaveListener saveListener;
-  public MyPostInsertEventListener postInsertListener;
-  public MyUpdateListener updateListener;
-  public MyPostUpdateEventListener postUpdateListener;
+  private MySaveListener saveListener;  
+  private MyUpdateListener updateListener;
+  private MySaveOrUpdateListener saveOrUpdateListener;  
+  private MyDeleteListener deleteListener;
+  private MyPostInsertEventListener postInsertListener;
+  private MyPostUpdateEventListener postUpdateListener;  
   
-  public MySaveOrUpdateListener saveOrUpdateListener;
-  public MyDeleteListener deleteListener;
-  private MCacheManager mcache;
   private static int myLogLevel = DB_LISTENER_LOGS;
+  
+  public DefaultSaveEventListener getSaveListener()                {return saveListener;}
+  public DefaultUpdateEventListener getUpdateListener()            {return updateListener;}
+  public DefaultSaveOrUpdateEventListener getSaveOrUpdateListener(){return saveOrUpdateListener;}
+  public PostInsertEventListener getPostInsertListener()           {return postInsertListener;}
+  public DefaultDeleteEventListener getDeleteListener()            {return deleteListener; }
+  public PostUpdateEventListener getPostUpdateListener()           {return postUpdateListener;};
   
   public DatabaseListeners(ServiceRegistry sRegistry)
   {
     saveListener         = new MySaveListener();
-    postInsertListener   = new MyPostInsertEventListener();
-    
     updateListener       = new MyUpdateListener();
-    postUpdateListener   = new MyPostUpdateEventListener();
-    
     saveOrUpdateListener = new MySaveOrUpdateListener();
-    
     deleteListener       = new MyDeleteListener();
     
-    mcache = MCacheManager.instance();
+    postInsertListener   = null; // not used 
+    postUpdateListener   = null; // not used 
+
 /*    
     EventListenerRegistry eventListenerRegistry = sRegistry.getService(EventListenerRegistry.class);
     
@@ -88,13 +90,13 @@ public class DatabaseListeners
   public void enableListeners(boolean tf)
   {
     saveListener.enabled = tf;    
-    postInsertListener.enabled = false; //tf;
-    
     updateListener.enabled = tf;
-    postUpdateListener.enabled = false; //tf;
-    
     saveOrUpdateListener.enabled = tf;
-    deleteListener.enabled = tf;    
+    deleteListener.enabled = tf; 
+    
+    // not used
+    //postInsertListener.enabled = tf;   
+    //postUpdateListener.enabled = tf;   
   }  
   
   @SuppressWarnings("serial")
@@ -105,10 +107,12 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-      MSysOut.println(myLogLevel,">>> Into   save db listener "+(enabled?"":"(unused)") + " type = "+event.getEntity().getClass().getSimpleName()+" <<<");
+      MSysOut.println(myLogLevel,"Save db listener "+(enabled?"":"(unused)") + " type = "+event.getEntity().getClass().getSimpleName()+" <<<");
+
       super.onSaveOrUpdate(event); // default behavior first
       if (!enabled)
         return;
+
       Object obj = event.getObject();
 
       Character msgTyp = null;
@@ -117,15 +121,11 @@ public class DatabaseListeners
       if (obj instanceof Card) {
         msgTyp = NEW_CARD;
         Card c = (Card)obj;
-        MSysOut.println(CARD_UPDATE_LOGS,"Save db listener got card with id = "+c.getId()+" text = "+c.getText());
         msg = "" + c.getId();
-        // DBGet.cacheCard(c);
-        mcache.putCard(c);
       }
       else if (obj instanceof User) {
         msgTyp = NEW_USER;
         msg = "" + ((User) obj).getId();
-        DBGet.cacheUser((User) obj);
       }
       else if (obj instanceof ActionPlan) {
         msgTyp = NEW_ACTIONPLAN;
@@ -135,7 +135,6 @@ public class DatabaseListeners
         msgTyp = GAMEEVENT;
         GameEvent ge = (GameEvent) obj;
         msg = "" + ge.getId() + "\t" + ge.getEventtype().toString() + "\t" + ge.getParameter();
-        // does nothingDBGet.cacheGameEvent((GameEvent)obj);
       }
 
       else if (obj instanceof Message) {
@@ -147,89 +146,15 @@ public class DatabaseListeners
           msg = "" + m.getId();
         }
       }
-      else if (obj instanceof ChatLog) {
-        // only happens when making new ActionPlan
-      }
       else {
-        // System.err.println("Unprocessed db save in ApplicationMaster: " +
-        // obj.getClass().getSimpleName());
+        MSysOut.println(myLogLevel,"Save db listener didn't understand "+obj.getClass().getSimpleName());
       }
+      
       if(msgTyp != null)
         messageOut(event, msgTyp, msg);
-
-      MSysOut.println(myLogLevel,">>> Out of save db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
     }
   }
-  @SuppressWarnings("serial")
-  class MyPostInsertEventListener implements PostInsertEventListener
-  {
-    public boolean enabled = false;
-
-    @Override
-    public void onPostInsert(PostInsertEvent event)
-    {
-      if (!enabled)
-        return;
-      
-      MSysOut.println(myLogLevel,">>> PostInsert db listener "+(enabled?"":"(unused)") + " type = "+event.getEntity().getClass().getSimpleName()+" <<<");
-      Object obj = event.getEntity();
-      Character msgTyp = null;
-      String msg = "";
-
-      if (obj instanceof Card) {
-        Card c = (Card)obj;
-        MSysOut.println(CARD_UPDATE_LOGS,"PostInsert db listener got card with id = "+c.getId()+" text = "+c.getText());
-
-        msgTyp = NEW_CARD;
-        msg = "" + c.getId();
-        // DBGet.cacheCard((Card)obj);
-        mcache.putCard(c);
-      }
-      else if (obj instanceof User) {
-        msgTyp = NEW_USER;
-        msg = "" + ((User) obj).getId();
-        DBGet.cacheUser((User) obj);
-      }
-      else if (obj instanceof ActionPlan) {
-        msgTyp = NEW_ACTIONPLAN;
-        msg = "" + ((ActionPlan) obj).getId();
-      }
-      else if (obj instanceof GameEvent) {
-        msgTyp = GAMEEVENT;
-        GameEvent ge = (GameEvent) obj;
-        msg = "" + ge.getId() + "\t" + ge.getEventtype().toString() + "\t" + ge.getParameter();
-        // does nothingDBGet.cacheGameEvent((GameEvent)obj);
-      }
-
-      else if (obj instanceof Message) {
-        Message m = (Message) obj;
-        if (m.getToUser() == null) // means its a comment on an Action Plan, let
-                                   // the AP update handle it
-          ;
-        else {
-          msgTyp = NEW_MESSAGE;
-          msg = "" + m.getId();
-        }
-      }
-      else if (obj instanceof ChatLog) {
-        // only happens when making new ActionPlan
-      }
-      else {
-        // System.err.println("Unprocessed db save in ApplicationMaster: " +
-        // obj.getClass().getSimpleName());
-      }
-      if (msgTyp != null)
-        messageOut(event, msgTyp, msg);
-
-      MSysOut.println(myLogLevel,">>> Out of post insert db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
-    }
-
-    @Override
-    public boolean requiresPostCommitHanding(EntityPersister persister)
-    {
-      return true;
-    }
-  } 
+  
   @SuppressWarnings("serial")
   class MyUpdateListener extends DefaultUpdateEventListener
   {
@@ -238,7 +163,8 @@ public class DatabaseListeners
     @Override
     public void onSaveOrUpdate(SaveOrUpdateEvent event) throws HibernateException
     {
-      MSysOut.println(myLogLevel,">>> Into   update db listener "+(enabled?"":"(unused) ") +event.getEntity().getClass().getSimpleName()+" session = "+event.getSession().hashCode());
+      MSysOut.println(myLogLevel,"Update db listener "+(enabled?"":"(unused) ") +event.getEntity().getClass().getSimpleName()+" session = "+event.getSession().hashCode());
+ 
       super.onSaveOrUpdate(event); // default behavior first      
       if(!enabled)
         return;
@@ -249,17 +175,13 @@ public class DatabaseListeners
       String msg = "";
       if (obj instanceof Card) {
         Card c = (Card)obj;
-        MSysOut.println(CARD_UPDATE_LOGS,"Update db listener got card with id = "+c.getId()+" version = "+c.getVersion()+" text = "+c.getText()+" hidden = "+c.isHidden());
         msgTyp = UPDATED_CARD;
-        msg = "" + c.getId() + MMessage.MMESSAGE_DELIM + c.getVersion();
-        mcache.putCard(c);
+        msg = "" + c.getId() + MMessage.MMESSAGE_DELIM + c.getRevision();
      }
       else if (obj instanceof User) {
         User u = (User)obj;
         msgTyp = UPDATED_USER;
-        msg = "" + u.getId() + MMessage.MMESSAGE_DELIM + u.getVersion();
-        DBGet.cacheUser(u);
-        mcache.putQuickUser(u);
+        msg = "" + u.getId() + MMessage.MMESSAGE_DELIM + u.getRevision();
       }
       else if (obj instanceof ActionPlan) {
         msgTyp = UPDATED_ACTIONPLAN;
@@ -293,86 +215,11 @@ public class DatabaseListeners
       else {
         MSysOut.println(myLogLevel,"Update db listener didn't understand "+obj.getClass().getSimpleName());
       }
-      if(msgTyp != null)
-        messageOut(event,msgTyp,msg);
       
-      MSysOut.println(myLogLevel,">>> Out of update db listener " +event.getEntity().getClass().getSimpleName()+" session = "+event.getSession().hashCode());
+      if(msgTyp != null)
+        messageOut(event,msgTyp,msg);      
     }
   }
-  
- @SuppressWarnings("serial")
-class MyPostUpdateEventListener implements PostUpdateEventListener
- {
-   boolean enabled = false;
-  @Override
-  public void onPostUpdate(PostUpdateEvent event)
-  {
-      if(!enabled)
-        return;
-
-      MSysOut.println(myLogLevel,">>> Postupdate db listener "+(enabled?"":"(unused)") + " type = "+event.getEntity().getClass().getSimpleName()+" <<<");
-      Object obj = event.getEntity();
-
-      Character msgTyp = null;
-      String msg = "";
-      if (obj instanceof Card) {
-        Card c = (Card)obj;
-        MSysOut.println(CARD_UPDATE_LOGS,"Postupdate db listener got card with id = "+c.getId()+" text = "+c.getText());
-        msgTyp = UPDATED_CARD;
-        msg = "" + c.getId() + MMessage.MMESSAGE_DELIM + c.getVersion();
-        mcache.putCard(c);
-     }
-      else if (obj instanceof User) {
-        User u = (User)obj;
-        msgTyp = UPDATED_USER;
-        msg = "" + u.getId() + MMessage.MMESSAGE_DELIM + u.getVersion();
-        DBGet.cacheUser(u);
-        mcache.putQuickUser(u);
-      }
-      else if (obj instanceof ActionPlan) {
-        msgTyp = UPDATED_ACTIONPLAN;
-        msg = "" + ((ActionPlan) obj).getId();
-      }
-      else if (obj instanceof ChatLog) {
-        msgTyp = UPDATED_CHAT;
-        msg = "" + ((ChatLog) obj).getId();
-      }
-      else if (obj instanceof Media) {
-        msgTyp = UPDATED_MEDIA;
-        msg = "" + ((Media) obj).getId();
-      }
-      else if (obj instanceof Game) {
-        msgTyp = UPDATED_GAME;
-        msg = "";
-      }
-      else if(obj instanceof CardType) {
-        CardTypeManager.updateCardType((CardType)obj);
-        msgTyp = UPDATED_CARDTYPE;
-        msg = ""+((CardType)obj).getId();
-      }
-      else if(obj instanceof Move) {
-        msgTyp = UPDATED_MOVE;
-        msg = "" + ((Move) obj).getId();        
-      }
-      else if(obj instanceof MovePhase) {
-        msgTyp = UPDATED_MOVEPHASE;
-        msg = "" + ((MovePhase) obj).getId();
-      }
-      else {
-        MSysOut.println(myLogLevel,"Post update listener didn't understand "+obj.getClass().getSimpleName());
-      }
-      if(msgTyp != null)
-        messageOut(event,msgTyp,msg);
-      
-      MSysOut.println(myLogLevel,">>> Out of postupdate db listener, type = "+event.getEntity().getClass().getSimpleName()+" <<<"); 
-  }
-
-  @Override
-  public boolean requiresPostCommitHanding(EntityPersister persister)
-  {
-    return true;
-  }   
- }
   
   @SuppressWarnings("serial")
   class MyDeleteListener extends DefaultDeleteEventListener
@@ -382,18 +229,25 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
     @Override
     public void onDelete(DeleteEvent event) throws HibernateException
     {
-      if(enabled) MSysOut.println(myLogLevel,">>> Delete db listener <<<");
+      if(enabled) MSysOut.println(myLogLevel,"Delete db listener "+(enabled?"":"(unused) ") +event.getEntityName()+" session = "+event.getSession().hashCode());
+ 
       super.onDelete(event);
       if(!enabled)
         return;
+      
       Object obj = event.getObject();
+      Character msgTyp = null;
+      String msg = "";
 
       // A user obj gets persisted at the first step of registration to reserve the user name.  If he doesn't complete (i.e., cancels),
       // his user object gets deleted from the db but was not from the cache.  This fixes that
-      if(obj instanceof User)
-        //todo V7 convirm mCacheManager().removeUser((Long)((User)obj).getId());
-        mcache.removeUser((Long)((User)obj).getId());
-      MSysOut.println(myLogLevel,">>> Out of delete db listener <<<");
+      if(obj instanceof User) {
+        msgTyp = DELETED_USER;
+        msg = "" + ((User)obj).getId();
+      }
+      
+      if(msgTyp != null)
+        messageOut(event,msgTyp,msg);
     }
   }
   
@@ -415,7 +269,40 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
       // Might be useful for something. Lesson, use save() and update() and merge() in app code to use the 3 listeners above.
     }
   }
+  
+  @SuppressWarnings("serial")
+  class MyPostUpdateEventListener implements PostUpdateEventListener
+   {
+     boolean enabled = false;
+     @Override
+     public void onPostUpdate(PostUpdateEvent event)
+     {
+     }
 
+     @Override
+     public boolean requiresPostCommitHanding(EntityPersister persister)
+     {
+       return false;
+     }  
+   }
+   
+   @SuppressWarnings("serial")
+   class MyPostInsertEventListener implements PostInsertEventListener
+   {
+     public boolean enabled = false;
+
+     @Override
+     public void onPostInsert(PostInsertEvent event)
+     {
+     }
+
+     @Override
+     public boolean requiresPostCommitHanding(EntityPersister persister)
+     {
+       return true;
+     }
+  } 
+    
   private void messageOut(AbstractEvent event, char msgTyp, String msg)
   {
     String session_id=null;
@@ -429,21 +316,12 @@ class MyPostUpdateEventListener implements PostUpdateEventListener
         session_id = ((Mmowgli2UI)currUI).getUserSessionUUID();
     }
     
-    // The following lets the session.commit.close action return before trying to access the saved or updated db object
-    MMessagePacket mmp = new MMessagePacket(msgTyp,
-                           msg,
-                           ui_id,
-                           session_id,
-                           AppMaster.instance().getServerName());
-    HSess.queueDBMessage(mmp);
-  
-/*
-    AppMaster.instance().incomingDatabaseEvent(
-        new MMessagePacket(msgTyp,
-                           msg,
-                           ui_id,
-                           session_id,
-                           AppMaster.instance().getServerName()));
-*/
+    // The following lets the session.commit.close action return before trying to access the saved or updated db object;
+    // Use it instead of directly calling AppMaster
+    MMessagePacket mmp = new MMessagePacket(msgTyp, msg, ui_id, session_id, AppMaster.instance().getServerName());
+    if(HSess.get() != null)
+      HSess.queueDBMessage(mmp);
+    else
+      AppMaster.instance().incomingDatabaseEvent(mmp);
   }
 }

@@ -69,6 +69,7 @@ public abstract class AbstractVHib// implements SessionManager
   public static final String DB_SHOW_SQL                   = "false";
   public static final String DB_TRANSACTION_STRATEGY       = "org.hibernate.transaction.JDBCTransactionFactory"; //"org.hibernate.transaction.JTATransactionFactory";
   public static final String DB_CURRENT_SESSION_CONTEXT_CLASS = "thread";
+  public static final String DB_HIBERNATE_CONNECTION_ISOLATION = "1"; //todo understand
   
   // Hibernate search properties
   public static final String HIB_SEARCH_SOURCEBASE_PROPERTY    = "hibernate.search.default.sourceBase";  // where master index is stored
@@ -143,35 +144,36 @@ public abstract class AbstractVHib// implements SessionManager
 
       // Constants gotten from the static imports of org.hibernate.cfg.Environment and edu.nps.moves.mmowgli.mmowgliOne.ApplicationConstants
 
-      cnf.setProperty(DRIVER, DB_DRIVER); // "com.mysql.jdbc.Driver");
-      cnf.setProperty(DIALECT, DB_DIALECT); // org.hibernate.dialect.MySQLDialect.class.getName());
+      cnf.setProperty(DRIVER, DB_DRIVER);
+      cnf.setProperty(DIALECT, DB_DIALECT);
 
       // Omitting this enables c3p0 below.
-      //cnf.setProperty(POOL_SIZE, DB_POOL_SIZE); // "10");
+      //cnf.setProperty(POOL_SIZE, DB_POOL_SIZE);
       
       cnf.setProperty(AUTOCOMMIT, DB_AUTOCOMMIT);
      //todo V7 not reqd? no-cache cnf.setProperty(CACHE_PROVIDER, DB_CACHE_PROVIDER);
 
       // c3p0 connection pooler
-      cnf.setProperty(C3P0_MAX_SIZE, c3.maxSize); //DB_C3P0_MAX_SIZE); // * Maximum size of C3P0 connection pool
-      cnf.setProperty(C3P0_MIN_SIZE, c3.minSize); //DB_C3P0_MIN_SIZE); // * Minimum size of C3P0 connection pool
-      cnf.setProperty(C3P0_ACQUIRE_INCREMENT, c3.acquireIncrement); //DB_C3P0_ACQUIRE_INCREMENT); // * Number of connections acquired when pool is exhausted
+      cnf.setProperty(C3P0_MAX_SIZE, c3.maxSize); // * Maximum size of C3P0 connection pool
+      cnf.setProperty(C3P0_MIN_SIZE, c3.minSize); // * Minimum size of C3P0 connection pool
+      cnf.setProperty(C3P0_ACQUIRE_INCREMENT, c3.acquireIncrement); // * Number of connections acquired when pool is exhausted
       
-      cnf.setProperty(C3P0_TIMEOUT, c3.timeout); //DB_C3P0_TIMEOUT); //="hibernate.c3p0.timeout";  // max idle time
-      cnf.setProperty(C3P0_IDLE_TEST_PERIOD, c3.idleTestPeriod); //DB_C3P0_IDLE_TEST_PERIOD); // "hibernate.c3p0.idle_test_period";  // Idle time before a C3P0 pooled connection is validated
+      cnf.setProperty(C3P0_TIMEOUT, c3.timeout); // max idle time
+      cnf.setProperty(C3P0_IDLE_TEST_PERIOD, c3.idleTestPeriod); // Idle time before a C3P0 pooled connection is validated
 
-      //dbDropAndCreate=true; // debug
+      //dbDropAndCreate=true; // dangerous!
 
       if (dbDropAndCreate)
-        cnf.setProperty(HBM2DDL_AUTO, DB_HBM2DDL_AUTO_CREATE_DROP); // "create-drop"); // When using this, the OLD TABLES WILL BE DROPPED each run
+        cnf.setProperty(HBM2DDL_AUTO, DB_HBM2DDL_AUTO_CREATE_DROP); // When using this, the OLD TABLES WILL BE DROPPED each run
       else
-        cnf.setProperty(HBM2DDL_AUTO, DB_HBM2DDL_AUTO_VALIDATE); // "validate"); // When using this, the OLD TABLES WILL BE BE RETAINED each run
+        cnf.setProperty(HBM2DDL_AUTO, DB_HBM2DDL_AUTO_VALIDATE); // When using this, the OLD TABLES WILL BE BE RETAINED each run
 
       cnf.setProperty(SHOW_SQL,   DB_SHOW_SQL);
       cnf.setProperty(FORMAT_SQL, DB_SHOW_SQL);
       
       cnf.setProperty(TRANSACTION_STRATEGY, DB_TRANSACTION_STRATEGY);
-      cnf.setProperty(CURRENT_SESSION_CONTEXT_CLASS, DB_CURRENT_SESSION_CONTEXT_CLASS); // "thread");
+      cnf.setProperty(CURRENT_SESSION_CONTEXT_CLASS, DB_CURRENT_SESSION_CONTEXT_CLASS);
+      cnf.setProperty(ISOLATION, DB_HIBERNATE_CONNECTION_ISOLATION);  //todo understand implications of this; this setting fixed some of our problems
     }
     catch(Throwable t) {
       commonInitCatch(t);       
@@ -197,7 +199,7 @@ public abstract class AbstractVHib// implements SessionManager
       srb.addService(EventListenerRegistry.class, new EventListenerRegistryImpl()); // have to add manually
       sr = srb.build();
 
-      sf = cnf.buildSessionFactory(sr);      
+      sf = cnf.buildSessionFactory(sr); 
     }
     catch (Throwable ex) {
       commonInitCatch(ex);
@@ -221,28 +223,33 @@ public abstract class AbstractVHib// implements SessionManager
     EventListenerRegistry registry = ((SessionFactoryImpl) sf).getServiceRegistry().getService(EventListenerRegistry.class);
     registry.addDuplicationStrategy(new DuplicationStrategy()
     {
-
       @Override
       public boolean areMatch(Object listener, Object original)
       {
         return false;
       }
-
       @Override
       public Action getAction()
       {
         return null;
       }
-
     });
-    registry.getEventListenerGroup(EventType.POST_COMMIT_INSERT).appendListener(dlis.postInsertListener);
-    registry.getEventListenerGroup(EventType.SAVE).appendListener(dlis.saveListener);
-    registry.getEventListenerGroup(EventType.POST_COMMIT_UPDATE).appendListener(dlis.postUpdateListener);
-    registry.getEventListenerGroup(EventType.UPDATE).appendListener(dlis.updateListener);
-    //registry.getEventListenerGroup(EventType.MERGE).appendListener(dlis.mergeListener);
-    registry.getEventListenerGroup(EventType.SAVE_UPDATE).appendListener(dlis.saveOrUpdateListener);
-    registry.getEventListenerGroup(EventType.DELETE).appendListener(dlis.deleteListener);
+    
+    if(dlis.getSaveListener() != null)
+      registry.getEventListenerGroup(EventType.SAVE).appendListener(dlis.getSaveListener());
+    if(dlis.getUpdateListener() != null)
+      registry.getEventListenerGroup(EventType.UPDATE).appendListener(dlis.getUpdateListener());
+    if(dlis.getSaveOrUpdateListener() != null)
+      registry.getEventListenerGroup(EventType.SAVE_UPDATE).appendListener(dlis.getSaveOrUpdateListener());
+    if(dlis.getDeleteListener() != null)
+      registry.getEventListenerGroup(EventType.DELETE).appendListener(dlis.getDeleteListener());
+    if(dlis.getPostInsertListener() != null)
+      registry.getEventListenerGroup(EventType.POST_COMMIT_INSERT).appendListener(dlis.getPostInsertListener());
+    if(dlis.getPostUpdateListener() != null)
+      registry.getEventListenerGroup(EventType.POST_COMMIT_UPDATE).appendListener(dlis.getPostUpdateListener());
+
     MSysOut.println(HIBERNATE_LOGS,"db listeners installed");
+    
     dlis.enableListeners(true); // may have to be moved later
   }
  

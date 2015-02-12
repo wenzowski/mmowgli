@@ -47,7 +47,7 @@ public class AdHocDBInits
    */
   private static void setUserPii(Session sess, String uname, boolean admin, boolean gm, boolean designer, boolean guest)
   {
-    User u = DBGet.getUserFresh(uname,sess);
+    User u = User.getUserWithUserName(uname, sess);
     if(u == null) {
       u = new User();
       u.setUserName(uname);
