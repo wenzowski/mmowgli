@@ -1,6 +1,15 @@
 # This is a list of SQL commands which may be useful to update old game databases. This file is not intended to be run in its entirety.
 # Remember to also update the MmowgliConstants field DATABASE_VERSION
 
+UPDATE `Game` SET `version` = '20150206' WHERE `id` = '1';
+ALTER TABLE `ActionPlan` DROP `version`;
+ALTER TABLE `ActionPlan` ADD `revision` BIGINT(20)  NOT NULL  DEFAULT '0';
+ALTER TABLE `Card` CHANGE `version` `revision` BIGINT(20)  NOT NULL  DEFAULT '0';
+ALTER TABLE `Game` ADD `revision` BIGINT(20)  NOT NULL  DEFAULT '0'  AFTER `id`;
+ALTER TABLE `Move` ADD `revision` BIGINT(20)  NOT NULL  DEFAULT '0';
+ALTER TABLE `MovePhase` ADD `revision` BIGINT(20)  NOT NULL  DEFAULT '0';
+ALTER TABLE `User` CHANGE `version` `revision` BIGINT(20)  NOT NULL  DEFAULT '0';
+
 UPDATE `Game` SET `version` = '20150116' WHERE `id` = '1';
 ALTER TABLE `Card` ADD `version` BIGINT(20)  NOT NULL  DEFAULT '0';
 ALTER TABLE `User` ADD `version` BIGINT(20)  NOT NULL  DEFAULT '0';
