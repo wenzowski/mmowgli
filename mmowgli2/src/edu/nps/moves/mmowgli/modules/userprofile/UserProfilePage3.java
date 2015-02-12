@@ -22,7 +22,7 @@
 
 package edu.nps.moves.mmowgli.modules.userprofile;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.APPLICATION_SCREEN_WIDTH;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.io.Serializable;
 
@@ -35,11 +35,11 @@ import com.vaadin.ui.Button.ClickListener;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.messaging.WantsMessageUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsUserUpdates;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * UserProfilePageStyled.java
@@ -69,8 +69,8 @@ public class UserProfilePage3 extends AbsoluteLayout implements MmowgliComponent
   @HibernateSessionThreadLocalConstructor
   public UserProfilePage3(Object uid)
   {
-    User u = DBGet.getUserTL(uid);
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User u = User.getTL(uid);
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     itsSomebodyElse = (u.getId() != me.getId());
 
     myIdeasPanel       = new UserProfileMyIdeasPanel2(uid);   
@@ -206,6 +206,7 @@ public class UserProfilePage3 extends AbsoluteLayout implements MmowgliComponent
   @Override
   public boolean userUpdated_oobTL(Object uId)
   {
+    MSysOut.println(USER_UPDATE_LOGS, getClass().getSimpleName()+".userUpdated_oobTL("+uId+")");
     return topPan.userUpdated_oobTL(uId);
   }
 

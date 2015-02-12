@@ -132,7 +132,7 @@ public class SigninPopover extends Popover implements Button.ClickListener
   private String tryLogin()
   {
     Session sess = VHibPii.getASession();
-    User u = User.getUserWithUserName(sess,enteredName);
+    User u = User.getUserWithUserName(enteredName, sess);
     if(u != null) {
       StrongPasswordEncryptor pwEncryptor = new StrongPasswordEncryptor();
       try {

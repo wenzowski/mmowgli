@@ -39,7 +39,6 @@ import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
 import edu.nps.moves.mmowgli.db.Media.Source;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 
@@ -186,20 +185,20 @@ public class MediaLocator implements Serializable
 
 	public Resource getCardSummaryBackground(Object cardId, Session sess)
 	{
-	  Card c = DBGet.getCard(cardId,sess);
+	  Card c = Card.get(cardId, sess);
 	  return locate(new Media(CardStyler.getCardSummaryImage(c.getCardType()),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
 	}
 	
   public Resource getCardSummaryBackgroundMultiple(Object cardId, Session sess)
 	{
-	  Card c = DBGet.getCard(cardId, sess);
+	  Card c = Card.get(cardId,sess);
 	  CardType ct = c.getCardType();
 	  return locate(new Media(CardStyler.getCardSummaryMultipleImage(ct),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
 	}
   
   public Resource getCardSummaryBackgroundSmallTL(Object cardId)
   {
-    Card c = DBGet.getCardTL(cardId);
+    Card c = Card.getTL(cardId);
     CardType ct = c.getCardType();
     
     return locate(new Media(CardStyler.getCardParentImage(ct),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
@@ -234,7 +233,7 @@ public class MediaLocator implements Serializable
   
   public Resource getCardLargeBackgroundTL(Object cardId)
   {
-    Card c = DBGet.getCardTL(cardId);
+    Card c = Card.getTL(cardId);
     return locate(new Media(CardStyler.getCardBigImage(c.getCardType()),"","",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
   

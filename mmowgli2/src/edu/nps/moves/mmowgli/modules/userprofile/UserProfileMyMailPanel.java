@@ -40,7 +40,6 @@ import edu.nps.moves.mmowgli.components.SendMessageWindow;
 import edu.nps.moves.mmowgli.components.ToggleLinkButton;
 import edu.nps.moves.mmowgli.db.Message;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsMessageUpdates;
@@ -90,7 +89,7 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
     getLeftLabel().setValue(left);
     
     if (!userIsMe) {
-      User u = DBGet.getUserTL(uid);
+      User u = User.getTL(uid);
       if (u.isOkEmail() || u.isOkGameMessages()) {
         final NativeButton sendEmailButt = new NativeButton("Send private mail to this user");
         sendEmailButt.addStyleName(BaseTheme.BUTTON_LINK);
@@ -119,7 +118,7 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
           {
             HSess.init();
 
-            User u = DBGet.getUserTL(uid);
+            User u = User.getTL(uid);
             if (u.isOkEmail() || u.isOkGameMessages())  // redundant here
               new SendMessageWindow(u,imAdminOrGameMaster);
             else
@@ -144,7 +143,7 @@ public class UserProfileMyMailPanel extends UserProfileTabPanel implements ItemC
     sp.setHeight("10px");
     rightVL.addComponent(mailPanel);
  
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     Set<Message> msgs = me.getGameMessages();
     if (msgs.size() > 0) {
       Message[] msgsAr = new Message[msgs.size()];

@@ -437,7 +437,7 @@ public class ScoreManager2
     if(cardSuperInterestingPoints == 0.0f)
       return;
     User author = c.getAuthor();
-    User me = User.getTL(Mmowgli2UI.getGlobals().getUserID()); //DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     
     if(me.getId() != author.getId())  // can't get points for saying you're interesting
       incrementBasicScoreTL(author,-1.0f*cardSuperInterestingPoints); 
@@ -448,7 +448,7 @@ public class ScoreManager2
     if(cardSuperInterestingPoints == 0.0f)
       return;
     User author = c.getAuthor();
-    User me = User.getTL(Mmowgli2UI.getGlobals().getUserID()); //DBGet.getUser(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     
     if(me.getId() != author.getId())  // can't get points for saying you're interesting
       incrementBasicScoreTL(author,cardSuperInterestingPoints);

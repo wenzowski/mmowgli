@@ -40,7 +40,6 @@ import com.vaadin.ui.Table;
 
 import edu.nps.moves.mmowgli.components.UserTable;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
@@ -146,7 +145,7 @@ public class UserProfileMyBuddiesPanel extends UserProfileTabPanel implements It
     @Override
     protected Criteria getBaseCriteriaTL()
     {
-      User me = DBGet.getUserFreshTL(uid);
+      User me = User.getTL(uid);
       
       Criteria crit = super.getBaseCriteriaTL();
       crit.add(Restrictions.not(Restrictions.idEq(me.getId())));  
