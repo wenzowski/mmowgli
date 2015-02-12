@@ -38,7 +38,6 @@ import edu.nps.moves.mmowgli.MmowgliController;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.IDButton;
@@ -79,7 +78,7 @@ public class CardSummaryLine extends HorizontalLayout implements MmowgliComponen
   @Override
   public void initGui()
   {
-    Card c = DBGet.getCardTL(cardId);
+    Card c = Card.getTL(cardId);
     String tooltip = c.getText();
     
     User auth = c.getAuthor();
@@ -139,7 +138,7 @@ public class CardSummaryLine extends HorizontalLayout implements MmowgliComponen
     HSess.init();
     MmowgliController cntlr = Mmowgli2UI.getGlobals().getController();
     if(event.getClickedComponent() == avatar) {
-      Card c = DBGet.getCardTL(cardId);
+      Card c = Card.getTL(cardId);
       cntlr.miscEventTL(new AppEvent(SHOWUSERPROFILECLICK,this,c.getAuthor().getId()));
     }
     else

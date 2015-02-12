@@ -41,7 +41,6 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliEvent;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 
@@ -84,7 +83,7 @@ public class CardChainTree extends TreeTable implements ItemClickListener
     this.loadCardOnSelect = goOnSelect;
     
     dateForm = new SimpleDateFormat("MM/dd HH:mm z");
-    isGameMaster = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).isGameMaster();
+    isGameMaster = Mmowgli2UI.getGlobals().getUserTL().isGameMaster();
     
     setSizeFull();
     setEditable(false);
@@ -211,13 +210,13 @@ public class CardChainTree extends TreeTable implements ItemClickListener
   
   private void loadTree()
   {
-    loadRootTL(DBGet.getCardTL(rootId)); //auto merge now //DBGet.getCardFreshTL(rootId));  // Need to access children, so need a refresh
+    loadRootTL(Card.getTL(rootId));
   }
   private void loadRootTL(Card c)
   {
     if(!isGameMaster && CardMarkingManager.isHidden(c))
       return;
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     if(!Card.canSeeCardTL(c, me))
       return;
     
@@ -236,7 +235,7 @@ public class CardChainTree extends TreeTable implements ItemClickListener
      crit = crit.createCriteria("cardType")
        .add(Restrictions.eq("cardClass",CardType.CardClass.POSITIVEIDEA));
 
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     
     Card.adjustCriteriaToOmitCardsTL(crit, me);
        
@@ -309,7 +308,7 @@ public class CardChainTree extends TreeTable implements ItemClickListener
   
   private CardWrapper addParentsTL(CardWrapper cw)
   {
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     ArrayList<CardWrapper> arLis = new ArrayList<CardWrapper>();
     do {
       arLis.add(0, cw); // master root will end up at 0
@@ -329,7 +328,7 @@ public class CardChainTree extends TreeTable implements ItemClickListener
   
   private void addChildrenTL(CardWrapper parent)
   {
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     Set<Card> lis = parent.card.getFollowOns();
     if(lis != null && lis.size()>0) {
       CardWrapper cw=null;

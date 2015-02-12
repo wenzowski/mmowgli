@@ -34,7 +34,6 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
@@ -100,7 +99,7 @@ public class IdeaDashboardTabSuperActive extends IdeaDashboardTabPanel
   {
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     List<Card> list = AppMaster.instance().getMcache().getSuperActiveChainRoots();
-    User me = DBGet.getUserTL(globs.getUserID());
+    User me = globs.getUserTL();
     ArrayList<Card> arLis = new ArrayList<Card>();
     
     for(Card c : list) {

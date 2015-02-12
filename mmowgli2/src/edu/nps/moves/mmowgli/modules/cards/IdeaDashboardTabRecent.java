@@ -35,7 +35,6 @@ import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.CardType;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
@@ -132,7 +131,7 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
       if(isGameMaster)
         allIdeasTable = new CardTable(null, null, true, false, false);
       else {
-        User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+        User me = Mmowgli2UI.getGlobals().getUserTL();
         allIdeasTable = new CardTable(null,new NotHiddenCardContainer(me),true,false,false);
       }
       allIdeasTable.setPageLength(40);
@@ -150,7 +149,7 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
   private void insertSuperInterestingTableTL()
   {
     if (superTable == null || (lastTable != null && lastTable != superTable)) { 
-      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      User me = Mmowgli2UI.getGlobals().getUserTL();
       superTable = new CardTable(null,new SuperInterestingCardContainer(me),true,false,false);
       superTable.setPageLength(40);
       superTable.setWidth("679px");
@@ -164,7 +163,7 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
   
   private CardTable createTypeTableTL(CardType typ)
   {
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     @SuppressWarnings({ "unchecked", "rawtypes" })
     CardTable ct = new CardTable(null,new CardTypeContainer(typ,me),true,false,false);
     ct.setPageLength(40);

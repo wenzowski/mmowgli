@@ -49,11 +49,11 @@ import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.components.*;
 import edu.nps.moves.mmowgli.components.CardSummaryListHeader.NewCardListener;
 import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsCardUpdates;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
-import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.IDNativeButton;
 
 /**
@@ -196,7 +196,7 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     bottomVLay.addComponent(hLay);
     bottomVLay.setComponentAlignment(hLay,Alignment.MIDDLE_LEFT);
     
-    User me = User.getTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     
     topholder = new HorizontalCardDisplay(new Dimension(CARDWIDTH,CARDHEIGHT),NUMCARDS,me,mockupOnly,"top");
     bottomVLay.addComponent(topholder);;
@@ -261,7 +261,7 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
   
   private void addCardsTL(HorizontalCardDisplay hcd, Collection<Card> coll)
   {
-    User me = User.getTL(Mmowgli2UI.getGlobals().getUserID()); //DBGet.getUser(app.getUser());
+    User me = Mmowgli2UI.getGlobals().getUserTL(); //DBGet.getUser(app.getUser());
     ArrayList<Object> wrappers = new ArrayList<Object>(coll.size());
     
     Session sess = HSess.get();
@@ -283,13 +283,11 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
   {
     boolean ret = false; // don't need ui update by default
     
-    Card c = Card.getTL(cId); //DBGet.getCard(cId, sess);
-    User me = User.getTL(Mmowgli2UI.getGlobals().getUserID());
+    Card c = DB.getRetry(Card.class, cId, null, HSess.get());
     if (c == null)
-      c = ComeBackWhenYouveGotIt.fetchCardWhenPossible((Long)cId);
-    if(c == null)
       System.err.println("Error, CallToActionPage.newCardMade_oob, card with id " + cId + " not found.");
     else {
+      User me = Mmowgli2UI.getGlobals().getUserTL();
       CardType ct = c.getCardType();
       if (Card.canSeeCard_oobTL(c, me)) {
         if (ct.getId() == leftType.getId()) {;
@@ -324,7 +322,7 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
   }
 
   @Override
-  public boolean cardUpdated_oobTL(Serializable cardId)
+  public boolean cardUpdated_oobTL(Serializable cardId, long revision)
   {
     return false;
   }
