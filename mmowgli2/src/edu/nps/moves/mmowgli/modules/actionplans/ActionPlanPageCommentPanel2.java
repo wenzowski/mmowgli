@@ -51,8 +51,9 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.components.ToggleLinkButton;
-import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.Message;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
@@ -158,7 +159,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
   
   private void refillCommentList(Session sess)
   {
-    ActionPlan ap = (ActionPlan)sess.get(ActionPlan.class, (Serializable)apId);
+    ActionPlan ap = ActionPlan.get(apId, sess);
     Set<Message> lis = ap.getComments();
     int total = lis.size();
 
@@ -169,7 +170,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
    
     mother.adjustCommentsLinkCaption(total);
     
-    User u = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID(), sess);
+    User u = User.get(Mmowgli2UI.getGlobals().getUserID(), sess);
     boolean isGameMaster = u.isGameMaster() || u.isAdministrator();
     
     int i = total;
@@ -353,7 +354,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
         tlb.setEnabled(!readonly);
         tlb.setToolTips("Hide this message in this list", "Show this message in this list");
         
-        if (DBGet.getUserTL(globs.getUserID()).isGameMaster()) {
+        if (globs.getUserTL().isGameMaster()) {
           NativeButton editButt = new NativeButton();
           editButt.setCaption("edit");
           editButt.setStyleName(BaseTheme.BUTTON_LINK);
@@ -404,7 +405,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
             textLabel.setValue(MmowgliLinkInserter.insertLinksTL(w.results,null));
             msg.setText(w.results);
             Message.updateTL(msg);
-            User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+            User me = Mmowgli2UI.getGlobals().getUserTL();
             GameEventLogger.commentTextEdittedTL(me.getUserName(),ap.getId(),msg);
             HSess.close();
           }
@@ -424,7 +425,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
         Boolean supInt = (Boolean) superInterestingCB.getValue();
         msg.setSuperInteresting(supInt);
         Message.updateTL(msg);
-        User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+        User me = Mmowgli2UI.getGlobals().getUserTL();
         GameEventLogger.commentMarkedSuperInterestingTL(me.getUserName(),ap.getId(),msg,supInt);
         HSess.close();
      }
@@ -579,7 +580,7 @@ public class ActionPlanPageCommentPanel2 extends Panel implements MmowgliCompone
         }
         if (len > 0) {
           MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-          User me = DBGet.getUserTL(globs.getUserID());
+          User me = globs.getUserTL();
           Message m = new Message(s,me);
           Message.saveTL(m);
           ActionPlan actPln = ActionPlan.getTL(apId);

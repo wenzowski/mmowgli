@@ -45,7 +45,6 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPageTabImages.IndexListener;
@@ -152,7 +151,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
   private void fillWithVideos(Session sess)
   {
     ((AbstractLayout)rightScroller.getContent()).removeAllComponents();
-    ActionPlan actionPlan = (ActionPlan)sess.get(ActionPlan.class,(Serializable)apId);
+    ActionPlan actionPlan = ActionPlan.get(apId, sess);
     List<Media> lis = actionPlan.getMedia();
     for (Media m : lis) {
       if (m.getType() == MediaType.VIDEO || m.getType() == MediaType.YOUTUBE)
@@ -297,7 +296,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
             ActionPlan ap = ActionPlan.getTL(apId);
             ap.getMedia().add(med);
             ActionPlan.updateTL(ap);
-            User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+            User u = Mmowgli2UI.getGlobals().getUserTL();
             GameEventLogger.logActionPlanVideoAddedTL(ap, u.getUserName(), med.getTitle());
             HSess.close();
           }
@@ -356,8 +355,8 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
         Media.updateTL(m);  // get into same session
         lis.remove(m);
         ActionPlan.updateTL(ap);
-        User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
-        GameEventLogger.logActionPlanUpdateTL(ap, "video removed", u.getId()); //u.getUserName());
+        User u = Mmowgli2UI.getGlobals().getUserTL();
+        GameEventLogger.logActionPlanUpdateTL(ap, "video removed", u.getId());
 
         fillWithVideosTL();
         HSess.close();
@@ -400,8 +399,8 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
                 ActionPlan ap = replaceMediaTL(oldM, med);
                 vPan.setMedia(med);
                 ActionPlan.updateTL(ap);
-                User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
-                GameEventLogger.logActionPlanUpdateTL(ap, "video replaced", u.getId()); //u.getUserName());
+                User u = Mmowgli2UI.getGlobals().getUserTL();
+                GameEventLogger.logActionPlanUpdateTL(ap, "video replaced", u.getId());
                 HSess.close();              }
             }
           });

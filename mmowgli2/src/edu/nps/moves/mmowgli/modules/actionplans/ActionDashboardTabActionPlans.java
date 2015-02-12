@@ -33,7 +33,6 @@ import com.vaadin.ui.*;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
@@ -112,7 +111,7 @@ public class ActionDashboardTabActionPlans extends ActionDashboardTabPanel imple
     protected Criteria getBaseCriteriaTL()
     {
       Criteria crit = super.getBaseCriteriaTL();
-      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      User me = Mmowgli2UI.getGlobals().getUserTL();
       ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
       return crit;
     }

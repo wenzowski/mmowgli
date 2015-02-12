@@ -56,7 +56,6 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 
@@ -181,7 +180,7 @@ public class ActionPlanTable extends Table
       return;
     }
     
-    boolean showRound = DBGet.getUserTL(myUserId).isAdministrator() || (Game.getTL().isShowPriorMovesActionPlans() && Move.getCurrentMoveTL().getNumber()>1);
+    boolean showRound = User.getTL(myUserId).isAdministrator() || (Game.getTL().isShowPriorMovesActionPlans() && Move.getCurrentMoveTL().getNumber()>1);
 
     if(!columnsInitted) {
       Table.ColumnGenerator colGen = new columnCustomizer();
@@ -211,7 +210,7 @@ public class ActionPlanTable extends Table
   
   private void finishFromHelpWantedDataSource()
   {
-    boolean showRound = DBGet.getUserTL(myUserId).isAdministrator() || (Game.getTL().isShowPriorMovesActionPlans() && Move.getCurrentMoveTL().getNumber()>1);
+    boolean showRound = User.getTL(myUserId).isAdministrator() || (Game.getTL().isShowPriorMovesActionPlans() && Move.getCurrentMoveTL().getNumber()>1);
 
     if(!columnsInitted) {
       Table.ColumnGenerator colGen = new columnCustomizer();
@@ -267,7 +266,7 @@ public class ActionPlanTable extends Table
  
   private User getUser(Object obj)
   {
-    return DBGet.getUserTL(obj);
+    return User.getTL(obj);
   }
   
   class columnCustomizer implements Table.ColumnGenerator
@@ -332,7 +331,7 @@ public class ActionPlanTable extends Table
       }
       if (MYTHUMBS_COLUMN_NAME.equals(columnId)) {
         Map<User,Integer>map = ap.getUserThumbs();       
-        Integer myRating = map.get(DBGet.getUserTL(ActionPlanTable.this.myUserId));
+        Integer myRating = map.get(User.getTL(ActionPlanTable.this.myUserId));
         Label lab;
         if(myRating == null || myRating.intValue()==0)
           lab = new Label("--");
@@ -454,7 +453,7 @@ public class ActionPlanTable extends Table
       crit = crit.createCriteria("authors").             // sub criteria
       add(Restrictions.idEq(uid));// written by me
       
-      User me = DBGet.getUserTL(uid);
+      User me = User.getTL(uid);
       ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
       
       return crit;
@@ -479,7 +478,7 @@ public class ActionPlanTable extends Table
       crit.add(Restrictions.isEmpty("authors"));// nobody there
       crit.add(Restrictions.isEmpty("invitees"));  // Any invitations have be declined
       
-      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      User me = Mmowgli2UI.getGlobals().getUserTL();
       ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
 
       return crit;
@@ -503,7 +502,7 @@ public class ActionPlanTable extends Table
       Criteria crit = super.getBaseCriteriaTL();  // gets all plans
       crit.add(Restrictions.isNotNull("helpWanted"));
       
-      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      User me = Mmowgli2UI.getGlobals().getUserTL();  // feb refactor DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
       ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
       return crit;
     }

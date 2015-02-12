@@ -36,7 +36,6 @@ import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.Media;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
@@ -151,7 +150,7 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
       HSess.init();
       captionSavePan.setVisible(true);
       String substring = m.getType()==MediaType.IMAGE?" is editing image "+s+"number ":" is editing video "+s+"number ";
-      sendStartEditMessage( DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).getUserName()+substring+(idx+1));
+      sendStartEditMessage(Mmowgli2UI.getGlobals().getUserTL().getUserName()+substring+(idx+1));
       HSess.close();
     }
    
