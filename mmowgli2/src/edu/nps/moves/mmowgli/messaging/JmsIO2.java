@@ -81,7 +81,7 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
   public MessageConsumer jmsExternalConsumer;
 
   /** Cache handler */
-  private FirstListener firstListener;
+  private JmsPreviewListener firstListener;
   
   public JmsIO2()
   {
@@ -282,17 +282,10 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
         // than once per instance as before;
 
         if(firstListener != null)
-          if( firstListener.doPreviewMessage(pkt))
+          if( firstListener.doPreviewJmsMessage(pkt))
             return; // consumed
 
-         //doSysOut("R"+pkt.msgType);
-
-         deliverToReceivers(pkt, false); // I think we let the registered receivers handle it
-         // Not this..
-         /*
-         MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-         if(globs != null)
-           globs.getAppMaster().receivedFromOtherNodes(pkt);  */
+         deliverToReceivers(pkt); // Let the registered receivers handle it
       }
       else
         JMSMessageUtil.dump("Message dumped because it's from me.", message);
@@ -306,18 +299,13 @@ public class JmsIO2 extends DefaultInterSessionIO implements JMSMessageListener
       t.printStackTrace();
     }
   }
-  /*
-  private boolean isLocalMessageOnly(char typ)
+
+  public static interface JmsPreviewListener
   {
-    return (typ == INSTANCEREPORTCOMMAND || typ == INSTANCEREPORT); // these stay local
-  }
-  */
-  public static interface FirstListener
-  {
-    public boolean doPreviewMessage(MMessagePacket pkt);
+    public boolean doPreviewJmsMessage(MMessagePacket pkt);
   }
 
-  public void addFirstExternalListener(FirstListener fListener)
+  public void addPreviewJmsListener(JmsPreviewListener fListener)
   {
     firstListener = fListener;
   }

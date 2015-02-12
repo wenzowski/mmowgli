@@ -42,23 +42,23 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  */
 public abstract class DefaultInterSessionIO extends InterSessionIOBase
 {
-  protected HashSet<InterTomcatReceiver> receivers;
+  protected HashSet<JmsReceiver> receivers;
   
   public DefaultInterSessionIO()
   {
     this(null);
   }
   
-  public DefaultInterSessionIO(InterTomcatReceiver recvr)
+  public DefaultInterSessionIO(JmsReceiver recvr)
   {
-    receivers = new HashSet<InterTomcatReceiver>();
+    receivers = new HashSet<JmsReceiver>();
     addReceiver(recvr);
   }
   
   @Override
   abstract public void send(MMessagePacket pkt);
   @Override
-  public void addReceiver(InterTomcatReceiver recvr)
+  public void addReceiver(JmsReceiver recvr)
   {
     if(recvr != null) {
       synchronized(receivers) {
@@ -68,7 +68,7 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
   }
 
   @Override
-  public void removeReceiver(InterTomcatReceiver recvr)
+  public void removeReceiver(JmsReceiver recvr)
   {
     if(recvr != null) {
       synchronized(receivers) {
@@ -77,22 +77,22 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
     }
   }
   
-  public void deliverToReceivers(MMessagePacket packet, boolean more)
+  public void deliverToReceivers(MMessagePacket packet)
   {
     synchronized(receivers) {
-      deliverToReceivers(packet, receivers, more);
+      deliverToReceivers(packet, receivers);
     }
   }
   
   /** this routine used to be synched, but JMS message delivery is single-thread */
-  public void deliverToReceivers(MMessagePacket packet, HashSet<InterTomcatReceiver> receivers, boolean more)
+  public void deliverToReceivers(MMessagePacket packet, HashSet<JmsReceiver> receivers)
   {
-    if (HSess.getSessionFactory() == null)//HibernateContainers.sessionFactory == null)
+    if (HSess.getSessionFactory() == null)
       return; // we haven't gotten started yet
 
     HSess.init();
 
-    for (InterTomcatReceiver rcvr : receivers) {
+    for (JmsReceiver rcvr : receivers) {
       // Attempt to keep thread alive
       try {
         rcvr.handleIncomingTomcatMessageTL(packet);
@@ -117,11 +117,6 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
         System.err.println(sb.toString());
       }
     }
-    
-    if (!more) {
-      for (InterTomcatReceiver rcvr : receivers)
-       rcvr.handleIncomingTomcatMessageEventBurstCompleteTL();
-    } 
     HSess.close();
   }
   

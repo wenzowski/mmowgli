@@ -40,16 +40,15 @@ public interface InterTomcatIO
   public void send(char messageType, String message, String ui_id);
   public void sendDelayed(char messageType, String message, String ui_id);
   public void sendDelayed(char messageType, String message, String ui_id, long msec);
-  public void addReceiver(InterTomcatReceiver recvr);
-  public void removeReceiver(InterTomcatReceiver recvr);
+  public void addReceiver(JmsReceiver recvr);
+  public void removeReceiver(JmsReceiver recvr);
   public void kill();
   
-  public interface InterTomcatReceiver
+  public interface JmsReceiver
   {
     /**
-     * @return true if need to resend because db is lagging
+     * @return true if need to resend
      */
     public boolean handleIncomingTomcatMessageTL(MMessagePacket packet);
-    public void    handleIncomingTomcatMessageEventBurstCompleteTL();
   }
 }

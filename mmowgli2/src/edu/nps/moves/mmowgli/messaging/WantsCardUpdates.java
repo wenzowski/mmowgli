@@ -38,5 +38,5 @@ import java.io.Serializable;
 public interface WantsCardUpdates
 { 
   public boolean cardPlayed_oobTL(Serializable cardId);  // return true if need ui update
-  public boolean cardUpdated_oobTL(Serializable cardId);
+  public boolean cardUpdated_oobTL(Serializable cardId, long revision);
 }
