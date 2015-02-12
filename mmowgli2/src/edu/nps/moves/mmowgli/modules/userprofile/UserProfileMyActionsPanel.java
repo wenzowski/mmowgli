@@ -35,7 +35,6 @@ import com.vaadin.ui.Label;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanTable;
@@ -111,7 +110,7 @@ public class UserProfileMyActionsPanel extends UserProfileTabPanel
     @Override
     protected Criteria getBaseCriteriaTL()
     {
-      User me = DBGet.getUserFreshTL(uid);
+      User me = User.getTL(uid);
       
       Criteria crit = super.getBaseCriteriaTL();
       

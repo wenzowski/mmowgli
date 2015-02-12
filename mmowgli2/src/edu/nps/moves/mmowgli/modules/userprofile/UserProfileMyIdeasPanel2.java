@@ -48,7 +48,6 @@ import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.CardType;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
@@ -273,7 +272,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
   
   private Criteria commonCriteria()
   {
-    User usr = DBGet.getUserTL(uid);
+    User usr = User.getTL(uid);
     
     Criteria crit = HSess.get().createCriteria(Card.class)
                     .add(Restrictions.eq("author", usr))
@@ -511,7 +510,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     protected Criteria getBaseCriteriaTL()
     {
       Criteria crit = super.getBaseCriteriaTL();           // gets all cards
-      crit.add(Restrictions.eq("author", DBGet.getUserFreshTL(uid)));// written by me (tried to remove the fresh, but got unexplained hibernate exception
+      crit.add(Restrictions.eq("author", User.getTL(uid))); // written by me
       crit.add(Restrictions.eq("factCard", false));      // which aren't fact cards
       crit.addOrder(Order.desc("creationDate"));   // newest first
       
@@ -541,7 +540,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
     @Override
     protected Criteria getBaseCriteriaTL()
     { 
-      User moi = DBGet.getUserTL(uid);
+      User moi = User.getTL(uid);
       Criteria crit = super.getBaseCriteriaTL();   // gets all cards
       //crit.add(Restrictions.ne("author", moi));  // that are not written by me
       crit.createAlias("parentCard","parent");   // who have parent cards
@@ -579,7 +578,7 @@ public class UserProfileMyIdeasPanel2 extends UserProfileTabPanel implements Cli
       Disjunction disj;
       crit.add(disj = Restrictions.disjunction());
       
-      User usr = DBGet.getUserFreshTL(uid);     
+      User usr = User.getTL(uid); 
       Set<Card> favs = usr.getFavoriteCards();
       if(favs != null && favs.size()>0) {
         for(Card c: favs) {

@@ -49,7 +49,6 @@ import edu.nps.moves.mmowgli.components.*;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.EmailPii;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
 import edu.nps.moves.mmowgli.markers.*;
@@ -191,13 +190,15 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
   private ChangePasswordDialog.PasswordPacket packet;
   private ChangeEmailDialog.EmailPacket emailPacket;
 
+  private boolean listenersDisabled=false;
+  
   @HibernateSessionThreadLocalConstructor
   public UserProfile3Top(Object uid)
   {
     this.uid = uid;
 
-    User u = DBGet.getUserTL(uid);
-    User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());  // must get internal tables
+    User u = User.getTL(uid);
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     itsSomebodyElse = (u.getId() != me.getId());
     imGuestAccount = me.isViewOnly();
     imAdmin = me.isAdministrator();
@@ -311,12 +312,13 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
       manageAwardsButt.addClickListener(new ManageAwardsListener());
     }
   }
-
+  
+  private String AFFILIATION_DELIMITER = "\t";
   @SuppressWarnings("unchecked")
   private void fillAffiliation(String s)
   {
     s = s==null?"":s;
-    String[]sa = s.split("\\s");
+    String[]sa = s.split(AFFILIATION_DELIMITER);
     Collection<Affiliation> contents = (Collection<Affiliation>)affiliationCombo.getItemIds();
 
     for(Affiliation a : contents) {
@@ -337,7 +339,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
     String ss = affiliationTA.getValue().toString();
     if(s.equalsIgnoreCase("required") || s.equalsIgnoreCase("optional"))
       s = "";
-    String ret = s+"\t"+ss.trim();
+    String ret = s + AFFILIATION_DELIMITER + ss.trim();
     return ret.trim();
   }
 
@@ -360,7 +362,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
   @Override
   public void initGui()
   {
-    User u = DBGet.getUserFreshTL(uid);  // Needs to load badges
+    User u = User.getTL(uid);
     Game g = Game.getTL();
 
     setWidth("945px");
@@ -523,7 +525,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
         public void buttonClick(ClickEvent event)
         {
           HSess.init();
-          User u = DBGet.getUserTL(uid);
+          User u = User.getTL(uid);
           Avatar av = u.getAvatar();
           AvatarChooser chooser = new AvatarChooser(av==null?null:av.getId());
           chooser.initGui();
@@ -545,9 +547,11 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
       @Override
       public void valueChange(ValueChangeEvent event)
       {
+        if(listenersDisabled)
+          return;
         HSess.init();
         String s = learnTA.getValue().toString().trim();
-        User u = DBGet.getUserTL(uid);
+        User u = User.getTL(uid);
         u.setAnswer(clampToVarchar255(s));  // Db field is 255 varchar
         User.updateTL(u);
         Notification.show("Answer changed", Notification.Type.HUMANIZED_MESSAGE);
@@ -566,9 +570,12 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
       @Override
       public void valueChange(ValueChangeEvent event)
       {
+        if(listenersDisabled)
+          return;
+        
         HSess.init();
         String s = expertiseTA.getValue().toString().trim();
-        User u = DBGet.getUserTL(uid);
+        User u = User.getTL(uid);
         u.setExpertise(clampToVarchar255(s));
         User.updateTL(u);
         Notification.show("Expertised changed", Notification.Type.HUMANIZED_MESSAGE);
@@ -587,9 +594,12 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
       @Override
       public void valueChange(ValueChangeEvent event)
       {
+        if(listenersDisabled)
+          return;
+        
         HSess.init();
         String s = buildAffiliation();
-        User u = DBGet.getUserTL(uid);
+        User u = User.getTL(uid);
         u.setAffiliation(clampToVarchar255(s));
         User.updateTL(u);
         Notification.show("Affiliation changed", Notification.Type.HUMANIZED_MESSAGE);
@@ -610,9 +620,12 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
       @Override
       public void valueChange(ValueChangeEvent event)
       {
+        if(listenersDisabled)
+          return;
+        
         HSess.init();
         String s = locationTF.getValue().toString().trim();
-        User u = DBGet.getUserTL(uid);
+        User u = User.getTL(uid);
         u.setLocation(clampToVarchar255(s));
         User.updateTL(u);
         Notification.show("Location changed",Notification.Type.HUMANIZED_MESSAGE);
@@ -717,7 +730,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
             VHibPii.update(uPii);
             Notification.show("Password Changed",Notification.Type.HUMANIZED_MESSAGE);
 
-            GameEventLogger.logUserPasswordChangedTL(DBGet.getUserTL(uid));
+            GameEventLogger.logUserPasswordChangedTL(User.getTL(uid));
 
             // Clean up for security
             packet.original = null;
@@ -771,7 +784,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
 
     ClickListener lis = new BadgeListener();
     Game g = Game.get(sess);
-    User u = DBGet.getUserFresh(uid, sess);
+    User u = User.get(uid, sess);
     Set<Badge> badges = u.getBadges();
 
     badgeLayout.removeAllComponents();
@@ -928,10 +941,12 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
     @HibernateClosed
     public void valueChange(ValueChangeEvent event)
     {
+      if(listenersDisabled)
+        return;
       HSess.init();
       Boolean b = (Boolean) followCB.getValue();
-      User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());
-      User him = DBGet.getUserFreshTL(uid);
+      User me = Mmowgli2UI.getGlobals().getUserTL();
+      User him = User.getTL(uid);
       Set<User> buds = me.getImFollowing();
       if (b)
         if(!CreateActionPlanPanel.usrContainsByIds(buds, him))
@@ -956,7 +971,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
     public void buttonClick(ClickEvent event)
     {
       HSess.init();
-      User user = DBGet.getUserTL(uid);
+      User user = User.getTL(uid);
 
       // Already checked above, and this button is not shown if no email, so this handler is a no-op
       if(user.isOkEmail() || user.isOkGameMessages())
@@ -967,8 +982,6 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
       HSess.close();
     }
   }
-
-  //private class Send
 
   @SuppressWarnings("serial")
   class EmailListener implements ValueChangeListener
@@ -985,14 +998,17 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
     @Override
     public void valueChange(final ValueChangeEvent event)
     {
+      if(listenersDisabled)
+        return;
+      
       HSess.init();
-      User u = DBGet.getUserTL(uid);
+      User u = User.getTL(uid); //feb refactor DBGet.getUserTL(uid);
 
       boolean wh = source.getValue();
       if(source == externMailCB) {
         u.setOkEmail(wh);
       }
-      /*else if (event.getSource() == ingameMailCB)*/ {
+      else /*if (event.getSource() == ingameMailCB)*/ {
         u.setOkGameMessages(wh);
       }
 
@@ -1017,7 +1033,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
       if(currentAvatarId != null) {
         Avatar newA = Avatar.getTL(currentAvatarId);
         setAvatarIcon(newA);
-        User u = DBGet.getUserTL(uid);
+        User u = User.getTL(uid);
         u.setAvatar(newA);
         User.updateTL(u);
       }
@@ -1054,7 +1070,7 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
 
   private void setAvatarIconFromDb()
   {
-    User u = DBGet.getUserTL(uid);
+    User u = User.getTL(uid);
     setAvatarIcon(u.getAvatar());
   }
 
@@ -1075,11 +1091,40 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
       Notification.show(((Button)event.getSource()).getDescription());
     }
   }
+
+  private void refreshData(User u)
+  {
+    listenersDisabled=true;
+    
+    setAvatarIcon(u.getAvatar());
+    nameLab.setValue(u.getUserName());
+    exploreScoreLab.setValue(formatFloat(u.getCombinedBasicScore()));
+    innovateScoreLab.setValue(formatFloat(u.getCombinedInnovScore()));
+    String loc = u.getLocation();loc = loc==null?"":loc;
+    String ans = u.getAnswer(); ans = ans==null?"":ans;
+    boolean prev;
+    prev = externMailCB.isEnabled();   externMailCB.setEnabled(true);   externMailCB.setValue(u.isOkEmail());        externMailCB.setEnabled(prev);
+    prev = ingameMailCB.isEnabled();   ingameMailCB.setEnabled(true);   ingameMailCB.setValue(u.isOkGameMessages()); ingameMailCB.setEnabled(prev);
+    prev = locationTF.isReadOnly();    locationTF.setReadOnly(false);   locationTF.setValue(loc);                    locationTF.setReadOnly(prev);
+    prev = expertiseTA.isReadOnly();   expertiseTA.setReadOnly(false);  expertiseTA.setValue(u.getExpertise());      expertiseTA.setReadOnly(prev);
+    prev = learnTA.isReadOnly();       learnTA.setReadOnly(false);      learnTA.setValue(ans);                       learnTA.setReadOnly(prev);
+    
+    prev = affiliationTA.isReadOnly(); affiliationTA.setReadOnly(false); 
+    boolean prev2 = affiliationCombo.isEnabled(); affiliationCombo.setEnabled(true);;
+    fillAffiliation(u.getAffiliation());
+    affiliationCombo.setEnabled(prev2);;
+    affiliationTA.setReadOnly(prev);
+    
+    listenersDisabled=false;
+ }
+  
   @Override
   public boolean userUpdated_oobTL(Object uId)
   {
     if(uId != this.uid)
       return false;
+    refreshData(User.getTL(uId));
+    
     displayBadgesAndAwardsTL(uId);
     return true;
   }

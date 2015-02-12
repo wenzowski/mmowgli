@@ -29,7 +29,6 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 
 /**
@@ -62,9 +61,9 @@ public abstract class UserProfileTabPanel extends HorizontalLayout implements Mm
   public UserProfileTabPanel(Object uid)
   {;
     this.uid = uid;
-    User u = DBGet.getUserTL(uid);
+    User u = User.getTL(uid);
     userName = u.getUserName();
-    me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    me = Mmowgli2UI.getGlobals().getUserTL();
     imAdminOrGameMaster = me.isAdministrator() || me.isGameMaster();    
     userIsMe = (u.getId() == me.getId());
   }

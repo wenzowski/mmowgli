@@ -68,6 +68,10 @@ public class MThreadManager
     {
       this.runner = runner;
       prior = priority;
+      if(prior < Thread.MIN_PRIORITY)
+        prior = Thread.MIN_PRIORITY;
+      else if(prior>Thread.MAX_PRIORITY)
+        prior = Thread.MAX_PRIORITY;
     }
     @Override
     public void run()
@@ -75,7 +79,7 @@ public class MThreadManager
       int myseq = seq++;
       MSysOut.println(MESSAGING_LOGS,"MThreadManager.Preamble start "+myseq);
       Thread thr = Thread.currentThread();
-      thr.setPriority(prior); 
+      thr.setPriority(prior);
       thr.setName("MThreadManagerPoolThread");
       try{Thread.sleep(100L);}catch(InterruptedException ex){} //Thread.yield();
       runner.run();

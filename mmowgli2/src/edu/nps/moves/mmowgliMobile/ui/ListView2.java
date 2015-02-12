@@ -120,7 +120,7 @@ public class ListView2 extends ForwardButtonView implements LayoutClickListener
         Object key = HSess.checkInit();
         Class<?> cls = folder.getPojoClass();
         if (cls == Card.class) {
-          final ListEntry m = new CardListEntry(Card.get((Serializable) itemId, HSess.get()));
+          final ListEntry m = new CardListEntry(Card.get(itemId, HSess.get()));
           m.setParent(folder);
           EntryButton2 btn = new EntryButton2(m, renderer);
           btn.addLayoutClickListener(ListView2.this);
@@ -128,7 +128,7 @@ public class ListView2 extends ForwardButtonView implements LayoutClickListener
           return btn;
         }
         if (cls == ActionPlan.class) {
-          final ListEntry m = new ActionPlanListEntry(ActionPlan.get((Serializable) itemId, HSess.get()));
+          final ListEntry m = new ActionPlanListEntry(ActionPlan.get(itemId, HSess.get()));
           m.setParent(folder);
           EntryButton2 btn = new EntryButton2(m, renderer);
           btn.addLayoutClickListener(ListView2.this);
@@ -137,7 +137,7 @@ public class ListView2 extends ForwardButtonView implements LayoutClickListener
 
         }
         if (cls == User.class) {
-          final ListEntry m = new UserListEntry(User.get((Serializable) itemId, HSess.get()));
+          final ListEntry m = new UserListEntry(User.get(itemId, HSess.get()));
           m.setParent(folder);
           EntryButton2 btn = new EntryButton2(m, renderer);
           btn.addLayoutClickListener(ListView2.this);
@@ -160,11 +160,11 @@ public class ListView2 extends ForwardButtonView implements LayoutClickListener
         Class<?> cls = folder.getPojoClass();
         ListEntry entry;
         if (cls == Card.class)
-          entry = new CardListEntry(Card.get((Serializable) event.getItemId(), HSess.get()));
+          entry = new CardListEntry(Card.get(event.getItemId(), HSess.get()));
         else if (cls == ActionPlan.class)
-          entry = new ActionPlanListEntry(ActionPlan.get((Serializable) event.getItemId(), HSess.get()));
+          entry = new ActionPlanListEntry(ActionPlan.get(event.getItemId(), HSess.get()));
         else //if (cls == User.class) {
-          entry = new UserListEntry(User.get((Serializable) event.getItemId(), HSess.get()));
+          entry = new UserListEntry(User.get(event.getItemId(), HSess.get()));
 
         entry.setParent(folder);
         entryClicked(entry, null);

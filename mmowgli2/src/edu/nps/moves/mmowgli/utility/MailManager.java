@@ -32,7 +32,6 @@ import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.MmowgliConstants;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Pages.PagesData;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -154,8 +153,8 @@ public class MailManager
 
   public void mailToUserTL(Object from, Object to, String subject, String body, String ccEmail, Channel chan)
   {
-    User uFrom = DBGet.getUserFreshTL(from); // Need to access internal tables, so needs to be fresh
-    User uTo = DBGet.getUserFreshTL(to);
+    User uFrom = User.getTL(from);
+    User uTo = User.getTL(to);
     String fromUser = uFrom.getUserName();
     Game game = Game.getTL();
     GameLinks gl = GameLinks.getTL();

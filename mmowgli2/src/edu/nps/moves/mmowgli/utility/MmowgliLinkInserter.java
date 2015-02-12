@@ -21,7 +21,9 @@
 */
 
 package edu.nps.moves.mmowgli.utility;
-import static edu.nps.moves.mmowgli.MmowgliEvent.*;
+import static edu.nps.moves.mmowgli.MmowgliEvent.ACTIONPLANSHOWCLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.CARDCLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.SHOWUSERPROFILECLICK;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -31,7 +33,7 @@ import org.hibernate.Session;
 
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Game.RegexPair;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
  * MmowgliLinkInserter.java
@@ -127,8 +129,8 @@ public class MmowgliLinkInserter
         sb = new StringBuilder(s);
       User u = null;
       try {
-        Long l = Long.parseLong(m.group(1));
-        u = DBGet.getUserTL(l);
+        Long lng = Long.parseLong(m.group(1));
+        u = User.getTL(lng);
       }
       catch(Throwable t) {
         return s;
@@ -244,9 +246,9 @@ public class MmowgliLinkInserter
       if(lTyp == linkType.ACTIONPLAN)
         return sess.get(ActionPlan.class,oid);
       if(lTyp == linkType.CARD) 
-        return DBGet.getCard(oid,sess);
+        return Card.get(oid, sess);
       if(lTyp == linkType.USER)
-        return DBGet.getUser(oid,sess);
+        return User.get(oid, sess);
     }
     catch(Throwable t) {}
     return null;
@@ -280,7 +282,7 @@ public class MmowgliLinkInserter
     }
     sb.append(">");
     if(lTyp == linkType.USER) {
-      User u = DBGet.getUser(Long.parseLong(objectId), sess);  //todo get from quickuser cache
+      User u = User.get(Long.parseLong(objectId), sess);//todo get from quickuser cache
       if(u != null)
         original = u.getUserName();
     }

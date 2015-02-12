@@ -31,7 +31,7 @@ import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
@@ -55,7 +55,7 @@ public class ManageAwardsDialog extends Window
   public ManageAwardsDialog(Object uId)
   {
     this.uId = uId;
-    User u = DBGet.getUserTL(uId);
+    User u = User.getTL(uId);
     
     setCaption("Manage Awards for "+u.getUserName());
     setModal(true);
@@ -110,7 +110,7 @@ public class ManageAwardsDialog extends Window
     gridLayout.setSpacing(true);
     gridLayout.setColumnExpandRatio(2, 0.5f);
     gridLayout.setColumnExpandRatio(3, 0.5f);
-    User u = DBGet.getUserFreshTL(uId);
+    User u = User.getTL(uId);
     Set<Award> uAwards = u.getAwards();
     MediaLocator mediaLoc = Mmowgli2UI.getGlobals().getMediaLocator();
     for(AwardType at: typs) {
@@ -159,7 +159,7 @@ public class ManageAwardsDialog extends Window
     public void buttonClick(ClickEvent event)
     {
       HSess.init();
-      User u = DBGet.getUserFreshTL(uId);
+      User u = User.getTL(uId);
       HashSet<Award> awSet = new HashSet<Award>();
       Set<Award>dbset = u.getAwards();
       for(Award a : dbset) {
@@ -180,7 +180,7 @@ public class ManageAwardsDialog extends Window
 
     private void addRemoveAwardTL(Set<Award> oldSet, Set<Award> newSet, AwardType at, User u, boolean add)
     {
-      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      User me = Mmowgli2UI.getGlobals().getUserTL();
 
       boolean handled = false;
       
