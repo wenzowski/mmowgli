@@ -33,7 +33,6 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
@@ -97,11 +96,11 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
       public void buttonClick(ClickEvent event)
       {
         HSess.init();
-        User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());
+        User me = Mmowgli2UI.getGlobals().getUserTL();
         ActionPlan ap = ActionPlan.getTL(apId);
         
         if(usrContainsByIds(ap.getInvitees(),me))
-          ap.removeInvitee(me); //ap.getInvitees().remove(me);
+          ap.removeInvitee(me);
         if(!usrContainsByIds(ap.getDeclinees(),me))
           ap.getDeclinees().add(me);
         ActionPlan.updateTL(ap);
@@ -109,11 +108,8 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
         if(apContainsByIds(me.getActionPlansInvited(),ap))
           me.getActionPlansInvited().remove(ap);
         
-        // User update here
-        User.updateTL(me);
-        
+        User.updateTL(me);        
         GameEventLogger.logActionPlanInvitationDeclinedTL(ap, me.getUserName());
-
         HSess.close();
         
         AuthorThisPlanPopup.this.buttonClick(event);
@@ -130,7 +126,7 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
       { 
         HSess.init();
         MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-        User me = DBGet.getUserFreshTL(globs.getUserID());
+        User me = globs.getUserTL(); //feb refactor DBGet.getUserFreshTL(globs.getUserID());
         ActionPlan thisAp = ActionPlan.getTL(apId);
 
         Set<ActionPlan> myInvites = me.getActionPlansInvited();

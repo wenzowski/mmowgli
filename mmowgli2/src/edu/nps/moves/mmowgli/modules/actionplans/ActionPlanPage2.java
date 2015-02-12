@@ -54,12 +54,11 @@ import com.vaadin.ui.themes.BaseTheme;
 import com.vaadin.ui.themes.Reindeer;
 
 import edu.nps.moves.mmowgli.*;
-import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
+import edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.components.ToggleLinkButton;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.*;
@@ -243,8 +242,8 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
         titleUnion.setLabelValueTL(s);
         titleUnion.labelTop();
         ActionPlan.updateTL(actPln);
-        User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
-        GameEventLogger.logActionPlanUpdateTL(actPln, "title edited", u.getId()); // u.getUserName());
+        User u = Mmowgli2UI.getGlobals().getUserTL();
+        GameEventLogger.logActionPlanUpdateTL(actPln, "title edited", u.getId());
       }
       pan.setVisible(false);
       titleFocused = false;
@@ -275,7 +274,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   public void initGuiTL()
   {
     ActionPlan actPln = ActionPlan.getTL(apId);
-    User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     addStyleName("m-cssleft-45");
     
     setWidth("1089px");
@@ -680,8 +679,8 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
         if (!sel.equals(currentTitle)) {
           ap.setTitleWithHistoryTL(sel); // will push and delete if needed
           ActionPlan.updateTL(ap);
-          User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
-          GameEventLogger.logActionPlanUpdateTL(ap, "title edited", u.getId()); // u.getUserName());
+          User u = Mmowgli2UI.getGlobals().getUserTL();
+          GameEventLogger.logActionPlanUpdateTL(ap, "title edited", u.getId());
         }
         HSess.close();
       }
@@ -713,7 +712,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   @SuppressWarnings("serial")
   private void maybeAddHiddenCheckBoxTL(HorizontalLayout hl, ActionPlan ap)
   {
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
 
     if (me.isAdministrator() || me.isGameMaster()) {
       Label sp;
@@ -1088,7 +1087,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       {
         ActionPlan ap = ActionPlan.getTL(apId);
         MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-        User me = DBGet.getUserFreshTL(globs.getUserID());
+        User me = globs.getUserTL();
 
         // The ap stores user votes
         ap.setUserThumbValue(me, count);
@@ -1229,7 +1228,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
         Iterator<QuickUser> itr = (Iterator<QuickUser>) set.iterator();
         while (itr.hasNext()) {
           QuickUser qu = itr.next();
-          handleUserTL(ap, DBGet.getUserFreshTL(qu.id));
+          handleUserTL(ap, User.getTL(qu.id));
         }
       }
     }
@@ -1244,7 +1243,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     }
     else if (o instanceof QuickUser) {
       QuickUser qu = (QuickUser) o;
-      handleUserTL(ap, DBGet.getUserFreshTL(qu.id));
+      handleUserTL(ap, User.getTL(qu.id));
     }
     ActionPlan.updateTL(ap);
     // app.globs().scoreManager().actionPlanUpdated(apId); // check for scoring changes //todo put this in one place, like ActionPlan.update()
@@ -1273,7 +1272,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
     AppMaster.instance().getMailManager().actionPlanInviteTL(ap, u);
     
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     GameEventLogger.logActionPlanInvitationExtendedTL(ap, me.getUserName(), u.getUserName());
   }
 
@@ -1478,7 +1477,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     boolean au = amIAnAuthor(sess);
     imAuthor = au; // save locally
-    boolean gm = DBGet.getUser(globs.getUserID(), sess).isGameMaster();
+    boolean gm = User.get(globs.getUserID(),sess).isGameMaster();
 
     thePlanTab.setImAuthor(au && !readonly);
 
@@ -1533,8 +1532,8 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   private boolean amIAnAuthor(Session sess)
   {
     // assume read only unless i'm in the list of authors (or invitees)
-    ActionPlan ap = ActionPlan.get((Serializable)apId, sess);
-    User me = DBGet.getUser(Mmowgli2UI.getGlobals().getUserID(),sess);
+    ActionPlan ap = ActionPlan.get(apId, sess);
+    User me = User.get(Mmowgli2UI.getGlobals().getUserID(), sess);
     // Let admins edit
     if (me.isAdministrator())
       return true;
@@ -1551,7 +1550,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
 
   private String helpWanted(Session sess)
   {
-    ActionPlan ap = ActionPlan.get((Serializable)apId,sess);
+    ActionPlan ap = ActionPlan.get(apId,sess);
     return ap.getHelpWanted();
   }
 
@@ -1647,7 +1646,7 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       HSess.init();
       Criteria crit = HSess.get().createCriteria(ActionPlan.class);
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-      ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, DBGet.getUserTL(globs.getUserID()));
+      ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, globs.getUserTL());
       List<Long> lis = (List<Long>) crit.setProjection(Projections.id()).list();
 
       if (event.getButton() == browseBackButt)

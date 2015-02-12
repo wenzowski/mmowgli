@@ -36,7 +36,6 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.Pages.PagesData;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.MailManager;
@@ -189,7 +188,7 @@ public class HelpWantedDialog extends Window
         List<User> authors = parseAuthorsTL(tos.toString().trim());
         MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
         MailManager mmgr = AppMaster.instance().getMailManager();
-        User me = DBGet.getUserTL(globs.getUserID());
+        User me = globs.getUserTL();
         for(User u : authors) {
           mmgr.mailToUserTL(me.getId(), u.getId(), subj.toString(), msg.toString());
         }

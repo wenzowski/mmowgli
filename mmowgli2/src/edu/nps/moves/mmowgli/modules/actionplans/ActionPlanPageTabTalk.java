@@ -41,11 +41,10 @@ import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.BaseTheme;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
+import edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.ToggleLinkButton;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsChatLogUpdates;
@@ -91,7 +90,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
     discardButt = new NativeButton();
     dateFormatter = new SimpleDateFormat("MM/dd HH:mm z");
     chatEntryComponent=createChatEntryField();    
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     
     isGameMasterOrAdmin = me.isAdministrator() || me.isGameMaster();
   }
@@ -386,7 +385,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
             textLabel.setValue(MmowgliLinkInserter.insertLinksTL(w.results,null));
             msg.setText(w.results);
             Message.updateTL(msg);
-            User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+            User me = Mmowgli2UI.getGlobals().getUserTL();
             GameEventLogger.chatTextEdittedTL(me.getUserName(),apId,msg);
             HSess.close();
           }
@@ -411,7 +410,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
         Boolean supInt = (Boolean) superInterestingCB.getValue();
         msg.setSuperInteresting(supInt);
         Message.updateTL(msg);
-        User me = DBGet.getUserTL(Mmowgli2UI.getGlobals());
+        User me = Mmowgli2UI.getGlobals().getUserTL();
         GameEventLogger.commentMarkedSuperInterestingTL(me.getUserName(),apId,msg,supInt);
         HSess.close();
       }
@@ -464,7 +463,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
       if(s == null || s.length()<=0)
         return;
       HSess.init();
-      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      User me = Mmowgli2UI.getGlobals().getUserTL();
       msg = new Message(s);
       
       if(!me.isGameMaster())
@@ -519,7 +518,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
           }
           else if (o instanceof QuickUser) {
             QuickUser qu = (QuickUser) o;
-            u = DBGet.getUserFreshTL(qu.id);
+            u = User.getTL(qu.id);
           }
         }
         cbLis.buttonClick2TL(u);

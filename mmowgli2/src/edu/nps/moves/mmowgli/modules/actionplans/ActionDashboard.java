@@ -41,7 +41,6 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
@@ -77,7 +76,7 @@ public class ActionDashboard extends VerticalLayout implements MmowgliComponent,
   @HibernateSessionThreadLocalConstructor
   public ActionDashboard()
   {
-    User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
 
     actionPlansTab     = new ActionDashboardTabActionPlans();
     myPlansTab         = new ActionDashboardTabMyPlans(me);
@@ -186,7 +185,7 @@ public class ActionDashboard extends VerticalLayout implements MmowgliComponent,
     needAuthorsTab.initGuiTL();
     needAuthorsTab.setVisible(false);
     
-    User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     Set<ActionPlan> invitedSet = me.getActionPlansInvited();
     if(invitedSet != null && (invitedSet.size())>0) {
       Notification note = new Notification(

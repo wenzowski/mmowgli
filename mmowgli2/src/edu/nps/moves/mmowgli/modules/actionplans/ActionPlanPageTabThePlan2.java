@@ -41,7 +41,6 @@ import com.vaadin.ui.themes.BaseTheme;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2.SaveCancelPan;
@@ -264,8 +263,8 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
             
       if(wh != null && wh == SAVE_BUTTON && wantUpdate) {
         ActionPlan.updateTL(ap);
-        User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
-        GameEventLogger.logActionPlanUpdateTL(ap, eventText, u.getId()); //u.getUserName());
+        User u = Mmowgli2UI.getGlobals().getUserTL();
+        GameEventLogger.logActionPlanUpdateTL(ap, eventText, u.getId());
       }
       HSess.close();
     }
@@ -348,7 +347,7 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
       HSess.init();
       setFocused(true);
       String substring = " is editing the "+ "<todo field names>"+" field.";
-      sendStartEditMessage( DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID()).getUserName()+substring); 
+      sendStartEditMessage(Mmowgli2UI.getGlobals().getUserTL().getUserName()+substring); 
       HSess.close();
     } 
 

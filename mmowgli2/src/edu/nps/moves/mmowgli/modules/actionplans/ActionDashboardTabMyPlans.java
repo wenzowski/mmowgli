@@ -42,7 +42,6 @@ import com.vaadin.ui.themes.BaseTheme;
 
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
@@ -133,7 +132,7 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
 
   private List<Criterion> buildMyPlansFilter()
   {
-    me = DBGet.getUserFreshTL(me.getId());
+    me = User.getTL(me.getId());
     Set<ActionPlan> set = me.getActionPlansAuthored();
     if(set == null)
       return null;

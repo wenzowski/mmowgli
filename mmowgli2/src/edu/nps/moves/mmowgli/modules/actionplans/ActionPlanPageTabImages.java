@@ -44,7 +44,6 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsMediaUpdates;
@@ -156,8 +155,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
   {
     ((AbstractLayout)imageScroller.getContent()).removeAllComponents();
 
-    ActionPlan actionPlan = (ActionPlan)sess.get(ActionPlan.class,(Serializable)apId);
-    
+    ActionPlan actionPlan = ActionPlan.get(apId, sess);
     List<Media> lis = actionPlan.getMedia();
 
     for (Media m : lis) {
@@ -237,8 +235,8 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
             else {
               HSess.init();
               User u;
-              sendStartEditMessage((u=DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID())).getUserName()+" has deleted an image from the action plan."); 
-              
+              sendStartEditMessage((u=Mmowgli2UI.getGlobals().getUserTL()).getUserName()+" has deleted an image from the action plan."); 
+
               ActionPlan ap = ActionPlan.getTL(apId);
               List<Media> lis = ap.getMedia();
               Media.updateTL(m); // get into same session
@@ -338,8 +336,8 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
                 ActionPlan ap = replaceMediaTL(oldM, med);
                 iPan.setMedia(med);
                 ActionPlan.updateTL(ap);
-                User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
-                GameEventLogger.logActionPlanUpdateTL(ap, "image replaced", u.getId()); //u.getUserName());
+                User u = Mmowgli2UI.getGlobals().getUserTL();
+                GameEventLogger.logActionPlanUpdateTL(ap, "image replaced", u.getId());
                 HSess.close();
               }
             }
@@ -397,7 +395,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
             ActionPlan ap = ActionPlan.getTL(apId);
             ap.getMedia().add(med);
             ActionPlan.updateTL(ap);
-            User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+            User u = Mmowgli2UI.getGlobals().getUserTL();
             GameEventLogger.logActionPlanImageAddedTL(ap, u.getUserName(), med.getTitle());
             HSess.close();
           }

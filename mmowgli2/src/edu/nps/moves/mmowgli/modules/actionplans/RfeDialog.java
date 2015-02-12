@@ -35,7 +35,6 @@ import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
@@ -198,7 +197,7 @@ public class RfeDialog extends Window
 
   private void notifyAuthorsOfChangeTL(ActionPlan ap)
   {
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     Set<User> authors = ap.getAuthors();
     String message = me.getUserName()+ " changed the \"request-for-expertise\" posting on Action Plan "+ap.getId()+" to:  ";
     message = message + (ap.getHelpWanted()==null?"(removed)":ap.getHelpWanted());

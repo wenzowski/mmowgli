@@ -40,7 +40,6 @@ import com.vaadin.ui.themes.Reindeer;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
@@ -60,6 +59,7 @@ import edu.nps.moves.mmowgli.modules.maps.LeafletLayers;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
+@SuppressWarnings("unused")
 public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
 {
   private static final long serialVersionUID = 7244591383530793474L;
@@ -70,6 +70,7 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
   private static String MAPWIDTH  = "685px";
   private static String MAPHEIGHT = "670px";
   private static String MAPHEIGHT_WITH_BUTTONS = "650px";
+
   private static double MAPW_CALC = 685.0d;
   private static double MAPH_CALC = 670.0d;
   private static double MAPH_CALC_WITH_BUTTONS = 650.0d;
@@ -565,8 +566,8 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
       //  mmowgliMap.setZoom(googleMapWidget.getZoom());
         GoogleMap.updateTL(mmowgliMap);
         ActionPlan.updateTL(ap);
-        User u = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
-        GameEventLogger.logActionPlanUpdateTL(ap, "map changed", u.getId()); //u.getUserName());
+        User u = Mmowgli2UI.getGlobals().getUserTL();
+        GameEventLogger.logActionPlanUpdateTL(ap, "map changed", u.getId());
 
         savePanel.saveLocButt.setEnabled(false);
         if(!savePanel.saveMarkerButt.isEnabled())
