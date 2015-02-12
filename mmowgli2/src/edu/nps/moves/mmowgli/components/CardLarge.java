@@ -22,8 +22,10 @@
 
 package edu.nps.moves.mmowgli.components;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.CARD_UPDATE_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.USER_UPDATE_LOGS;
 import static edu.nps.moves.mmowgli.MmowgliEvent.CARDAUTHORCLICK;
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+
 import java.text.SimpleDateFormat;
 import java.util.Set;
 
@@ -36,9 +38,10 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
-import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.AppEvent;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
@@ -142,7 +145,7 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
       bckgrndImg = new Embedded(null,bckgrndResource);
       addComponent(bckgrndImg,"top:0px;left:0px");
     }
-    Card card = DBGet.getCardFreshTL(cardId);
+    Card card = Card.getTL(cardId);
     title.setValue(card.getCardType().getTitle().toUpperCase());
     title.setWidth(CARDBIG_TITLE_W);
     title.setHeight(CARDBIG_TITLE_H);
@@ -151,7 +154,7 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     title.addStyleName("m-cardlarge-title");
     title.addStyleName(CardStyler.getCardTextColorOverWhiteStyle(card.getCardType()));
     
-    User userMe = DBGet.getUserFreshTL(globs.getUserID());  // need favorite cards
+    User userMe = globs.getUserTL();
     if(starGreyResource!=null && starRedResource!=null ) {
       if(userMe.getFavoriteCards().contains(card))
         starButton.setIcon(starRedResource);
@@ -265,7 +268,7 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
   private void goToUserProfilePage()
   {
     HSess.init();
-    Card card = DBGet.getCardTL(cardId);    // bring up-to-date in this session
+    Card card = Card.getTL(cardId);
     AppEvent evt = new AppEvent(CARDAUTHORCLICK, CardLarge.this, card.getAuthor().getId());
     Mmowgli2UI.getGlobals().getController().miscEventTL(evt);
     HSess.close();   
@@ -316,8 +319,8 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     public void buttonClick(ClickEvent event)
     {
       HSess.init();
-      User userMe = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());
-      Card card = DBGet.getCardFreshTL(cardId);
+      User userMe = Mmowgli2UI.getGlobals().getUserTL();
+      Card card = Card.getTL(cardId);
       Set<Card> set = userMe.getFavoriteCards();
       if (set.contains(card)) {
         // remove it
@@ -329,7 +332,6 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
         starButton.setIcon(starRedResource);
       }
       userMe.setFavoriteCards(set);
-      DBGet.putUser(userMe); // put into cache right now
       User.updateTL(userMe);
       
       HSess.close(); // will commit
@@ -338,7 +340,7 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
 
   private boolean checkStarTL(Card c, Object uid)
   {
-    User u = DBGet.getUserTL(uid);
+    User u = User.getTL(uid);
     Set<Card> set = u.getFavoriteCards();
     if (set.contains(c)) {
       starButton.setIcon(starRedResource);
@@ -363,7 +365,7 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
     if(!id.equals(cardId))  //; the card should be for us, but just to make sure
       return;
 
-    Card c = DBGet.getCardTL(id); // was getFresh, but cache is probably more recent
+    Card c = Card.getTL(id);
     update_oobTL_common(c);
   }
   
@@ -387,10 +389,8 @@ public class CardLarge extends AbsoluteLayout implements MmowgliComponent
   {
     MSysOut.println(USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL("+uid.toString()+")"); 
     if(uid.equals(Mmowgli2UI.getGlobals().getUserID())) {
-      Card c = DBGet.getCardTL(cardId);// was getFresh, but cache is probably more recent
-      boolean retb = checkStarTL(c,uid);
-      //MSysOut.println(USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL() checkStar() returned "+retb);
-      return retb;
+      Card c = Card.getTL(cardId);
+      return checkStarTL(c,uid);
     }
     else
       ;//MSysOut.println(AppMaster.USER_UPDATE_LOGS,"CardLarge.userUpdated_oobTL() not me");

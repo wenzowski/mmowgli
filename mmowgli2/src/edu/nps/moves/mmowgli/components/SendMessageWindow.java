@@ -34,7 +34,6 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.GameLinks;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.MailManager;
@@ -171,7 +170,7 @@ public class SendMessageWindow extends Window
     subjTf.setCaption("Subject");
     subjTf.setWidth("100%");
     
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     Game game = Game.getTL();
     String acronym = game.getAcronym();
     acronym = acronym==null?"":acronym+" ";
@@ -227,7 +226,7 @@ public class SendMessageWindow extends Window
         if(msg.length()>0) { 
           MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
           MailManager mmgr = AppMaster.instance().getMailManager();
-          User me = DBGet.getUserTL(globs.getUserID());
+          User me = globs.getUserTL(); //feb refactor DBGet.getUserTL(globs.getUserID());
           String subj = subjTf.getValue().toString().trim();
           String troubleList = null;
           if(ccTroubleListCB != null) {
