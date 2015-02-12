@@ -43,7 +43,6 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.db.Card;
 import edu.nps.moves.mmowgli.db.Move;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.cards.CardStyler;
@@ -79,7 +78,7 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
   
   public static CardSummary newCardSummary(Object cardId, Session sess, boolean isFactCard, User me, boolean mockupOnly)
   { 
-    Card c = DBGet.getCardFresh(cardId, sess);
+    Card c = Card.get(cardId, sess);
     CardSummary summ = new CardSummary(cardId, isFactCard, sess, mockupOnly);
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     if(c.getFollowOns().size() <= 0)
@@ -213,9 +212,9 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
     // Assumption: the initGui() method below, where these 2 hib. objects are referenced, will be called in
     // the same thread/vaadin session so the hib. session passed in on the constructor will still be valid
     
-    card = DBGet.getCard(cardId,sess);
+    card = Card.getTL(cardId); 
     
-    me   = DBGet.getUserFresh(Mmowgli2UI.getGlobals().getUserID(),sess);  // need joined favorites
+    me   = Mmowgli2UI.getGlobals().getUserTL();
     
     content = new HtmlLabel();
     user    = new Label();
@@ -353,7 +352,7 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
       {
         HSess.init();
         Component c = event.getChildComponent();
-        Card card = DBGet.getCardTL(cardId);  // in TL transaction here
+        Card card = Card.getTL(cardId);
         if(c == star) {
           //Let the starlistener below handle it
         }
@@ -384,8 +383,8 @@ public class CardSummary extends AbsoluteLayout implements MmowgliComponent//, C
     {
       HSess.init();
       
-      User me = DBGet.getUserFreshTL(Mmowgli2UI.getGlobals().getUserID());  // in vaadin transaction here
-      Card card = DBGet.getCardFreshTL(cardId);
+      User me = Mmowgli2UI.getGlobals().getUserTL();
+      Card card = Card.getTL(cardId);
       
       if (me.getFavoriteCards().contains(card)) {
         // remove it

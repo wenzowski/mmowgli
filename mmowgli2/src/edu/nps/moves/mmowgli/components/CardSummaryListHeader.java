@@ -39,9 +39,8 @@ import com.vaadin.ui.Window.CloseListener;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals.CardPermission;
-import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
+import edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.actionplans.AddAuthorDialog;
@@ -228,7 +227,7 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
   {
     if (c == null)
       return false; // ok to create
-    User me = User.getTL(Mmowgli2UI.getGlobals().getUserID()); // DBGet.getUser(app.getUser());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
     return c.isHidden() && !me.isGameMaster();
   }
 
@@ -427,7 +426,7 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
         }
 
         // Admins get to add cards under other names
-        author = User.get(Mmowgli2UI.getGlobals().getUserID(), HSess.get()); 
+        author = Mmowgli2UI.getGlobals().getUserTL(); 
         if (author.isAdministrator())
           adminSwitchAuthorsTL(event.getButton(), this);
         else
@@ -523,7 +522,7 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
             }
             else if (o instanceof QuickUser) {
               QuickUser qu = (QuickUser) o;
-              coroutine.author = DBGet.getUserTL(qu.id);
+              coroutine.author = User.getTL(qu.id);
             }
           }
           coroutine.run(); // finish up

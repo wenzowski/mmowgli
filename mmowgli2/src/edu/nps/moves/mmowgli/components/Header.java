@@ -47,13 +47,12 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliController;
 import edu.nps.moves.mmowgli.MmowgliEvent;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsGameEventUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsGameUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
-import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.IDNativeButton;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
@@ -405,7 +404,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     if(!uid.equals(Mmowgli2UI.getGlobals().getUserID()))
        return false;
     
-    User u = DBGet.getUserFresh(uid, sess);  // needs Role
+    User u = User.get(uid, sess);
     userNameButt.setCaption(u.getUserName());
     userNameButt.setParam(uid);
     if(u.getAvatar() != null) {
@@ -559,15 +558,12 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   
   public boolean gameEventLoggedOobTL(Object evId)
   {
-    GameEvent ev = (GameEvent)HSess.get().get(GameEvent.class, (Serializable)evId);
+    GameEvent ev = DB.getRetry(GameEvent.class, evId, null, HSess.get());
     if(ev == null) {
-      ev = ComeBackWhenYouveGotIt.fetchGameEventWhenPossible((Long)evId);
-    }
-    if(ev == null) {
-      System.err.println("ERROR: Header.gameEventLoggedOob(): GameEvent matching id "+evId+" not found in db.");
+      System.err.println("ERROR: Header.gameEventLoggedOobTL(): GameEvent matching id "+evId+" not found in db.");
     }
     else if(ev.getEventtype() == GameEvent.EventType.BLOGHEADLINEPOST) {
-      MessageUrl mu = (MessageUrl)HSess.get().get(MessageUrl.class, (Serializable)ev.getParameter());
+      MessageUrl mu = MessageUrl.getTL(ev.getParameter());
       decorateBlogHeadlinesLink(mu);
       return true;
     }
@@ -577,10 +573,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
   @Override
   public boolean moveUpdatedOobTL(Serializable mvId)
   {
-    Move m = (Move)HSess.get().get(Move.class, (Serializable)mvId);
-    if(m == null) {
-      m = ComeBackWhenYouveGotIt.fetchMoveWhenPossible((Long)mvId);
-    }
+    Move m = DB.getRetry(Move.class, mvId, null, HSess.get());
     if(m == null) {
       System.err.println("ERROR: Header.moveUpdatedOob: Move matching id "+mvId+" not found in db.");
     }

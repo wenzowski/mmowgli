@@ -36,7 +36,6 @@ import org.hibernate.criterion.Restrictions;
 
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.messaging.MMessage;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
@@ -149,7 +148,7 @@ public class BadgeManager implements Runnable
         switch(pkt.msgType) {
         case NEW_CARD:
         case UPDATED_CARD:
-          Card c = DBGet.getCardFreshTL(pkt.id);
+          Card c = Card.getTL(pkt.id);
           checkBadgeOneTL(c);  // one of each root card type
           checkBadgeFourTL(c); // marked superinteresting
           checkBadgeTwoTL(c.getAuthor()); // one of everytype
@@ -160,7 +159,7 @@ public class BadgeManager implements Runnable
           checkBadgeSixTL(ap);  // ap author
           break;
         case UPDATED_USER:
-          User u =DBGet.getUserFreshTL(pkt.id);
+          User u = User.getTL(pkt.id);
           checkBadgeFiveTL(u); // user fav list
 
           //todo: badge 8, logged in each day
@@ -254,9 +253,8 @@ public class BadgeManager implements Runnable
   private void addBadgeTL(User u, long badgeID)
   {
     Set<Badge> bSet = u.getBadges();
-    Badge bdg = Badge.get(badgeID);
+    Badge bdg = Badge.getTL(badgeID);
     bSet.add(bdg);
-    // User update here
     User.updateTL(u);
   }
 
@@ -360,8 +358,8 @@ public class BadgeManager implements Runnable
     List<Card> roots = master.getMcache().getSuperActiveChainRoots();
     Session sess = HSess.get();
     for(Card crd : roots) {
-      User author = crd.getAuthor();  // Hb classes not current in this sess
-      author = DBGet.getUserFresh(author.getId(),sess);
+      User author = crd.getAuthor();
+      author = User.get(author.getId(), sess);  // Hb class not current in this sess
       if(!hasBadge(author,BADGE_THREE_ID)) {
         Badge third = (Badge)sess.get(Badge.class, BADGE_THREE_ID);
         author.getBadges().add(third);
