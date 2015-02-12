@@ -33,7 +33,7 @@ import javax.persistence.*;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  * ChatLog.java
@@ -62,13 +62,14 @@ public class ChatLog implements Serializable
   
   public static void updateTL(ChatLog c)
   {
-    HSess.get().update(c);   
+    DB.updateTL(c);
   }
  
   public static void saveTL(ChatLog c)
   {
-    HSess.get().save(c);
+    DB.saveTL(c);
   }
+  
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(nullable = false)

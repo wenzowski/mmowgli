@@ -28,7 +28,7 @@ import javax.persistence.*;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  * Avatar.java
@@ -64,12 +64,12 @@ public class Avatar implements Serializable
   
   public static Avatar getTL(Object id)
   {
-    return (Avatar)HSess.get().get(Avatar.class, (Serializable)id);
+    return DB.getTL(Avatar.class, id);
   }
   
   public static HbnContainer<Avatar> getContainer()
   {
-    return new HbnContainer<Avatar>(Avatar.class,HSess.getSessionFactory());   
+    return DB.getContainer(Avatar.class);
   }
 
   @Override

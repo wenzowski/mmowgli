@@ -30,6 +30,7 @@ import javax.persistence.*;
 
 import org.hibernate.Session;
 
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
@@ -154,31 +155,33 @@ public class MovePhase implements Serializable
   String actionPlanWhatWillItTakeHeader=WHAT_WILL_IT_TAKE;
   String actionPlanHowWillItWorkHeader=HOW_WILL_IT_WORK;
   String actionPlanHowWillItChangeHeader=HOW_WILL_IT_CHANGE_THE_SITUATION;
+  
+  Long revision = 0L;   // used internally by hibernate for optimistic locking, but not here
 //@formatter:on
 
   public static MovePhase mergeTL(MovePhase ph)
   {
-    return (MovePhase)HSess.get().merge(ph);
+    return DB.mergeTL(ph);
   }
 
   public static MovePhase getTL(Object id)
   {
-    return (MovePhase)HSess.get().get(MovePhase.class, (Serializable)id);
+    return DB.getTL(MovePhase.class, id);
   }
 
   public static void updateTL(MovePhase ph)
   {
-    HSess.get().update(ph);;
+    DB.updateTL(ph);
   }
 
   public static void saveTL(MovePhase ph)
   {
-    HSess.get().save(ph);
+    DB.saveTL(ph);
   }
 
   public static void deleteTL(MovePhase mp)
   {
-    HSess.get().delete(mp);
+    DB.saveTL(mp);
   }
   
   public MovePhase()
@@ -197,6 +200,23 @@ public class MovePhase implements Serializable
     this.id = id;
   }
   
+  @Basic
+  public Long getRevision()
+  {
+    return revision;
+  }
+
+  public void setRevision(Long revision)
+  {
+    this.revision = revision;
+  }
+
+  public Long incrementVersion()
+  {
+    setRevision(revision+1);
+    return getRevision();
+  }
+ 
   @Override
   public String toString()
   {
@@ -948,6 +968,7 @@ public class MovePhase implements Serializable
   {
     return getCurrentMovePhase(HSess.get());
   }
+  
   public static MovePhase getCurrentMovePhase(Session sess)
   {
     return Move.getCurrentMove(sess).getCurrentMovePhase();

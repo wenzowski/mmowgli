@@ -36,7 +36,7 @@ import org.hibernate.search.annotations.*;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  *  This is a database table, listing action plans
@@ -125,8 +125,7 @@ public class ActionPlan implements Serializable
   
   boolean     superInteresting;
   
-//  Integer      version = 0;   // used internally by hibernate for optimistic locking
-  // removed 29 dec 2014, causing problems with new merge code
+  Long revision = 0L;   // used internally by hibernate for optimistic locking, but not here
 //@formatter:on
 
   public ActionPlan()
@@ -137,41 +136,40 @@ public class ActionPlan implements Serializable
     setHeadline(headline);
   }
 
-  @SuppressWarnings("unchecked")
   public static HbnContainer<ActionPlan> getContainer()
   {
-    return (HbnContainer<ActionPlan>) HSess.getContainer(ActionPlan.class);
+    return DB.getContainer(ActionPlan.class);
   }
 
-//  public static ActionPlan get(Object id)
-//  {
-//    return (ActionPlan)VHib.getVHSession().get(ActionPlan.class,(Serializable)id);
-//  }
   public static ActionPlan getTL(Object id)
   {
-    return (ActionPlan)HSess.get().get(ActionPlan.class, (Serializable)id);
+    return DB.getTL(ActionPlan.class, id);
   }
-  public static ActionPlan get(Serializable id, Session sess)
+  
+  public static ActionPlan get(Object id, Session sess)
   {
-    return (ActionPlan)sess.get(ActionPlan.class, id);
+    return DB.get(ActionPlan.class, id, sess);
   }  
+  
   public static ActionPlan mergeTL(ActionPlan ap)
   {
-    return (ActionPlan)merge(ap,HSess.get());
+    return DB.mergeTL(ap);
   }
   
   public static ActionPlan merge(ActionPlan ap, Session sess)
   {
-    return (ActionPlan)sess.merge(ap);
+    return DB.merge(ap, sess);
   }
+  
   public static void updateTL(ActionPlan ap)
   {
-    HSess.get().update(ap);   
+    ap.incrementRevision();
+    DB.updateTL(ap);  
   }
   
   public static void saveTL(ActionPlan ap)
   {
-    HSess.get().save(ap);
+    DB.saveTL(ap);
   }
 
   /**
@@ -207,18 +205,23 @@ public class ActionPlan implements Serializable
     this.idForSorting = idForSorting;
   }
 
-  /* Used to lock the table when we controlling editing */
-/*  @Version
-  public Integer getVersion()
+  @Basic
+  public Long getRevision()
   {
-    return version;
+    return revision;
   }
 
-  public void setVersion(Integer version)
+  public void setRevision(Long revision)
   {
-    this.version = version;
+    this.revision = revision;
   }
-*/
+
+  public Long incrementRevision()
+  {
+    setRevision(revision+1);
+    return getRevision();
+  }
+  
   /**
    * @return the headline
    */

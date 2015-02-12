@@ -32,6 +32,7 @@ import javax.persistence.*;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
@@ -112,17 +113,13 @@ public class CardType implements Serializable
   
   public static CardType getTL(Object id)
   {
-    return (CardType)HSess.get().get(CardType.class, (Serializable)id);
+    return DB.getTL(CardType.class, id);
   }
   
-  @SuppressWarnings("unchecked")
   public static List<CardType> getIdeaCards(Session sess)
   {
-    List<CardType> lis = sess.createCriteria(CardType.class).
-                              add(Restrictions.eq("ideaCard", true)).
-                              //addOrder(Order.desc("title")).  // innovate then defend
-                              //addOrder(Order.asc("title")).     // best then worst
-                                list();
+    List<CardType> lis = DB.getMultiple(CardType.class, sess, Restrictions.eq("ideaCard", true));
+    
     assert lis.size()==2: "Two idea card types must be defined in the database";
     // put in order, pos then neg
     if(lis.get(0).cardClass == CardClass.POSITIVEIDEA)
@@ -132,33 +129,16 @@ public class CardType implements Serializable
       lis.set(0, lis.get(1));
       lis.set(1, ct);
     }
-    return lis;
+    return lis;    
   }
-  
+
   public static CardType getPositiveIdeaCardTypeTL()
   {
     return getPositiveIdeaCardType(HSess.get());
   }
+  
   public static CardType getPositiveIdeaCardType(Session sess)
   {
-//    Disjunction disj = Restrictions.disjunction();
-//    disj.add(Restrictions.eq("title", "Best Strategy"));
-//    disj.add(Restrictions.eq("titleAlternate", "Best Strategy"));
-//    disj.add(Restrictions.eq("title", "Innovate"));
-//    disj.add(Restrictions.eq("titleAlternate", "Resource"));
-   /* 
-    List<CardType> lis =  (List<CardType>) sess.createCriteria(CardType.class).
-                              add(Restrictions.eq("cardClass",CardClass.POSITIVEIDEA)).
-                              // add(disj).
-                              list();
-    return lis.get(0);
-    */
-//    Set<CardType> typs = Game.get(sess).currentMove.getCurrentMovePhase().getAllowedCards();
-//    for(CardType ct : typs)
-//      if(ct.isPositiveIdeaCard())
-//        return ct;
-//    return null;
-    
     return getPositiveIdeaCardType(Game.get(sess).getCurrentMove());
   }
   
@@ -333,12 +313,12 @@ public class CardType implements Serializable
 
   public static CardType mergeTL(CardType ct)
   {
-    return (CardType)HSess.get().merge(ct);
+    return DB.mergeTL(ct);
   }
 
   public static void updateTL(CardType ct)
   {
-    HSess.get().update(ct);
+    DB.updateTL(ct);
   }
   
   @Id

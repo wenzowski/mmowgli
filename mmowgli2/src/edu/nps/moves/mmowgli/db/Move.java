@@ -30,13 +30,12 @@ import java.util.List;
 
 import javax.persistence.*;
 
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
-//import edu.nps.moves.mmowgli.hibernate.VHib;
 
 /**
  * @author Mike Bailey, jmbailey@nps.edu
@@ -64,6 +63,9 @@ public class Move implements Serializable
   boolean       showMoveBranding = false;
   List<MovePhase> movePhases = new ArrayList<MovePhase>();
   MovePhase     currentMovePhase;
+  
+  Long revision = 0L;   // used internally by hibernate for optimistic locking, but not here
+
  //@formatter:on
   
   public Move()
@@ -78,43 +80,34 @@ public class Move implements Serializable
     this.title = title;
   }
 
-  @SuppressWarnings("unchecked")
   public static List<Move> getAllTL()
   {
-    Criteria crit = HSess.get().createCriteria(Move.class);
-    crit.addOrder(Order.asc("number"));
-    return (List<Move>)crit.list();
+    return DB.getMultipleTL(Move.class, Order.asc("number"));
   }
   
   public static Move getTL(Object id)
   {
-    return (Move)HSess.get().get(Move.class, (Serializable)id);
+    return DB.getTL(Move.class, id);
   }
   
   public static Move getMoveByNumberTL(int i)
   {
-    Session sess = HSess.get();
-    @SuppressWarnings("unchecked")
-    List<Move> lis = (List<Move>)sess.createCriteria(Move.class)
-                     .add(Restrictions.eq("number", i)).list();
-    if(lis.size()>0)
-      return lis.get(0);
-    return null;
+    return DB.getSingleTL(Move.class, (Restrictions.eq("number", i)));
   }
-
+  
   public static Move mergeTL(Move m)
   {
-    return (Move)HSess.get().merge(m);
+    return DB.mergeTL(m);
   }
 
   public static void updateTL(Move m)
   {
-    HSess.get().update(m);
+    DB.updateTL(m);
   }
 
   public static void saveTL(Move m)
   {
-    HSess.get().save(m);
+    DB.saveTL(m);
   }
   
   @OneToOne
@@ -154,6 +147,23 @@ public class Move implements Serializable
     this.id = id;
   }
   
+  @Basic
+  public Long getRevision()
+  {
+    return revision;
+  }
+
+  public void setRevision(Long revision)
+  {
+    this.revision = revision;
+  }
+
+  public Long incrementVersion()
+  {
+    setRevision(revision+1);
+    return getRevision();
+  }
+   
   @Override
   public String toString()
   {
@@ -286,9 +296,7 @@ public class Move implements Serializable
   
   public static Move getCurrentMove(Session sess)
   {
-    Game game = (Game)sess.get(Game.class, 1L);
+    Game game = Game.get(sess);
     return game.getCurrentMove();
   }
-  
-
 }

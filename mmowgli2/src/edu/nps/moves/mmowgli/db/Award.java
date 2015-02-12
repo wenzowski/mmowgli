@@ -26,7 +26,7 @@ import java.util.Calendar;
 
 import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  * @author DMcG
@@ -57,12 +57,12 @@ public class Award
 
   public static void deleteTL(Award aw)
   {
-    HSess.get().delete(aw);
+    DB.deleteTL(aw);
   }
 
   public static void saveTL(Award aw)
   {
-    HSess.get().save(aw);
+    DB.saveTL(aw);
   }
   
   @Id

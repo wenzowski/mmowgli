@@ -31,7 +31,7 @@ import javax.persistence.*;
 
 import org.hibernate.Session;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  * GameEvent.java Created on May 3, 2010
@@ -144,16 +144,17 @@ public class GameEvent implements Serializable
   
   public static void saveTL(GameEvent m)
   {
-    HSess.get().save(m);
+    DB.saveTL(m);
   }
   
-  public static GameEvent getTL(Serializable id)
+  public static GameEvent getTL(Object id)
   {
-    return get(id,HSess.get());
+    return DB.getTL(GameEvent.class, id);
   }
-  public static GameEvent get(Serializable id, Session sess)
+  
+  public static GameEvent get(Object id, Session sess)
   {
-    return (GameEvent)sess.get(GameEvent.class, id);
+    return DB.get(GameEvent.class, id, sess);
   }
   
   public void clone(GameEvent ge)

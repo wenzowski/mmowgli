@@ -34,6 +34,7 @@ import org.hibernate.criterion.Order;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
@@ -87,12 +88,12 @@ public class MessageUrl implements Serializable
   
   public static void saveTL(MessageUrl mu)
   {
-    HSess.get().save(mu);
+    DB.saveTL(mu);
   }
   
   public static MessageUrl getTL(Object id)
   {
-    return (MessageUrl)HSess.get().get(MessageUrl.class,(Serializable)id);
+    return DB.getTL(MessageUrl.class, id);
   }
  
   public static MessageUrl getLastTL()

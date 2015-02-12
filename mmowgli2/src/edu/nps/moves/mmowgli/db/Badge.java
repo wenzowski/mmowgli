@@ -26,7 +26,7 @@ import java.io.Serializable;
 
 import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  * Badges are awards that may span games. Eg, for being a good boy in the
@@ -62,9 +62,9 @@ public class Badge implements Serializable
     /** An icon associated with the badge */
     Media media;
 
-    public static Badge get(Object id)
+    public static Badge getTL(Object id)
     {
-      return (Badge)HSess.get().get(Badge.class, (Serializable)id);
+      return DB.getTL(Badge.class, id);
     }
     
     /**

@@ -33,8 +33,8 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import org.hibernate.Session;
 
 import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
-//import edu.nps.moves.mmowgli.hibernate.VHib;
 
 @Entity
 public class Pages implements Serializable
@@ -124,7 +124,7 @@ public class Pages implements Serializable
 
   public static Pages getTL()
   {
-    return (Pages)HSess.get().get(Pages.class, 1L);
+    return DB.getTL(Pages.class, 1L);
   }
 
   /**********************************************************************/
