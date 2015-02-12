@@ -28,7 +28,7 @@ import javax.persistence.*;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  * @author Mike Bailey, jmbailey@nps.edu
@@ -66,17 +66,17 @@ public class CardMarking implements Serializable
   
   public static HbnContainer<CardMarking> getContainer()
   {
-    return new HbnContainer<CardMarking>(CardMarking.class, HSess.getSessionFactory());
+    return DB.getContainer(CardMarking.class);
   }
 
   public static CardMarking getTL(Object id)
   {
-    return (CardMarking)HSess.get().get(CardMarking.class,  (Serializable)id);
+    return DB.getTL(CardMarking.class, id);
   }
   
   public static CardMarking mergeTL(CardMarking cm)
   {
-    return (CardMarking)HSess.get().merge(cm);
+    return DB.mergeTL(cm);
   }
   
   @Id

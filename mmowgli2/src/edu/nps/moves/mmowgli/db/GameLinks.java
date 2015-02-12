@@ -28,7 +28,7 @@ import javax.persistence.*;
 
 import org.hibernate.Session;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  * One game represents an interaction that may have several "turns". For example, a game about piracy in Somalia.
@@ -91,18 +91,16 @@ public class GameLinks implements Serializable
   
   public static GameLinks getTL(Object id)
   {
-    return (GameLinks)HSess.get().get(GameLinks.class, (Serializable) id);
+    return DB.getTL(GameLinks.class, id);
   }
 
   public static void updateTL(GameLinks gl)
   {
-    HSess.get().update(gl);
+    DB.updateTL(gl);
   }
 
   /**
    * Primary key
-   * 
-   * @return the id
    */
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -112,11 +110,6 @@ public class GameLinks implements Serializable
     return id;
   }
 
-  /**
-   * Primary key
-   * 
-   * @param id
-   */
   public void setId(long id)
   {
     this.id = id;

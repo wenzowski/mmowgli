@@ -23,15 +23,12 @@
 package edu.nps.moves.mmowgli.db;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.persistence.*;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  * Media.java
@@ -105,22 +102,22 @@ public class Media implements Serializable
 
   public static void saveTL(Media med)
   {
-    HSess.get().save(med);
+    DB.saveTL(med);
   }
 
   public static void updateTL(Media med)
   {
-    HSess.get().update(med);
+    DB.updateTL(med);
   }
 
   public static void deleteTL(Media med)
   {
-    HSess.get().delete(med);
+    DB.deleteTL(med);
   }
 
   public static Media getTL(Object o)
   {
-    return (Media)HSess.get().get(Media.class, (Serializable)o);
+    return DB.getTL(Media.class, o);
   }
   
   public static Media getDefaultCallToActionVideoTL()
@@ -133,16 +130,9 @@ public class Media implements Serializable
     return getDefaultVideoTL(DEFAULT_ORIENTATION_VIDEO_HANDLE);
   }
   
-  @SuppressWarnings("unchecked")
   private static Media getDefaultVideoTL(String handle) 
   {
-    Session sess = HSess.get();;
-    Criteria crit = sess.createCriteria(Media.class)
-                        .add(Restrictions.eq("handle", handle));
-    List<Media> lis = (List<Media>)crit.list();
-    if(lis.size()>0)
-      return lis.get(0);
-    return null;
+    return DB.getSingleTL(Media.class, Restrictions.eq("handle", handle));
   }
   
   public static Media newYoutubeMedia(String url)

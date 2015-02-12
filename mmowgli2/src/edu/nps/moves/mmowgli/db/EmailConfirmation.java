@@ -28,7 +28,7 @@ import java.util.UUID;
 
 import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  * EmailConfirmation.java Created on Sep 7, 2012
@@ -64,7 +64,7 @@ public class EmailConfirmation implements Serializable
    
   public static void saveTL(EmailConfirmation e)
   {
-    HSess.get().save(e);     
+    DB.saveTL(e);
   }
 
   @Id

@@ -28,6 +28,8 @@ import java.util.*;
 import javax.persistence.*;
 
 import org.hibernate.Session;
+
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
@@ -140,6 +142,7 @@ public class Game implements Serializable
     
     String       adminLoginMessage;
     String       gameHandle; // default = mmowgli
+    Long         revision = 0L;   // used internally by hibernate for optimistic locking, but not here
     
 //@formatter:on
 /*    
@@ -153,12 +156,7 @@ public class Game implements Serializable
 */  
   public static Game get(Session sess)
   {
-    return get(sess,1L);  //only one entry in current design
-  }
-  
-  public static Game get(Session sess, Serializable id)
-  {
-    return (Game)sess.get(Game.class, id);
+    return (Game)sess.get(Game.class,1L); //only one entry in current design
   }
   
   public static Game getTL()
@@ -168,13 +166,25 @@ public class Game implements Serializable
   
   public static Game getTL(Object id)
   {
-    return (Game)HSess.get().get(Game.class, (Serializable)id);
+    return get(HSess.get());
   }
   
+  public static void updateTL()
+  {
+    Game g = Game.getTL();
+    g.incrementRevision();
+    DB.updateTL(g);
+  }
+  
+  // This is needed for game designer
+  public static void updateTL(Game g) 
+  {
+    g.incrementRevision();
+    DB.updateTL(g);
+  }
+ 
   /**
    * Primary key
-   * 
-   * @return the id
    */
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -184,14 +194,26 @@ public class Game implements Serializable
     return id;
   }
 
-  /**
-   * Primary key
-   * 
-   * @param id
-   */
   public void setId(long id)
   {
     this.id = id;
+  }
+  
+  @Basic
+  public Long getRevision()
+  {
+    return revision;
+  }
+
+  public void setRevision(Long revision)
+  {
+    this.revision = revision;
+  }
+
+  public Long incrementRevision()
+  {
+    setRevision(revision+1);
+    return getRevision();
   }
 
   /**
@@ -403,16 +425,6 @@ public class Game implements Serializable
     this.maxUsersRegistered = maxUsersRegistered;
   }
 
-  public static void updateTL()
-  {
-    HSess.get().update(Game.getTL());
-  }
-  // This is needed for game designer
-  public static void updateTL(Game g) 
-  {
-    HSess.get().update(g);
-  }
- 
   @OneToMany
   public Set<ActionPlan> getTop5ActionPlans()
   {

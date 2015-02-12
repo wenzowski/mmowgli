@@ -27,9 +27,7 @@ import java.util.Date;
 
 import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
-//import edu.nps.moves.mmowgli.hibernate.VHib;
-//import edu.nps.moves.mmowgli.hibernate.Sess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  * Message.java Created on Dec 16, 2010
@@ -85,12 +83,12 @@ public class Message implements Serializable, Comparable<Object>
     
   public static void saveTL(Message m)
   {
-    HSess.get().save(m);
+    DB.saveTL(m);
   }
   
   public static void updateTL(Message m)
   {
-    HSess.get().update(m);;
+    DB.updateTL(m);
   }
   
  @Override

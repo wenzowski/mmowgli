@@ -28,7 +28,7 @@ import java.util.Date;
 
 import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  * Edits.java Created on June 12, 2012
@@ -61,8 +61,9 @@ public class Edits implements Serializable, Comparable<Object>
   
   public static void saveTL(Edits e)
   {
-    HSess.get().save(e);
+    DB.saveTL(e);
   }
+  
   @Id
   @Basic
   @GeneratedValue(strategy = GenerationType.AUTO)

@@ -35,12 +35,12 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.search.annotations.*;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -85,7 +85,7 @@ public class Card implements Serializable
   Set<CardMarking> marking = new HashSet<CardMarking>();       // optional marking by gamemasters, e.g., positive, negative, superinteresting
   boolean     hidden = false;  // duplicate of the CardMarking hidden, but used for Hibernate querying -- must be kept in sync
   
-  Long       version = 0L;   // used internally by hibernate for optimistic locking, but not here
+  Long        revision = 0L;   // used internally by hibernate for optimistic locking, but not here
 //@formatter:on
   
   public Card()
@@ -100,59 +100,46 @@ public class Card implements Serializable
     setCreationDate(creation);   
   }
   
-  @SuppressWarnings({ "serial" })
   public static HbnContainer<Card> getContainer()
   {
-    return new HbnContainer<Card>(Card.class,HSess.getSessionFactory())
-    {
-      @Override
-      protected Criteria getBaseCriteriaTL()
-      {
-        return super.getBaseCriteriaTL().addOrder(Order.desc("creationDate")); // newest first
-      }      
-    };
+    return DB.getContainer(Card.class);
   }
 
   public static Card getTL(Object id)
   {
-    return (Card)HSess.get().get(Card.class, (Serializable)id);
+    return DB.getTL(Card.class, id);
   }
   
-  public static Card getVersionTL(Serializable id, long version)
+  public static Card getRevisionTL(Object id, long revision)
   {
-    @SuppressWarnings("unchecked")
-    List<Card> lis = (List<Card>)HSess.get().createCriteria(Card.class)
-                     .add(Restrictions.eq("id", id))
-                     .add(Restrictions.gt("version", version)).list();
-    if(lis.size()>0)
-      return lis.get(0);
-    return null;
+    return DB.getRevisionTL(Card.class, id, revision);
   }
-  
-  public static Card get(Serializable id, Session sess)
+
+  public static Card get(Object id, Session sess)
   {
-    return (Card)sess.get(Card.class, id);
+    return DB.get(Card.class, id, sess);
   }
   
   public static Card merge(Card c, Session sess)
   {
-    return (Card)sess.merge(c);
+    return DB.merge(c, sess);
   }
+  
   public static Card mergeTL(Card c)
   {
-    return Card.merge(c,HSess.get());
+    return DB.mergeTL(c);
   }
  
   public static void updateTL(Card c)
   {
-    c.incrementVersion();
-    HSess.get().update(c);
+    c.incrementRevision();
+    DB.updateTL(c);
     MSysOut.println(CARD_UPDATE_LOGS,"Card.updateTL() back from sess.update card "+c.getId()+" with text: "+c.getText()+" hidden = "+c.isHidden());
   }
  
   public static void saveTL(Card c)
   {
-    HSess.get().save(c);
+    DB.saveTL(c);;
     MSysOut.println(CARD_UPDATE_LOGS,"Card.saveTL() back from sess.save card "+c.getId()+" with text: "+c.getText());
   }
 
@@ -186,10 +173,10 @@ public class Card implements Serializable
     StringBuilder sb = new StringBuilder();
     sb.append("id = ");
     sb.append(getId());
-    sb.append("text = ");
+    sb.append(" text = ");
     sb.append(getText());
-    sb.append(" version = ");
-    sb.append(getVersion());
+    sb.append(" revision = ");
+    sb.append(getRevision());
     sb.append(" hidden = ");
     sb.append(isHidden());
     // temp sb.append("# children = ");
@@ -200,7 +187,7 @@ public class Card implements Serializable
   @Id
   @DocumentId
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(nullable = false)
+  //@Column(nullable = false)
   @Field(analyze=Analyze.NO) //index=Index.UN_TOKENIZED)
   public long getId()
   {
@@ -214,20 +201,20 @@ public class Card implements Serializable
   
   // This screws up our code@Version
   @Basic
-  public Long getVersion()
+  public Long getRevision()
   {
-    return version;
+    return revision;
   }
 
-  public void setVersion(Long version)
+  public void setRevision(Long revision)
   {
-    this.version = version;
+    this.revision = revision;
   }
 
-  public Long incrementVersion()
+  public Long incrementRevision()
   {
-    setVersion(version+1);
-    return getVersion();
+    setRevision(revision+1);
+    return getRevision();
   }
   
   // This field duplicates CardMarking.hidden and must be kept in sync

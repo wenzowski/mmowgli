@@ -28,7 +28,8 @@ import java.util.UUID;
 
 import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
+
 /*
  * Program:      MMOWGLI
  *
@@ -79,7 +80,7 @@ public class PasswordReset implements Serializable
 
   public static void saveTL(PasswordReset e)
   {
-    HSess.get().save(e);
+    DB.saveTL(e);
   }
 
   @Id

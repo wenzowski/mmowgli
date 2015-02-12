@@ -29,7 +29,7 @@ import java.util.List;
 
 import javax.persistence.*;
 
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.DB;
 
 /**
  * GoogleMap.java
@@ -71,11 +71,12 @@ public class GoogleMap implements Serializable
     
   public static void updateTL(GoogleMap map)
   {
-    HSess.get().update(map);
+    DB.updateTL(map);
   }
+  
   public static void saveTL(GoogleMap map)
   {
-    HSess.get().save(map);
+    DB.saveTL(map);
   }
 
   /**
