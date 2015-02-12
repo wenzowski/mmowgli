@@ -159,7 +159,7 @@ public class PasswordResetPopup extends Window implements Button.ClickListener
   
   private void proceedWithNameTL_2a(String uname, Session piiSess)
   {
-    User usr = User.getUserWithUserName(HSess.get(), uname);
+    User usr = User.getUserWithUserNameTL(uname);
     if(usr != null) {
        UserPii uPii = VHibPii.getUserPii(usr.getId(), piiSess, false);
        List<EmailPii> ePii = uPii.getEmailAddresses(); 

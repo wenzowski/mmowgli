@@ -33,10 +33,9 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
-import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
+import edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser;
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
@@ -164,7 +163,7 @@ public class AddAuthorEventHandler
   private static void inviteMultipleUsersTL(ActionPlan ap, Set<?> users)
   {
     for (Object qu : users) {
-      User u = DBGet.getUserTL(((QuickUser) qu).id);
+      User u = User.getTL(((QuickUser) qu).id);
       inviteSingleUserTL(ap, u);
     }
   }
@@ -187,6 +186,6 @@ public class AddAuthorEventHandler
 
   private static void inviteSingleUserTL(ActionPlan ap, QuickUser qu)
   {
-    inviteSingleUserTL(ap, DBGet.getUserTL(((QuickUser) qu).id));
+    inviteSingleUserTL(ap, User.getTL(((QuickUser)qu).id));
   }
 }

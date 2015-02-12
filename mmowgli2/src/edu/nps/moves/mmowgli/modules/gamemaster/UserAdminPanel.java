@@ -23,7 +23,7 @@
 package edu.nps.moves.mmowgli.modules.gamemaster;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.APPLICATION_SCREEN_WIDTH;
-import static edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser.*;
+import static edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -50,18 +50,18 @@ import com.vaadin.ui.Window.CloseListener;
 
 import edu.nps.moves.mmowgli.*;
 import edu.nps.moves.mmowgli.cache.MCacheManager;
-import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
+import edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.components.SendMessageWindow;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
-import edu.nps.moves.mmowgli.hibernate.*;
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.hibernate.VHibPii;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsUserUpdates;
 import edu.nps.moves.mmowgli.utility.BeanContainerWithCaseInsensitiveSorter;
 import edu.nps.moves.mmowgli.utility.MailManager;
-
 
 /**
  * UserAdminPanel.java Created on May 6, 2011
@@ -360,7 +360,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
           
           @SuppressWarnings({ "unchecked" })
           final QuickUser qu = (QuickUser)((BeanItem<QuickUser>)event.getItem()).getBean();
-          User u = DBGet.getUserFreshTL(qu.getId());
+          User u = User.getTL(qu.getId());
           if(u == null) {
             // This has been happening infrequently...some error on signup where (maybe) a user object gets created
             // but doesn't make it into the db.
@@ -510,7 +510,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       addComponent(formLay);
       setComponentAlignment(formLay,Alignment.TOP_CENTER);
       formLay.setWidth("98%");
-      User u = DBGet.getUserFreshTL(uid);
+      User u = User.getTL(uid); //feb refactor DBGet.getUserFreshTL(uid);
       TextField f = new TextField("id");
       f.setValue(""+u.getId());
       f.setReadOnly(true);
@@ -519,7 +519,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
 
       HorizontalLayout hl;
        // A current admin can allow others to be admins
-      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      User me = Mmowgli2UI.getGlobals().getUserTL();
       if(me.isAdministrator()) {
         hl = new HorizontalLayout();
         formLay.addComponent(hl);       
@@ -686,6 +686,8 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
           
           if(loadAndSaveUserTL()) {          
             closePopup(event);
+            HSess.close();  //Commit, else a get() in the call below will retrieve old data.
+            HSess.init();
             Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(MmowgliEvent.SHOWUSERPROFILECLICK,event.getButton(),user.getId()));
           }             
           HSess.close();
@@ -726,7 +728,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       public void buttonClick(ClickEvent event)
       {
         HSess.init();
-        User u = DBGet.getUserFreshTL(uid);
+        User u = User.getTL(uid);
         List<String> lis = VHibPii.getUserPiiEmails(u.getId());
         String email = lis.get(0);
         String gameUrl = AppMaster.instance().getAppUrlString();
@@ -754,7 +756,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       public void buttonClick(ClickEvent event)
       {
         HSess.init();
-        User u = DBGet.getUserFreshTL(uid);
+        User u = User.getTL(uid);
         if(u.isOkEmail()) {
           new SendMessageWindow(u, false, MailManager.Channel.EXTERNALEMAIL,true);
         }
@@ -771,7 +773,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       public void buttonClick(ClickEvent event)
       {
         HSess.init();
-        User u = DBGet.getUserFreshTL(uid);
+        User u = User.getTL(uid);
         if(u.isOkGameMessages()) {
           new SendMessageWindow(u, false, MailManager.Channel.INGAMEMESSAGE);
         }
@@ -805,8 +807,8 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     private boolean handleDisabledTL()
     {
       boolean wantToDisable = lockedOutCb.getValue();
-      User badGuy = DBGet.getUserTL(uid);
-      User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+      User badGuy = User.getTL(uid);
+      User me = Mmowgli2UI.getGlobals().getUserTL();
       String message = "";
       GameEvent.EventType lockEvent = null;
       Long lockParameter = null;
@@ -868,7 +870,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       if(newEmail == null || newEmail.length()<=0)
         return errorOut("Email address must be entered");
       
-      user = DBGet.getUserFreshTL(uid);
+      user = User.getTL(uid);
       String oldUname = user.getUserName();
       
       user.setAccountDisabled(handleDisabledTL());

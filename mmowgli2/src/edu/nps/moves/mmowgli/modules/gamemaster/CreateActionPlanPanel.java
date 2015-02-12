@@ -42,11 +42,10 @@ import com.vaadin.ui.Window.CloseListener;
 import com.vaadin.ui.themes.BaseTheme;
 
 import edu.nps.moves.mmowgli.*;
-import edu.nps.moves.mmowgli.cache.MCacheManager.QuickUser;
+import edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.*;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2.UserList;
@@ -92,6 +91,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
     layout.initGui();
   }
 
+  @SuppressWarnings("deprecation")
   public static class CreateActionPlanLayout extends VerticalLayout implements MmowgliComponent
   {
     /**
@@ -334,6 +334,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
               Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(MmowgliEvent.TAKEACTIONCLICK, CreateActionPlanLayout.this, null));
             }
             else {
+              HSess.close();
               return;  // leave window open
             }
           }
@@ -358,7 +359,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
       baseVLay.setComponentAlignment(buttons, Alignment.TOP_RIGHT);
 
       if (rootCardId != null) {
-        Card c = DBGet.getCardTL(rootCardId);
+        Card c = Card.getTL(rootCardId);
         cardIdTF.setValue("" + c.getId());
         cardText.setValue(c.getText());
         ((TextField)form.getField("title")).setValue(c.getText());  // put as title to start with
@@ -401,7 +402,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
         HSess.init();
         try {
           Long id = Long.parseLong(idStr);
-          Card crd = DBGet.getCardTL(id);
+          Card crd = Card.getTL(id);
           /*if (!crd.getCardType().isIdeaCard()) {
             cardIdTF.getWindow()
                 .showNotification("Action Plan card chain roots must be \"Idea\" cards (Disrupt, Protect)", Notification.TYPE_HUMANIZED_MESSAGE);
@@ -482,7 +483,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
 
     public static void notifyApInviteeTL(User u, ActionPlan ap) //todo TL
     {
-      u = DBGet.getUserFreshTL(u.getId()); // fresh get for this session
+      u = User.getTL(u.getId());
       Set<ActionPlan> set = u.getActionPlansInvited();
       if (set == null)
         u.setActionPlansInvited(set = new HashSet<ActionPlan>(1));
@@ -582,7 +583,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
             Iterator<QuickUser> itr = (Iterator<QuickUser>) set.iterator();
             while (itr.hasNext()) {
               QuickUser qu = itr.next();
-              handleAddUser(DBGet.getUserTL(qu.id));
+              handleAddUser(User.getTL(qu.id));
             }
           }
         }
@@ -595,7 +596,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
         }
         else if (o instanceof QuickUser) {
           QuickUser qu = (QuickUser) o;
-          handleAddUser(DBGet.getUserTL(qu.id));
+          handleAddUser(User.getTL(qu.id)); //feb refactor DBGet.getUserTL(qu.id));
         }
       }
     }

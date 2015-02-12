@@ -32,7 +32,6 @@ import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.GameEvent.EventType;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 
 /**
@@ -144,7 +143,7 @@ public class GameEventLogger
   public static void logHelpWantedTL(ActionPlan ap)
   {
     Serializable uid = Mmowgli2UI.getGlobals().getUserID();
-    User me = DBGet.getUserTL(uid);
+    User me = User.getTL(uid);
     String s = ap.getHelpWanted();
     if(s == null)
       s = "(removed)";
