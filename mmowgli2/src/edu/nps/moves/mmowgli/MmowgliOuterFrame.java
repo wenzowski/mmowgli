@@ -35,7 +35,6 @@ import edu.nps.moves.mmowgli.components.Footer;
 import edu.nps.moves.mmowgli.components.Header;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -66,7 +65,7 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
     addStyleName("m-mmowgliouterframe");
    // addStyleName("m-redborder");   this is a good debugging border
     
-    User me = DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
+    User me = Mmowgli2UI.getGlobals().getUserTL();
 
     addMenuBarAndFouoRowTL(me);
     addComponent(header=new Header());

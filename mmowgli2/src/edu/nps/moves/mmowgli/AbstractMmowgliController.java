@@ -24,7 +24,6 @@ package edu.nps.moves.mmowgli;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 import com.vaadin.navigator.Navigator;
@@ -43,7 +42,6 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.export.ActionPlanExporter;
 import edu.nps.moves.mmowgli.export.CardExporter;
 import edu.nps.moves.mmowgli.export.GameExporter;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
@@ -59,7 +57,8 @@ import edu.nps.moves.mmowgli.modules.gamemaster.*;
 import edu.nps.moves.mmowgli.modules.maps.LeafletMap;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
 import edu.nps.moves.mmowgli.modules.userprofile.UserProfilePage3;
-import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
+import edu.nps.moves.mmowgli.utility.IDButtonIF;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 /**
  * AbstractMmowgliController.java
@@ -120,7 +119,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
         
       case CARDCLICK:
-        Card c = DBGet.getCardTL(param);
+        Card c = Card.getTL(param);
         if(c == null) {
           System.err.println("CARDCLICK with invalid card id: "+param);
           // I'd like to remove the fragment, probably by emulating the browser button
@@ -330,7 +329,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       case SIGNOUTCLICK:
         MmowgliSessionGlobals globs = ui.getSessionGlobals();
         globs.loggingOut = true;
-        User u = DBGet.getUserTL(globs.getUserID());
+        User u = globs.getUserTL();
         GameEventLogger.logUserLogoutTL(u);
         MessagingManager2 mgr = Mmowgli2UI.getGlobals().getMessagingManager();
         if(mgr != null) {
@@ -400,7 +399,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     Mmowgli2UI ui = Mmowgli2UI.getAppUI();
     switch(mEv) {
       case HANDLE_LOGIN_STARTUP:
-        doStartupTL((Serializable)obj);
+        doStartupTL(obj);
         break;
       case SHOWUSERPROFILECLICK:
         ui.navigateTo(new AppEvent(mEv,ui,obj));
@@ -413,13 +412,13 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     }
   }
   
-  private void doStartupTL(Serializable userId)
+  private void doStartupTL(Object userId)
   {
-    Mmowgli2UI.getGlobals().setUserIDTL(userId); 
+    Mmowgli2UI.getGlobals().setUserIDTL(userId);
     Mmowgli2UI ui = Mmowgli2UI.getAppUI();
     ui.setRunningApplicationFrameworkTL(); 
 
-    User u = DBGet.getUserTL(userId);
+    User u = User.getTL(userId);
     Game g = Game.getTL();
     ui.showOrHideFouoButton(g.isShowFouo());
 

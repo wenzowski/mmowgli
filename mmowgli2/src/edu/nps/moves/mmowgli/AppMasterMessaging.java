@@ -30,17 +30,11 @@ import java.util.Set;
 import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.components.BadgeManager;
 import edu.nps.moves.mmowgli.components.KeepAliveManager;
-import edu.nps.moves.mmowgli.db.ActionPlan;
-import edu.nps.moves.mmowgli.db.Card;
-import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
-import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.SearchManager;
 import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.messaging.Broadcaster.BroadcastListener;
-import edu.nps.moves.mmowgli.messaging.InterTomcatIO.InterTomcatReceiver;
-import edu.nps.moves.mmowgli.messaging.JmsIO2.FirstListener;
-import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
+import edu.nps.moves.mmowgli.messaging.InterTomcatIO.JmsReceiver;
+import edu.nps.moves.mmowgli.messaging.JmsIO2.JmsPreviewListener;
 import edu.nps.moves.mmowgli.utility.MThreadManager;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -56,7 +50,7 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  * @version $Id$
  */
 
-public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, BroadcastListener
+public class AppMasterMessaging implements JmsReceiver, JmsPreviewListener, BroadcastListener
 {
   private AppMaster appMaster;
   private JmsIO2     _jmsIO;
@@ -78,7 +72,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
       try {
         _jmsIO = new JmsIO2();
         _jmsIO.addReceiver(this);
-        _jmsIO.addFirstExternalListener(this);
+        _jmsIO.addPreviewJmsListener(this);
         MSysOut.println(myLogLevel,"*****Internode IO built in AppMasterMessaging");
       }
       catch (Exception ex) {
@@ -89,7 +83,6 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
     return _jmsIO;
   }
   
-  // FirstListener
   /**
    * This guy gets to look at all external-JMS incoming message, and report back if it is "consumed";
    * The idea is to support our local object cache only.  Want it to be updated before any of our
@@ -98,60 +91,9 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
    * @return consumed
    */
   @Override
-  public boolean doPreviewMessage(MMessagePacket pkt)
+  public boolean doPreviewJmsMessage(MMessagePacket pkt)
   {
-    MSysOut.println(myLogLevel,"AppMasterMessaging.doPreviewMessage()...got external message");
-    HSess.init();
-    HSess.get().getTransaction().setTimeout(HIBERNATE_TRANSACTION_TIMEOUT_IN_SECONDS);
-    MMessage msg;
-    Object srcobj=null;
-
-    switch(pkt.msgType) {
-      case NEW_CARD:
-      case UPDATED_CARD:
-        msg = MMessage.MMParse(pkt.msgType,pkt.msg);
-        Card c = Card.getTL(msg.id);
-        if(c != null)
-          HSess.get().refresh(c);
-        else
-          c = ComeBackWhenYouveGotIt.fetchCardWhenPossible(msg.id);
-        srcobj = DBGet.getCardFreshTL(msg.id); // updates cache
-        break;
-
-      case NEW_USER:
-      case UPDATED_USER:
-        msg = MMessage.MMParse(pkt.msgType,pkt.msg);
-        User u = User.getTL(msg.id);
-        if(u != null)
-          HSess.get().refresh(u);
-        else
-          u = ComeBackWhenYouveGotIt.fetchUserWhenPossible(msg.id);
-        srcobj = DBGet.getUserFreshTL(msg.id);// updates cache
-        break;
-/*test
-      case GAMEEVENT:
-        msg = MMessage.MMParse(pkt.msgType,pkt.msg);
-        GameEvent ge = GameEvent.get(msg.id,sess);
-        sess.refresh(ge);
-       // does nothing DBGet.getGameEvent(msg.id, sess); // updates cache
-        break;
-*/
-      case UPDATED_ACTIONPLAN:
-        srcobj = ActionPlan.getTL(MMessage.MMParse(pkt.msgType,pkt.msg).id);
-        HSess.get().refresh(srcobj);
-        break;
-      default:
-    }
-
-    // We also pass the message to the SearchManager, which can cause Lucene/Hibernate Search, to index specific
-    // object types that are annotated as @Indexed. We sort out which objects to index on the
-    // receiving end and ignore the rest.
-    if(srcobj != null)
-      SearchManager.indexHibernateObject(srcobj,HSess.get());
-
-    HSess.close();
-
-    return false;  // not consumed, keep going
+    return false;  //not used
   }
   
   private MCacheManager mcache;
@@ -171,6 +113,7 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
   
   private HashMap<String,Integer> serverSessionCounts = new HashMap<String,Integer>();
   private HashMap<String,String> serverSessionReports = new HashMap<String,String>();
+  
   /**
    * Called from the servlet listener, which keeps track of our instance count
    * @param sessCount
@@ -263,12 +206,11 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
     }
   }
   
-  // edu.nps.moves.mmowgli.messaging.InterTomcatIO.Receiver
   // Handler of messages off the JmsIO2 object, which is receiving msgs from other custer nodes
   @Override 
   public boolean handleIncomingTomcatMessageTL(MMessagePacket pkt)
   {
-    MSysOut.println(myLogLevel,"AppMasterMessaging/JMSIO2.handleIncomingTomcatMessageOob()");
+    MSysOut.println(myLogLevel,"AppMasterMessaging/JMSIO2.handleIncomingTomcatMessageTL()");
     
     if(getMcache() != null)
       mcache.handleIncomingTomcatMessageTL(pkt);
@@ -300,13 +242,6 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
     return false; // don't want a retry    
   }
  
-  // edu.nps.moves.mmowgli.messaging.InterTomcatIO.Receiver
-  // Handler of messages off the JmsIO2 object, which is receiving msgs from other custer nodes
-  @Override
-  public void handleIncomingTomcatMessageEventBurstCompleteTL()
-  { 
-  }
-
   /**
    * This is where all messages generated from user sessions in this cluster node come in
    */
@@ -329,14 +264,11 @@ public class AppMasterMessaging implements InterTomcatReceiver, FirstListener, B
       public void run()
       {
         MSysOut.println(myLogLevel, "AppMasterMessaging.incomingDatabaseEvent() running in new thread");
-        HSess.init();
         if (getMcache() != null)
-          mcache.handleIncomingDatabaseMessageTL(mMessagePacket);
-        HSess.close();
+          mcache.handleIncomingDatabaseMessage(mMessagePacket);  // this will make sure our hibernate can see the object
+        
         Broadcaster.broadcast(mMessagePacket);
       }
     });
-    // This guy, however, gets run "inline" if appropriate
-    // Broadcaster.broadcast(mMessagePacket); mike test
   }
 }

@@ -120,6 +120,7 @@ public class MmowgliConstants
   public static final int MISC_LOGS = 0x10000;
   public static final int MAIL_LOGS = 0x20000;
   public static final int MOBILE_LOGS = 0x40000;
+  public static final int HIBERNATE_SESSION_LOGS = 0x80000;
   
   public static HashMap<Integer,String> logTokens = new HashMap<Integer,String>();
   static {
@@ -142,6 +143,7 @@ public class MmowgliConstants
     logTokens.put(MISC_LOGS, "MSC");
     logTokens.put(MAIL_LOGS, "MAI");
     logTokens.put(MOBILE_LOGS,  "MOB");
+    logTokens.put(HIBERNATE_SESSION_LOGS, "SES");
   }
   // web.xml param names
 //@formatter:off

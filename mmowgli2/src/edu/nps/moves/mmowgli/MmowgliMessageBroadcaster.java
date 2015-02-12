@@ -30,7 +30,6 @@ import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.db.GameEvent;
 import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.DBGet;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
@@ -120,7 +119,7 @@ public class MmowgliMessageBroadcaster
             if (msg.length() > 255) // clamp to 255 to avoid db exception
               msg = msg.substring(0, 254);
             Serializable uid = Mmowgli2UI.getGlobals().getUserID();
-            User u = DBGet.getUserTL(uid);
+            User u = User.getTL(uid);
             if (typ == GameEvent.EventType.GAMEMASTERNOTE)
               GameEventLogger.logGameMasterCommentTL(msg, u);
             else

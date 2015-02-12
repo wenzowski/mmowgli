@@ -22,7 +22,9 @@
 
 package edu.nps.moves.mmowgli;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+import static edu.nps.moves.mmowgli.MmowgliConstants.MISC_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.PUSHTRANSPORT;
+import static edu.nps.moves.mmowgli.MmowgliConstants.SYSTEM_LOGS;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -41,13 +43,13 @@ import edu.nps.moves.mmowgli.components.AppMenuBar;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.Move;
 import edu.nps.moves.mmowgli.db.MovePhase;
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HasUUID;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.messaging.*;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
-import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
@@ -337,17 +339,14 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   @Override
   public boolean movePhaseUpdatedOobTL(Serializable pId)
   {
-    MSysOut.println(MISC_LOGS,"Mmowgli2UI.movePhaseUpdated_oob.handle() UI = "+getClass().getSimpleName()+" "+hashCode());
+    MSysOut.println(MISC_LOGS,"Mmowgli2UI.movePhaseUpdated_oobTL.handle() UI = "+getClass().getSimpleName()+" "+hashCode());
 
     if(outerFr != null)
       outerFr.movePhaseUpdatedOobTL(pId);  // maybe a nop
 
-    MovePhase mp = (MovePhase)HSess.get().get(MovePhase.class, (Serializable)pId);
+    MovePhase mp = DB.getRetry(MovePhase.class, pId, null, HSess.get());
     if(mp == null) {
-      mp = ComeBackWhenYouveGotIt.fetchMovePhaseWhenPossible((Long)pId);
-    }
-    if(mp == null) {
-      System.err.println("ERROR: Mmowgli2UI.movePhaseUpdatedOob: MovePhase matching id "+pId+" not found in db.");
+      System.err.println("ERROR: Mmowgli2UI.movePhaseUpdatedOobTL: MovePhase matching id "+pId+" not found in db.");
     }
     // Just wanted to make sure we could get it for the following
     setWindowTitle(HSess.get());

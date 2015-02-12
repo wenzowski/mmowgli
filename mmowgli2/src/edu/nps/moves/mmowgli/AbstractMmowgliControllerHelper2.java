@@ -31,11 +31,11 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 
 import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.messaging.*;
-import edu.nps.moves.mmowgli.utility.ComeBackWhenYouveGotIt;
-import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
 
 /**
  * AbstractMmowgliControllerHelper2.java created on Nov 24, 2014
@@ -69,7 +69,26 @@ public class AbstractMmowgliControllerHelper2
     {
       this.pkt = pkt;
     }
-
+    
+    private long[] parseIdAndRevision(String msg)
+    {
+      long[] longArr = null;
+      String[] sa = msg.split(MMessage.MMESSAGE_DELIM);
+      if(sa.length == 2) {
+        try {
+          long id = Long.parseLong(sa[0]);
+          long rev = Long.parseLong(sa[1]);
+          longArr = new long[2];
+          longArr[0] = id;
+          longArr[1] = rev;
+        }
+        catch(Exception ex) {
+          MSysOut.println(ERROR_LOGS,"Id and/or revision parse error in received message: "+msg);
+        }
+      }
+      return longArr;
+    }
+    
     // We're running here inside a call to ui.access(). Do a push at the end if needed.
     @Override
     public void run()
@@ -92,8 +111,10 @@ public class AbstractMmowgliControllerHelper2
           break;
         case UPDATED_CARD:
           MSysOut.println(PUSH_LOGS,"AbstractMmowgliControllerHelper2.UIAccessRunner calling cardUpdated_TL()");
-          sa = pkt.msg.split(MMessage.MMESSAGE_DELIM);
-          push = cardUpdated_TL(Long.parseLong(sa[0]), comp);
+          long[] la = parseIdAndRevision(pkt.msg);
+          if(la != null) {
+            push = cardUpdated_TL(la[0],la[1], comp);
+          }
           break;
         case UPDATED_CHAT:
           push = chatLogUpdated_TL(Long.parseLong(pkt.msg),comp);
@@ -208,14 +229,14 @@ public class AbstractMmowgliControllerHelper2
     }
     return ret;
   }  
-  private boolean cardUpdated_TL(long cardId, Component visibleComponent)
+  private boolean cardUpdated_TL(long cardId, long revision, Component visibleComponent)
   {
     boolean ret = false;
     if(myUI instanceof WantsCardUpdates)
-      if(((WantsCardUpdates)myUI).cardUpdated_oobTL(cardId))
+      if(((WantsCardUpdates)myUI).cardUpdated_oobTL(cardId,revision))
         ret = true;
     if(visibleComponent instanceof WantsCardUpdates)
-      if(((WantsCardUpdates)visibleComponent).cardUpdated_oobTL(cardId));
+      if(((WantsCardUpdates)visibleComponent).cardUpdated_oobTL(cardId,revision));
         ret = true;
     return ret;
   }  
@@ -277,10 +298,7 @@ public class AbstractMmowgliControllerHelper2
 
   private boolean newGameMessage_TL(long id, Component visibleComponent) // Mail messages
   {
-    Message msg = (Message) HSess.get().get(Message.class, id);
-
-    if (msg == null) // Here's a way to get the message when it's ready:
-      msg = ComeBackWhenYouveGotIt.waitForMessage_oobTL(this, id);
+    Message msg = DB.getRetry(Message.class, id, null, HSess.get());
     if (msg == null)
       return false;
 
@@ -342,13 +360,10 @@ public class AbstractMmowgliControllerHelper2
       ret = true;
     
     if (eventType == GameEvent.EventType.MESSAGEBROADCAST || eventType == GameEvent.EventType.MESSAGEBROADCASTGM) {
-      if (meId == NO_LOGGEDIN_USER_ID) {
+      if (meId == NO_LOGGEDIN_USER_ID)
         return ret; // Don't display messages during login sequence
-      }
-      GameEvent ge = (GameEvent) HSess.get().get(GameEvent.class, MSG.id);
-      if (ge == null)
-        ge = ComeBackWhenYouveGotIt.fetchGameEventWhenPossible(MSG.id);
 
+      GameEvent ge = DB.getRetry(GameEvent.class, MSG.id, null, HSess.get());
       if (ge == null) {
         System.err.println("Can't get Game Event from database: id=" + MSG.id + ", MmowgliOneApplicationController on " + AppMaster.instance().getServerName());
         return ret;
