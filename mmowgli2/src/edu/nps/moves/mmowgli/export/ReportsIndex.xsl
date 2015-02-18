@@ -76,8 +76,14 @@
             <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
                 <xsl:text>NAWCAD Strategic Cell</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
+            <xsl:when test="starts-with($gameTitle,'blackswan') or starts-with($gameTitle,'Blackswan') or contains($gameTitle,'blackswan') or contains($gameTitle,'Blackswan')">
                 <xsl:text>blackswan</xsl:text>
+            </xsl:when>
+            <xsl:when test="starts-with($gameTitle,'dd') or starts-with($gameTitle,'DD') or contains($gameTitle,'dd') or contains($gameTitle,'DD')">
+                <xsl:text>Data Dilemma (dd)</xsl:text>
+            </xsl:when>
+            <xsl:when test="starts-with($gameTitle,'pcc') or starts-with($gameTitle,'PCC') or contains($gameTitle,'pcc') or contains($gameTitle,'PCC')">
+                <xsl:text>Professional Core Competencies (pcc)</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                 <xsl:text>Unmanned Vehicle Digital Manufacturing (uxvdm)</xsl:text>
@@ -267,9 +273,6 @@ td.longtext {
                         <xsl:when test="contains($gameTitle,'ig')">
                             <xsl:text>https://portal.mmowgli.nps.edu/ig</xsl:text>
                         </xsl:when>
-                        <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
-                            <xsl:text>https://portal.mmowgli.nps.edu/coin</xsl:text>
-                        </xsl:when>
                         <xsl:when test="contains($gameTitle,'training')">
                             <xsl:text>https://portal.mmowgli.nps.edu/training</xsl:text>
                         </xsl:when>
@@ -278,6 +281,12 @@ td.longtext {
                         </xsl:when>
                         <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
                             <xsl:text>https://portal.mmowgli.nps.edu/blackswan</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="contains($gameTitle,'dd') or contains(lower-case($gameTitle),'DD')">
+                            <xsl:text>https://portal.mmowgli.nps.edu/dd</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="contains($gameTitle,'pcc') or contains(lower-case($gameTitle),'PCC')">
+                            <xsl:text>https://portal.mmowgli.nps.edu/pcc</xsl:text>
                         </xsl:when>
                         <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                             <xsl:text>https://portal.mmowgli.nps.edu/uxvdm</xsl:text>
@@ -330,81 +339,179 @@ td.longtext {
                 
                 <!-- TODO add totals?  requires reaching into other files -->
 
-                <ul>
-                    <li>
-                        <a href="{concat($IdeaCardLocalLink,'.html')}" title="Idea Card chains report .html">
-                            <xsl:text>Idea Card Chains</xsl:text>
-                        </a>
-                        <xsl:if test="(//ApplicationURLs/PdfAvailable = 'true')">
-                            <xsl:text> (</xsl:text>
-                            <a href="{concat($IdeaCardLocalLink,'.pdf')}" title="Idea Card chains report .pdf">
-                                <xsl:text>.pdf</xsl:text>
+                <table cellspacing="2" cellpadding="4" border="0">
+                    <tr align="center">
+                        <td>
+                            <a href="{concat($IdeaCardLocalLink,'.html')}" title="Idea Card chains report .html">
+                                <img src="images/PlayAnIdea.png"/>
                             </a>
-                            <xsl:text>)</xsl:text>
-                        </xsl:if>
-                        <xsl:text> and </xsl:text>
-                        <a href="cardSunburstVisualizer.html" title="Idea Card Sunburst Visualizer">
-                            <xsl:text disable-output-escaping="yes">Idea&amp;nbsp;Card Sunburst&amp;nbsp;Visualizer</xsl:text>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{concat($ActionPlanLocalLink,'.html')}" title="Action Plans report .html">
-                            <xsl:text>Action Plans</xsl:text>
-                        </a>
-                        <xsl:if test="(//ApplicationURLs/PdfAvailable = 'true')">
-                            <xsl:text>(</xsl:text>
-                            <a href="{concat($ActionPlanLocalLink,'.pdf')}" title="Action Plans report .pdf">
-                                <xsl:text>.pdf</xsl:text>
+                            <br />
+                            <a href="{concat($IdeaCardLocalLink,'.html')}" title="Idea Card chains report .html">
+                                <xsl:text>Idea Card Chains</xsl:text>
                             </a>
-                            <xsl:text>)</xsl:text>
-                        </xsl:if>
-                    </li>
-                    <li>
-                        <a href="{concat($PlayerProfilesLocalLink,'.html')}" title="Player Profiles report .html">
-                            <xsl:text>Player Profiles</xsl:text>
-                        </a>
+                            <xsl:if test="(//ApplicationURLs/PdfAvailable = 'true')">
+                                <xsl:text> (</xsl:text>
+                                <a href="{concat($IdeaCardLocalLink,'.pdf')}" title="Idea Card chains report .pdf">
+                                    <xsl:text>.pdf</xsl:text>
+                                </a>
+                                <xsl:text>)</xsl:text>
+                            </xsl:if>
+                        </td>
+                        <td>
+                            <a href="cardSunburstVisualizer.html" title="Idea Card Sunburst Visualizer">
+                                <img src="images/IdeaCardSunburstVisualizer.png" height="100"/>
+                            </a>
+                            <br />
+                            <a href="cardSunburstVisualizer.html" title="Idea Card Sunburst Visualizer">
+                                <xsl:text disable-output-escaping="yes">Idea&amp;nbsp;Card Sunburst&amp;nbsp;Visualizer</xsl:text>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{concat($ActionPlanLocalLink,'.html')}" title="Action Plans report .html">
+                                <img src="images/TakeAction100.png"/>
+                            </a>
+                            <br />
+                            <a href="{concat($ActionPlanLocalLink,'.html')}" title="Action Plans report .html">
+                                <xsl:text>Action Plans</xsl:text>
+                            </a>
+                            <xsl:if test="(//ApplicationURLs/PdfAvailable = 'true')">
+                                <xsl:text>(</xsl:text>
+                                <a href="{concat($ActionPlanLocalLink,'.pdf')}" title="Action Plans report .pdf">
+                                    <xsl:text>.pdf</xsl:text>
+                                </a>
+                                <xsl:text>)</xsl:text>
+                            </xsl:if>
+                        </td>
+                        <td width="175">
+                            <a href="{concat($PlayerProfilesLocalLink,'.html')}" title="Player Profiles report .html">
+                                <img src="images/MMOWGLIteam258w_q75.jpg" height="100"/>
+                            </a>
+                            <br />
+                            <a href="{concat($PlayerProfilesLocalLink,'.html')}" title="Player Profiles report .html">
+                                <xsl:text>Player Profiles</xsl:text>
+                            </a>
 
-                        <!-- TODO
-                        <xsl:if test="(//ApplicationURLs/PdfAvailable = 'true')">
-                            <xsl:text>(</xsl:text>
-                            <a href="{concat($PlayerProfilesLocalLink,'.pdf')}" title="Player Profiles report .pdf">
-                                <xsl:text>.pdf</xsl:text>
+                            <!-- TODO
+                            <xsl:if test="(//ApplicationURLs/PdfAvailable = 'true')">
+                                <xsl:text>(</xsl:text>
+                                <a href="{concat($PlayerProfilesLocalLink,'.pdf')}" title="Player Profiles report .pdf">
+                                    <xsl:text>.pdf</xsl:text>
+                                </a>
+                                <xsl:text>)</xsl:text>
+                            </xsl:if>
+                            -->
+                        </td>
+                        <td>
+                            <a href="{concat($GameDesignLocalLink,'.html')}" title="Game Design report">
+                                <img src="images/stoplights.png" height="100"/>
                             </a>
-                            <xsl:text>)</xsl:text>
-                        </xsl:if>
-                        -->
-                    </li>
-                    <li>
-                        <a href="{concat($GameDesignLocalLink,'.html')}" title="Game Design report">
-                            <xsl:text>Game Design</xsl:text>
-                        </a>
-                    </li>
-                </ul>
-
-                <p>
-                    <xsl:text>Also available: </xsl:text>
+                            <br />
+                            <a href="{concat($GameDesignLocalLink,'.html')}" title="Game Design report">
+                                <xsl:text>Game Design</xsl:text>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{//ApplicationURLs/Game/.}" target="_{//Other/GameAcronym/.}Game">
+                                <img src="images/MmowgliWelcomeSplash.png" height="100"/>
+                            </a>
+                            <br />
+                            <a href="{//ApplicationURLs/Game/.}" target="_{//Other/GameAcronym/.}Game">
+                                <xsl:text>Play the </xsl:text>
+                                <xsl:value-of select="//HeaderFooter/BrandingText/."/>
+                                <xsl:text> game</xsl:text>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game">
+                                <img src="images/MmowgliPortalUrl.qr.png" height="100"/>
+                            </a>
+                            <br />
+                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game">
+                                <xsl:text>Mobile</xsl:text>
+                            </a>
+                        </td>
+                    </tr>
                     
-                </p>
-                <ul>
-                    <li>
-                        <xsl:text>Play the </xsl:text>
-                        <a href="{//ApplicationURLs/Game/.}" target="_{//Other/GameAcronym/.}Game">
-                            <xsl:value-of select="//HeaderFooter/BrandingText/."/>
-                        </a>
-                        <xsl:text> game</xsl:text>
-                    </li>
-                    <li>
-                        <xsl:text>Game </xsl:text>
-                        <a href="{substring-before(//HeaderFooter/BlogURL,'-blog')}">portal</a>
-                        <xsl:text>, </xsl:text>
-                        <a href="{//HeaderFooter/BlogURL/.}">blog</a>
-                        <xsl:text>, and </xsl:text>
-                        <a href="{//ApplicationURL/AlternateVideo/.}">videos</a>
-                    </li>
-                    <li>
-                        <a href="https://portal.mmowgli.nps.edu/reports" target="_blank">All published MMOWGLI Game Reports</a>
-                    </li>
-                </ul>
+                    <tr align="center" rowspan="3">
+                        <td colspan="6">
+                            <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                        </td>
+                    </tr>
+                    <tr align="center" rowspan="3">
+                        <td colspan="6">
+                            <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                        </td>
+                    </tr>
+                    
+                    <tr align="center">
+                        <td>
+                            <a href="{substring-before(//HeaderFooter/BlogURL,'-blog')}">
+                                <img src="images/PlayersPortal.png" height="100"/>
+                            </a>
+                            <br />
+                            <a href="{substring-before(//HeaderFooter/BlogURL,'-blog')}">
+                                <xsl:text>Players Portal</xsl:text>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{//HeaderFooter/BlogURL}">
+                                <img src="images/GameBlog.png" height="100"/>
+                            </a>
+                            <br />
+                            <a href="{//HeaderFooter/BlogURL}">
+                                <xsl:text>Game Blog</xsl:text>
+                            </a>
+                        </td>
+                        <td valign="bottom">
+                            <a href="{//ApplicationURLs/AlternateVideo/.}" title="Videos" target="_blank">
+                                <img src="images/1424078129_device_camera_recorder_video_-128.png"/>
+                            </a>
+                            <br />
+                            <a href="{//ApplicationURLs/AlternateVideo/.}">Videos</a>
+                        </td>
+                        <td>
+                            <a href="https://twitter.com/mmowgli" title="Follow @MMOWGLI" target="_blank">
+                                <img src="images/twitterLogoSquare.png" height="100"/>
+                            </a>
+                            <br />
+                            <a href="https://twitter.com/mmowgli" title="Follow @MMOWGLI" target="_blank">
+                                <xsl:text>@MMOWGLI</xsl:text>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="https://portal.mmowgli.nps.edu/reports" title="All published MMOWGLI Game Reports" target="_blank">
+                                <img src="images/DirectoryProducts.png" height="100"/>
+                            </a>
+                            <br />
+                            <a href="https://portal.mmowgli.nps.edu/reports" title="All published MMOWGLI Game Reports" target="_blank">
+                                <xsl:text>All Reports</xsl:text>
+                            </a>
+                        </td>
+                        <td valign="bottom">
+                            <a href="https://portal.mmowgli.nps.edu/trouble" title="Trouble Report" target="_blank">
+                                <img src="images/Oops.png"/>
+                            </a>
+                            <br />
+                            <a href="https://portal.mmowgli.nps.edu/trouble" title="Trouble Report" target="_blank">
+                                <xsl:text>Trouble Report</xsl:text>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game">
+                                <img src="images/AndroidHandheldTabletAlphaTestPhoto.jpg" height="100"/>
+                            </a>
+                            <br />
+                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game">
+                                <xsl:text>Mobile</xsl:text>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr align="center" rowspan="3">
+                        <td colspan="6">
+                            <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                        </td>
+                    </tr>
+                </table>
 
                 <h2>
                     <a name="DatabaseExports">Database Exports</a>
@@ -438,11 +545,14 @@ td.longtext {
                         <xsl:text> XML source </xsl:text>
                     </li>
                 </ul>
-
+                
                 <p>
-                    <xsl:text> Also available: the </xsl:text>
-                    <a href="data/" title="database table text export">reports/data/</a>
-                    <xsl:text> subdirectory contains database tables exported as tab-delimited text files. </xsl:text>
+                    <a href="data/" title="Database tables as text data" target="_blank">
+                        <img src="images/Mimetypes-inode-directory-icon.png" width="24" height="24" align="left"/>
+                    </a>
+                    <xsl:text> The </xsl:text>
+                    <a href="data/" title="database table text export">data/ subdirectory</a>
+                    <xsl:text> contains database tables exported as tab-delimited text files. </xsl:text>
                 </p>
 
                 <ul>
@@ -460,27 +570,28 @@ td.longtext {
                             <xsl:text> button. </xsl:text>
                         </li>
                         <li>
-                            <xsl:text> Copy the link address for the </xsl:text>
-                            <a href="data/Card.txt" title="database table text export">Card.txt</a>
-                            <xsl:text> file and follow the wizard instructions. </xsl:text>
+                            <xsl:text> Copy the link address for the table file of interest. </xsl:text>
+                        </li>
+                        <li>
+                            <xsl:text> Tables of frequent interest: </xsl:text>
+                            <a href="data/ActionPlan.txt" title="database table text export">ActionPlan.txt</a>
+                            <xsl:text>, </xsl:text>
+                            <a href="data/CardType.txt" title="database table text export">CardType.txt</a>
+                            <xsl:text>, and </xsl:text>
+                            <a href="data/User.txt" title="database table text export">User.txt</a>
+                        </li>
+                        <li>
+                            <xsl:text>Follow the Excel import wizard instructions. </xsl:text>
                         </li>
                     </ul>
                 </li>
                 <li>
-                    <xsl:text> Additional tables of interest: </xsl:text>
-                    <a href="data/ActionPlan.txt" title="database table text export">ActionPlan.txt</a>
-                    <xsl:text>, </xsl:text>
-                    <a href="data/CardType.txt" title="database table text export">CardType.txt</a>
-                    <xsl:text>, and </xsl:text>
-                    <a href="data/User.txt" title="database table text export">User.txt</a>
-                </li>
-                <li>
                     <xsl:text> TODO: automatic spreadsheet and presentation generation capability as part of the open-source MMOWGLI game platform. </xsl:text>
                 </li>
-                <li>
-                    <xsl:text> Additional exemplars and contributions are welcome. </xsl:text>
-                </li>
             </ul>
+            <p>
+                <xsl:text> Additional exemplars and contributions are welcome. </xsl:text>
+            </p>
 
 <!-- =================================================== Production Notes =================================================== -->
 
