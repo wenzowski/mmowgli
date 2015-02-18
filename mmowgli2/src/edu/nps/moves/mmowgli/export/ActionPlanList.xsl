@@ -53,6 +53,15 @@
             <xsl:when test="starts-with($gameTitle,'am') or starts-with($gameTitle,'Am') or contains($gameTitle,'additive') or contains($gameTitle,'Additive')">
                 <xsl:text>Additive Manufacturing (am)</xsl:text>
             </xsl:when>
+            <xsl:when test="starts-with($gameTitle,'blackswan') or starts-with($gameTitle,'Blackswan') or contains($gameTitle,'blackswan') or contains($gameTitle,'Blackswan')">
+                <xsl:text>blackswan</xsl:text>
+            </xsl:when>
+            <xsl:when test="starts-with($gameTitle,'dd') or starts-with($gameTitle,'DD') or contains($gameTitle,'dd') or contains($gameTitle,'DD')">
+                <xsl:text>Data Dilemma (dd)</xsl:text>
+            </xsl:when>
+            <xsl:when test="starts-with($gameTitle,'pcc') or starts-with($gameTitle,'PCC') or contains($gameTitle,'pcc') or contains($gameTitle,'PCC')">
+                <xsl:text>Professional Core Competencies (pcc)</xsl:text>
+            </xsl:when>
             <xsl:when test="starts-with($gameTitle,'cap2con') or starts-with($gameTitle,'Cap2con') or contains($gameTitle,'cap2con') or contains($gameTitle,'Cap2con')">
                 <xsl:text>Capacity, Capabilities and Constraints (cap2con)</xsl:text>
             </xsl:when>
@@ -61,9 +70,6 @@
             </xsl:when>
             <xsl:when test="contains($gameTitle,'ig')">
                 <xsl:text>NPS Inspector General (ig) Review</xsl:text>
-            </xsl:when>
-            <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
-                <xsl:text>Officer Accesions</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'training')">
                 <xsl:text>MMOWGLI Training</xsl:text>
@@ -128,9 +134,6 @@
             <xsl:when test="contains($gameTitle,'ig')">
                 <xsl:text>https://mmowgli.nps.edu/ig</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
-                <xsl:text>https://mmowgli.nps.edu/coin</xsl:text>
-            </xsl:when>
             <xsl:when test="contains($gameTitle,'training')">
                 <xsl:text>https://mmowgli.nps.edu/training</xsl:text>
             </xsl:when>
@@ -139,6 +142,12 @@
             </xsl:when>
             <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
                 <xsl:text>https://mmowgli.nps.edu/blackswan</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'dd') or contains(lower-case($gameTitle),'DD')">
+                <xsl:text>https://portal.mmowgli.nps.edu/dd</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'pcc') or contains(lower-case($gameTitle),'PCC')">
+                <xsl:text>https://portal.mmowgli.nps.edu/pcc</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                 <xsl:text>https://mmowgli.nps.edu/uxvdm</xsl:text>
@@ -267,9 +276,33 @@
         </xsl:variable>
         <xsl:variable name="roundNumber" select="@moveNumber"/>
         <xsl:variable name="numberPlansInRound" select="count(//ActionPlan[@moveNumber=$roundNumber])"/>
+        <!-- debug 
+        <xsl:comment>
+            <xsl:text>$ActionPlanLabel=</xsl:text>
+            <xsl:value-of select="$ActionPlanLabel"/>
+            <xsl:text>, $ranking=</xsl:text>
+            <xsl:value-of select="$ranking"/>
+            <xsl:text>, $roundNumber=</xsl:text>
+            <xsl:value-of select="$roundNumber"/>
+            <xsl:text>, $numberPlansInRound=</xsl:text>
+            <xsl:value-of select="$numberPlansInRound"/>
+            <xsl:text>, @hidden=</xsl:text>
+            <xsl:value-of select="@hidden"/>
+            <xsl:text>, count(preceding-sibling::ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')])=</xsl:text>
+  <xsl:value-of select="count(preceding-sibling::ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')])"/>
+                  <xsl:text>, preceding-sibling::ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')][1]/@moveNumber=</xsl:text>
+        <xsl:value-of select="preceding-sibling::ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')][1]/@moveNumber"/>
+        </xsl:comment>
+        -->
         
-        <xsl:if test="($numberOfRounds != '1') and (($roundNumber = '1') or ($roundNumber != preceding::*/@moveNumber))">
-            <h2>
+        <!-- print header if already-sorted Action Plans start a new round -->
+        <xsl:if test="($numberOfRounds != '1') and (count(preceding-sibling::ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')]) = 0)">
+            <!--
+            ($numberOfRounds != '1') and 
+                      ((($roundNumber = '1') and (count(preceding-sibling::ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')]) = 0)) or 
+                       ( $roundNumber != preceding-sibling::ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')][1]/@moveNumber))
+                       -->
+            <h1 style="background-color:lightgray;" align="center">
                 <a name="Round{$roundNumber}"> 
                     <xsl:text>Round </xsl:text>
                     <xsl:value-of select="$roundNumber"/>
@@ -277,9 +310,9 @@
                                 <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
                                 <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
                                 <xsl:text> (</xsl:text>
-                                <xsl:value-of select="count(//ActionPlan[(@moveNumber = ($roundNumber)) and not(@hidden='true')])"/>
+                                <xsl:value-of select="count(//ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')])"/>
                                 <xsl:text> plans)</xsl:text>
-            </h2>
+            </h1>
             <hr />
         </xsl:if>
 
@@ -1384,9 +1417,6 @@ b.error {color: #CC0000}
                 <xsl:when test="contains($gameTitle,'ig')">
                     <xsl:text>https://portal.mmowgli.nps.edu/ig</xsl:text>
                 </xsl:when>
-                <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
-                    <xsl:text>https://portal.mmowgli.nps.edu/coin</xsl:text>
-                </xsl:when>
                 <xsl:when test="contains($gameTitle,'training')">
                     <xsl:text>https://portal.mmowgli.nps.edu/training</xsl:text>
                 </xsl:when>
@@ -1395,6 +1425,12 @@ b.error {color: #CC0000}
                 </xsl:when>
                 <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
                     <xsl:text>https://portal.mmowgli.nps.edu/blackswan</xsl:text>
+                </xsl:when>
+                <xsl:when test="contains($gameTitle,'dd') or contains(lower-case($gameTitle),'DD')">
+                    <xsl:text>https://portal.mmowgli.nps.edu/dd</xsl:text>
+                </xsl:when>
+                <xsl:when test="contains($gameTitle,'pcc') or contains(lower-case($gameTitle),'PCC')">
+                    <xsl:text>https://portal.mmowgli.nps.edu/pcc</xsl:text>
                 </xsl:when>
                 <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                     <xsl:text>https://portal.mmowgli.nps.edu/uxvdm</xsl:text>
@@ -1521,30 +1557,12 @@ b.error {color: #CC0000}
                         </td>
                     </tr>
                 </xsl:if>
-                <xsl:if test="($numberOfRounds != '1')">
-                    <tr>
-                        <td colspan="6">
-                            <hr title="Round 1"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
-                        </td>
-                        <td colspan="4">
-                            <b>
-                                <a href="#Round1">Round 1</a>
-                            </b>
-                            <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
-                            <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
-                            <xsl:text> (</xsl:text>
-                            <xsl:value-of select="count(//ActionPlan[(@moveNumber = 1) and not(@hidden='true')])"/>
-                            <xsl:text> plans)</xsl:text>
-                        </td>
-                    </tr>
-                </xsl:if>
 
+                <!-- index list for sll plans, grouped by round and sorted by ID number -->
                 <xsl:for-each select="//ActionPlan">
+                    <xsl:sort select="number(@moveNumber)" />
+                    <xsl:sort select="number(ID)" />
+                    
                     <xsl:variable name="ActionPlanLabel">
                         <!-- n.b. defined twice in this stylesheet, ensure consistent or links will break -->
                         <xsl:text>ActionPlan</xsl:text>
@@ -1552,6 +1570,32 @@ b.error {color: #CC0000}
                     </xsl:variable>
                     <xsl:comment>found action plan</xsl:comment>
                     <xsl:variable name="roundNumber" select="@moveNumber"/>
+                    
+                    <xsl:if test="($numberOfRounds != '1') and (count(preceding-sibling::ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')]) = 0)">
+                        <tr>
+                            <td colspan="6">
+                                <hr title="Round {@moveNumber}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                            </td>
+                            <td colspan="4">
+                                <b>
+                                    <a href="#Round{@moveNumber}"> 
+                                        <xsl:text>Round </xsl:text>
+                                        <xsl:value-of select="@moveNumber"/>
+                                    </a>
+                                </b>
+                                <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                                <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                                <xsl:text> (</xsl:text>
+                                <xsl:value-of select="count(//ActionPlan[(@moveNumber = ($roundNumber)) and not(@hidden='true')])"/>
+                                <xsl:text> plans)</xsl:text>
+                            </td>
+                        </tr>
+                    </xsl:if>
                 
                     <xsl:choose>
                         <!-- first list hidden plan, if allowed -->
@@ -1716,31 +1760,6 @@ b.error {color: #CC0000}
                             </tr>
                         </xsl:otherwise>
                     </xsl:choose>
-                    <xsl:if test="(position() > 1) and (following-sibling::*[1]/@moveNumber > @moveNumber)">
-                        <tr>
-                            <td colspan="6">
-                                <hr title="Round {following-sibling::*[1]/@moveNumber}"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
-                            </td>
-                            <td colspan="4">
-                                <b>
-                                    <a href="#Round{following-sibling::*[1]/@moveNumber}"> 
-                                        <xsl:text>Round </xsl:text>
-                                        <xsl:value-of select="following-sibling::*[1]/@moveNumber"/>
-                                    </a>
-                                </b>
-                                <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
-                                <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
-                                <xsl:text> (</xsl:text>
-                                <xsl:value-of select="count(//ActionPlan[(@moveNumber = ($roundNumber+1)) and not(@hidden='true')])"/>
-                                <xsl:text> plans)</xsl:text>
-                            </td>
-                        </tr>
-                    </xsl:if>
                 </xsl:for-each>
 
                 <xsl:if test="($numberOfRounds != '1')">
@@ -1854,11 +1873,16 @@ b.error {color: #CC0000}
         </xsl:if> <!-- end if showing all plans -->
 
         <xsl:choose>
+            <!-- show single plan -->
             <xsl:when test="(string-length($displaySingleActionPlanNumber) > 0)">
                 <xsl:apply-templates select="ActionPlan[number($displaySingleActionPlanNumber)]"/>
             </xsl:when>
+            <!-- show sll plans, grouped by round and sorted by ID number -->
             <xsl:otherwise>
-                <xsl:apply-templates select="ActionPlan[not(@hidden='true') or ($displayHiddenPlans='true')]"/>
+                <xsl:apply-templates select="ActionPlan[not(@hidden='true') or ($displayHiddenPlans='true')]">
+                    <xsl:sort select="number(@moveNumber)" />
+                    <xsl:sort select="number(ID)" />
+                </xsl:apply-templates>
             </xsl:otherwise>
         </xsl:choose>
 

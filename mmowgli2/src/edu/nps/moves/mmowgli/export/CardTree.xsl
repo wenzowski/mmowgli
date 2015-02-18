@@ -78,6 +78,15 @@
             <xsl:when test="starts-with($gameTitle,'am') or starts-with($gameTitle,'Am') or contains($gameTitle,'additive') or contains($gameTitle,'Additive')">
                 <xsl:text>Additive Manufacturing (am)</xsl:text>
             </xsl:when>
+            <xsl:when test="starts-with($gameTitle,'blackswan') or starts-with($gameTitle,'Blackswan') or contains($gameTitle,'blackswan') or contains($gameTitle,'Blackswan')">
+                <xsl:text>blackswan</xsl:text>
+            </xsl:when>
+            <xsl:when test="starts-with($gameTitle,'dd') or starts-with($gameTitle,'DD') or contains($gameTitle,'dd') or contains($gameTitle,'DD')">
+                <xsl:text>Data Dilemma (dd)</xsl:text>
+            </xsl:when>
+            <xsl:when test="starts-with($gameTitle,'pcc') or starts-with($gameTitle,'PCC') or contains($gameTitle,'pcc') or contains($gameTitle,'PCC')">
+                <xsl:text>Professional Core Competencies (pcc)</xsl:text>
+            </xsl:when>
             <xsl:when test="starts-with($gameTitle,'cap2con') or starts-with($gameTitle,'Cap2con') or contains($gameTitle,'cap2con') or contains($gameTitle,'Cap2con')">
                 <xsl:text>Capacity, Capabilities and Constraints (cap2con)</xsl:text>
             </xsl:when>
@@ -86,9 +95,6 @@
             </xsl:when>
             <xsl:when test="contains($gameTitle,'ig')">
                 <xsl:text>NPS Inspector General (ig) Review</xsl:text>
-            </xsl:when>
-            <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
-                <xsl:text>Officer Accesions</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'training')">
                 <xsl:text>MMOWGLI Training</xsl:text>
@@ -133,6 +139,16 @@
         <xsl:choose>
             <xsl:when           test="//CallToAction/BriefingText">
                 <xsl:value-of select="//CallToAction/BriefingText"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:text></xsl:text>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+    <xsl:variable name="callToActionBriefingSummary">
+        <xsl:choose>
+            <xsl:when           test="//CallToAction/BriefingSummary">
+                <xsl:value-of select="//CallToAction/BriefingSummary"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:text></xsl:text>
@@ -400,15 +416,27 @@
         <!-- Insert divider row before new top-level cards, but only when listing entire card chains -->
         <xsl:variable name="currentCardId"  select="@id"/>
         <xsl:variable name="currentCardType"  select="@type"/>
-        <!-- debug
+        <xsl:variable name="currentCardMoveNumber"  select="@moveNumber"/>
+        <!-- debug 
         <xsl:comment>
             <xsl:text>$singleIdeaCardChainRootNumber=</xsl:text>
             <xsl:value-of select="$singleIdeaCardChainRootNumber"/>
             <xsl:text>, $currentCardId=</xsl:text>
             <xsl:value-of select="$currentCardId"/>
-        </xsl:comment> -->
+            <xsl:text>, $currentCardMoveNumber=</xsl:text>
+            <xsl:value-of select="$currentCardMoveNumber"/>
+            <xsl:text>, number(@level)=</xsl:text>
+            <xsl:value-of select="number(@level)"/>
+            <xsl:text>, $recurse=</xsl:text>
+            <xsl:value-of select="$recurse"/>
+            <xsl:text>, preceding-sibling::*[not(@hidden = 'true')][1]/@moveNumber=</xsl:text>
+            <xsl:value-of select="preceding-sibling::*[not(@hidden = 'true')][1]/@moveNumber"/>
+        </xsl:comment>
+        -->
         <xsl:choose>
-            <xsl:when test="(number(@level) = 1) and ($recurse = 'true') and ((position() = 1) or not(preceding-sibling::*[@type = $currentCardType])) and (string-length($singleIdeaCardChainRootNumber) = 0)">
+            <xsl:when test="(number(@level) = 1) and ($recurse = 'true') and not(@hidden = 'true') and 
+                            ((position() = 1) or not(preceding-sibling::*[@type = $currentCardType]) or not(preceding-sibling::*[not(@hidden = 'true')][1][@moveNumber = $currentCardMoveNumber])) and
+                            (string-length($singleIdeaCardChainRootNumber) = 0)">
                 <tr>
                     <td align="left" valign="bottom" colspan="{number($maxColumnCount) - 1}">
                         <!-- embedded table to clean up, simplify column spacing -->
@@ -776,7 +804,7 @@
                 <meta name="created"     content="{current-date()}"/>
                 <meta name="exported"    content="{$exportDateTime}"/>
                 <meta name="filename"    content="IdeaCardChains_{$gameTitle}.html"/>
-                <meta name="identifier"  content="https://mmowgli.nps.edu/{$gameAcronym}/IdeaCardChains_{$gameTitle}.html"/>
+                <meta name="identifier"  content="https://mmowgli.nps.edu/{$gameAcronym}/reports/IdeaCardChain_{$gameTitle}.html"/>
                 <meta name="reference"   content="MMOWGLI Game Engine, https://portal.mmowgli.nps.edu"/>
                 <meta name="generator"   content="Eclipse, https://www.eclipse.org"/>
                 <meta name="generator"   content="Altova XML-Spy, https://www.altova.com"/>
@@ -882,12 +910,6 @@ text-shadow:; /* off */
                         <xsl:when test="contains($gameTitle,'vtp')"> <!-- evtp -->
                             <xsl:text>https://portal.mmowgli.nps.edu/evtp</xsl:text>
                         </xsl:when>
-                        <xsl:when test="contains($gameTitle,'ig')">
-                            <xsl:text>https://portal.mmowgli.nps.edu/ig</xsl:text>
-                        </xsl:when>
-                        <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
-                            <xsl:text>https://portal.mmowgli.nps.edu/coin</xsl:text>
-                        </xsl:when>
                         <xsl:when test="contains($gameTitle,'training')">
                             <xsl:text>https://portal.mmowgli.nps.edu/training</xsl:text>
                         </xsl:when>
@@ -896,6 +918,12 @@ text-shadow:; /* off */
                         </xsl:when>
                         <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
                             <xsl:text>https://portal.mmowgli.nps.edu/blackswan</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="contains($gameTitle,'dd') or contains(lower-case($gameTitle),'DD')">
+                            <xsl:text>https://portal.mmowgli.nps.edu/dd</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="contains($gameTitle,'pcc') or contains(lower-case($gameTitle),'PCC')">
+                            <xsl:text>https://portal.mmowgli.nps.edu/pcc</xsl:text>
                         </xsl:when>
                         <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                             <xsl:text>https://portal.mmowgli.nps.edu/uxvdm</xsl:text>
@@ -1289,6 +1317,12 @@ text-shadow:; /* off */
                     <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
                 </td>
                 <td valign="top">
+
+                    <xsl:if test="string-length(normalize-space($callToActionBriefingSummary)) > 0">
+                        <h3>
+                            <xsl:value-of select="$callToActionBriefingSummary" disable-output-escaping="yes"/>
+                        </h3>
+                    </xsl:if>
 
                     <xsl:if test="string-length(normalize-space($callToActionBriefingText)) > 0">
                         <xsl:value-of select="$callToActionBriefingText" disable-output-escaping="yes"/>

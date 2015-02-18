@@ -22,8 +22,13 @@
 
 package edu.nps.moves.mmowgli.export;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.REPORT_LOGS;
+
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.xml.transform.*;
@@ -36,7 +41,6 @@ import edu.nps.moves.mmowgli.export.BaseExporter.ExportProducts;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 /**
  * ReportGenerator.java
  * Created on Jun 28, 2012
@@ -130,10 +134,11 @@ public class ReportGenerator implements Runnable
 
           writeIndexDotHtml(MmowgliConstants.REPORTS_FILESYSTEM_PATH + "index.html", gXmlPath);
 
+          copyImages();
+          
           MSysOut.println(REPORT_LOGS,"Report-generator finished");
           GameEventLogger.logEndReportGenerationTL();
-        } // try
-
+        }
         catch (Throwable t) {
           if (!(t instanceof InterruptedException) && !killed) {
             System.err.println("Exception in ReportGenerator: " + t.getClass().getSimpleName() + " / " + t.getLocalizedMessage());
@@ -211,6 +216,44 @@ public class ReportGenerator implements Runnable
     fw.write(sw.toString());
     fw.close();
   }
+  
+  private String imagesPackage = "edu.nps.moves.mmowgli.export.reports.images";
+  private String targetDir =  MmowgliConstants.REPORTS_FILESYSTEM_PATH+"images/";
+  
+  private void copyImages() throws Exception
+  {
+    ArrayList<File> list = ReportGenerator.filesInPackage(this.getClass().getClassLoader(), imagesPackage); 
+    new File(targetDir).mkdirs();
+    for(File f : list) {
+      copyOne(f,targetDir+f.getName());
+    }
+  }
+  
+  private void copyOne(File from, String to) throws FileNotFoundException, IOException
+  {
+    InputStream is = new FileInputStream(from);
+    OutputStream os = new FileOutputStream(to);
+    int count = 0;
+    byte b[] = new byte[4096];
+    while((count = is.read(b)) != -1) {
+      os.write(b, 0, count);
+    }
+    is.close();
+    os.close();
+  }
+  
+  public static ArrayList<File> filesInPackage(ClassLoader cl, String packge) throws URISyntaxException
+  {
+    ArrayList<File> list = new ArrayList<File>();
+
+    URL url = cl.getResource(packge.replace('.', '/'));
+    File dbFiles = new File(url.toURI());
+    File[] files = dbFiles.listFiles();
+    for (File f : files) {
+      list.add(f);
+    }
+    return list;
+  }
 
   private boolean initted()
   {
@@ -219,6 +262,7 @@ public class ReportGenerator implements Runnable
 
   public void poke()
   {
+    MSysOut.println(REPORT_LOGS, "ReportGenerator.poke()");
     if(asleep) {
       poked = true;
       thread.interrupt();
