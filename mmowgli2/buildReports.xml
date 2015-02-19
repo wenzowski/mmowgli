@@ -114,6 +114,12 @@
                 <include name="*.jpg"/>
             </fileset>
           </copy>
+          <echo message="copy mmowgli.nps.edu.@{gameName}.mobile.qr.png"/>
+          <copy todir="${reports.dir}/@{gameName}/images" verbose="true">
+            <fileset dir="${reports.dir}/images/qr">
+                <include name="mmowgli.nps.edu.@{gameName}.mobile.qr.png"/>
+            </fileset>
+          </copy>
         </sequential>
     </macrodef>
 
