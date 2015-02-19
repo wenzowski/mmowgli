@@ -267,7 +267,8 @@ public class MmowgliConstants
   */
   public static final char SESSIONS_REPORT = 'n';
   public static final char JMSKEEPALIVE = 'K';
-
+  public static final char REBUILD_REPORTS = 'R';
+  
   public static final String SESSION_REPORT_FIELD_DELIMITER_WIRE = "&euro;";
   public static final String SESSION_REPORT_ITEM_DELIMITER_WIRE = "&yen;";
   public static final String SESSION_REPORT_FIELD_DELIMITER = "\t";
