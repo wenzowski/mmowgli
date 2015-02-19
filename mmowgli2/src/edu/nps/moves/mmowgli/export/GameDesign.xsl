@@ -53,6 +53,15 @@
             <xsl:when test="starts-with($gameTitle,'am') or starts-with($gameTitle,'Am') or contains($gameTitle,'additive') or contains($gameTitle,'Additive')">
                 <xsl:text>Additive Manufacturing (am)</xsl:text>
             </xsl:when>
+            <xsl:when test="starts-with($gameTitle,'blackswan') or starts-with($gameTitle,'Blackswan') or contains($gameTitle,'blackswan') or contains($gameTitle,'Blackswan')">
+                <xsl:text>blackswan</xsl:text>
+            </xsl:when>
+            <xsl:when test="starts-with($gameTitle,'dd') or starts-with($gameTitle,'DD') or contains($gameTitle,'dd') or contains($gameTitle,'DD')">
+                <xsl:text>Data Dilemma (dd)</xsl:text>
+            </xsl:when>
+            <xsl:when test="starts-with($gameTitle,'pcc') or starts-with($gameTitle,'PCC') or contains($gameTitle,'pcc') or contains($gameTitle,'PCC')">
+                <xsl:text>Professional Core Competencies (pcc)</xsl:text>
+            </xsl:when>
             <xsl:when test="starts-with($gameTitle,'cap2con') or starts-with($gameTitle,'Cap2con') or contains($gameTitle,'cap2con') or contains($gameTitle,'Cap2con')">
                 <xsl:text>Capacity, Capabilities and Constraints (cap2con)</xsl:text>
             </xsl:when>
@@ -65,9 +74,6 @@
             <xsl:when test="contains($gameTitle,'ig')">
                 <xsl:text>NPS Inspector General (ig) Review</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
-                <xsl:text>Officer Accesions</xsl:text>
-            </xsl:when>
             <xsl:when test="contains($gameTitle,'training')">
                 <xsl:text>MMOWGLI Training</xsl:text>
             </xsl:when>
@@ -76,6 +82,12 @@
             </xsl:when>
             <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
                 <xsl:text>blackswan</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'dd') or contains(lower-case($gameTitle),'DD')">
+                <xsl:text>dd</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'pcc') or contains(lower-case($gameTitle),'PCC')">
+                <xsl:text>pcc</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                 <xsl:text>Unmanned Vehicle Digital Manufacturing (uxvdm)</xsl:text>
@@ -125,9 +137,6 @@
             <xsl:when test="contains($gameTitle,'ig')">
                 <xsl:text>https://portal.mmowgli.nps.edu/ig</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
-                <xsl:text>https://portal.mmowgli.nps.edu/coin</xsl:text>
-            </xsl:when>
             <xsl:when test="contains($gameTitle,'training')">
                 <xsl:text>https://portal.mmowgli.nps.edu/training</xsl:text>
             </xsl:when>
@@ -136,6 +145,12 @@
             </xsl:when>
             <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
                 <xsl:text>https://portal.mmowgli.nps.edu/blackswan</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'dd') or contains(lower-case($gameTitle),'DD')">
+                <xsl:text>https://portal.mmowgli.nps.edu/dd</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'pcc') or contains(lower-case($gameTitle),'PCC')">
+                <xsl:text>https://portal.mmowgli.nps.edu/pcc</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                 <xsl:text>https://portal.mmowgli.nps.edu/uxvdm</xsl:text>
