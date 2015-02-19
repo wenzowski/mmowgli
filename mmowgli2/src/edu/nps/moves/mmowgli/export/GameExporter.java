@@ -281,8 +281,8 @@ public class GameExporter extends BaseExporter
   private void _addMovePhaseCall2Action(Element root, Session sess, Move m, MovePhase phase)
   {
     Element call2ActionElem = createAppend(root,"CallToAction");
-    call2ActionElem.setAttribute("Round", m.getName());
-    call2ActionElem.setAttribute("Phase", phase.getDescription());
+    call2ActionElem.setAttribute("round", ""+m.getNumber());
+    call2ActionElem.setAttribute("phase", phase.getDescription());
    
     String s = "";
     Media vid = phase.getCallToActionBriefingVideo();
