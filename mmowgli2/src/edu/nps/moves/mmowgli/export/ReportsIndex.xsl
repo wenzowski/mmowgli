@@ -423,7 +423,7 @@ td.longtext {
                         </td>
                         <td>
                             <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game">
-                                <img src="images/MmowgliPortalUrl.qr.png" height="100"/>
+                                <img src="images/mmowgli.nps.edu.{//Other/GameAcronym/.}.mobile.qr.png" height="100"/>
                             </a>
                             <br />
                             <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game">
