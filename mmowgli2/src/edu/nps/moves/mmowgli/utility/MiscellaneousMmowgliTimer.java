@@ -22,6 +22,7 @@
 
 package edu.nps.moves.mmowgli.utility;
 
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -164,6 +165,41 @@ public class MiscellaneousMmowgliTimer
           sb.setLength(0);
         }
       }
+    }
+    
+    public static void dumpStack(int logLevel)
+    {
+      PrintWriter pw = new PrintWriter(new MSysOutStream(logLevel),true);
+      new Exception().printStackTrace(pw);
+    }
+  }
+  
+  private static class MSysOutStream extends OutputStream
+  {
+    int nl = System.getProperty("line.separator").charAt(0);
+    
+    StringWriter sw = new StringWriter(4096);
+    int logLevel;
+    
+    MSysOutStream(int logLevel)
+    {
+      this.logLevel = logLevel;
+    }
+
+    @Override
+    public void write(int b) throws IOException
+    {
+      if(b != nl)
+        sw.write(b);     
+    }
+
+    @Override
+    public void flush() throws IOException
+    {
+      String s = sw.toString();
+      if(s.trim().length()>0)
+        MSysOut.println(logLevel,s);
+      sw = new StringWriter();
     }
   }
 }
