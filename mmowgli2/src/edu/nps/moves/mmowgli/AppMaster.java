@@ -137,8 +137,7 @@ public class AppMaster
 
   private AppMaster(VaadinServlet vservlet, ServletContext context)
   {
-    System.out.print("Running Vaadin ");
-    System.out.println(Version.getFullVersion());
+    MSysOut.println(SYSTEM_LOGS,"Running Vaadin "+Version.getFullVersion());
 
     servletContext = context;
     
@@ -634,10 +633,22 @@ public class AppMaster
     }
   }
 */
+  
+  // Called from AppMasterMessaging on receipt of a rebuild_reports message
   public void pokeReportGenerator()
   {
+    MSysOut.println(SYSTEM_LOGS,"AppMaster.pokeReportGenerator(), reportGenerator: "+reportGenerator);
     if (reportGenerator != null)
       reportGenerator.poke();
+  }
+  
+  // Called from the Game Admin menu to get the reports to be be rebuild
+  public void requestPublishReports()
+  {
+    if(reportGenerator != null)  // if we're the master...
+      reportGenerator.poke();
+    else
+      appMasterMessaging.doRebuildReportsRequest();  // sends requests to other AppMasters  
   }
 
   public static String getAlternateVideoUrlTL()
