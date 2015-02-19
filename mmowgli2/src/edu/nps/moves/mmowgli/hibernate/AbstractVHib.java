@@ -26,6 +26,7 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 import static org.hibernate.cfg.AvailableSettings.*;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +70,7 @@ public abstract class AbstractVHib// implements SessionManager
   public static final String DB_SHOW_SQL                   = "false";
   public static final String DB_TRANSACTION_STRATEGY       = "org.hibernate.transaction.JDBCTransactionFactory"; //"org.hibernate.transaction.JTATransactionFactory";
   public static final String DB_CURRENT_SESSION_CONTEXT_CLASS = "thread";
-  public static final String DB_HIBERNATE_CONNECTION_ISOLATION = "1"; //todo understand
+  //public static final String DB_HIBERNATE_CONNECTION_ISOLATION = "1"; //todo understand
   
   // Hibernate search properties
   public static final String HIB_SEARCH_SOURCEBASE_PROPERTY    = "hibernate.search.default.sourceBase";  // where master index is stored
@@ -154,6 +155,7 @@ public abstract class AbstractVHib// implements SessionManager
      //todo V7 not reqd? no-cache cnf.setProperty(CACHE_PROVIDER, DB_CACHE_PROVIDER);
 
       // c3p0 connection pooler
+      cnf.setProperty(CONNECTION_PROVIDER , c3.providerClass);
       cnf.setProperty(C3P0_MAX_SIZE, c3.maxSize); // * Maximum size of C3P0 connection pool
       cnf.setProperty(C3P0_MIN_SIZE, c3.minSize); // * Minimum size of C3P0 connection pool
       cnf.setProperty(C3P0_ACQUIRE_INCREMENT, c3.acquireIncrement); // * Number of connections acquired when pool is exhausted
@@ -173,7 +175,14 @@ public abstract class AbstractVHib// implements SessionManager
       
       cnf.setProperty(TRANSACTION_STRATEGY, DB_TRANSACTION_STRATEGY);
       cnf.setProperty(CURRENT_SESSION_CONTEXT_CLASS, DB_CURRENT_SESSION_CONTEXT_CLASS);
-      cnf.setProperty(ISOLATION, DB_HIBERNATE_CONNECTION_ISOLATION);  //todo understand implications of this; this setting fixed some of our problems
+      
+      // the following config will kill startup on our deployed games:
+      //Feb 18, 2015 2:46:14 PM org.hibernate.engine.jdbc.spi.SqlExceptionHelper logExceptions
+      //ERROR: Cannot execute statement: impossible to write to binary log since BINLOG_FORMAT = STATEMENT and at least one table
+      //uses a storage engine limited to row-based logging. InnoDB is limited to row-logging when transaction isolation level is 
+      //READ COMMITTED or READ UNCOMMITTED.
+
+      //cnf.setProperty(ISOLATION, DB_HIBERNATE_CONNECTION_ISOLATION);  //todo understand implications of this; this setting fixed some of our problems
     }
     catch(Throwable t) {
       commonInitCatch(t);       
@@ -277,12 +286,11 @@ public abstract class AbstractVHib// implements SessionManager
   {
     // Any class in the db package will be added to Hibernate config
     ArrayList<Class<?>> list = new ArrayList<Class<?>>();
-
-    ClassLoader cl = exampleClass.getClassLoader();
-    String pkg = exampleClass.getPackage().getName();
-    Object o = cl.getResource(pkg.replace('.', '/'));
-    if (o instanceof URL) {
-      File dbFiles = new File(((URL) o).getFile());
+    try {
+      ClassLoader cl = exampleClass.getClassLoader();
+      String pkg = exampleClass.getPackage().getName();
+      URL url = cl.getResource(pkg.replace('.', '/'));
+      File dbFiles = new File(url.toURI());
       File[] files = dbFiles.listFiles();
       for (File f : files) {
         String nm = f.getName();
@@ -300,6 +308,10 @@ public abstract class AbstractVHib// implements SessionManager
         }
       }
     }
+    catch(URISyntaxException ex) {
+      MSysOut.println(ERROR_LOGS, "Program error in AbstractVHib.addAnnotatedClasses(): "+ex.getLocalizedMessage());
+    }
+
     return list;
   }
   
@@ -310,6 +322,7 @@ public abstract class AbstractVHib// implements SessionManager
     public String acquireIncrement;
     public String timeout;
     public String idleTestPeriod;
+    public String providerClass = "org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider";
   }
   
   public static String getHib_fs_local_path()
