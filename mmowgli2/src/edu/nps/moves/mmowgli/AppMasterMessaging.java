@@ -230,6 +230,8 @@ public class AppMasterMessaging implements JmsReceiver, JmsPreviewListener, Broa
       case SESSIONS_REPORT:
         handleSessionsReportMsg(pkt.msg);
         break;
+      case REBUILD_REPORTS:
+        handleRebuildReportsMsg();
       default:
         Broadcaster.broadcast(pkt,this);  // last param means I don't want to hear my own messages
     }
@@ -242,6 +244,22 @@ public class AppMasterMessaging implements JmsReceiver, JmsPreviewListener, Broa
     return false; // don't want a retry    
   }
  
+  public void doRebuildReportsRequest()
+  {
+    // We want to let everyone know we've been updated
+    InterTomcatIO sessIO = getInterTomcatIO();
+    if (sessIO != null)
+      sessIO.sendDelayed(REBUILD_REPORTS, "", ""); // let this thread return
+
+    // This is because we've changed so that now we don't receive the jms messages we've sent
+    handleRebuildReportsMsg();    
+  }
+  
+  private void handleRebuildReportsMsg()
+  {
+    AppMaster.instance().pokeReportGenerator(); // if we don't build reports on the cluster node, nothing happens here
+  }
+  
   /**
    * This is where all messages generated from user sessions in this cluster node come in
    */
