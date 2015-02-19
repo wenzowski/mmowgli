@@ -5,7 +5,7 @@
 			<xs:sequence>
 				<xs:element ref="HeaderFooter"/>
 				<xs:element ref="Welcome"/>
-				<xs:element ref="CallToAction"/>
+				<xs:element ref="CallToAction" maxOccurs="unbounded"/>
 				<xs:element ref="TopCards"/>
 				<xs:element ref="SubCards"/>
 				<xs:element ref="SeedCards"/>
@@ -88,6 +88,8 @@
 				<xs:element ref="BriefingSummary"/>
 				<xs:element ref="BriefingText"/>
 			</xs:sequence>
+            <xs:attribute name="Round" use="required"/>
+            <xs:attribute name="Phase" use="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="BriefingSummary" type="xs:string"/>
