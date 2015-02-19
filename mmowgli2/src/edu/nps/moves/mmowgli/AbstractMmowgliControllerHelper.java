@@ -892,7 +892,7 @@ public class AbstractMmowgliControllerHelper
   
   public void handlePublishReports()
   {
-    AppMaster.instance().pokeReportGenerator();
+    AppMaster.instance().requestPublishReports();
 
     Notification notification = new Notification("", "Report publication begun", Notification.Type.WARNING_MESSAGE);
 
