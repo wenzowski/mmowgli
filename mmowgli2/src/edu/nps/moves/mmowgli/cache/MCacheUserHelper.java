@@ -30,16 +30,12 @@ import java.util.*;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 
-import com.vaadin.data.util.BeanContainer;
-import com.vaadin.data.util.BeanItem;
-
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
 import edu.nps.moves.mmowgli.messaging.MMessage;
-import edu.nps.moves.mmowgli.utility.BeanContainerWithCaseInsensitiveSorter;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -54,76 +50,73 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 public class MCacheUserHelper
 {  
-  private SortedMap<String,Long> usersQuick;
-  private BeanContainer<Long,QuickUser> quickUsersContainer;
+  private SortedMap<String,Long> usersQuick;  // key = name
+  private SortedMap<Long,String> _usersQuick; // key = id
+  private SortedMap<Long,QuickUser> usersQuickFull; // key = id, full data
 
   private static int myLogLevel = MCACHE_LOGS;
 
   // package-local
   MCacheUserHelper(Session sess)
   {
-    usersQuick = Collections.synchronizedSortedMap(new TreeMap<String, Long>(new UserNameCaseInsensitiveComparator()));
-    quickUsersContainer = new BeanContainerWithCaseInsensitiveSorter<Long, QuickUser>(QuickUser.class);
-
+    usersQuick =     Collections.synchronizedSortedMap(new TreeMap<String, Long>   (new UserNameCaseInsensitiveComparator()));
+    usersQuickFull = Collections.synchronizedSortedMap(new TreeMap<Long, QuickUser>(new UserNameFullCaseInsensitiveComparator()));
+    _usersQuick =    Collections.synchronizedSortedMap(new TreeMap<Long, String> ());
     _rebuildUsers(sess);
   }
   
   void putUser(User u)
   {
     MSysOut.println(myLogLevel,"MCacheUserHelper.putUser() id= "+u.getId()+"  name: "+u.getUserName());
-    putQuickUser(u);
+    
+    if (u.isViewOnly() || u.isAccountDisabled())
+      ; // don't add
+    else
+      usersQuick.put(u.getUserName(), u.getId());
+    
+    _usersQuick.put(u.getId(), u.getUserName());   // before below
+    usersQuickFull.put(u.getId(),new QuickUser(u));
   }
  
-  private void putQuickUser(User u)
-  {
-   synchronized (usersQuick) {
-     addOrUpdateUserInContainer(u);
-
-     // Smaller, previous quick list...todo merge with other
-     if (u.isViewOnly() || u.isAccountDisabled())
-       ; // don't add
-     else {
-       usersQuick.put(u.getUserName(), u.getId());
-     }
-   }
- }
-
-  BeanContainer<Long,QuickUser> getQuickUsersContainer()
-  {
-    return quickUsersContainer;
-  }
-  
   // Only used by add authordialog; list won't include guest account(s) or banished accounts
   public List<QuickUser> getUsersQuickList()
   {
-    synchronized (usersQuick) {
-      ArrayList<QuickUser> lis = new ArrayList<QuickUser>(usersQuick.size());
-      Set<String> keySet = usersQuick.keySet();
-      for (String key : keySet) {
-        long id = usersQuick.get(key);
-        lis.add(new QuickUser(id, key));
-      }
-      return lis;
+    ArrayList<QuickUser> lis = new ArrayList<QuickUser>(usersQuick.size());
+    Set<String> keySet = usersQuick.keySet();
+    for (String key : keySet) {
+      long id = usersQuick.get(key);
+      lis.add(new QuickUser(id, key));
     }
+    return lis;
   }
-
+  
+  // Used by UserAdminPanel
+  public List<QuickUser> getUsersQuickFullList()
+  {
+    ArrayList<QuickUser> lis = new ArrayList<QuickUser>(usersQuickFull.size());
+    Collection<QuickUser> coll = usersQuickFull.values();
+    Iterator<QuickUser> itr = coll.iterator();
+    while (itr.hasNext())
+      lis.add(itr.next());
+    return lis;
+  }
+  
   private void _rebuildUsers(Session sess)
   {
-    synchronized(usersQuick) {
-      List<User> usrs = usersQuery(sess);
-      for(User u : usrs) {
-        if(u.getUserName() == null) {
-          System.err.println("User in db with null userName: "+u.getId());
-          continue;
-        }
-        addOrUpdateUserInContainer(u);
+    List<User> usrs = usersQuery(sess);
+    for (User u : usrs) {
+      if (u.getUserName() == null) {
+        System.err.println("User in db with null userName: " + u.getId());
+        continue;
+      }
+      
+      _usersQuick.put(u.getId(), u.getUserName());    // before below
+      usersQuickFull.put(u.getId(),new QuickUser(u));
 
-        // Smaller, previous quick list...todo merge with other
-        if(u.isViewOnly() || u.isAccountDisabled())
-          ; // don't add
-        else {
-          usersQuick.put(u.getUserName(),u.getId());
-        }
+      if (u.isViewOnly() || u.isAccountDisabled())
+        ; // don't add
+      else {
+        usersQuick.put(u.getUserName(), u.getId());
       }
     }
   }
@@ -146,14 +139,12 @@ public class MCacheUserHelper
       return;
     }
     
-    synchronized(usersQuick) {
-      addOrUpdateUserInContainer(u);
-
+     usersQuickFull.put(u.getId(), new QuickUser(u));
+     
       if(u.isViewOnly() || u.isAccountDisabled())
         ; // don't add
       else
         usersQuick.put(u.getUserName(), u.getId());
-    }
   }
 
   void dbDeleteUser(char messageType, String message)
@@ -169,31 +160,21 @@ public class MCacheUserHelper
   
   void removeUser(User u)
   {
-    deleteUserInContainer(u.getId());
+    removeUser(u.getId());
   }
   
   private void removeUser(Long id)
   {
-    deleteUserInContainer(id);
-  }
-  
-  private void addOrUpdateUserInContainer(User u)
-  {
-    if(u == null) {
-      MSysOut.println(ERROR_LOGS,"Null user in addOrUpdateUserInContainer(); Exception trapped, dump:");
-      new Exception().printStackTrace();
-      return;
+    Collection<Long> coll = usersQuick.values();
+    Iterator<Long> itr = coll.iterator();
+    while(itr.hasNext()) {
+      if(itr.next() == id) {
+        usersQuick.remove(id);
+        break;
+      }
     }
-    BeanItem<QuickUser> bi = quickUsersContainer.getItem(u.getId());
-    if(bi == null)
-      quickUsersContainer.addItem(u.getId(),new QuickUser(u));
-    else
-      bi.getBean().update(u);
-  }
-  
-  private void deleteUserInContainer(long id)
-  {
-    quickUsersContainer.removeItem(id);
+    _usersQuick.remove(id);
+    usersQuickFull.remove(id);
   }
   
   @SuppressWarnings("unchecked")
@@ -212,7 +193,18 @@ public class MCacheUserHelper
       return s1.compareToIgnoreCase(s2);
     }
   }
-
+  
+  class UserNameFullCaseInsensitiveComparator implements Comparator<Long>
+  {
+    @Override
+    public int compare(Long key1, Long key2)
+    {
+      String n1 = _usersQuick.get(key1);
+      String n2 = _usersQuick.get(key2);
+      return n1.compareToIgnoreCase(n2);
+    }
+  }
+  
   public static class QuickUser
   {
     public long id;
