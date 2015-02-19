@@ -26,7 +26,9 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.APPLICATION_SCREEN_WIDTH;
 import static edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser.*;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -49,7 +51,6 @@ import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
 import edu.nps.moves.mmowgli.*;
-import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
@@ -948,25 +949,19 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     @Override
     public void fillTable(Table table)
     {
-      if(container == null) {
-        MCacheManager cm = AppMaster.instance().getMcache();
-        if(termsArr != null) {
-          container = new BeanContainerWithCaseInsensitiveSorter<Long,QuickUser>(QuickUser.class);
-          BeanContainer<Long,QuickUser> bc = cm.getQuickUsersContainer();
-          Collection<Long> ids = bc.getItemIds();
-          for(Long id : ids) {
-            QuickUser qu = bc.getItem(id).getBean();
-            if(foundTerm(qu))
-              container.addItem(qu.id, qu);
-          }
+      if (container == null) {
+        List<QuickUser> lis = AppMaster.instance().getMcache().getUsersQuickFullList();
+        container = new BeanContainerWithCaseInsensitiveSorter<Long, QuickUser>(QuickUser.class);
+        for (QuickUser qu : lis) {
+          if (termsArr != null)
+            if (!foundTerm(qu))
+              continue;
+          container.addItem(qu.id, qu);
         }
-        else
-          container = cm.getQuickUsersContainer();
-      
         container.sort(new Object[] { UNAME_COL }, new boolean[] { true });
         table.setContainerDataSource(container);
 
-        table.setVisibleColumns((Object[])visibleColumns);
+        table.setVisibleColumns((Object[]) visibleColumns);
         table.setColumnHeaders(columnNames);
       }
     }
