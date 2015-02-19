@@ -88,8 +88,8 @@
 				<xs:element ref="BriefingSummary"/>
 				<xs:element ref="BriefingText"/>
 			</xs:sequence>
-            <xs:attribute name="Round" use="required"/>
-            <xs:attribute name="Phase" use="required"/>
+            <xs:attribute name="round" use="required"/>
+            <xs:attribute name="phase" use="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="BriefingSummary" type="xs:string"/>
