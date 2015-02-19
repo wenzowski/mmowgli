@@ -28,8 +28,6 @@ import java.util.*;
 
 import org.hibernate.Session;
 
-import com.vaadin.data.util.BeanContainer;
-
 import edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DB;
@@ -357,11 +355,11 @@ public class MCacheManager implements JmsReceiver
     return userHelper.getUsersQuickList();
   }
 
-  public BeanContainer<Long,QuickUser> getQuickUsersContainer()
+  // Used by UserAdminPanel
+  public List<QuickUser> getUsersQuickFullList()
   {
-    return userHelper.getQuickUsersContainer();
+    return userHelper.getUsersQuickFullList();
   }
-
 
   public void putObject(Object obj)
   {
