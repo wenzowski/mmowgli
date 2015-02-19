@@ -134,7 +134,7 @@ public class ReportGenerator implements Runnable
 
           writeIndexDotHtml(MmowgliConstants.REPORTS_FILESYSTEM_PATH + "index.html", gXmlPath);
 
-          copyImages();
+          copyImages(g);
           
           MSysOut.println(REPORT_LOGS,"Report-generator finished");
           GameEventLogger.logEndReportGenerationTL();
@@ -218,20 +218,40 @@ public class ReportGenerator implements Runnable
   }
   
   private String imagesPackage = "edu.nps.moves.mmowgli.export.reports.images";
+  private String qrPackage     = "edu/nps/moves/mmowgli/export/reports/images/qr/";
+  private String qrFileName1   = "mmowgli.nps.edu.";
+  private String qrFileName2   = ".mobile.qr.png";
+  
   private String targetDir =  MmowgliConstants.REPORTS_FILESYSTEM_PATH+"images/";
   
-  private void copyImages() throws Exception
+  
+  private void copyImages(Game g) throws Exception
   {
     ArrayList<File> list = ReportGenerator.filesInPackage(this.getClass().getClassLoader(), imagesPackage); 
     new File(targetDir).mkdirs();
     for(File f : list) {
-      copyOne(f,targetDir+f.getName());
+      if(f.isFile())
+        copyOne(f,targetDir+f.getName());
     }
+    
+    // Copy a qr image in the classpath to the reports directory, using game acronym as partial filename
+    String qrfilename = qrFileName1 + g.getAcronym() + qrFileName2;
+    String qrpath = qrPackage + qrfilename;
+    InputStream qrIs = getClass().getClassLoader().getResourceAsStream(qrpath);
+    
+    if(qrIs != null)
+      copyOne(qrIs,targetDir+qrfilename);
+    else
+      MSysOut.println(REPORT_LOGS,"Image "+qrfilename+" not found for copy to reports deployment");
   }
   
   private void copyOne(File from, String to) throws FileNotFoundException, IOException
   {
-    InputStream is = new FileInputStream(from);
+    copyOne(new FileInputStream(from),to);
+  }
+  
+  private void copyOne(InputStream  is, String to) throws FileNotFoundException, IOException
+  {
     OutputStream os = new FileOutputStream(to);
     int count = 0;
     byte b[] = new byte[4096];
