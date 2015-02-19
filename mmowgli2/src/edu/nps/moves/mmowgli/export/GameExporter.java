@@ -136,7 +136,7 @@ public class GameExporter extends BaseExporter
       addMetaData(root,sess,g);
       addHeaderFooter(root,sess,g);
       addWelcome(root,sess,g);
-      addCall2Action(root,sess,g);
+      newAddCall2Action(root,sess);
       addTopCards(root,sess,g);
       addSubCards(root,sess,g);
       addSeedCards(root,sess,g);
@@ -225,7 +225,7 @@ public class GameExporter extends BaseExporter
     s = phase.getOrientationSummary();
     addElementWithText(welcomeElem,ORIENTATION_SUMMARY,s==null?"":s);
   }
-  
+/*  
   private void addCall2Action(Element root, Session sess, Game g)
   {
     Element call2ActionElem = createAppend(root,"CallToAction");
@@ -246,6 +246,57 @@ public class GameExporter extends BaseExporter
     addElementWithText(call2ActionElem,"BriefingSummary",s==null?"":s);
     s = phase.getCallToActionBriefingText();
     addElementWithText(call2ActionElem,CALL2ACTION_BRIEFINGTEXT,s==null?"":s);
+  }
+*/ 
+  
+  @SuppressWarnings("unchecked")
+  private void newAddCall2Action(Element root, Session sess)
+  {
+    List<Move> lis = sess.createCriteria(Move.class).list();
+    Collections.sort(lis, new Comparator<Move>() {
+      @Override
+      public int compare(Move m1, Move m2)
+      {
+        return m1.getNumber()-m2.getNumber();
+      }     
+    });
+    for(Move m : lis)
+      _addMoveCall2Action(root,sess,m);
+  }
+  
+  private void _addMoveCall2Action(Element root, Session sess, Move m)
+  {
+    List<MovePhase> lis = m.getMovePhases();
+    Collections.sort(lis, new Comparator<MovePhase>() {
+      @Override
+      public int compare(MovePhase o1, MovePhase o2)
+      {
+        return (int)(o1.getId()-o2.getId());
+      }     
+    });
+    for(MovePhase mp : lis)
+      _addMovePhaseCall2Action(root,sess, m, mp);
+  }
+  
+  private void _addMovePhaseCall2Action(Element root, Session sess, Move m, MovePhase phase)
+  {
+    Element call2ActionElem = createAppend(root,"CallToAction");
+    call2ActionElem.setAttribute("Round", m.getName());
+    call2ActionElem.setAttribute("Phase", phase.getDescription());
+   
+    String s = "";
+    Media vid = phase.getCallToActionBriefingVideo();
+    if(vid != null) {
+      String url = vid.getUrl();
+      if(url != null)
+        s = url;
+    }
+    addElementWithText(call2ActionElem,"Video",s==null?"":s);
+
+    s = phase.getCallToActionBriefingSummary();
+    addElementWithText(call2ActionElem,"BriefingSummary",s==null?"":s);
+    s = phase.getCallToActionBriefingText();
+    addElementWithText(call2ActionElem,CALL2ACTION_BRIEFINGTEXT,s==null?"":s);    
   }
   
   private void addTopCards(Element root, Session sess, Game g)
