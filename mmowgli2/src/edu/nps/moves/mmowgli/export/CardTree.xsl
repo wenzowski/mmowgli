@@ -113,58 +113,6 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
-
-    <!-- massive gyrations due to mixed or missing content... -->
-    <xsl:variable name="videoYouTubeID">
-        <xsl:choose>
-            <xsl:when           test="//CallToAction/VideoYouTubeID">
-                <xsl:value-of select="//CallToAction/VideoYouTubeID"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:text></xsl:text>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-    <xsl:variable name="videoAlternateUrl">
-        <xsl:choose>
-            <xsl:when           test="//CallToAction/VideoAlternateUrl">
-                <xsl:value-of select="//CallToAction/VideoAlternateUrl"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:text></xsl:text>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-    <xsl:variable name="callToActionBriefingText">
-        <xsl:choose>
-            <xsl:when           test="//CallToAction/BriefingText">
-                <xsl:value-of select="//CallToAction/BriefingText"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:text></xsl:text>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-    <xsl:variable name="callToActionBriefingSummary">
-        <xsl:choose>
-            <xsl:when           test="//CallToAction/BriefingSummary">
-                <xsl:value-of select="//CallToAction/BriefingSummary"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:text></xsl:text>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-    <xsl:variable name="orientationSummary">
-        <xsl:choose>
-            <xsl:when           test="//CallToAction/OrientationSummary">
-                <xsl:value-of select="//CallToAction/OrientationSummary"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:text></xsl:text>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
     
     <!-- TODO get game acronym, url in XML file -->
     <xsl:variable name="gameAcronym">
@@ -935,6 +883,8 @@ text-shadow:; /* off */
                 </xsl:variable>
 
                 <!-- page header -->
+                
+                <!-- test if full report or single card chain -->
                 <xsl:if test="(string-length($singleIdeaCardChainRootNumber) = 0)">
                     <table align="center" border="0" class="banner">
                         <tr border="0">
@@ -1267,92 +1217,163 @@ text-shadow:; /* off */
                             </td>
                         </tr>
                     </table>
-        <br />
-        <hr />
+            <br />
 
-        <!-- Now provide Call To Action, if available -->
-        <table align="center" width="100%">
-            <tr align="top">
-                <td align="left">
-                    <h2 title="Motivation and purpose for this game">
-                        <a name="CallToAction">
-                            <xsl:text> Call to Action: player motivation </xsl:text>
-                        </a>
-                    </h2>
-                    <!-- Debug diagnostic -->
-                    <xsl:comment><xsl:text>$gameLabel=</xsl:text><xsl:value-of select="$gameLabel"/></xsl:comment>
-                </td>
-                <td>
-                    <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
-                </td>
-                <td align="right" valign="top">
-                    <a href="#index" title="to top">
-                        <!-- 1158 x 332, width="386" height="111"  -->
-                        <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
+            <!-- Now provide Call To Action, if available -->
+            
+            <xsl:text>&#10;</xsl:text>
+            <a name="CallToAction"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></a>
+            <xsl:text>&#10;</xsl:text>
+            
+            <xsl:for-each select="//CallToAction">
+                
+                <xsl:variable name="videoYouTubeID">
+                    <xsl:choose>
+                        <xsl:when           test="VideoYouTubeID">
+                            <xsl:value-of select="VideoYouTubeID"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text></xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:variable name="videoAlternateUrl">
+                    <xsl:choose>
+                        <xsl:when           test="VideoAlternateUrl">
+                            <xsl:value-of select="VideoAlternateUrl"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text></xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:variable name="callToActionBriefingSummary">
+                    <xsl:choose>
+                        <xsl:when           test="BriefingSummary">
+                            <xsl:value-of select="BriefingSummary"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text></xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:variable name="callToActionBriefingText">
+                    <xsl:choose>
+                        <xsl:when           test="BriefingText">
+                            <xsl:value-of select="BriefingText"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text></xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:variable name="orientationSummary">
+                    <xsl:choose>
+                        <xsl:when           test="OrientationSummary">
+                            <xsl:value-of select="OrientationSummary"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text></xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                
+                <hr />
+                
+                <h1 style="background-color:lightgray;" align="center">
+                    <a name="CallToActionRound{@round}"> 
+                        <xsl:text>Call To Action</xsl:text>
+                        <xsl:if test="number(@round) > 0">
+                            <xsl:text>, Round </xsl:text>
+                            <xsl:value-of select="@round"/>
+                        </xsl:if>
                     </a>
-                </td>
-            </tr>
-        </table>
-        <table align="center" width="100%">
-            <tr>
-                <td>
-                    <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
-                </td>
-                <td align="left" valign="top">
-                    <!-- 80% of height="315" width="560" -->
+                </h1>
+                <hr />
+                
+                <table align="center" width="100%">
+                    <tr align="top">
+                        <td align="left">
+                            <h2 title="Motivation and purpose for this game">
+                                <a name="CallToAction">
+                                    <xsl:text> Call to Action: player motivation </xsl:text>
+                                </a>
+                            </h2>
+                            <!-- Debug diagnostic -->
+                            <xsl:comment><xsl:text>$gameLabel=</xsl:text><xsl:value-of select="$gameLabel"/></xsl:comment>
+                        </td>
+                        <td>
+                            <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
+                        </td>
+                        <td align="right" valign="top">
+                            <a href="#index" title="to top">
+                                <!-- 1158 x 332, width="386" height="111"  -->
+                                <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+                <table align="center" width="100%">
+                    <tr>
+                        <td>
+                            <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
+                        </td>
+                        <td align="left" valign="top">
+                            <!-- 80% of height="315" width="560" -->
 
-                    <object height="252" width="448">
-                        <param name="movie" value="https://www.youtube.com/v/{normalize-space($videoYouTubeID)}?version=3&amp;hl=en_US&amp;rel=0" />
-                        <param name="allowFullScreen" value="true" />
-                        <param name="allowscriptaccess" value="always" />
-                        <embed height="252" width="448" allowfullscreen="true" allowscriptaccess="always" src="https://www.youtube.com/v/{normalize-space($videoYouTubeID)}?version=3&amp;hl=en_US&amp;rel=0" type="application/x-shockwave-flash" ></embed>
-                    </object>
-                    <xsl:if test="string-length(normalize-space($videoAlternateUrl)) > 0">
-                        <br />
-                        (No video? Try
-                        <a href="{normalize-space($videoAlternateUrl)}" target="_blank">this</a>)
-                    </xsl:if>
-                </td>
-                <td>
-                    <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
-                </td>
-                <td valign="top">
+                            <object height="252" width="448">
+                                <param name="movie" value="https://www.youtube.com/v/{normalize-space($videoYouTubeID)}?version=3&amp;hl=en_US&amp;rel=0" />
+                                <param name="allowFullScreen" value="true" />
+                                <param name="allowscriptaccess" value="always" />
+                                <embed height="252" width="448" allowfullscreen="true" allowscriptaccess="always" src="https://www.youtube.com/v/{normalize-space($videoYouTubeID)}?version=3&amp;hl=en_US&amp;rel=0" type="application/x-shockwave-flash" ></embed>
+                            </object>
+                            <xsl:if test="string-length(normalize-space($videoAlternateUrl)) > 0">
+                                <br />
+                                (No video? Try
+                                <a href="{normalize-space($videoAlternateUrl)}" target="_blank">this</a>)
+                            </xsl:if>
+                        </td>
+                        <td>
+                            <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
+                        </td>
+                        <td valign="top">
 
-                    <xsl:if test="string-length(normalize-space($callToActionBriefingSummary)) > 0">
-                        <h3>
-                            <xsl:value-of select="$callToActionBriefingSummary" disable-output-escaping="yes"/>
-                        </h3>
-                    </xsl:if>
+                            <xsl:if test="string-length(normalize-space($callToActionBriefingSummary)) > 0">
+                                <h3>
+                                    <xsl:value-of select="$callToActionBriefingSummary" disable-output-escaping="yes"/>
+                                </h3>
+                            </xsl:if>
 
-                    <xsl:if test="string-length(normalize-space($callToActionBriefingText)) > 0">
-                        <xsl:value-of select="$callToActionBriefingText" disable-output-escaping="yes"/>
-                    </xsl:if>
+                            <xsl:if test="string-length(normalize-space($callToActionBriefingText)) > 0">
+                                <xsl:value-of select="$callToActionBriefingText" disable-output-escaping="yes"/>
+                            </xsl:if>
 
-                    <xsl:if test="string-length(normalize-space($orientationSummary)) > 0">
-                        <xsl:value-of select="$orientationSummary" disable-output-escaping="yes"/>
-                    </xsl:if>
+                            <xsl:if test="string-length(normalize-space($orientationSummary)) > 0">
+                                <xsl:value-of select="$orientationSummary" disable-output-escaping="yes"/>
+                            </xsl:if>
 
-                    <p>
-                        The
-                        <xsl:choose>
-                            <xsl:when test="contains($gameTitle,'nergy')">
-                                    <a href="https://portal.mmowgli.nps.edu/energy-welcome">energyMMOWGLI Portal</a>
-                            </xsl:when>
-                            <xsl:when test="contains($gameTitle,'iracy')">
-                                    <a href="https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Piracy+MMOWGLI+Games">piracyMMOWGLI Portal</a>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                    <a href="https://portal.mmowgli.nps.edu">MMOWGLI Portal</a>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                        contains further game information.
-                    </p>
-                </td>
-            </tr>
-        </table>
-        <!-- Call To Action complete -->
+                            <p>
+                                The
+                                <xsl:choose>
+                                    <xsl:when test="contains($gameTitle,'nergy')">
+                                            <a href="https://portal.mmowgli.nps.edu/energy-welcome">energyMMOWGLI Portal</a>
+                                    </xsl:when>
+                                    <xsl:when test="contains($gameTitle,'iracy')">
+                                            <a href="https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Piracy+MMOWGLI+Games">piracyMMOWGLI Portal</a>
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                            <a href="https://portal.mmowgli.nps.edu">MMOWGLI Portal</a>
+                                    </xsl:otherwise>
+                                </xsl:choose>
+                                contains further game information.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </xsl:for-each>
+            <!-- Call To Action complete -->
 
-                </xsl:if>
+        </xsl:if>
 
         <!-- Process CardTree/*/Card(s) -->
         <xsl:apply-templates/> <!-- process CardTree for InnovateCards and DefendCards -->
