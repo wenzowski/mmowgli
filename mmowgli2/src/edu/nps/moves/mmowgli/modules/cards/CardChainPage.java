@@ -750,6 +750,9 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
     MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL() externCardId/rev = "+externCardId+"/"+revision+" my cardId = "+cardId+" hash = "+hashCode());
 
     Card c = Card.getRevisionTL(externCardId, revision);
+    if(c == null)    // happens under load?
+      return false;
+    
     if (externCardId.equals(cardId)) {   // Don't do this: externCardId == cardId  !
       MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL / "+c.toString2());
       MSysOut.println(CARD_UPDATE_LOGS,"CardChainPage.cardUpdated_oobTL / num children: "+c.getFollowOns().size());
