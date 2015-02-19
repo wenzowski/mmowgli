@@ -157,13 +157,8 @@ public class AbstractMmowgliControllerHelper2
           // User usr = DBGet.getUser(id,sessMgr.getSession());
           // broadcastNews_oob(sessMgr,"User " + usr.getUserName() + " / " + usr.getLocation() + " went offline");
           break;
-/* Not used with new session report
-        case INSTANCEREPORTCOMMAND:
-          doSessionReport(pkt.msg);
-          break;
-*/
         }
-        if(push)
+        if(push && myUI != null)
           myUI.push();
       }
       catch (RuntimeException re) {
@@ -178,27 +173,7 @@ public class AbstractMmowgliControllerHelper2
       HSess.checkClose(sessKey);
     }
   }
-  /* Not used with new session report
-  void doSessionReport(String message)
-  {
-    String svrNm = ApplicationSessionGlobals.SERVERNAME;
-    if(!message.trim().equals(svrNm))
-      return;
-    String brw = app.globs().browserType();
-    brw = brw.replace(',',';');  // comma is our delimiter
-    Object uid = app.getUser();
-    String uname = ""+uid; // default;
-    if(uid != NO_LOGGEDIN_USER_ID ) {
-      User u = DBGet.getUser(uid, mgr.getSession());
-      if(u != null)
-        uname = u.getUserName();
-    }
-    String msg = svrNm+", "+brw+", "+app.globs().browserAddress()+", userid "+uname;
-    //System.out.println("YES-IM-AWAKE, "+msg);
-    InterTomcatIO sessIO = getSessIO();
-    sessIO.sendDelayed(INSTANCEREPORT, msg);
-  }
-*/
+ 
   private boolean actionPlanUpdated_TL(long apId, Component visibleComponent)
   {
     boolean ret = false;
