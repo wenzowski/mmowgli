@@ -171,10 +171,13 @@ public class DB
     }
     ss.close();
     long secs = (RETRY_SLEEP * RETRY_COUNT)/1000l;
+    
     MSysOut.println(ERROR_LOGS,"DB.getRetry() couldn't get " + cls.getSimpleName() + " " + id + " rev: "+revision+" in "+secs+" seconds");// give up
+    MSysOut.println(ERROR_LOGS,"Stack trace follows (no Exception generated)");
+    MSysOut.dumpStack(ERROR_LOGS);
     return null;
   }
-  
+   
   private static void sleep(long msec)
   {
     try {
