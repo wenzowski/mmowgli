@@ -48,6 +48,7 @@
         <dependency org="org.apache.lucene" name="lucene-analyzers" rev="3.6.2"/>
         <dependency org="org.hibernate" name="hibernate-core" rev="4.3.4.Final"/>
         <dependency org="org.hibernate" name="hibernate-search" rev="4.5.0.Final"/>
+        <dependency org="org.hibernate" name="hibernate-c3p0" rev="4.3.8.Final"/> 
         <!-- <dependency org="org.hibernate" name="hibernate-core" rev="4.3.0.Final" /> -->
 		<!-- <dependency org="org.hibernate" name="hibernate-search-orm" rev="4.4.2.Final" /> -->
 		<dependency org="net.bull.javamelody" name="javamelody-core" rev="1.48.0"/>
