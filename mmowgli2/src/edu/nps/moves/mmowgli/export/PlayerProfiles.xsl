@@ -176,48 +176,6 @@
         </xsl:choose>
     </xsl:variable>
 
-    <!-- massive gyrations due to mixed or missing content... -->
-    <xsl:variable name="videoYouTubeID">
-        <xsl:choose>
-            <xsl:when           test="//CallToAction/VideoYouTubeID">
-                <xsl:value-of select="//CallToAction/VideoYouTubeID"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:text></xsl:text>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-    <xsl:variable name="videoAlternateUrl">
-        <xsl:choose>
-            <xsl:when           test="//CallToAction/VideoAlternateUrl">
-                <xsl:value-of select="//CallToAction/VideoAlternateUrl"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:text></xsl:text>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-    <xsl:variable name="callToActionBriefingText">
-        <xsl:choose>
-            <xsl:when           test="//CallToAction/BriefingText">
-                <xsl:value-of select="//CallToAction/BriefingText"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:text></xsl:text>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-    <xsl:variable name="orientationSummary">
-        <xsl:choose>
-            <xsl:when           test="//CallToAction/OrientationSummary">
-                <xsl:value-of select="//CallToAction/OrientationSummary"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:text></xsl:text>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-
         <!-- supported values:  true, false, summaryOnly -->
     <!-- it is sometimes useful to show hidden cards while quality/correctness review is in progress
     <xsl:variable name="displayHiddenPlayers">
@@ -1073,9 +1031,79 @@ text-shadow:; /* off */
             </table>
         </p>
         <br />
-        <hr />
 
-        <!-- Now provide Call To Action, if available -->
+            <!-- Now provide Call To Action, if available -->
+            
+            <xsl:text>&#10;</xsl:text>
+            <a name="CallToAction"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></a>
+            <xsl:text>&#10;</xsl:text>
+            
+            <xsl:for-each select="//CallToAction">
+                
+                <xsl:variable name="videoYouTubeID">
+                    <xsl:choose>
+                        <xsl:when           test="VideoYouTubeID">
+                            <xsl:value-of select="VideoYouTubeID"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text></xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:variable name="videoAlternateUrl">
+                    <xsl:choose>
+                        <xsl:when           test="VideoAlternateUrl">
+                            <xsl:value-of select="VideoAlternateUrl"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text></xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:variable name="callToActionBriefingSummary">
+                    <xsl:choose>
+                        <xsl:when           test="BriefingSummary">
+                            <xsl:value-of select="BriefingSummary"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text></xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:variable name="callToActionBriefingText">
+                    <xsl:choose>
+                        <xsl:when           test="BriefingText">
+                            <xsl:value-of select="BriefingText"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text></xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                <xsl:variable name="orientationSummary">
+                    <xsl:choose>
+                        <xsl:when           test="OrientationSummary">
+                            <xsl:value-of select="OrientationSummary"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text></xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:variable>
+                
+                <hr />
+                
+                <h1 style="background-color:lightgray;" align="center">
+                    <a name="CallToActionRound{@round}"> 
+                        <xsl:text>Call To Action</xsl:text>
+                        <xsl:if test="number(@round) > 0">
+                            <xsl:text>, Round </xsl:text>
+                            <xsl:value-of select="@round"/>
+                        </xsl:if>
+                    </a>
+                </h1>
+                <hr />
+                
         <table align="center" width="100%">
             <tr align="top">
                 <td align="left">
@@ -1123,6 +1151,12 @@ text-shadow:; /* off */
                 </td>
                 <td valign="top">
 
+                    <xsl:if test="string-length(normalize-space($callToActionBriefingSummary)) > 0">
+                        <h3>
+                            <xsl:value-of select="$callToActionBriefingSummary" disable-output-escaping="yes"/>
+                        </h3>
+                    </xsl:if>
+
                     <xsl:if test="string-length(normalize-space($callToActionBriefingText)) > 0">
                         <xsl:value-of select="$callToActionBriefingText" disable-output-escaping="yes"/>
                     </xsl:if>
@@ -1149,6 +1183,7 @@ text-shadow:; /* off */
                 </td>
             </tr>
         </table>
+        </xsl:for-each>
         <br />
         <hr />
         <!-- Call To Action complete -->
