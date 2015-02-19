@@ -271,6 +271,7 @@ public class AppMaster
 
   public void oneTimeSetAppUrlFromUI()
   {
+    MSysOut.println(SYSTEM_LOGS,"AppMaster.oneTimeSetAppUrlFromUI()");
     if(appUrlString == null || appUrlString.length()<=0) {
       try {
         URL url = Page.getCurrent().getLocation().toURL();
@@ -281,12 +282,17 @@ public class AppMaster
           appUrlString = appUrlString.substring(0, appUrlString.length()-1);       
 
         computeUrls();
+        MSysOut.println(SYSTEM_LOGS,"AppMaster.oneTimeSetAppUrlFromUI() url set to "+appUrlString);
       }
       catch(MalformedURLException ex) {
         System.err.println("Can't form App URL in AppMaster.oneTimeSetAppUrlFromUI()");
       }
     }
+    else {
+      MSysOut.println(SYSTEM_LOGS,"AppMaster.oneTimeSetAppUrlFromUI() url NOT set, currently: "+appUrlString);      
+    }
   }
+  
   // todo combine,
   public static String getUrlString()
   {
