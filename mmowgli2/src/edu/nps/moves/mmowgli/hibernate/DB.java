@@ -171,7 +171,7 @@ public class DB
     }
     ss.close();
     long secs = (RETRY_SLEEP * RETRY_COUNT)/1000l;
-    System.err.println("ERROR: DB.getRetry() couldn't get " + cls.getSimpleName() + " " + id + " in "+secs+" seconds");// give up
+    MSysOut.println(ERROR_LOGS,"DB.getRetry() couldn't get " + cls.getSimpleName() + " " + id + " rev: "+revision+" in "+secs+" seconds");// give up
     return null;
   }
   
