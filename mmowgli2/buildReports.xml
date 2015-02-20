@@ -18,7 +18,8 @@
 
     <!-- ANT Contrib archive at http://sourceforge.net/project/showfiles.php?group_id=36177       -->
     <!-- must have ant-contrib.jar in ANT_HOME/lib (or else specify path)                         -->
-    <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+    <!-- use local relative path for portability: -->
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${stylesheets.dir}/jar"/>
 
     <property name="saxon.dir" location="${stylesheets.dir}/jar" description="relative path from stylesheets directory"/>
     <property name="saxon.jar"           value="saxon9B.jar"/>
