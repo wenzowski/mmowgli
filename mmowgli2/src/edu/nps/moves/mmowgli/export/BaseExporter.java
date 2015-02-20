@@ -32,9 +32,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -587,7 +585,31 @@ public abstract class BaseExporter implements Runnable
   {
     public void continueOrCancel(String s);
   }
- 
+ // from game
+  /*  
+  private void addCall2Action(Element root, Session sess, Game g)
+  {
+    Element call2ActionElem = createAppend(root,"CallToAction");
+    //addElementWithText(call2ActionElem,"ScreenShot","callToActionScreenShot.png");
+
+    MovePhase phase = MovePhase.getCurrentMovePhase(sess);
+
+    String s = "";
+    Media vid = phase.getCallToActionBriefingVideo();
+    if(vid != null) {
+      String url = vid.getUrl();
+      if(url != null)
+        s = url;
+    }
+    addElementWithText(call2ActionElem,"Video",s==null?"":s);
+
+    s = phase.getCallToActionBriefingSummary();
+    addElementWithText(call2ActionElem,"BriefingSummary",s==null?"":s);
+    s = phase.getCallToActionBriefingText();
+    addElementWithText(call2ActionElem,CALL2ACTION_BRIEFINGTEXT,s==null?"":s);
+  }
+*/ 
+  /*
   protected void addCallToAction(Element root, Session sess)
   {
     MovePhase mp = MovePhase.getCurrentMovePhase(sess);
@@ -601,6 +623,72 @@ public abstract class BaseExporter implements Runnable
     addElementWithText(cto,"BriefingSummary",toUtf8(nn(mp.getCallToActionBriefingSummary())));    
     addElementWithText(cto,BRIEFING_TEXT_ELEM,toUtf8(nn(mp.getCallToActionBriefingText())));
   }
+  */
+  @SuppressWarnings("unchecked")
+  protected void newAddCall2Action(Element root, Session sess)
+  {
+    List<Move> lis = sess.createCriteria(Move.class).list();
+    Collections.sort(lis, new Comparator<Move>() {
+      @Override
+      public int compare(Move m1, Move m2)
+      {
+        return m1.getNumber()-m2.getNumber();
+      }     
+    });
+    for(Move m : lis)
+      _addMoveCall2Action(root,sess,m);
+  }
+  
+  private void _addMoveCall2Action(Element root, Session sess, Move m)
+  {
+    List<MovePhase> lis = m.getMovePhases();
+    Collections.sort(lis, new Comparator<MovePhase>() {
+      @Override
+      public int compare(MovePhase o1, MovePhase o2)
+      {
+        return (int)(o1.getId()-o2.getId());
+      }     
+    });
+    for(MovePhase mp : lis)
+      _addMovePhaseCall2Action(root,sess, m, mp);
+  }
+  
+  private void _addMovePhaseCall2Action(Element root, Session sess, Move m, MovePhase phase)
+  {
+    Element call2ActionElem = createAppend(root,"CallToAction");
+    call2ActionElem.setAttribute("round", ""+m.getNumber());
+    call2ActionElem.setAttribute("phase", phase.getDescription());
+   
+    String s = "";
+    Media vid = phase.getCallToActionBriefingVideo();
+    if(vid != null) {
+      String url = vid.getUrl();
+      if(url != null)
+        s = url;
+    }
+    addElementWithText(call2ActionElem,"VideoYouTubeID",toUtf8(nn(s)));
+    addElementWithText(call2ActionElem,"VideoAlternateUrl","");
+
+    s = phase.getCallToActionBriefingSummary();
+    addElementWithText(call2ActionElem,"BriefingSummary",toUtf8(nn(s)));
+    s = phase.getCallToActionBriefingText();
+    addElementWithText(call2ActionElem,BRIEFING_TEXT_ELEM,toUtf8(nn(s)));    
+  }
+  /*
+  protected void addCallToAction(Element root, Session sess)
+  {
+    MovePhase mp = MovePhase.getCurrentMovePhase(sess);
+    Element cto = createAppend(root,"CallToAction");
+    String vidUrl = "";
+    Media vid = mp.getCallToActionBriefingVideo();
+    if(vid != null)
+      vidUrl = vid.getUrl();
+    addElementWithText(cto,"VideoYouTubeID",toUtf8(nn(vidUrl)));
+    addElementWithText(cto,"VideoAlternateUrl","");
+    addElementWithText(cto,"BriefingSummary",toUtf8(nn(mp.getCallToActionBriefingSummary())));    
+    addElementWithText(cto,BRIEFING_TEXT_ELEM,toUtf8(nn(mp.getCallToActionBriefingText())));
+  }
+  */
   
   public String buildFileName(String prefix)
   {
