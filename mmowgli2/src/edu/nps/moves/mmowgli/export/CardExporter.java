@@ -119,7 +119,7 @@ public class CardExporter extends BaseExporter
       addElementWithText(root, "GameTitle", s.replace(' ', '_'));     // for better file-name building
       addElementWithText(root, "GameSecurity", g.isShowFouo()?"FOUO":"open");
       addElementWithText(root, "GameSummary", metaString);
-      addCallToAction(root, sess);
+      newAddCall2Action(root, sess);
       
       Element innovateRoot = createAppend(root, "InnovateCards");
       Element defendRoot = createAppend(root,"DefendCards");
