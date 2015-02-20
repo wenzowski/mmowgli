@@ -64,6 +64,9 @@
 	<xs:element name="TermsURL" type="xs:anyURI"/>
 	<xs:element name="ActiveRound" type="xs:int"/>
 	<xs:element name="ActivePhase" type="xs:string"/>
+    <xs:element name="VideoYouTubeID" type="xs:string"/>
+    <xs:element name="VideoAlternateUrl" type="xs:string"/>
+  
 	<xs:element name="Welcome">
 		<xs:complexType>
 			<xs:sequence>
@@ -80,18 +83,18 @@
 	<xs:element name="CallToActionText" type="xs:string"/>
 	<xs:element name="OrientationHeadline" type="xs:string"/>
 	<xs:element name="OrientationSummary" type="xs:string"/>
-	<xs:element name="CallToAction">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element ref="ScreenShot"/>
-				<xs:element ref="Video"/>
-				<xs:element ref="BriefingSummary"/>
-				<xs:element ref="BriefingText"/>
-			</xs:sequence>
+    <xs:element name="CallToAction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="VideoYouTubeID"/>
+        <xs:element ref="VideoAlternateUrl"/>
+        <xs:element ref="BriefingText"/>
+        <xs:element ref="OrientationSummary"/>
+      </xs:sequence>
             <xs:attribute name="round" use="required"/>
             <xs:attribute name="phase" use="required"/>
-		</xs:complexType>
-	</xs:element>
+    </xs:complexType>
+  </xs:element>
 	<xs:element name="BriefingSummary" type="xs:string"/>
 	<xs:element name="BriefingText" type="xs:string"/>
 	<xs:element name="TopCards">

@@ -27,6 +27,8 @@
         <xs:element ref="BriefingText"/>
         <xs:element ref="OrientationSummary"/>
       </xs:sequence>
+            <xs:attribute name="round" use="required"/>
+            <xs:attribute name="phase" use="required"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="InnovateCards">

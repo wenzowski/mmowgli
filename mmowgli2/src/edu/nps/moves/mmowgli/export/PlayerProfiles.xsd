@@ -25,9 +25,11 @@
       <xs:sequence>
         <xs:element ref="VideoYouTubeID"/>
         <xs:element ref="VideoAlternateUrl"/>
-        <xs:element ref="BriefingSummary"/>
         <xs:element ref="BriefingText"/>
+        <xs:element ref="OrientationSummary"/>
       </xs:sequence>
+            <xs:attribute name="round" use="required"/>
+            <xs:attribute name="phase" use="required"/>
     </xs:complexType>
   </xs:element>
   
@@ -143,6 +145,7 @@
   <xs:element name="VideoAlternateUrl" type="xs:string"/>
   <xs:element name="BriefingText" type="xs:string"/>
   <xs:element name="BriefingSummary" type="xs:string"/>
+  <xs:element name="OrientationSummary" type="xs:string"/>
    
    <xs:element name="MoveScores">
      <xs:complexType>
