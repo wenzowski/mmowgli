@@ -1225,7 +1225,7 @@ text-shadow:; /* off */
             <a name="CallToAction"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></a>
             <xsl:text>&#10;</xsl:text>
             
-            <xsl:for-each select="//CallToAction">
+            <xsl:for-each select="//CallToAction[not(@round = following-sibling::CallToAction/@round)]">
                 
                 <xsl:variable name="videoYouTubeID">
                     <xsl:choose>
