@@ -390,13 +390,24 @@
                         <!-- embedded table to clean up, simplify column spacing -->
                         <table border="0" width="100%" cellpadding="0">
                             <tr>
-				<td align="left" valign="bottom">
-                                    <br />
-                                    <h2 title="Idea card chains beginning with an innovation card">
+                                <td colspan="2" valign="middle">
+                                    <h1 style="background-color:lightgray;" align="center">
                                         <xsl:element name="a">
                                             <xsl:attribute name="name">
                                                 <xsl:value-of select="@type"/>
                                             </xsl:attribute>
+                                            <xsl:text>Idea Card Chains</xsl:text>
+                                            <xsl:if test="number(@round) > 0">
+                                                <xsl:text>, Round </xsl:text>
+                                                <xsl:value-of select="@round"/>
+                                            </xsl:if>
+                                        </xsl:element>
+                                    </h1>
+                                </td>
+                            </tr>
+                            <tr>
+				<td align="left" valign="bottom">
+                                    <h2 title="Idea card chains beginning with an innovation card">
                                             <xsl:if test="//CardTree[@multipleMoves='true']">
                                                 <xsl:text> Round </xsl:text>
                                                 <xsl:value-of select="@moveNumber"/>
@@ -406,6 +417,7 @@
                                                 <xsl:value-of select="@type"/>
                                             </i>
                                             <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                                            <!-- TODO replace with top-level cardType prompt -->
                                             <xsl:text> Idea Card Chains </xsl:text>
                                         </xsl:element>
                                     </h2>
