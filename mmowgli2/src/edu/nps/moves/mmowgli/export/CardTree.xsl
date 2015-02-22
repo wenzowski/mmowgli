@@ -559,7 +559,7 @@
                                 <xsl:value-of select="."/>
                             </del>
                             <!-- link to game -->
-                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Card {@id}">
+                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go online to Card {@id}">
                                 <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
                             </a>
                         </xsl:when>
@@ -581,7 +581,7 @@
                                 </xsl:call-template>
                             </b>
                             <!-- link to game -->
-                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Card {@id}">
+                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go online to Card {@id}">
                                 <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
                             </a>
                         </xsl:when>
@@ -593,7 +593,7 @@
                                 </xsl:call-template>
                             </span>
                             <!-- link to game -->
-                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Card {@id}">
+                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go online to Card {@id}">
                                 <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
                             </a>
                         </xsl:otherwise>
