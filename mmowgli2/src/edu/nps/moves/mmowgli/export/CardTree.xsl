@@ -408,18 +408,17 @@
                             <tr>
 				<td align="left" valign="bottom">
                                     <h2 title="Idea card chains beginning with an innovation card">
-                                            <xsl:if test="//CardTree[@multipleMoves='true']">
-                                                <xsl:text> Round </xsl:text>
-                                                <xsl:value-of select="@moveNumber"/>
-                                                <xsl:text>: </xsl:text>
-                                            </xsl:if>
-                                            <i>
-                                                <xsl:value-of select="@type"/>
-                                            </i>
-                                            <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
-                                            <!-- TODO replace with top-level cardType prompt -->
-                                            <xsl:text> Idea Card Chains </xsl:text>
-                                        </xsl:element>
+                                        <xsl:if test="//CardTree[@multipleMoves='true']">
+                                            <xsl:text> Round </xsl:text>
+                                            <xsl:value-of select="@moveNumber"/>
+                                            <xsl:text>: </xsl:text>
+                                        </xsl:if>
+                                        <i>
+                                            <xsl:value-of select="@type"/>
+                                        </i>
+                                        <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                                        <!-- TODO replace with top-level cardType prompt -->
+                                        <xsl:text> Idea Card Chains </xsl:text>
                                     </h2>
 				</td>
 				<td align="right" valign="top">
