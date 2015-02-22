@@ -299,11 +299,19 @@ td.longtext {
 
                 <table align="center" border="0" class="banner">
                     <tr>
+                        <td align="center" valign="middle">
+                            <h1 align="center">
+                                <xsl:value-of disable-output-escaping="yes" select="$gameLabel"/> <!-- want escaped <br /> intact for line break -->
+                            </h1>
+                            <h2 align="center" valign="middle">
+                                <xsl:text> Game Reports </xsl:text>
+                            </h2>
+                        </td>
                         <td>
                             <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
                             <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
                         </td>
-                        <td align="center" valign="middle">
+                        <td align="left" valign="middle">
                             <a href="{$portalPage}" title="Game documentation for {$gameLabel}">
                                 <!-- 1158 x 332 -->
                                 <img align="center" valign="middle" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="386" height="111" border="0"/>
@@ -313,19 +321,24 @@ td.longtext {
                             <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
                             <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
                         </td>
-                        <td align="center" valign="middle">
-                            <br />
-                            <h1 align="center" valign="middle">
-                                <xsl:text> Reports Index </xsl:text>
-                            </h1>
-                            <h2 align="center">
-                                <xsl:value-of disable-output-escaping="yes" select="$gameLabel"/> <!-- want escaped <br /> intact for line break -->
-                            </h2>
+                        <!-- Table of Contents -->
+                        <td align="left" valign="middle">
+                <p style="font-size:-2">
+                    <!--
+                    <a href="#index">Game Reports</a><xsl:text> </xsl:text>
+                    <br />
+                    -->
+                    <a href="#DatabaseExports">Database Exports</a><xsl:text> </xsl:text>
+                    <br />
+                    <a href="#ProductionNotes">Production Notes</a><xsl:text> </xsl:text>
+                    <br />
+                    <a href="#Contact"><xsl:text>Contact</xsl:text></a>
+                </p>
                         </td>
                     </tr>
                 </table>
                 
-                <!-- Table of Contents -->
+                <!-- Table of Contents
                 <p align="center" style="font-size:-2">
                     <a href="#GameReports">Game Reports</a><xsl:text> | </xsl:text>
                     <a href="#DatabaseExports">Database Exports</a><xsl:text> | </xsl:text>
@@ -335,7 +348,10 @@ td.longtext {
 
                 <h2> 
                     <a name="GameReports">Game Reports</a>
-                </h2>
+                </h2> -->
+                
+                <br />
+                <br />
                 
                 <!-- TODO add totals?  requires reaching into other files -->
 
@@ -411,22 +427,22 @@ td.longtext {
                             </a>
                         </td>
                         <td>
-                            <a href="{//ApplicationURLs/Game/.}" target="_{//Other/GameAcronym/.}Game">
+                            <a href="{//ApplicationURLs/Game/.}" target="_{//Other/GameAcronym/.}Game" title="Play the game! go online">
                                 <img src="images/MmowgliWelcomeSplash.png" height="100"/>
                             </a>
                             <br />
-                            <a href="{//ApplicationURLs/Game/.}" target="_{//Other/GameAcronym/.}Game">
+                            <a href="{//ApplicationURLs/Game/.}" target="_{//Other/GameAcronym/.}Game" title="Play the game! go online">
                                 <xsl:text>Play the </xsl:text>
                                 <xsl:value-of select="//HeaderFooter/BrandingText/."/>
                                 <xsl:text> game</xsl:text>
                             </a>
                         </td>
                         <td>
-                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game">
+                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game" title="Play the game! go mobile online">
                                 <img src="images/mmowgli.nps.edu.{//Other/GameAcronym/.}.mobile.qr.png" height="100"/>
                             </a>
                             <br />
-                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game">
+                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game" title="Play the game! go mobile online">
                                 <xsl:text>Mobile</xsl:text>
                             </a>
                         </td>
@@ -497,11 +513,11 @@ td.longtext {
                             </a>
                         </td>
                         <td>
-                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game">
+                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game" title="Play the game! go mobile online">
                                 <img src="images/AndroidHandheldTabletAlphaTestPhoto.jpg" height="100"/>
                             </a>
                             <br />
-                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game">
+                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game" title="Play the game! go mobile online">
                                 <xsl:text>Mobile</xsl:text>
                             </a>
                         </td>
@@ -551,8 +567,8 @@ td.longtext {
                         <img src="images/Mimetypes-inode-directory-icon.png" width="24" height="24" align="left"/>
                     </a>
                     <xsl:text> The </xsl:text>
-                    <a href="data/" title="database table text export">data/ subdirectory</a>
-                    <xsl:text> contains database tables exported as tab-delimited text files. </xsl:text>
+                    <a href="data/" title="database table text export">reports/data/</a>
+                    <xsl:text> subdirectory contains database tables exported as tab-delimited text files. </xsl:text>
                 </p>
 
                 <ul>
@@ -586,11 +602,11 @@ td.longtext {
                     </ul>
                 </li>
                 <li>
-                    <xsl:text> TODO: automatic spreadsheet and presentation generation capability as part of the open-source MMOWGLI game platform. </xsl:text>
+                    <xsl:text> TODO: automatically generate report spreadsheets and presentations. </xsl:text>
                 </li>
             </ul>
             <p>
-                <xsl:text> Additional exemplars and contributions are welcome. </xsl:text>
+                <xsl:text> Contributions to the open-source MMOWGLI game platform are always welcome. </xsl:text>
             </p>
 
 <!-- =================================================== Production Notes =================================================== -->
@@ -629,6 +645,15 @@ td.longtext {
                         <a href="https://portal.mmowgli.nps.edu/license">open-source license</a>.
                     </li>
                 </ul>
+
+        <p>
+            <xsl:text>Online at </xsl:text>
+            
+            <a href="{//ApplicationURLs/Game/.}/reports">
+                <xsl:value-of select="//ApplicationURLs/Game/."/>
+                <xsl:text>/reports</xsl:text>
+            </a>
+        </p>
 
 <!-- =================================================== Contact =================================================== -->
 

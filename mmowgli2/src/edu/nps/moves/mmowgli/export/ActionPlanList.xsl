@@ -665,11 +665,11 @@
                             </xsl:choose>
                             <li>
                                 <!-- link to game -->
-                                <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{ID}" target="_{$gameAcronym}Game" title="play the game! go to Action Plan {ID}">
+                                <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{ID}" target="_{$gameAcronym}Game" title="play the game! go online to Action Plan {ID}">
                                     <xsl:text>Go to game</xsl:text>
                                 </a>
                                 <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
-                                <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{ID}" target="_{$gameAcronym}Game" title="play the game! go to Action Plan {ID}">
+                                <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{ID}" target="_{$gameAcronym}Game" title="play the game! go online to Action Plan {ID}">
                                     <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" width="16px"/>
                                 </a>
                             </li>
@@ -1719,7 +1719,7 @@ b.error {color: #CC0000}
                                 <td align="right">
                                     <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
                                     <!-- link to game -->
-                                    <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{ID}" target="_{$gameAcronym}Game" title="play the game! go to Action Plan {ID}">
+                                    <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{ID}" target="_{$gameAcronym}Game" title="play the game! go online to Action Plan {ID}">
                                         <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" width="16px" align="right"/>
                                     </a>
                                 </td>

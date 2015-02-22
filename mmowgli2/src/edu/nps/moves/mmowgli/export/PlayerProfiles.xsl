@@ -1238,7 +1238,7 @@ text-shadow:; /* off */
                             </b>
                             
                             <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
-                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!91_{@id}" target="_{$gameAcronym}Game" title="play the game! go to Player {@id}">
+                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!91_{@id}" target="_{$gameAcronym}Game" title="play the game! go online to Player {@id}">
                                 <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" width="16px"/>
                             </a>
 
@@ -1629,7 +1629,7 @@ text-shadow:; /* off */
                                         </xsl:variable>
                                         <li>
                                             <!-- link to game -->
-                                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{$cardID}" target="_{$gameAcronym}Game" title="play the game! go to Card {$cardID}">
+                                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{$cardID}" target="_{$gameAcronym}Game" title="play the game! go online to Card {$cardID}">
                                                 <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
                                             </a>
                                             <a href="{concat($IdeaCardChainLocalLink,'.html#IdeaCard',.)}" title="to Idea Card {.}">
@@ -1703,7 +1703,7 @@ text-shadow:; /* off */
                                         </xsl:variable>
                                         <li>
                                             <!-- link to game -->
-                                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{$actionPlanID}" target="_{$gameAcronym}Game" title="play the game! go to Action Plan {$actionPlanID}">
+                                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{$actionPlanID}" target="_{$gameAcronym}Game" title="play the game! go online to Action Plan {$actionPlanID}">
                                                 <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" width="16px" align="right"/>
                                             </a>
                                             <a href="{concat($ActionPlanLocalLink,'.html#ActionPlan',$actionPlanID)}" title="to Action Plan {.}">
