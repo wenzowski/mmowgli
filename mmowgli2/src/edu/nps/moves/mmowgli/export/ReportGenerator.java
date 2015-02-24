@@ -119,7 +119,7 @@ public class ReportGenerator implements Runnable
           MSysOut.println(REPORT_LOGS,"Report-generator generating card visualizer and action plan, card, user and game design reports to " + MmowgliConstants.REPORTS_FILESYSTEM_PATH + " at "
                                + df.format(new Date()));
           GameEventLogger.logBeginReportGenerationTL();
-          // don't put in game log...too many GameEventLogger.logBeginReportGeneration(ssm);
+
           MSysOut.println(REPORT_LOGS,"Report-generator building card visualizer");
           new CardVisualizerBuilder().build();
           
