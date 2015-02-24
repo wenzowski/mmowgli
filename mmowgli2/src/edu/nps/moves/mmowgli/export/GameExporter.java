@@ -136,7 +136,7 @@ public class GameExporter extends BaseExporter
       addMetaData(root,sess,g);
       addHeaderFooter(root,sess,g);
       addWelcome(root,sess,g);
-      newAddCall2Action(root,sess);
+      newAddCall2Action(root,sess,g);
       addTopCards(root,sess,g);
       addSubCards(root,sess,g);
       addSeedCards(root,sess,g);
