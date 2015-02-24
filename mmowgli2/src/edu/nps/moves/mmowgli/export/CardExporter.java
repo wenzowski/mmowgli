@@ -30,6 +30,7 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -119,7 +120,10 @@ public class CardExporter extends BaseExporter
       addElementWithText(root, "GameTitle", s.replace(' ', '_'));     // for better file-name building
       addElementWithText(root, "GameSecurity", g.isShowFouo()?"FOUO":"open");
       addElementWithText(root, "GameSummary", metaString);
-      newAddCall2Action(root, sess);
+      newAddCall2Action(root, sess, g);
+      
+      Element topCards = createAppend(root, "TopLevelCardTypes");
+      insertTopCardsForAllRounds(topCards,g,sess);
       
       Element innovateRoot = createAppend(root, "InnovateCards");
       Element defendRoot = createAppend(root,"DefendCards");
@@ -144,6 +148,37 @@ public class CardExporter extends BaseExporter
       throw t; // rethrow
     }
     return doc;  
+  }
+  
+  @SuppressWarnings("unchecked")
+  private void insertTopCardsForAllRounds(Element parent, Game g, Session sess)
+  {
+    Move lastMove = g.getCurrentMove();
+    
+    Element innovType = createAppend(parent,"InnovateType");
+    Element defendType = createAppend(parent,"DefendType");
+    
+    List<Move> mvs = sess.createCriteria(Move.class).addOrder(Order.asc("number")).list();
+    for(Move m : mvs) {
+      if(m.getNumber() > lastMove.getNumber())
+        continue;  // don't want future moves
+      MovePhase mp = m.getCurrentMovePhase();
+      Set<CardType> allowedCards = mp.getAllowedCards();
+      for(CardType ct : allowedCards) {
+        if(ct.isPositiveIdeaCard()) {
+          Element elm = createAppend(innovType, "Type");
+          elm.setAttribute("title", ct.getTitle());
+          elm.setAttribute("round",""+m.getNumber());
+          elm.setAttribute("prompt", ct.getPrompt());
+        }
+        else if(ct.isNegativeIdeaCard()) {
+          Element elm = createAppend(defendType, "Type");
+          elm.setAttribute("title", ct.getTitle());
+          elm.setAttribute("round",""+m.getNumber());
+          elm.setAttribute("prompt", ct.getPrompt());
+        }
+      }
+    }    
   }
   
   private void walkCardTree(Element parent, Card child, int level)
