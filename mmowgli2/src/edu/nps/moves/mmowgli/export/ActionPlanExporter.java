@@ -136,7 +136,7 @@ public class ActionPlanExporter extends BaseExporter
       addElementWithText(root, "GameTitle", s.replace(' ','_'));  // better file name handling
       addElementWithText(root, "GameSecurity", g.isShowFouo()?"FOUO":"open");
       addElementWithText(root, "GameSummary", metaString);
-      newAddCall2Action(root, sess);
+      newAddCall2Action(root, sess, g);
 
       @SuppressWarnings("unchecked")
       List<ActionPlan> lis = sess.createCriteria(ActionPlan.class).list();     
