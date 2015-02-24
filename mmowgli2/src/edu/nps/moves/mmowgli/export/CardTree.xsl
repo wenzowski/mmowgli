@@ -417,8 +417,9 @@
                                             <xsl:value-of select="@type"/>
                                         </i>
                                         <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
-                                        <!-- TODO replace with top-level cardType prompt -->
-                                        <xsl:text> Idea Card Chains </xsl:text>
+                                        <!-- top-level cardType prompt -->
+                                        <xsl:value-of select="//TopLevelCardTypes/InnovateType/Type[@title = $currentCardType][@round = $currentCardMoveNumber]/@prompt"/>
+                                   <!-- <xsl:text> Idea Card Chains </xsl:text> -->
                                     </h2>
 				</td>
 				<td align="right" valign="top">
@@ -1236,7 +1237,7 @@ text-shadow:; /* off */
             <a name="CallToAction"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></a>
             <xsl:text>&#10;</xsl:text>
             
-            <xsl:for-each select="//CallToAction[not(@round = following-sibling::CallToAction/@round)]">
+            <xsl:for-each select="//CallToAction"> <!-- [not(@round = following-sibling::CallToAction/@round)] -->
                 
                 <xsl:variable name="videoYouTubeID">
                     <xsl:choose>
