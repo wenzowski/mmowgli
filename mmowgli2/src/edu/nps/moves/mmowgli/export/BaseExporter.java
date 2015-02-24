@@ -625,7 +625,7 @@ public abstract class BaseExporter implements Runnable
   }
   */
   @SuppressWarnings("unchecked")
-  protected void newAddCall2Action(Element root, Session sess)
+  protected void newAddCall2Action(Element root, Session sess, Game g)
   {
     List<Move> lis = sess.createCriteria(Move.class).list();
     Collections.sort(lis, new Comparator<Move>() {
@@ -635,22 +635,28 @@ public abstract class BaseExporter implements Runnable
         return m1.getNumber()-m2.getNumber();
       }     
     });
-    for(Move m : lis)
-      _addMoveCall2Action(root,sess,m);
+    Move currentMove = g.getCurrentMove();
+    for(Move m : lis){
+      if(m.getNumber()<= currentMove.getNumber())  // if any moves have been defined, but never executed, skip them
+        _addMoveCall2Action(root,sess,m);
+    }
   }
   
   private void _addMoveCall2Action(Element root, Session sess, Move m)
   {
-    List<MovePhase> lis = m.getMovePhases();
-    Collections.sort(lis, new Comparator<MovePhase>() {
-      @Override
-      public int compare(MovePhase o1, MovePhase o2)
-      {
-        return (int)(o1.getId()-o2.getId());
-      }     
-    });
-    for(MovePhase mp : lis)
-      _addMovePhaseCall2Action(root,sess, m, mp);
+//    List<MovePhase> lis = m.getMovePhases();
+//    Collections.sort(lis, new Comparator<MovePhase>() {
+//      @Override
+//      public int compare(MovePhase o1, MovePhase o2)
+//      {
+//        return (int)(o1.getId()-o2.getId());
+//      }     
+//    });
+//    for(MovePhase mp : lis)
+//      _addMovePhaseCall2Action(root,sess, m, mp);
+
+    // Only the current/last phase gets shown
+    _addMovePhaseCall2Action(root,sess,m,m.getCurrentMovePhase());
   }
   
   private void _addMovePhaseCall2Action(Element root, Session sess, Move m, MovePhase phase)
