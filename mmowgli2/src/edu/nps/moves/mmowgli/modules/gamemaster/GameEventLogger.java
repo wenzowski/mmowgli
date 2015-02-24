@@ -295,18 +295,24 @@ public class GameEventLogger
     GameEvent ev = new GameEvent(GameEvent.EventType.BLOGHEADLINEPOST," by user "+uid+" / "+ sb.toString(),id);
     GameEvent.saveTL(ev);
   }
-
+  
+  public static void logRequestReportGenerationTL(User u)
+  {
+     GameEvent ev = new GameEvent(GameEvent.EventType.REPORTGENERATIONREQUESTED, " by "+u.getUserName());
+     GameEvent.saveTL(ev);
+  }
+  
   public static void logEndReportGenerationTL()
   {
     logReportGenerationTL(" completed");
   }
-
+  
   public static void logBeginReportGenerationTL()
   {
     logReportGenerationTL(" begun");  
   }
   
-  private static void logReportGenerationTL(/*SingleSessionManager sessMgr, */String txt)
+  private static void logReportGenerationTL(String txt)
   {
     String url = AppMaster.instance().getAppUrlString();
     if(!url.endsWith("/"))
