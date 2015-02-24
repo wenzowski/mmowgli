@@ -899,6 +899,8 @@ public class AbstractMmowgliControllerHelper
     notification.setPosition(Position.TOP_CENTER);
     notification.setDelayMsec(5000);
     notification.show(Page.getCurrent());
+    
+    GameEventLogger.logRequestReportGenerationTL(Mmowgli2UI.getGlobals().getUserTL());
   }
  
   public void setEmailConfirmationTL(boolean tf, EventType evt)
