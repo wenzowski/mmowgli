@@ -1762,7 +1762,7 @@ b.error {color: #CC0000}
             <a name="CallToAction"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></a>
             <xsl:text>&#10;</xsl:text>
             
-            <xsl:for-each select="//CallToAction[not(@round = following-sibling::CallToAction/@round)]">
+            <xsl:for-each select="//CallToAction"> <!-- [not(@round = following-sibling::CallToAction/@round)] -->
                 
                 <xsl:variable name="videoYouTubeID">
                     <xsl:choose>
