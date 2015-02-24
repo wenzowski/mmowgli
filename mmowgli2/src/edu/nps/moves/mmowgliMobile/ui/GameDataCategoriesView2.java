@@ -64,6 +64,7 @@ public class GameDataCategoriesView2 extends ForwardButtonView
       @Override
       public void buttonClick(NavigationButtonClickEvent event)
       {
+        HSess.init();
         Folder[] fa = new Folder[2];
         CardType posTyp = CardTypeManager.getPositiveIdeaCardTypeTL();
         Container cntr = new CardsByTypeContainer<Card>(posTyp);
@@ -78,6 +79,7 @@ public class GameDataCategoriesView2 extends ForwardButtonView
         // Go to a FolderView
         FolderView2 v = new FolderView2(fa, "Top Level Cards");
         getNavigationManager().navigateTo(v);
+        HSess.close();
       }
     });
 
