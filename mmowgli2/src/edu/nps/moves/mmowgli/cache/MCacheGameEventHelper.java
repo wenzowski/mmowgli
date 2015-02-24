@@ -93,18 +93,17 @@ public class MCacheGameEventHelper
 //    setMaxResults(GAMEEVENTCAPACITY).list();
     return evs;
   }
-  // feb refactor called from db listener
+
   void putGameEvent(GameEvent ge)
   {
     synchronized(gameEvents) {
-      gameEvents.add(0, ge);  // The original but was here, you CAN add a null to position 0
+      gameEvents.add(0, ge);
       int i;
       while((i=gameEvents.size()) > GAMEEVENTCAPACITY)
         gameEvents.remove(i-1);
     }
   }
 
-  // feb refactor; should now be used only for externally generated events
   void newGameEventTL(char messageType, String message)
   {
     Long id = MMessage.MMParse(messageType,message).id;
@@ -116,13 +115,17 @@ public class MCacheGameEventHelper
       ev.setId(id);
       updateGameEventWhenPossible(ev);
     }
+    // The getTL above automatically puts into the cache so the following incorrectly doubles it
+    /*
     synchronized(gameEvents) {
       gameEvents.add(0, ev);  // The original but was here, you CAN add a null to position 0
       int i;
       while((i=gameEvents.size()) > GAMEEVENTCAPACITY)
         gameEvents.remove(i-1);
     }
+    */
   }
+  
   public GameEvent getGameEventWhenPossible(Long id)
   {
      GameEvent ev = new GameEvent();
