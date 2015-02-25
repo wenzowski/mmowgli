@@ -311,7 +311,7 @@ public class LoginPopup extends MmowgliDialog
       }
 
       // This is necessary to receive an email to activate your registration
-      Mmowgli2UI.getGlobals().setUserIDTL(user.getId());
+      Mmowgli2UI.getGlobals().setUserID(user);
 
       // Lots of stuff borrowed from RegistrationPageBase
       if (event.getButton() == pwResetButt) {
