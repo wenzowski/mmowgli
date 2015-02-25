@@ -100,27 +100,29 @@ public class MmowgliConstants
   public static final String TWEETBUTTON_HEIGHT = "20px";
 
   // Logging
+  //@formatter:off
   public static final int ALL_LOGS = -1;
-  public static final int MESSAGING_LOGS = 0x1;
-  public static final int DB_LISTENER_LOGS = 0x2;
-  public static final int MCACHE_LOGS = 0x04;
-  public static final int TICK_LOGS = 0x08;
-  public static final int USER_UPDATE_LOGS = 0x10;
-  public static final int CARD_UPDATE_LOGS = 0x20;
-  public static final int PUSH_LOGS = 0x40;
-  public static final int BROADCASTER_LOGS = 0x80;
-  public static final int HIBERNATE_LOGS = 0x100;
-  public static final int BADGEMANAGER_LOGS = 0x200;
-  public static final int SYSTEM_LOGS = 0x400;
-  public static final int SCOREMANAGER_LOGS = 0x800;
-  public static final int ACTIONPLAN_UPDATE_LOGS = 0x1000;
-  public static final int REPORT_LOGS = 0x2000;
-  public static final int JMS_LOGS = 0x4000;
-  public static final int ERROR_LOGS = 0x8000;
-  public static final int MISC_LOGS = 0x10000;
-  public static final int MAIL_LOGS = 0x20000;
-  public static final int MOBILE_LOGS = 0x40000;
+  public static final int MESSAGING_LOGS             = 0x1;
+  public static final int DB_LISTENER_LOGS           = 0x2;
+  public static final int MCACHE_LOGS                = 0x4;
+  public static final int TICK_LOGS                  = 0x8;
+  public static final int USER_UPDATE_LOGS          = 0x10;
+  public static final int CARD_UPDATE_LOGS          = 0x20;
+  public static final int PUSH_LOGS                 = 0x40;
+  public static final int BROADCASTER_LOGS          = 0x80;
+  public static final int HIBERNATE_LOGS           = 0x100;
+  public static final int BADGEMANAGER_LOGS        = 0x200;
+  public static final int SYSTEM_LOGS              = 0x400;
+  public static final int SCOREMANAGER_LOGS        = 0x800;
+  public static final int ACTIONPLAN_UPDATE_LOGS  = 0x1000;
+  public static final int REPORT_LOGS             = 0x2000;
+  public static final int JMS_LOGS                = 0x4000;
+  public static final int ERROR_LOGS              = 0x8000;
+  public static final int MISC_LOGS              = 0x10000;
+  public static final int MAIL_LOGS              = 0x20000;
+  public static final int MOBILE_LOGS            = 0x40000;
   public static final int HIBERNATE_SESSION_LOGS = 0x80000;
+  //@formatter:on
   
   public static HashMap<Integer,String> logTokens = new HashMap<Integer,String>();
   static {
@@ -335,13 +337,13 @@ public class MmowgliConstants
   public static final String ACTIONDASHBOARD_OFFSET_POS  = "top:0px;left:"+ACTIONDASHBOARD_HOR_OFFSET+"px";
 
   public static final String ACTIONPLAN_TABCONTENT_W         = "910px";
-  public static final String ACTIONPLAN_TABCONTENT_H         = "682px";
+  public static final String ACTIONPLAN_TABCONTENT_H         = "720px"; //"682px";
   public static final String ACTIONPLAN_TABCONTENT_POS       = "top:357px;left:46px";
   public static final String ACTIONPLAN_TABCONTENT_LEFT_W    = "188px";
   public static final String ACTIONPLAN_TABCONTENT_LEFT_H    = "300px";
   public static final String ACTIONPLAN_TABCONTENT_LEFT_POS  = "top:25px;left:0px";
   public static final String ACTIONPLAN_TABCONTENT_RIGHT_W   = "705px";
-  public static final String ACTIONPLAN_TABCONTENT_RIGHT_H   = "682px";
+  public static final String ACTIONPLAN_TABCONTENT_RIGHT_H   = "720px"; //"682px";
   public static final String ACTIONPLAN_TABCONTENT_RIGHT_POS = "top:0px;left:239px";
 
   public static final String ACTIONDASHBOARD_TABCONTENT_POS       = "top:103px;left:46px";
