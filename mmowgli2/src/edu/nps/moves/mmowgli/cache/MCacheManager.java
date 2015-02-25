@@ -28,6 +28,7 @@ import java.util.*;
 
 import org.hibernate.Session;
 
+import edu.nps.moves.mmowgli.cache.MCacheActionPlanHelper.QuickActionPlan;
 import edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DB;
@@ -51,8 +52,9 @@ import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
  */
 public class MCacheManager implements JmsReceiver
 {
-  private MCacheGameEventHelper gameEventHelper;
-  private MCacheUserHelper      userHelper;
+  private MCacheGameEventHelper  gameEventHelper;
+  private MCacheUserHelper       userHelper;
+  private MCacheActionPlanHelper actionPlanHelper;
   
   private SortedMap<Long,Card> allNegativeIdeaCardsCurrentMove;
   private SortedMap<Long,Card> unhiddenNegativeIdeaCardsCurrentMove;
@@ -86,6 +88,7 @@ public class MCacheManager implements JmsReceiver
       Session sess = HSess.getSessionFactory().openSession();
       gameEventHelper = new MCacheGameEventHelper(sess);
       userHelper = new MCacheUserHelper(sess);
+      actionPlanHelper = new MCacheActionPlanHelper(sess);
       
       supActMgr = new MSuperActiveCacheManager();
 
@@ -149,6 +152,11 @@ public class MCacheManager implements JmsReceiver
       case DELETED_USER:
         userHelper.dbDeleteUser(packet.msgType,packet.msg);
         break;
+      case UPDATED_ACTIONPLAN:
+        actionPlanHelper.dbUpdatedActionPlan(packet.msgType,packet.msg);
+        break;
+      case NEW_ACTIONPLAN:
+        actionPlanHelper.dbNewActionPlan(packet.msgType,packet.msg);
       default:
     }
     return false;  
@@ -175,6 +183,11 @@ public class MCacheManager implements JmsReceiver
       case DELETED_USER:
         userHelper.externallyDeletedUser(packet.msgType,packet.msg);
         break;
+      case UPDATED_ACTIONPLAN:
+        actionPlanHelper.externallyUpdatedActionPlanTL(packet.msgType,packet.msg);
+        break;
+      case NEW_ACTIONPLAN:
+        actionPlanHelper.externallyNewActionPlanTL(packet.msgType,packet.msg);
       default:
     }
     return false;
@@ -347,6 +360,11 @@ public class MCacheManager implements JmsReceiver
   public void removeUser(User u)
   {
     userHelper.removeUser(u);
+  }
+  
+  public List<QuickActionPlan> getQuickActionPlanList()
+  {
+    return actionPlanHelper.getQuickActionPlanList();
   }
   
   // Only used by add authordialog; list won't include guest account(s) or banished accounts
