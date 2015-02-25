@@ -671,6 +671,8 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         mmgr.onNewUserSignupTL(user);
         user.setWelcomeEmailSent(true);
         User.updateTL(user);
+        
+        HSess.close();HSess.init();  // because further down the thread, a User.get is performed, which loses the update
       }
       
       // Adjust session timeouts.  Default (standard user) is set in web.xml
