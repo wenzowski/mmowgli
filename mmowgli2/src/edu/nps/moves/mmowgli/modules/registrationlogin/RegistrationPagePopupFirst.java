@@ -224,7 +224,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       User.saveTL(u);  //B
 
       // This is necessary to receive an email to activate your registration
-      Mmowgli2UI.getGlobals().setUserIDTL(u.getId());
+      Mmowgli2UI.getGlobals().setUserID(u);
 
       uPii = new UserPii();
       uPii.setUserObjectId(u.getId());
