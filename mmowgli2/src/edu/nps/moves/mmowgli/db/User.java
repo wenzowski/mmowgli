@@ -38,6 +38,8 @@ import org.hibernate.search.annotations.*;
 import org.jasypt.hibernate4.type.EncryptedStringType;
 
 import edu.nps.moves.mmowgli.hibernate.DB;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 /** Used for jasypt encryption of fields */
 
@@ -169,6 +171,7 @@ public class User implements Serializable
   public static void updateTL(User u)
   {
     u.incrementRevision();
+    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.updateTL() id/newrev="+u.getId()+"/"+u.getRevision());
     DB.updateTL(u);
   }
   
@@ -184,11 +187,14 @@ public class User implements Serializable
 
   public static User get(Object id, Session sess)
   {
+    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.get() id="+id);
+    
     return DB.get(User.class, id, sess);
   }
   
   public static User getTL(Object id)
   {
+    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.getTL() id="+id);
     return DB.getTL(User.class, id);
   }
 
@@ -204,11 +210,13 @@ public class User implements Serializable
 
   public static User getUserWithUserName(String pUserName, Session sess)
   {
+    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.getUserWithUserName() name="+pUserName);
     return DB.getSingle(User.class, sess, Restrictions.eq("userName",  pUserName));
   }
   
   public static User getUserWithUserNameTL(String pUserName)
   {
+    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.getUserWithUserNameTL() name="+pUserName);
     return DB.getSingleTL(User.class, Restrictions.eq("userName",  pUserName));
   }
   
