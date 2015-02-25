@@ -186,10 +186,18 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     this.mediaLoc = mediaLocator;    
   }
 
+  public void setUserID(User u)
+  {
+    this.userId = u.getId();  
+    gameAdministrator = u.isAdministrator();
+    gameMaster = u.isGameMaster();
+    viewOnlyUser = u.isViewOnly();
+    userName = u.getUserName();    
+  }
+  
   public void setUserIDTL(Object userId)
   {
-    this.userId = (Serializable)userId;  
-    
+    this.userId = (Serializable)userId;      
     User me = User.getTL(userId);
     gameAdministrator = me.isAdministrator();
     gameMaster = me.isGameMaster();
