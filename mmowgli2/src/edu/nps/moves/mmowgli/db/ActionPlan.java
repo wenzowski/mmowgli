@@ -47,6 +47,7 @@ import edu.nps.moves.mmowgli.hibernate.DB;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
+@SuppressWarnings("deprecation")
 @Entity
 @Indexed(index="mmowgli")
 public class ActionPlan implements Serializable
@@ -439,7 +440,6 @@ public class ActionPlan implements Serializable
   /**
    * @return the comments
    */
-  @SuppressWarnings("deprecation")
   @OneToMany
   @JoinTable(name="ActionPlan_Comments",
         joinColumns = @JoinColumn(name="actionplan_id"),
@@ -463,7 +463,6 @@ public class ActionPlan implements Serializable
   /**
    * @return the authorMessages
    */
-  @SuppressWarnings("deprecation")
   @OneToMany
   @JoinTable(name="ActionPlan_AuthorMessages",
         joinColumns = @JoinColumn(name="actionplan_id"),
@@ -965,7 +964,6 @@ public class ActionPlan implements Serializable
     this.hidden = hidden;
   }
   
-  @SuppressWarnings("deprecation")
   @OneToMany
   @JoinTable(name="ActionPlan_Titles_History",
         joinColumns = @JoinColumn(name="actionplan_id"),
@@ -986,7 +984,6 @@ public class ActionPlan implements Serializable
     this.titlesEditHistory = titlesEditHistory;
   }
 
-  @SuppressWarnings("deprecation")
   @OneToMany
   @JoinTable(name="ActionPlan_SubTitles_History",
         joinColumns = @JoinColumn(name="actionplan_id"),
@@ -1007,7 +1004,6 @@ public class ActionPlan implements Serializable
     this.subTitleEditHistory = subTitleEditHistory;
   }
 
-  @SuppressWarnings("deprecation")
   @OneToMany
   @JoinTable(name="ActionPlan_WhatIs_History",
         joinColumns = @JoinColumn(name="actionplan_id"),
@@ -1029,7 +1025,6 @@ public class ActionPlan implements Serializable
     this.whatIsItEditHistory = whatIsItEditHistory;
   }
 
-  @SuppressWarnings("deprecation")
   @OneToMany
   @JoinTable(name="ActionPlan_WhatTake_History",
         joinColumns = @JoinColumn(name="actionplan_id"),
@@ -1051,7 +1046,6 @@ public class ActionPlan implements Serializable
     this.whatTakeEditHistory = whatTaketEditHistory;
   }
 
-  @SuppressWarnings("deprecation")
   @OneToMany
   @JoinTable(name="ActionPlan_HowWork_History",
         joinColumns = @JoinColumn(name="actionplan_id"),
@@ -1073,7 +1067,6 @@ public class ActionPlan implements Serializable
     this.howWorkEditHistory = howWorkEditHistory;
   }
 
-  @SuppressWarnings("deprecation")
   @OneToMany
   @JoinTable(name="ActionPlan_HowChange_History",
         joinColumns = @JoinColumn(name="actionplan_id"),
@@ -1158,4 +1151,4 @@ public class ActionPlan implements Serializable
   }
 
 
- }
+}
