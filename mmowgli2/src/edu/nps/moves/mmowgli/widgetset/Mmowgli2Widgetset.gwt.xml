@@ -26,9 +26,9 @@
     <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
     <!--WS Compiler: manually edited -->
     <inherits name="org.vaadin.cssinject.Cssinject_addonWidgetset" />
-    <inherits name="org.vaadin.jouni.animator.AnimatorWidgetset" />
-    <inherits name="org.vaadin.addon.leaflet.draw.DrawWidgetset" />
+    <inherits name="org.vaadin.jouni.animator.AnimatorWidgetset" />   
     <inherits name="org.vaadin.jouni.dom.DomWidgetset" /> <!--  PlayAnIdeaPage2 -->
     <inherits name="org.vaadin.jouni.restrain.RestrainWidgetset" />  <!-- not used yet -->
     <inherits name="org.vaadin.addon.ios7fixes.Ios7HotFixesWidgetset" />
+    <inherits name="org.vaadin.addon.leaflet.Widgetset" />
 </module>
