@@ -17,4 +17,7 @@
 	<set-configuration-property
 		name='touchkit.manifestlinker.additionalCacheRoot'
 		value='src/main/webapp/VAADIN/themes/mmowglimobile:../../themes/mmowglimobile' />
+
+    <inherits name="edu.nps.moves.mmowgli.widgetset.Mmowgli2Widgetset" />
+    <inherits name="org.vaadin.cssinject.Cssinject_addonWidgetset" />
 </module>
