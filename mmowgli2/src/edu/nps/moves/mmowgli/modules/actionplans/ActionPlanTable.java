@@ -24,23 +24,16 @@ package edu.nps.moves.mmowgli.modules.actionplans;
 
 import static edu.nps.moves.mmowgli.MmowgliEvent.ACTIONPLANSHOWCLICK;
 
-import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-
-import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.data.hbnutil.HbnContainer.EntityItem;
 import com.vaadin.data.util.AbstractBeanContainer;
 import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
@@ -54,10 +47,13 @@ import com.vaadin.ui.themes.BaseTheme;
 import edu.nps.moves.mmowgli.AppEvent;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
+import edu.nps.moves.mmowgli.cache.MCacheActionPlanHelper.QuickActionPlan;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
+import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanContainers.HelpWantedContainer;
+import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanContainers.QuickAllPlansInThisMove;
 
 /**
  * ActionPlanTable.java
@@ -83,11 +79,11 @@ public class ActionPlanTable extends Table
   private static String AVGTHUMBS_COLUMN_NAME = "averageThumb";
   private static String ROUND_COLUMN_NAME = "createdInMove";
   
-  private static String[] visibleColumns = {IDFORSORTING_COLUMN_NAME, TITLE_COLUMN_NAME, AUTHORS_COLUMN_NAME, MYTHUMBS_COLUMN_NAME, AVGTHUMBS_COLUMN_NAME};  
-  private static String[] columnNames    = {"ID","Title","Authors","Thumbs","Avg"}; // These get auto capitalized
+  private static String[] visibleColumns = {IDFORSORTING_COLUMN_NAME, TITLE_COLUMN_NAME, AUTHORS_COLUMN_NAME, /*MYTHUMBS_COLUMN_NAME,*/ AVGTHUMBS_COLUMN_NAME};  
+  private static String[] columnNames    = {"ID","Title","Authors",/*"Thumbs","Avg"*/"Thumbs"}; // These get auto capitalized
   
-  private static String[] visibleColumnsWithRound = {IDFORSORTING_COLUMN_NAME, ROUND_COLUMN_NAME,TITLE_COLUMN_NAME, AUTHORS_COLUMN_NAME, MYTHUMBS_COLUMN_NAME, AVGTHUMBS_COLUMN_NAME}; 
-  private static String[] columnNamesWithRound = {"ID","RND","Title","Authors","Thumbs","Avg"}; // These get auto capitalized
+  private static String[] visibleColumnsWithRound = {IDFORSORTING_COLUMN_NAME, ROUND_COLUMN_NAME,TITLE_COLUMN_NAME, AUTHORS_COLUMN_NAME,/* MYTHUMBS_COLUMN_NAME,*/ AVGTHUMBS_COLUMN_NAME}; 
+  private static String[] columnNamesWithRound = {"ID","RND","Title","Authors",/*"Thumbs","Avg"*/"Thumbs"}; // These get auto capitalized
   
   private static String[] visibleColumnsHelpWanted = {IDFORSORTING_COLUMN_NAME, TITLE_COLUMN_NAME, HELPWANTED_COLUMN_NAME};
   private static String[] columnNamesHelpWanted = {"ID","Title","Expertise Needed"};
@@ -147,13 +143,18 @@ public class ActionPlanTable extends Table
         HSess.init();
      // if(event.isDoubleClick()){
         Object item = event.getItem();
-        ActionPlan actPln;
-        if(item instanceof BeanItem<?>)
-          actPln = (ActionPlan)((BeanItem<?>)item).getBean();
+        Long apId;
+        if(item instanceof BeanItem<?>) {
+          Object bean = ((BeanItem<?>)item).getBean();
+          if(bean instanceof ActionPlan)
+            apId = ((ActionPlan)bean).getId();
+          else
+            apId = ((QuickActionPlan)bean).getId();
+        }
         else
-          actPln = (ActionPlan)((EntityItem)event.getItem()).getPojo();
+          apId = ((ActionPlan)(((EntityItem)event.getItem()).getPojo())).getId();
           
-        Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(ACTIONPLANSHOWCLICK,ActionPlanTable.this,actPln.getId()));
+        Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(ACTIONPLANSHOWCLICK,ActionPlanTable.this,apId));
     // }
        HSess.close();
       }     
@@ -161,11 +162,10 @@ public class ActionPlanTable extends Table
   }
   
   private boolean columnsInitted = false;
-  @SuppressWarnings("rawtypes")
   public void initFromDataSource(Container con)
   {
-    if(con instanceof AbstractBeanContainer)
-      ((AbstractBeanContainer)con).addNestedContainerProperty(IDFORSORTING_COLUMN_NAME);
+    if(con instanceof AbstractBeanContainer & !(con instanceof QuickAllPlansInThisMove))  // don't know the details here
+     ((AbstractBeanContainer<?, ?>)con).addNestedContainerProperty(IDFORSORTING_COLUMN_NAME);
     else
       ; //con.addContainerProperty(IDFORSORTING_COLUMN_NAME,Long.class,null);
     try {
@@ -191,7 +191,7 @@ public class ActionPlanTable extends Table
       }    
       addGeneratedColumn(AUTHORS_COLUMN_NAME,colGen);
       addGeneratedColumn(TITLE_COLUMN_NAME,colGen);
-      addGeneratedColumn(MYTHUMBS_COLUMN_NAME,colGen);
+      //addGeneratedColumn(MYTHUMBS_COLUMN_NAME,colGen);
       addGeneratedColumn(AVGTHUMBS_COLUMN_NAME,colGen);
       setColumnExpandRatio(TITLE_COLUMN_NAME, 1.0f);
       columnsInitted = true;
@@ -240,16 +240,16 @@ public class ActionPlanTable extends Table
   {
     setColumnWidth(IDFORSORTING_COLUMN_NAME,35);
     setColumnWidth(AUTHORS_COLUMN_NAME,165);
-    setColumnWidth(MYTHUMBS_COLUMN_NAME,60);
-    setColumnWidth(AVGTHUMBS_COLUMN_NAME,32);
+    //setColumnWidth(MYTHUMBS_COLUMN_NAME,60);
+    setColumnWidth(AVGTHUMBS_COLUMN_NAME,60); //32);
   }
   private void setAllColumnWidthsWithRound()
   {
     setColumnWidth(IDFORSORTING_COLUMN_NAME,35);
     setColumnWidth(ROUND_COLUMN_NAME,30);
     setColumnWidth(AUTHORS_COLUMN_NAME,140);
-    setColumnWidth(MYTHUMBS_COLUMN_NAME,60);
-    setColumnWidth(AVGTHUMBS_COLUMN_NAME,32);
+    //setColumnWidth(MYTHUMBS_COLUMN_NAME,60);
+    setColumnWidth(AVGTHUMBS_COLUMN_NAME,60); //32);
   }
   
   private void setAllColumnWidthsHelpWanted()
@@ -282,8 +282,13 @@ public class ActionPlanTable extends Table
       ActionPlan ap;
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       Object obj = ActionPlanTable.this.getItem(itemId);
-      if(obj instanceof BeanItem<?>)
+      
+      if(obj instanceof BeanItem<?>) {
+        Object bean = ((BeanItem<?>)obj).getBean();
+        if(bean instanceof QuickActionPlan)
+          return generateCellFromQuickActionPlan(source,itemId, columnId);
         ap = (ActionPlan)((BeanItem<?>)obj).getBean();
+      }
       else {
         EntityItem ei = (EntityItem) obj;
         ap = (ActionPlan) ei.getPojo();
@@ -400,21 +405,123 @@ public class ActionPlanTable extends Table
       HSess.checkClose(sessKey);
       return new Label("Program error in ActionPlanTable.java");
     }
+    
+    public Component generateCellFromQuickActionPlan(Table source, Object itemId, Object columnId)
+    {
+     // Object sessKey = HSess.checkInit();
+      QuickActionPlan qap;
+      MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
+      Object thisRow = ActionPlanTable.this.getItem(itemId);      
+      qap = (QuickActionPlan)((BeanItem<?>)thisRow).getBean();
+      Component ret;
+      
+      if (IDFORSORTING_COLUMN_NAME.equals(columnId)) {
+        Label lab  = new HtmlLabel(""+qap.getId());
+        String hw=null;
+        if((hw=qap.getHelpWanted()) != null) {
+          lab.addStyleName("m-actionplan-redtext");
+          lab.setDescription("Help wanted: "+hw);
+        }
+        if(qap.isHidden()) {
+          lab.setValue(lab.getValue().toString()+"<span style='color:#CB0613'>(H)</span>");
+          lab.setDescription("hidden");
+        } 
+        ret = lab;
+      }
+      //------------------
+      else if (ROUND_COLUMN_NAME.equals(columnId)) {
+        Label lab = new Label(""+qap.getCreatedInMove());
+        lab.setDescription("Creation round");
+        ret = lab;
+      }
+      //------------------
+      else if (TITLE_COLUMN_NAME.equals(columnId)) {        
+        Label lab = null;     
+        if(qap.isSuperInteresting()) {
+          lab = new HtmlLabel("<b>"+FontAwesome.STAR.getHtml()+"&nbsp;"+qap.getTitle()+"</b>");
+          lab.addStyleName("m-actionplan-highlighted_background");
+          lab.setDescription("SUPER INTERESTING: "+qap.getTitle());
+        }
+        else {
+          lab = new Label(qap.getTitle());
+          lab.setDescription(lab.getValue().toString());
+        }
+        ret = lab;
+      }
+      //------------------
+      else if (AUTHORS_COLUMN_NAME.equals(columnId)) {
+        // First see if I've been invited to any action plans, put up the link if so
+        long meId = (Long)globs.getUserID();
+        long[] inviteesArr = qap.getInviteeIds();
+        String quickAuthors = qap.getAuthorNames();
+        
+        Button b = null;
+        if(inviteesArr != null && inviteesArr.length>0) {
+          for(long id : inviteesArr) {
+            if(id == meId) {
+              b = new Button("you're invited to join");
+              b.setStyleName(BaseTheme.BUTTON_LINK);
+              b.addClickListener(new AuthorPlanListener(qap.getId()));
+              b.setDescription("You've been invited to become an author of this plan");
+              b.setEnabled(!globs.isGameReadOnly() && !globs.isViewOnlyUser());
+              ret = b;
+              break;
+            }
+          }
+        }
+        if(b != null) {
+          ret = b;
+        }
+        // Else list authors
+        else if(quickAuthors != null && quickAuthors.length()>0) {
+          Label lab = new Label(quickAuthors);
+          lab.setDescription(quickAuthors);
+          ret = lab;
+        }       
+        else if(inviteesArr !=null && inviteesArr.length>0) { // no authors, so if there are invitees, put "pending"
+          Label lab = new Label("pending");
+          lab.setDescription("This plan has outstanding invitations");
+          ret = lab;
+        }
+        else {
+          // No authors, no invitees, Let anybody in
+          b = new Button("author this plan");
+          b.setStyleName(BaseTheme.BUTTON_LINK);
+          b.addClickListener(new AuthorPlanListener(qap.getId()));
+          b.setDescription("You are free to become an author of this plan");
+          ret = b;
+        }       
+      }
+      //------------------
+      else if (AVGTHUMBS_COLUMN_NAME.equals(columnId)) {
+        if(qap.getAverageThumbs() == 0.0d)
+          ret = new HtmlLabel("--");
+        else
+          ret = new HtmlLabel(avgThumbFormatter.format(qap.getAverageThumbs()));
+      }
+      //------------------
+      else
+        ret = new Label("error");
+      return ret;
+    }
   }
-
+  
   @SuppressWarnings("serial")
   class AuthorPlanListener implements ClickListener
   {
-    private ActionPlan ap;
+    private long apId;
     public AuthorPlanListener(ActionPlan ap)
     {
-      this.ap = ap;
+      this.apId = ap.getId();
     }
-
+    public AuthorPlanListener(Long apId)
+    {
+      this.apId = apId;
+    }
     @Override
     public void buttonClick(ClickEvent event)
     {
-      Window w = new AuthorThisPlanPopup(ap.getId());
+      Window w = new AuthorThisPlanPopup(apId);
       w.setModal(true);
       w.center();
       UI.getCurrent().addWindow(w);
@@ -427,93 +534,12 @@ public class ActionPlanTable extends Table
         public void windowClose(CloseEvent e)
         {
           Object key = HSess.checkInit();  // can be entered in same thread as AuthorThisPlanPopup.buttonclick()
-          Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(ACTIONPLANSHOWCLICK,ActionPlanTable.this,ap.getId())); 
+          Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(ACTIONPLANSHOWCLICK,ActionPlanTable.this,apId)); 
           HSess.checkClose(key);
         }       
       });
     }   
   }
+ 
   
-  @SuppressWarnings({ "serial", "unchecked" })
-  public static class MyActionPlanContainer<T> extends HbnContainer<T>
-  {
-    public MyActionPlanContainer()
-    {
-      this(HSess.getSessionFactory());
-    }
-    public MyActionPlanContainer(SessionFactory fact)
-    {
-      super((Class<T>)ActionPlan.class, fact );
-    }
-    @Override
-    protected Criteria getBaseCriteriaTL()
-    {
-      Serializable uid = Mmowgli2UI.getGlobals().getUserID();
-      Criteria crit = super.getBaseCriteriaTL();           // gets all cards
-      crit = crit.createCriteria("authors").             // sub criteria
-      add(Restrictions.idEq(uid));// written by me
-      
-      User me = User.getTL(uid);
-      ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
-      
-      return crit;
-    }
-  }
-  
-  @SuppressWarnings({ "serial", "unchecked" })
-  public static class NeedsAuthorsContainer<T> extends HbnContainer<T>
-  {
-    public NeedsAuthorsContainer()
-    {
-      this(HSess.getSessionFactory());
-    }
-    public NeedsAuthorsContainer(SessionFactory fact)
-    {
-      super((Class<T>)ActionPlan.class, fact);
-    }
-    @Override
-    protected Criteria getBaseCriteriaTL()
-    {
-      Criteria crit = super.getBaseCriteriaTL();  // gets all plans
-      crit.add(Restrictions.isEmpty("authors"));// nobody there
-      crit.add(Restrictions.isEmpty("invitees"));  // Any invitations have be declined
-      
-      User me = Mmowgli2UI.getGlobals().getUserTL();
-      ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
-
-      return crit;
-    }
-  }
-  
-  @SuppressWarnings({ "serial", "unchecked" })
-  public static class HelpWantedContainer<T> extends HbnContainer<T>
-  {
-    public HelpWantedContainer()
-    {
-      this(HSess.getSessionFactory());
-    }
-    public HelpWantedContainer(SessionFactory fact)
-    {
-      super((Class<T>)ActionPlan.class, fact);
-    }
-    @Override
-    protected Criteria getBaseCriteriaTL()
-    {
-      Criteria crit = super.getBaseCriteriaTL();  // gets all plans
-      crit.add(Restrictions.isNotNull("helpWanted"));
-      
-      User me = Mmowgli2UI.getGlobals().getUserTL();  // feb refactor DBGet.getUserTL(Mmowgli2UI.getGlobals().getUserID());
-      ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
-      return crit;
-    }
-  }
-  
-  @SuppressWarnings({ "serial", "rawtypes", "unchecked" })
-  public static class ImFollowingContainer2 extends BeanItemContainer
-  {
-    public ImFollowingContainer2(Class type, Collection collection) throws IllegalArgumentException
-    {
-      super(ActionPlan.class, collection);
-    }
-  }
 }
