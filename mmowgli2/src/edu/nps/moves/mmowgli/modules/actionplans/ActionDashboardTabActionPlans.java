@@ -24,18 +24,14 @@ package edu.nps.moves.mmowgli.modules.actionplans;
 
 import java.io.Serializable;
 
-import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
-
-import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.db.ActionPlan;
-import edu.nps.moves.mmowgli.db.User;
-import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
+import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanContainers.QuickAllPlansInThisMove;
+
 
 /**
  * ActionDashboardTabActionPlans.java Created on Mar 2, 2011
@@ -94,40 +90,18 @@ public class ActionDashboardTabActionPlans extends ActionDashboardTabPanel imple
     loadTableTL();
   }
 
-  @SuppressWarnings({ "serial", "unchecked" })
-  class AllPlansInThisMove<T> extends HbnContainer<T>
-  {
-    public AllPlansInThisMove()
-    {
-      this(HSess.getSessionFactory());
-    }
-
-    public AllPlansInThisMove(SessionFactory fact)
-    {
-      super((Class<T>) ActionPlan.class, fact);
-    }
-
-    @Override
-    protected Criteria getBaseCriteriaTL()
-    {
-      Criteria crit = super.getBaseCriteriaTL();
-      User me = Mmowgli2UI.getGlobals().getUserTL();
-      ActionPlan.adjustCriteriaToOmitActionPlansTL(crit, me);
-      return crit;
-    }
-  }
-
+  
   private void loadTableTL()
   {
     if(table != null)
       flowLay.removeComponent(table);
-    
-    table = new ActionPlanTable(new AllPlansInThisMove<ActionPlan>());
+
+    table = new ActionPlanTable(new QuickAllPlansInThisMove(Game.getTL(),Mmowgli2UI.getGlobals().getUserTL()));
 
     flowLay.addComponent(table);
     flowLay.setWidth("669px");
     table.setWidth("100%");
-    table.setHeight("680px");   
+    table.setHeight("715px"); //"680px");   
   }
 
   @Override
