@@ -129,23 +129,23 @@ public class MiscellaneousMmowgliTimer
     
     
     // immediate write
-    public static void immPrint(Integer logLevel,String... sa)
+    public static void immPrint(Integer logLevel, String... sa)
     {
-      if (sb != null) {
-        synchronized (sb) {
-          if(logLevel != null) {
-            sb.append(MmowgliConstants.logTokens.get(logLevel));
-            sb.append(' ');
+      if ((AppMaster.sysOutLogLevel & logLevel) == logLevel)
+        if (sb != null) {
+          synchronized (sb) {
+            if (logLevel != null) {
+              sb.append(MmowgliConstants.logTokens.get(logLevel));
+              sb.append(' ');
+            }
+            if (sb.length() > 0) {
+              System.out.print(sb.toString());
+              sb.setLength(0);
+            }
+            SysoutVarargs(sa);
           }
-          if (sb.length() > 0) {
-            System.out.print(sb.toString());
-            sb.setLength(0);
-          }
-          SysoutVarargs(sa);
         }
-      }
-      else
-        SysoutVarargs(sa);
+      SysoutVarargs(sa);
     }
     
     private static void SysoutVarargs(String...sa)
