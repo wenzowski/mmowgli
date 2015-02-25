@@ -28,6 +28,7 @@ import com.vaadin.ui.*;
 
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
+import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanContainers.HelpWantedContainer;
 
 /**
  * ActionDashboardTabPowerPlay.java
@@ -93,7 +94,7 @@ public class ActionDashboardTabNeedAuthors extends ActionDashboardTabPanel imple
     if(table != null)
       flowLay.removeComponent(table);
 
-    table = new ActionPlanTable(new ActionPlanTable.HelpWantedContainer<ActionPlan>());
+    table = new ActionPlanTable(new HelpWantedContainer<ActionPlan>());
 
     flowLay.addComponent(table);
     flowLay.setWidth("669px");
