@@ -67,7 +67,7 @@ public class MCacheUserHelper
   
   void putUser(User u)
   {
-    MSysOut.println(myLogLevel,"MCacheUserHelper.putUser() id= "+u.getId()+"  name: "+u.getUserName());
+    MSysOut.println(myLogLevel,"MCacheUserHelper.putUser() id/rev= "+u.getId()+"/"+u.getRevision()+"  name: "+u.getUserName());
     
     if (u.isViewOnly() || u.isAccountDisabled())
       ; // don't add
@@ -135,7 +135,7 @@ public class MCacheUserHelper
     Long revision = msg.version;
     User u = DB.getRevisionTL(User.class, id, revision);
     if (u == null) {
-      MSysOut.println(ERROR_LOGS, "MCacheUserHelper.externallyNewOrUpdatedUserTL(), cant get user id = " + id);
+      MSysOut.println(ERROR_LOGS, "MCacheUserHelper.externallyNewOrUpdatedUserTL(), cant get user id/rev = " + id+"/"+revision);
       return;
     }
     
@@ -174,7 +174,8 @@ public class MCacheUserHelper
       }
     }
     _usersQuick.remove(id);
-    usersQuickFull.remove(id);
+    if(usersQuickFull.containsKey(id))
+      usersQuickFull.remove(id);
   }
   
   @SuppressWarnings("unchecked")
