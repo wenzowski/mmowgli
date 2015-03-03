@@ -83,7 +83,6 @@ public class AppMaster
                                     // completed on first login
   private URL appUrl;
   
-  private TransactionCommitWaiter myTransactionWaiter;
   private KeepAliveManager keepAliveManager;
   private VHib vaadinHibernate;
   private VHibPii piiHibernate;
@@ -120,7 +119,8 @@ public class AppMaster
     MSysOut.println(SYSTEM_LOGS,"System log level = "+sysOutLogLevel);
   }
   private static AppMaster myInstance = null;
-
+  private static boolean initted = false;
+  
   public static AppMaster instance(VaadinServlet servlet, ServletContext context)
   {
     if (myInstance == null)
@@ -148,7 +148,6 @@ public class AppMaster
     trustAllCerts();
 
     mailManager = new MailManager();
-    myTransactionWaiter = new TransactionCommitWaiter();
 
     // JMS keep-alive monitor
     Long keepAliveInterval = null;
@@ -317,14 +316,14 @@ public class AppMaster
   
   public void init(ServletContext context)
   {
-    piiHibernate = VHibPii.instance(); // This has already been initialized
-                                       // through the sessioninterceptor
+    piiHibernate = VHibPii.instance();
+                                       
     piiHibernate.init(context);
-    vaadinHibernate = VHib.instance(); // ditto
+    vaadinHibernate = VHib.instance();
     vaadinHibernate.init(context);
 
-    vaadinHibernate.installDataBaseListeners(); // this);
-
+    vaadinHibernate.installDataBaseListeners();
+    
     mCacheManager = MCacheManager.instance();
     handleMoveSwitchScoring();
     handleBadgeManager();
@@ -333,10 +332,16 @@ public class AppMaster
     GameEventLogger.logApplicationLaunch();
 
     startThreads();
+    
+    initted = true;
     MSysOut.println(SYSTEM_LOGS,"Out of AppMaster.init");
-
   }
-
+  
+  public static boolean isInitted()
+  {
+    return initted;
+  }
+  
   /**
    * Called after the db has been setup; We need to read game table to see if we
    * should be the badgemanager among clusters.
@@ -489,11 +494,6 @@ public class AppMaster
   public InterTomcatIO getInterNodeIO()
   {
     return appMasterMessaging.getInterTomcatIO();
-  }
-
-  public TransactionCommitWaiter getTransactionWaiter()
-  {
-    return myTransactionWaiter;
   }
 
   public MCacheManager getMcache()
