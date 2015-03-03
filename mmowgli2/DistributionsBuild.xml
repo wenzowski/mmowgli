@@ -29,7 +29,10 @@
 		<delete file="build/ivylibs/servlet-api.jar"/>  <!-- not wanted in deploy -->
 	</target>
 
-	<!-- This is new in V7, some of this had been done previously by hand -->
+	<!-- Our Apache/Akamai/Tomcat is setup so that anything in the VAADIN directory will be served -->
+	<!-- by Apache/Akamai...the request never gets to Tomcat.  Therefore we MUST extract all stuff in the VAADIN -->
+	<!-- directories of the vaadin jars into our war file that we're building here. -->
+	<!-- The 4 vaadin jars which have VAADIN directories are below. -->
 	<target name="expandVaadinJars" description="put selected vaadin components in VAADIN dir from distribution jars">
 	  <unzip dest="WebContent">
 		<patternset>
@@ -37,8 +40,8 @@
 		</patternset>
 		<fileset dir="build/ivylibs">
 		  <include name="vaadin-server.jar" />
-		  <include name="vaadin-themes.jar" />
-		  <include name="vaadin-push.jar" />
+		  <include name="vaadin-themes.jar" /> 		  
+		  <include name="vaadin-push.jar" />             <!-- not shown in latest vaadin pdf doc, but needed -->
 		  <include name="vaadin-client-compiled.jar" />  <!-- use def. wid set for misc servlets -->
 		</fileset>
 	  </unzip>
@@ -65,7 +68,8 @@
 	<target name="energy.war"     depends="confirmClean,zipVaadinDir"> <deployOne outFile="energy.war"     webxml="energy_web.xml"     /></target>
 	<target name="evtp.war"       depends="confirmClean,zipVaadinDir"> <deployOne outFile="evtp.war"       webxml="evtp_web.xml"       /></target>
 	<target name="hamming.war"    depends="confirmClean,zipVaadinDir"> <deployOne outFile="hamming.war"    webxml="hamming_web.xml"    /></target>
-	<target name="nps.war"        depends="confirmClean,zipVaadinDir"> <deployOne outFile="nps.war"        webxml="nps_web.xml"         /></target>
+	<target name="nato.war"       depends="confirmClean,zipVaadinDir"> <deployOne outFile="nato.war"       webxml="nato_web.xml"       /></target>
+	<target name="nps.war"        depends="confirmClean,zipVaadinDir"> <deployOne outFile="nps.war"        webxml="nps_web.xml"        /></target>
 	<target name="piracy.war"     depends="confirmClean,zipVaadinDir"> <deployOne outFile="piracy.war"     webxml="piracy_web.xml"     /></target>
 	<target name="training.war"   depends="confirmClean,zipVaadinDir"> <deployOne outFile="training.war"   webxml="training_web.xml"   /></target>
 	<target name="uxvdm.war"      depends="confirmClean,zipVaadinDir"> <deployOne outFile="uxvdm.war"      webxml="uxvdm_web.xml"      /></target>
@@ -99,6 +103,7 @@
 		energy.war,
 		evtp.war,
 		hamming.war,
+		nato.war,
 		nps.war,
 		piracy.war,
 		piracy2011_1.war,
