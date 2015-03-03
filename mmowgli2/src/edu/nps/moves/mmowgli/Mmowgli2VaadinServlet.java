@@ -127,6 +127,13 @@ public class Mmowgli2VaadinServlet extends VaadinServlet implements SessionInitL
   @Override
   public void sessionInit(SessionInitEvent event) throws ServiceException
   {
+  /*  Enumeration<String> en = event.getRequest().getHeaderNames();
+    while(en.hasMoreElements()) {
+      String hdr = en.nextElement();
+      String val = event.getRequest().getHeader(hdr);
+      System.out.println("Request header "+hdr+" = "+val);
+    }
+  */
     new MmowgliSessionGlobals(event,this);   // Initialize global object across all users windows, gets stored in VaadinSession object referenced in event
     event.getSession().addUIProvider(new Mmowgli2UIProvider());
     
