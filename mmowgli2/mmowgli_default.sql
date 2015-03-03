@@ -66,7 +66,6 @@ CREATE TABLE `ActionPlan` (
   KEY `FKE5314E9FAF29DE0A` (`createdInMove_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `ActionPlan` WRITE;
 /*!40000 ALTER TABLE `ActionPlan` DISABLE KEYS */;
 
 INSERT INTO `ActionPlan` (`id`, `idForSorting`, `averageThumb`, `chatLog_id`, `chainRoot_id`, `currentAuthorInnovationPoints`, `currentInnoBrokerInnovationPoints`, `discussion`, `headline`, `helpWanted`, `howWillItChangeText`, `howWillItWorkText`, `imagesInstructions`, `lockedBy_id`, `mapInstructions`, `map_id`, `planInstructions`, `powerPlay`, `priceToInvest`, `subTitle`, `sumThumbs`, `talkItOverInstructions`, `title`, `version`, `videosInstructions`, `whatIsItText`, `whatWillItTakeText`, `hidden`, `quickAuthorList`, `creationDate`, `createdInMove_id`, `superInteresting`)
@@ -75,7 +74,6 @@ VALUES
 	(2,2,0,2,2,0,0,NULL,NULL,NULL,'Game masters can help people to be more engaged by connecting relevant card chains and similar ideas. This approach supports the creation of action plans to bring larger groups together, and also helps reduce the risk of conversation on critical ideas getting split and lost in the avalanche of cards. Constructive moderation also helps flesh out ideas so that, after the game ends and further analysis occurs, so that ideas deemed to have the best potential can be acted upon and taken to the next step toward implementation. ','Game masters can use the tools at their disposal to communicate with the players, mark cards, invite players to participate in action plans, expand on ideas in the card chains, add glossary items, and generally add value. Players are able to ask questions of trusted individuals. Game masters do not appear on the Leader Board, but they are allowed to play with separate accounts at the same time. Playing in two separate browsers makes it easy to \"keep your hats straight\" and participate via both roles. ','Game.defaultActionPlanImagesText: Photographs, pictures, and charts bring your action plan to life and convey important details that might not fit easily into the text of your plan. \n<p>\nYou can search online for images, or upload images from your own desktop. Be sure to add a caption that explains the significance of each image.\n</p>\n<i>Hint: You may want to give one of your team members the responsibility for tracking down the images that support your plan.</i>\n',NULL,'You can annotate a map to show how your plan would work. Here are some ways to use the map:\n<ul>\n<li>Annotate it with numbered steps to show how your plan will unfold.</li>\n\n<li>Mark the locations of resources your plan will draw on--or put in place.</li>\n\n<li>Add data points that explain the what\'s happening on the ground.</li>\n</ul>\nMaps are powerful tools for planning. Use yours in the way that best supports your plan!\n</p>\n<p>\nAs an author, you may make changes to this map by re-centering, zooming and adding markers.\nSave your changes using one or both of the save buttons above the map before leaving this page. (Non authors do not see the buttons.)\n</p>\n<b>New markers (authors only)</b>:  drag one of the following icons onto the map.  To delete a marker, click it on the map and follow directions in the popup window.\n</p>\n',2,'Describe your action plan here. Talk it over with your fellow authors in real-time or asynchronous chat. Add images, videos, or map annotations. Remember this is a team effort! So work with your teammates to come up with the best possible plan.\n<p>\nNeed more information? Check our <a href=\"https://portal.mmowgli.nps.edu/instructions/-/asset_publisher/e02P/content/how-to-build-action-plans\" target=\"_portal\">help</a> page.\n</p>\n<p>\n<b>The 5 Basic Steps:</b>\n<ol>\n<li>Start by entering a headline that captures the big idea.</li>\n\n<li>Describe the basic plan in the What Is It? box.</li>\n\n<li>Make a list of the resources you need in the What Will It Take? box.</li>\n\n<li>Outline the steps to succeed in the How Will It Work box. <i>Hint: Use your card chain as a starting place</i>.</li>\n\n<li>Sum up the impact in the last box, How Will Change the Situation?</li>\n</ol>\nClick Save Changes often to make sure your text is saved. Click History to review previous versions.\n</p><p>\nWork fast. Work smart. Work together.\n<b><i>Good luck!</i></b></p>\n',00000000,200,'This plan involves all game masters. It also provides helpful information for players, letting them know how it all WORKS.',0,'Game.defaultActionPlanTalkText: Coming up with an action plan -- with people you may not know across multiple time zones -- can be a challenge. But you can use this private* chat room to trade ideas in real time or leave messages for your teammates.\n<p>\nYou might want to start by discussing the basic ideas in your card chain. How are you going to make those ideas work?  What\'s the core idea?  And what are the actions you need to take? \n</p><p>\nTalk it over here. But don\'t be shy about just starting to fill in the plan. Switch back and forth between The Plan and this team discussion space as you build your winning action plan.\n</p>\n*<i>Your chats cannot be seen by anyone else in the game other than gamemasters. However, they will be available to analysts for post-game analysis</i>.','PLAYER FAMILIARIZATION.  How can game masters best moderate to help players engage, learn and contribute in the game?',59,'A video is worth a thousand words.  Consider:<OL><LI> Making a 1-2 minute video to tell us about your action plan.</LI><LI>Share a video you\'ve found that helps support your action plan.</LI></OL>Add a caption to highlight the point you\'re making.','The Game Master Guidance document is now available on the (controlled access) Game Masters Portal. It involves game masters coaching, encouraging, and supporting player efforts. Hopefully the game quickly becomes clear enough so that players can simply play without lots of explanation. Available to game masters at https://portal.mmowgli.nps.edu/web/portal/gamemaster-guidance','It takes collaboration from multiple disciplines and multiple players. It takes game masters reading cards, marking very interesting ideas, and inviting players to do action plans. It involves asking question about the details of the action plans. A \"light touch\" let\'s player voices be heard without filtering or topspin. Game masters can also play as players to be a catalyst for discussion/thought without the potential to intimidate other players by using the gm_name title with its implied authority.',00000000,'gm_becca,gm_donb','2013-10-01 17:00:00',1,00000000);
 
 /*!40000 ALTER TABLE `ActionPlan` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table ActionPlan_AuthorMessages
@@ -107,7 +105,6 @@ CREATE TABLE `ActionPlan_Authors` (
   KEY `FKDDC38E88CA276057` (`actionPlan_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `ActionPlan_Authors` WRITE;
 /*!40000 ALTER TABLE `ActionPlan_Authors` DISABLE KEYS */;
 
 INSERT INTO `ActionPlan_Authors` (`actionPlan_id`, `author_user_id`)
@@ -117,7 +114,6 @@ VALUES
 	(2,8);
 
 /*!40000 ALTER TABLE `ActionPlan_Authors` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table ActionPlan_Award
@@ -241,7 +237,6 @@ CREATE TABLE `ActionPlan_Media` (
   KEY `FK24067E24CA276057` (`ActionPlan_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `ActionPlan_Media` WRITE;
 /*!40000 ALTER TABLE `ActionPlan_Media` DISABLE KEYS */;
 
 INSERT INTO `ActionPlan_Media` (`ActionPlan_id`, `media_id`)
@@ -252,7 +247,6 @@ VALUES
 	(2,412);
 
 /*!40000 ALTER TABLE `ActionPlan_Media` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table ActionPlan_PlanFields
@@ -359,7 +353,6 @@ CREATE TABLE `Affiliation` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `Affiliation` WRITE;
 /*!40000 ALTER TABLE `Affiliation` DISABLE KEYS */;
 
 INSERT INTO `Affiliation` (`id`, `affiliation`)
@@ -382,7 +375,6 @@ VALUES
 	(30,'Media');
 
 /*!40000 ALTER TABLE `Affiliation` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Avatar
@@ -398,7 +390,6 @@ CREATE TABLE `Avatar` (
   KEY `FK7597AD792BFE963D` (`media_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `Avatar` WRITE;
 /*!40000 ALTER TABLE `Avatar` DISABLE KEYS */;
 
 INSERT INTO `Avatar` (`id`, `description`, `media_id`)
@@ -422,7 +413,6 @@ VALUES
 	(17,'Zags',76);
 
 /*!40000 ALTER TABLE `Avatar` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Award
@@ -465,7 +455,6 @@ CREATE TABLE `AwardType` (
   KEY `FKC27A2717A9FB652C` (`icon300x300_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `AwardType` WRITE;
 /*!40000 ALTER TABLE `AwardType` DISABLE KEYS */;
 
 INSERT INTO `AwardType` (`id`, `basicValue`, `description`, `name`, `powerValue`, `icon300x300_id`, `icon55x55_id`)
@@ -483,7 +472,6 @@ VALUES
 	(11,0,'Certificate of Commendation, Best Action Plan','Certificate of Commendation',0,138,137);
 
 /*!40000 ALTER TABLE `AwardType` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Badge
@@ -500,7 +488,6 @@ CREATE TABLE `Badge` (
   KEY `FK3CFAB832BFE963D` (`media_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `Badge` WRITE;
 /*!40000 ALTER TABLE `Badge` DISABLE KEYS */;
 
 INSERT INTO `Badge` (`badge_pk`, `badgeName`, `description`, `media_id`)
@@ -515,7 +502,6 @@ VALUES
 	(8,'Active player','Logged in each day of gameplay (each day of each session, ex: Tues, Wed, and Thurs of one week)',154);
 
 /*!40000 ALTER TABLE `Badge` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Card
@@ -541,7 +527,6 @@ CREATE TABLE `Card` (
   KEY `FK1FEF30AF29DE0A` (`createdInMove_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `Card` WRITE;
 /*!40000 ALTER TABLE `Card` DISABLE KEYS */;
 
 INSERT INTO `Card` (`id`, `creationDate`, `factCard`, `hidden`, `text`, `author_id`, `cardType_id`, `createdInMove_id`, `parentCard_id`, `authorName`)
@@ -556,7 +541,6 @@ VALUES
 	(8,'2013-10-01 01:01:08',00000000,00000000,'Card 8 text',2,2,1,NULL,'SeedCard');
 
 /*!40000 ALTER TABLE `Card` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Card_CardMarking
@@ -602,7 +586,6 @@ CREATE TABLE `CardMarking` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `CardMarking` WRITE;
 /*!40000 ALTER TABLE `CardMarking` DISABLE KEYS */;
 
 INSERT INTO `CardMarking` (`id`, `description`, `label`)
@@ -613,7 +596,6 @@ VALUES
 	(4,'Bad behavior or sensitive information','Hidden');
 
 /*!40000 ALTER TABLE `CardMarking` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table CardType
@@ -635,7 +617,6 @@ CREATE TABLE `CardType` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `CardType` WRITE;
 /*!40000 ALTER TABLE `CardType` DISABLE KEYS */;
 
 INSERT INTO `CardType` (`id`, `cardClass`, `ideaCard`, `descendantOrdinal`, `prompt`, `summaryHeader`, `title`, `titleAlternate`, `cssColorStyle`, `cssLightColorStyle`)
@@ -648,7 +629,6 @@ VALUES
 	(6,2,00000000,4,'Something missing? Ask a question','EXPLORE','Explore',NULL,'m-lime','m-lime-light');
 
 /*!40000 ALTER TABLE `CardType` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table ChatLog
@@ -661,7 +641,6 @@ CREATE TABLE `ChatLog` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `ChatLog` WRITE;
 /*!40000 ALTER TABLE `ChatLog` DISABLE KEYS */;
 
 INSERT INTO `ChatLog` (`id`)
@@ -670,7 +649,6 @@ VALUES
 	(2);
 
 /*!40000 ALTER TABLE `ChatLog` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table ChatLog_Messagess
@@ -747,7 +725,6 @@ CREATE TABLE `EmailPii` (
   KEY `digestKey` (`digest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
-LOCK TABLES `EmailPii` WRITE;
 /*!40000 ALTER TABLE `EmailPii` DISABLE KEYS */;
 
 INSERT INTO `EmailPii` (`id`, `address`, `isPrimary`, `digest`)
@@ -762,7 +739,6 @@ VALUES
 	(8,'0CcOXi/rSt6fyUY/ujYPx9COR3W90Omj',00000001,'BMEzjQKYKUeJ+l1b0L6BKE7qU1M=');
 
 /*!40000 ALTER TABLE `EmailPii` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Expertise
@@ -871,7 +847,6 @@ CREATE TABLE `Game` (
   KEY `FK21C012E6BEC161` (`lastMove_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `Game` WRITE;
 /*!40000 ALTER TABLE `Game` DISABLE KEYS */;
 
 INSERT INTO `Game` (`id`, `version`, `backgroundImageLink`, `mapTitle`, `cardsReadonly`, `clusterMaster`, `currentMove_id`, `lastMove_id`, `defaultActionPlanImagesText`, `defaultActionPlanMapText`, `defaultActionPlanTalkText`, `defaultActionPlanThePlanText`, `defaultActionPlanVideosText`, `defaultActionPlanMapLon`, `defaultActionPlanMapLat`, `description`, `displayedMoveNumberOverride`, `endDate`, `maxUsersOnline`, `maxUsersRegistered`, `preregistrationDate`, `question_id`, `readonly`, `startDate`, `title`, `acronym`, `reportIntervalMinutes`, `restrictByQueryListInterval`, `headerBranding_id`, `linkRegexs`, `topCardsReadonly`, `emailConfirmation`, `secondLoginPermissionPage`, `secondLoginPermissionPageTitle`, `secondLoginPermissionPageText`, `showFouo`, `fouoDescription`, `showPriorMovesCards`, `showPriorMovesActionPlans`, `playOnPriorMovesCards`, `editPriorMovesActionPlans`, `fouoButtonImage`, `pdfAvailable`, `inGameMailEnabled`, `userSignupAnswerPoints`, `userActionPlanCommentPoints`, `cardSuperInterestingPoints`, `actionPlanCommentPoints`, `actionPlanThumbFactor`, `actionPlanAuthorPoints`, `actionPlanSuperInterestingPoints`, `actionPlanRaterPoints`, `cardAncestorPoints`, `cardAuthorPoints`, `cardAncestorPointsGenerationFactors`, `externalMailEnabled`, `adminLoginMessage`, `bootStrapping`, `headerBannerImage`, `actionPlansEnabled`, `showHeaderBranding`, `playIdeaButtonImage`, `gameHandle`)
@@ -879,7 +854,6 @@ VALUES
 	(1,20140129,'https://web.mmowgli.nps.edu/mmowMedia/images/nauticalBackground.jpg','NAVAIR Patuxent River Maryland',00000000,'web7',1,1,'Game.defaultActionPlanImagesText: Photographs, pictures, and charts bring your action plan to life and convey important details that might not fit easily into the text of your plan. \n<p>\nYou can search online for images, or upload images from your own desktop. Be sure to add a caption that explains the significance of each image.\n</p>\n<i>Hint: You may want to give one of your team members the responsibility for tracking down the images that support your plan.</i>\n','You can annotate a map to show how your plan would work. Here are some ways to use the map:\n<ul>\n<li>Annotate it with numbered steps to show how your plan will unfold.</li>\n\n<li>Mark the locations of resources your plan will draw on--or put in place.</li>\n\n<li>Add data points that explain the what\'s happening on the ground.</li>\n</ul>\nMaps are powerful tools for planning. Use yours in the way that best supports your plan!\n</p>\n<p>\nAs an author, you may make changes to this map by re-centering, zooming and adding markers.\nSave your changes using one or both of the save buttons above the map before leaving this page. (Non authors do not see the buttons.)\n</p>\n<b>New markers (authors only)</b>:  drag one of the following icons onto the map.  To delete a marker, click it on the map and follow directions in the popup window.\n</p>\n','Game.defaultActionPlanTalkText: Coming up with an action plan -- with people you may not know across multiple time zones -- can be a challenge. But you can use this private* chat room to trade ideas in real time or leave messages for your teammates.\n<p>\nYou might want to start by discussing the basic ideas in your card chain. How are you going to make those ideas work?  What\'s the core idea?  And what are the actions you need to take? \n</p><p>\nTalk it over here. But don\'t be shy about just starting to fill in the plan. Switch back and forth between The Plan and this team discussion space as you build your winning action plan.\n</p>\n*<i>Your chats cannot be seen by anyone else in the game other than gamemasters. However, they will be available to analysts for post-game analysis</i>.','Describe your action plan here. Talk it over with your fellow authors in real-time or asynchronous chat. Add images, videos, or map annotations. Remember this is a team effort! So work with your teammates to come up with the best possible plan.\n<p>\nNeed more information? Check our <a href=\"https://portal.mmowgli.nps.edu/instructions/-/asset_publisher/e02P/content/how-to-build-action-plans\" target=\"_portal\">help</a> page.\n</p>\n<p>\n<b>The 5 Basic Steps:</b>\n<ol>\n<li>Start by entering a headline that captures the big idea.</li>\n\n<li>Describe the basic plan in the What Is It? box.</li>\n\n<li>Make a list of the resources you need in the What Will It Take? box.</li>\n\n<li>Outline the steps to succeed in the How Will It Work box. <i>Hint: Use your card chain as a starting place</i>.</li>\n\n<li>Sum up the impact in the last box, How Will Change the Situation?</li>\n</ol>\nClick Save Changes often to make sure your text is saved. Click History to review previous versions.\n</p><p>\nWork fast. Work smart. Work together.\n<b><i>Good luck!</i></b></p>\n','A video is worth a thousand words.  Consider:<OL><LI> Making a 1-2 minute video to tell us about your action plan.</LI><LI>Share a video you\'ve found that helps support your action plan.</LI></OL>Add a caption to highlight the point you\'re making.',-99.4759979248047,38.5970001220703,NULL,NULL,NULL,100,10000,NULL,6,00000000,NULL,'NewMmowgliGame','new',60,00000001,NULL,X'ACED0005737200146A6176612E7574696C2E4C696E6B65644C6973740C29535D4A6088220300007870770400000001737200276564752E6E70732E6D6F7665732E6D6D6F77676C692E64622E47616D652452656765785061697200000000000000010200024C000572656765787400124C6A6176612F6C616E672F537472696E673B4C000B7265706C6163656D656E7471007E0003787074002047616D6520323031312E285C642920416374696F6E20506C616E20285C642B2974006D3C6120687265663D2268747470733A2F2F7765622E6D6D6F77676C692E6E70732E6564752F7069726163792F416374696F6E506C616E4C697374323031312E24312E68746D6C23416374696F6E506C616E243222207461726765743D22617077696E646F77223E24303C2F613E78',00000001,00000000,00000001,'Important!','<p>Please do not contribute any material specific to ongoing contracts or solicitations that are in any way competition sensitive.</p>',00000000,'Unclassified -- For Official Use Only',00000000,00000000,00000000,00000000,'fouo250w36h.png',00000000,00000001,10,1,10,3,1,100,12,5,1,5,'5.0 4.0 3.0 2.0 1.0',00000001,NULL,00000000,'mmowgliBanner350w130h.png',00000001,00000001,'playIdeaButt124w18h.png','mmowgli');
 
 /*!40000 ALTER TABLE `Game` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Game_ActionPlan
@@ -910,7 +884,6 @@ CREATE TABLE `Game_Move` (
   KEY `FKB30CE3FE895E9426` (`moves_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `Game_Move` WRITE;
 /*!40000 ALTER TABLE `Game_Move` DISABLE KEYS */;
 
 INSERT INTO `Game_Move` (`Game_id`, `moves_id`)
@@ -918,7 +891,6 @@ VALUES
 	(1,1);
 
 /*!40000 ALTER TABLE `Game_Move` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Game_Turn
@@ -944,7 +916,7 @@ DROP TABLE IF EXISTS `GameEvent`;
 CREATE TABLE `GameEvent` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `dateTime` datetime DEFAULT NULL,
-  `description` varchar(511) DEFAULT NULL,
+  `description` longtext DEFAULT NULL,
   `eventtype` int(11) DEFAULT NULL,
   `parameter` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
@@ -985,7 +957,6 @@ CREATE TABLE `GameLinks` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `GameLinks` WRITE;
 /*!40000 ALTER TABLE `GameLinks` DISABLE KEYS */;
 
 INSERT INTO `GameLinks` (`id`, `aboutLink`, `actionPlanRequestLink`, `blogLink`, `creditsLink`, `faqLink`, `fixesLink`, `fouoLink`, `gameFromEmail`, `gameFullLink`, `gameHomeUrl`, `glossaryLink`, `howToPlayLink`, `improveScoreLink`, `informedConsentLink`, `learnMoreLink`, `mmowgliMapLink`, `surveyConsentLink`, `termsLink`, `thanksForInterestLink`, `thanksForPlayingLink`, `troubleLink`, `troubleMailto`, `userAgreementLink`)
@@ -993,7 +964,6 @@ VALUES
 	(1,'https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/About%20MMOWGLI','https://portal.mmowgli.nps.edu/action-plan-request','https://portal.mmowgli.nps.edu/game-blogs','https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Credits%20and%20Contact','https://portal.mmowgli.nps.edu/faq','https://portal.mmowgli.nps.edu/fixes','https://portal.mmowgli.nps.edu/fouo','mmowgli@nps.navy.mil','https://mmowgli.nps.edu/pleaseWaitGameFull.html','mmowgli.nps.edu','https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Glossary',NULL,'https://portal.mmowgli.nps.edu/instructions','https://web.mmowgli.nps.edu/mmowMedia/MmowgliGameParticipantInformedConsent.html','https://portal.mmowgli.nps.edu/instructions','http://maps.google.com/maps/ms?hl=en&amp;ie=UTF8&amp;t=h&amp;msa=0&amp;msid=&amp;ll=38.895111,-77.036667&amp;spn=15.060443,18.676758&amp;z=6&amp;output=embed','https://movesinstitute.org/mmowMedia/MMOWGLI-AnonymousSurveyConsentUnsigned2013January25.pdf','https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Terms%20and%20Conditions','https://mmowgli.nps.edu/thanksForInterest.html','https://mmowgli.nps.edu/thanksForPlaying.html','https://portal.mmowgli.nps.edu/trouble','mmowgli-trouble@movesinstitute.org?subject=Problem%20creating%20new%20account','http://www.defense.gov/socialmedia/user-agreement.aspx');
 
 /*!40000 ALTER TABLE `GameLinks` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table GameQuestion
@@ -1008,7 +978,6 @@ CREATE TABLE `GameQuestion` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `GameQuestion` WRITE;
 /*!40000 ALTER TABLE `GameQuestion` DISABLE KEYS */;
 
 INSERT INTO `GameQuestion` (`id`, `question`, `summary`)
@@ -1021,7 +990,6 @@ VALUES
 	(6,'What\'s your hope for the world in 2021?','HOPE FOR 2021');
 
 /*!40000 ALTER TABLE `GameQuestion` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table GoogleMap
@@ -1039,7 +1007,6 @@ CREATE TABLE `GoogleMap` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `GoogleMap` WRITE;
 /*!40000 ALTER TABLE `GoogleMap` DISABLE KEYS */;
 
 INSERT INTO `GoogleMap` (`id`, `description`, `latCenter`, `lonCenter`, `title`, `zoom`)
@@ -1048,7 +1015,6 @@ VALUES
 	(2,'',38.5970001220703,-99.4759979248047,'',6);
 
 /*!40000 ALTER TABLE `GoogleMap` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table GoogleMap_GoogleMapMarker
@@ -1162,7 +1128,6 @@ CREATE TABLE `Level` (
   UNIQUE KEY `ordinal` (`ordinal`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `Level` WRITE;
 /*!40000 ALTER TABLE `Level` DISABLE KEYS */;
 
 INSERT INTO `Level` (`id`, `description`, `ordinal`)
@@ -1179,7 +1144,6 @@ VALUES
 	(100,'Game Master',-1);
 
 /*!40000 ALTER TABLE `Level` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Login
@@ -1216,7 +1180,6 @@ CREATE TABLE `Media` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `Media` WRITE;
 /*!40000 ALTER TABLE `Media` DISABLE KEYS */;
 
 INSERT INTO `Media` (`id`, `caption`, `description`, `handle`, `inAppropriate`, `source`, `title`, `type`, `url`, `alternateUrl`)
@@ -1289,7 +1252,6 @@ VALUES
 	(412,NULL,NULL,NULL,00000000,1,NULL,0,'2/3dgun.jpg',NULL);
 
 /*!40000 ALTER TABLE `Media` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Message
@@ -1348,7 +1310,6 @@ CREATE TABLE `Move` (
   KEY `FK24AFF1E69C1AD6` (`currentMovePhase_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `Move` WRITE;
 /*!40000 ALTER TABLE `Move` DISABLE KEYS */;
 
 INSERT INTO `Move` (`id`, `endDate`, `number`, `startDate`, `title`, `showMoveBranding`, `name`, `currentMovePhase_id`)
@@ -1356,7 +1317,6 @@ VALUES
 	(1,NULL,1,NULL,'new',00000000,'Round 1',1);
 
 /*!40000 ALTER TABLE `Move` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Move_MovePhase
@@ -1372,7 +1332,6 @@ CREATE TABLE `Move_MovePhase` (
   KEY `FK22BE93CD657495E` (`movePhases_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `Move_MovePhase` WRITE;
 /*!40000 ALTER TABLE `Move_MovePhase` DISABLE KEYS */;
 
 INSERT INTO `Move_MovePhase` (`Move_id`, `movePhases_id`)
@@ -1383,7 +1342,6 @@ VALUES
 	(1,4);
 
 /*!40000 ALTER TABLE `Move_MovePhase` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table MovePhase
@@ -1446,7 +1404,6 @@ CREATE TABLE `MovePhase` (
   KEY `FKB648B80ACD3E9A` (`authorInviteVideo_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `MovePhase` WRITE;
 /*!40000 ALTER TABLE `MovePhase` DISABLE KEYS */;
 
 INSERT INTO `MovePhase` (`id`, `authorInviteCallToActionText`, `authorInviteHeadline`, `authorInviteSummary`, `callToActionBriefingHeadline`, `callToActionBriefingPrompt`, `callToActionBriefingSummary`, `callToActionBriefingText`, `description`, `investorInviteCallToActionText`, `investorInviteHeadline`, `investorInviteSummary`, `orientationCallToActionText`, `orientationHeadline`, `orientationSummary`, `playACardSubtitle`, `playACardTitle`, `authorInviteVideo_id`, `callToActionBriefingVideo_id`, `investorInviteVideo_id`, `orientationVideo_id`, `windowTitle`, `signupText`, `signupPageEnabled`, `signupButtonEnabled`, `signupButtonShow`, `signupButtonIcon`, `signupButtonSubText`, `signupButtonToolTip`, `newButtonEnabled`, `newButtonShow`, `newButtonIcon`, `newButtonSubText`, `newButtonToolTip`, `loginButtonEnabled`, `loginButtonShow`, `loginButtonIcon`, `loginButtonSubText`, `loginButtonToolTip`, `guestButtonEnabled`, `guestButtonShow`, `guestButtonIcon`, `guestButtonSubText`, `guestButtonToolTip`, `loginPermissions`, `restrictByQueryList`, `signupHeaderImage`)
@@ -1457,7 +1414,6 @@ VALUES
 	(4,NULL,NULL,NULL,NULL,NULL,'Welcome to the (new) MMOWGLI game4','<p>The <b>additive MMOWGLI game</b> is for NAVAIR professionals exploring how best to achieve shared command goals together. Together, we’re proposing and publishing new Idea Card Chains and Action Plans to work together more effectively.</p>\n<p> \nParticipants will explore  Group Goals and Group Challenges in the design phase of this game. By actively contributing, top level cards and seed cards for the live game will begin to emerge!\n</p>\n<p>  Player contributions are essential.  Please join in to contribute!\n<br />\nThe <a href=\"https://portal.mmowgli.nps.edu/additive\" target=\"_blank\">additive game portal</a> is a great information resource for game play.  You can also check out the <a href=\"https://portal.mmowgli.nps.edu/additive-blog\" target=\"_blank\">additive game blog</a> for game news.</p>\n<p>\nThanks for your ideas.\nPlay&nbsp;the&nbsp;game, change the game!</p>','PUBLISH',NULL,NULL,NULL,'additive MMOWGLI: welcome NAVAIR players and partners!','<!-- p style=\"color:green\">Please come back Monday to register and play! </p-->\n\n<p> The <b>additive MMOWGLI</b> wargame will examine new opportunities and challenges of Additive Manufacturing for Navy personnel.</p>\n<p> <!--span style=\"color:green\"> Once the game is open on Monday,</span--> If you work for the Navy, or for a company that supports the Navy, please\n<a href=\"https://mmowgli.nps.edu/additive/signup\">signup to be notified</a>\nwhen&nbsp;the additive mmowgli game is ready to begin.\n<!-- begin by following <i>I\'m&nbsp;new to MMOWGLI</i> below. Registration is fast.--> \n\nGame masters: to&nbsp;login again, follow the<br /> <i>I\'m registered</i> link below.\n<!--You can also <a href=\"https://mmowgli.nps.edu/adwd/signup\">sign up to be notified</a> when the game starts.-->\n</p>\n<p>The <a href=\"https://portal.mmowgli.nps.edu/additive\" target=\"portal\">additive mmowgli portal</a> has project news and game information for Navy and industry players. Let&apos;s innovate together - thanks for all contributions.\nPlay the game, change the game!</p>','(Preparation-phase game design in progress)','Start now, play fast, work together.','Play an Idea Card about our topic Now!',NULL,404,NULL,78,'new mmowgli: Massive Multiplayer Online Wargame Leveraging the Internet','<p>\r\nThe initial round of the <i><b>additive mmowgli</b></i> game is being designed to explore Navy opportunities and challenges associated with additive manufacturing, 3D printing, improved maintenance, forward-deployed logistics, and related capabilities.\r\n</p>\r\n<p>\r\nIf you want to receive an email message when the Additive Manufacturing game is running, later this summer, please fill out the following information and click \"Signup\" below. </p>\r\n<p>\r\nThe game is primarily for NAVAIR and Navy personnel.  Game sponsors are considering whether industry professionals will also be granted access.  If you work in industry and might want to participate, please also let us know your Navy/DoD business relationship that justifies your access to this game. </p>\r\n\r\n<p> More information is available on the \r\n<a href=\"https://portal.mmowgli.nps.edu/additive\" target=\"_blank\">additive mmowgli portal</a>\r\nand\r\n<a href=\"https://portal.mmowgli.nps.edu/additive-blog\" target=\"_blank\">additive game blog</a>. </p>\r\n<p> <img src=\'https://web.mmowgli.nps.edu/mmowMedia/images/blackThumb21w29h.png\' height=\'29\' width=\'21\'/>  Thanks for your interest.\r\nPlay the game, change the game! </p>',00000001,00000001,00000001,'tellMeMore130w15h.png','Signup for email notification','',00000000,00000001,'imNewButton202w22h.png','Game masters only please...','You can get started in 2 minutes...',00000001,00000001,'imRegisteredButton133w24h.png','Rejoin the action now!','Login using your game name',00000000,00000001,'guestLogin97w24h.png','Look around a bit','Read only',-9,00000000,'mmowgli_logo_final.png');
 
 /*!40000 ALTER TABLE `MovePhase` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table MovePhase_CardType
@@ -1473,7 +1429,6 @@ CREATE TABLE `MovePhase_CardType` (
   KEY `FK37A6BF1FB19999A6` (`allowedCards_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `MovePhase_CardType` WRITE;
 /*!40000 ALTER TABLE `MovePhase_CardType` DISABLE KEYS */;
 
 INSERT INTO `MovePhase_CardType` (`MovePhase_id`, `allowedCards_id`)
@@ -1504,7 +1459,6 @@ VALUES
 	(4,6);
 
 /*!40000 ALTER TABLE `MovePhase_CardType` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Pages
@@ -1526,7 +1480,6 @@ CREATE TABLE `Pages` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `Pages` WRITE;
 /*!40000 ALTER TABLE `Pages` DISABLE KEYS */;
 
 INSERT INTO `Pages` (`id`, `confirmationEmail`, `actionPlanInviteEmail`, `confirmedReminderEmail`, `welcomeEmail`, `confirmationEmailSubject`, `confirmedReminderEmailSubject`, `welcomeEmailSubject`, `actionPlanInviteEmailSubject`, `passwordResetEmail`)
@@ -1534,7 +1487,6 @@ VALUES
 	(1,'<p>Greetings, <b>[$UNAME$]</b>, from <i>[$GAMEACRONYM$] [$GAMEHANDLE$]</i>, the \"Massively Multiplayer Online War Game Leveraging the Internet\".</p><p>At [$DATETIME$], someone (presumably you) signed up to play <i>[$GAMEHANDLE$] / [$GAMENAME$]</i>.</p><p>Please follow <a href=\'[$CONFIRMLINK$]\'>this link to confirm your registration</a>  ([$CONFIRMLINK$]).</p><p>Problems may always be reported on the <a href=\'[$TROUBLELINK$]\'>[$GAMEHANDLE$] trouble report</a> page at <a href=\'[$TROUBLELINK$]\'>[$TROUBLELINK$]</a>, or by email to <br /><a href=\'mailto:[$TROUBLEMAILTO$]\'>[$TROUBLEMAILTO$]</a>.</p><p>More information is also available on the <a href=\'[$PORTALLINK$]\'>[$GAMEHANDLE$] portal</a>.</p><p>Thanks for your interest in playing <i>[$GAMEACRONYM$] [$GAMEHANDLE$]</i>.  Play the game, change the game!</p>','<p>Greetings, <b>[$UNAME$]</b>, from <i>[$GAMEACRONYM$] mmowgli</i>, the \"Massively Multiplayer Online War Game Leveraging the Internet\".</p><p>At [$DATETIME$], you were invited to become a (co-) author of the following ActionPlan:<br/><center>[$ACTIONPLANTITLE$]</center></p><p>The creation of successful action plans from card chains is the ultimate goal of the grand <i>mmowgli</i> experiment.  You receive points for participating in action plan, so you are encouraged to participate.  Click the <i>Take Action</i> button in the <i>mmowgli</i> page header to view the list of plans on the <i>Action Dashboard</i>.  Find the correct plan and follow the directions.</p><p><i>mmowgli</i> periodically sends mail to users notifying them of important game events.  Other players may also send you direct messages, but this is through the game interface and your email address is always kept private.  If you prefer to receive no email messages during <i>mmowgli</i> game play, you may opt out by visiting your User Profile page and checking the appropriate box.</p><p>Your User Profile page is available to you by clicking your game name in the <i>mmowgli</i> page header.</p><p>Problems may always be reported on the <a href=\'[$TROUBLELINK$]\'>MMOWGLI Trouble Report</a> page at [$TROUBLELINK$].</p><p>Thanks for playing [$GAMEACRONYM$] mmowgli.</p>','<p>Your [$GAMEACRONYM$] [$GAMEHANDLE$] account has been confirmed.  You are welcome to play the game.<br/>[$GAMEURL$]</p><p>If you receive this message in error, indicating, perhaps, that someone has gained entry by pretending to use your account, please notify us immediately via a Trouble Report.</br>[$TROUBLELINK$]</p><p>Thanks for your interest in playing <i>[$GAMEACRONYM$] [$GAMEHANDLE$]</i>.  Play the game, change the game!</p>','<p>Greetings, <b>[$UNAME$]</b>, from <i>[$GAMEACRONYM$] mmowgli</i>, the \"Massively Multiplayer Online War Game Leveraging the Internet\".</p><p>At [$DATETIME$], you enrolled a new player name [$UNAME$] in <i>mmowgli / [$GAMENAME$]</i> at <a href=\'[$GAMEURL$]\'>[$GAMEURL$]</a>, and we&apos;re glad to have you.</p><p>If this enrollment was in error, or your email address was somehow used by someone else without your permission, please notify us at <a href=\'mailto:[$TROUBLEMAILTO$]\'>[$TROUBLEMAILTO$]</a> and we will take corrective action.  You can also submit a Trouble Report at <a href=\'[$TROUBLELINK$]\'>[$TROUBLELINK$]</a>.</p><p><i>[$GAMEACRONYM$] mmowgli</i> periodically sends mail to users notifying them of important game events.  Other players may also send you direct messages, but this is through the game interface and your email address is always kept private.  If you prefer to receive no email messages from <i>mmowgli</i> game play, you may opt out by visiting your User Profile page and checking the appropriate box.</p><p>When logged in, your User Profile page is available to you by clicking your game name in the <i>[$GAMEACRONYM$] mmowgli</i> page header.</p><p>More information is also available on the <a href=\'[$PORTALLINK$]\'>MMOWGLI Portal</a>.</p><p>\"How to Play\" tips can be found on the <a href=\'[$HOWTOPLAYURL$]\'>Game Instructions</a> page.</p><p>Problems may always be reported on the <a href=\'[$TROUBLELINK$]\'>MMOWGLI Trouble Report</a> page at [$TROUBLELINK$].</p><p>Thanks for your interest in playing [$GAMEACRONYM$] mmowgli.  Play the game, change the game!</p>','[$GAMEHANDLE$]: Signup Confirmation','[$GAMEHANDLE$]: Signup Confirmation Reminder','Your [$GAMEHANDLE$] registration','[$GAMEHANDLE$]: Invitation to author Action Plan','<p>Greetings, <b>[$UNAME$]</b>, from <i>[$GAMEACRONYM$] [$GAMEHANDLE$]</i>, the \"Massively Multiplayer Online War Game Leveraging the Internet\".</p><p>At [$DATETIME$], someone (presumably you) requested a password reset for<i> [$GAMEHANDLE$] / [$GAMENAME$]</i>.</p><p>Please follow <a href=\'[$CONFIRMLINK$]\'>this link to complete your password reset request</a>.</p><br /><p>Please note that this process will expire within three hours after this email was generated.</p><p>If you have not changed your password within this timeframe, you will have to re-initiate this process from the <i>[$GAMEACRONYM$] [$GAMEHANDLE$]</i> login in screen.<br /></p><p>Problems may always be reported on the <a href=\'[$TROUBLELINK$]\'>[$GAMEHANDLE$] trouble report</a> page at <a href=\'[$TROUBLELINK$]\'>[$TROUBLELINK$]</a>, or by email to <br /><a href=\'mailto:[$TROUBLEMAILTO$]\'>[$TROUBLEMAILTO$]</a>.</p><p>More information is also available on the <a href=\'[$PORTALLINK$]\'>[$GAMEHANDLE$] portal</a>.</p><p>Thanks for your interest in playing <i>[$GAMEACRONYM$] [$GAMEHANDLE$]</i>.  Play the game, change the game!</p>');
 
 /*!40000 ALTER TABLE `Pages` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table PasswordReset
@@ -1737,7 +1689,6 @@ CREATE TABLE `User` (
   KEY `FK285FEBD0DE2BB0` (`registeredInMove_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `User` WRITE;
 /*!40000 ALTER TABLE `User` DISABLE KEYS */;
 
 INSERT INTO `User` (`id`, `administrator`, `affiliation`, `answer`, `basicScore`, `designer`, `registeredInMove_id`, `expertise`, `facebookId`, `firstChildEmailSent`, `gameMaster`, `innovationScore`, `linkedInId`, `location`, `okEmail`, `okGameMessages`, `okSurvey`, `online`, `password`, `realFirstName`, `realLastName`, `registerDate`, `tweeter`, `twitterId`, `userName`, `avatar_id`, `level_id`, `question_id`, `role_id`, `accountDisabled`, `emailConfirmed`, `welcomeEmailSent`, `viewOnly`, `basicScoreMove1`, `basicScoreMove2`, `basicScoreMove3`, `basicScoreMove4`, `basicScoreMove5`, `innovScoreMove1`, `innovScoreMove2`, `innovScoreMove3`, `innovScoreMove4`, `innovScoreMove5`, `basicScoreMove10`, `basicScoreMove11`, `basicScoreMove12`, `basicScoreMove13`, `basicScoreMove14`, `basicScoreMove15`, `basicScoreMove16`, `basicScoreMove6`, `basicScoreMove7`, `basicScoreMove8`, `basicScoreMove9`, `innovScoreMove10`, `innovScoreMove11`, `innovScoreMove12`, `innovScoreMove13`, `innovScoreMove14`, `innovScoreMove15`, `innovScoreMove16`, `innovScoreMove6`, `innovScoreMove7`, `innovScoreMove8`, `innovScoreMove9`)
@@ -1752,7 +1703,6 @@ VALUES
 	(8,00000001,'Academia','My hope for 2021 is that everyone has experienced a MMOWGLI game ;)',0,00000001,1,'MMOWGLI expert',NULL,00000001,00000001,0,NULL,'Norfolk, VA',00000001,00000001,00000001,00000000,NULL,NULL,NULL,'2013-04-29 11:26:54',00000001,NULL,'gm_becca',4,1,6,NULL,00000000,00000001,00000001,00000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table User_ActionPlan
@@ -1789,7 +1739,6 @@ CREATE TABLE `User_AuthoredPlans` (
   KEY `FK3740AFACCA276057` (`actionplan_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `User_AuthoredPlans` WRITE;
 /*!40000 ALTER TABLE `User_AuthoredPlans` DISABLE KEYS */;
 
 INSERT INTO `User_AuthoredPlans` (`user_id`, `actionplan_id`)
@@ -1800,7 +1749,6 @@ VALUES
 	(8,2);
 
 /*!40000 ALTER TABLE `User_AuthoredPlans` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table User_Award
@@ -1832,7 +1780,6 @@ CREATE TABLE `User_Badges` (
   KEY `FK5C8B424E1018ABD` (`badge_pk`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `User_Badges` WRITE;
 /*!40000 ALTER TABLE `User_Badges` DISABLE KEYS */;
 
 INSERT INTO `User_Badges` (`user_id`, `badge_pk`)
@@ -1844,7 +1791,6 @@ VALUES
 	(8,6);
 
 /*!40000 ALTER TABLE `User_Badges` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table User_Email
@@ -1922,7 +1868,6 @@ CREATE TABLE `User_ImplAuthorScoreByActionPlan` (
   KEY `FKA12BEE986C88E77` (`User_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `User_ImplAuthorScoreByActionPlan` WRITE;
 /*!40000 ALTER TABLE `User_ImplAuthorScoreByActionPlan` DISABLE KEYS */;
 
 INSERT INTO `User_ImplAuthorScoreByActionPlan` (`User_id`, `actionPlanAuthorScores`, `actionPlanAuthorScores_KEY`)
@@ -1936,7 +1881,6 @@ VALUES
 	(8,0,2);
 
 /*!40000 ALTER TABLE `User_ImplAuthorScoreByActionPlan` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table User_ImplCommentScoreByActionPlan
@@ -2000,7 +1944,6 @@ CREATE TABLE `User_InnovationByMove` (
   KEY `FKF492248186C88E77` (`User_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `User_InnovationByMove` WRITE;
 /*!40000 ALTER TABLE `User_InnovationByMove` DISABLE KEYS */;
 
 INSERT INTO `User_InnovationByMove` (`User_id`, `innovationByMove`, `innovationByMove_KEY`)
@@ -2015,7 +1958,6 @@ VALUES
 	(8,0,1);
 
 /*!40000 ALTER TABLE `User_InnovationByMove` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table User_InvestedPlans
@@ -2076,7 +2018,6 @@ CREATE TABLE `User_LevelByMove` (
   KEY `FK21946AF886C88E77` (`User_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `User_LevelByMove` WRITE;
 /*!40000 ALTER TABLE `User_LevelByMove` DISABLE KEYS */;
 
 INSERT INTO `User_LevelByMove` (`User_id`, `levelByMove`, `levelByMove_KEY`)
@@ -2091,7 +2032,6 @@ VALUES
 	(8,1,1);
 
 /*!40000 ALTER TABLE `User_LevelByMove` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table User_PointsByMove
@@ -2107,7 +2047,6 @@ CREATE TABLE `User_PointsByMove` (
   KEY `FKD2F85F7F86C88E77` (`User_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `User_PointsByMove` WRITE;
 /*!40000 ALTER TABLE `User_PointsByMove` DISABLE KEYS */;
 
 INSERT INTO `User_PointsByMove` (`User_id`, `pointsByMove`, `pointsByMove_KEY`)
@@ -2122,7 +2061,6 @@ VALUES
 	(8,0,1);
 
 /*!40000 ALTER TABLE `User_PointsByMove` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table UserPii
@@ -2142,7 +2080,6 @@ CREATE TABLE `UserPii` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
-LOCK TABLES `UserPii` WRITE;
 /*!40000 ALTER TABLE `UserPii` DISABLE KEYS */;
 
 INSERT INTO `UserPii` (`id`, `userObjectId`, `realFirstName`, `realLastName`, `password`, `facebookId`, `linkedInId`, `twitterId`)
@@ -2157,7 +2094,6 @@ VALUES
 	(8,8,'rgy4h2EBQJxbkeM7YSceYg==','x92TbFSeaqkVueh0AvhHSQ==','xvYH6KEOfLpZMhGk0FFh4AFz5XVNkuBwnHvlQQlJ1Zauro4LDivV4qc5yZ6LXRsPnBTzZNpozwScSlBUgijW1lmIuzae784Yp/s/nM920EI=',NULL,NULL,NULL);
 
 /*!40000 ALTER TABLE `UserPii` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table UserPii_EmailPii
@@ -2173,7 +2109,6 @@ CREATE TABLE `UserPii_EmailPii` (
   KEY `FKE799422886C88E77` (`UserPii_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
-LOCK TABLES `UserPii_EmailPii` WRITE;
 /*!40000 ALTER TABLE `UserPii_EmailPii` DISABLE KEYS */;
 
 INSERT INTO `UserPii_EmailPii` (`UserPii_id`, `emailAddresses_id`)
@@ -2188,7 +2123,6 @@ VALUES
 	(8,8);
 
 /*!40000 ALTER TABLE `UserPii_EmailPii` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table Vip
@@ -2218,6 +2152,18 @@ CREATE TABLE `VipPii` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+UPDATE `Game` SET `version` = '20150116' WHERE `id` = '1';
+ALTER TABLE `Card` ADD `version` BIGINT(20)  NOT NULL  DEFAULT '0';
+ALTER TABLE `User` ADD `version` BIGINT(20)  NOT NULL  DEFAULT '0';
+
+UPDATE `Game` SET `version` = '20150206' WHERE `id` = '1';
+ALTER TABLE `ActionPlan` DROP `version`;
+ALTER TABLE `ActionPlan` ADD `revision` BIGINT(20)  NOT NULL  DEFAULT '0';
+ALTER TABLE `Card` CHANGE `version` `revision` BIGINT(20)  NOT NULL  DEFAULT '0';
+ALTER TABLE `Game` ADD `revision` BIGINT(20)  NOT NULL  DEFAULT '0'  AFTER `id`;
+ALTER TABLE `Move` ADD `revision` BIGINT(20)  NOT NULL  DEFAULT '0';
+ALTER TABLE `MovePhase` ADD `revision` BIGINT(20)  NOT NULL  DEFAULT '0';
+ALTER TABLE `User` CHANGE `version` `revision` BIGINT(20)  NOT NULL  DEFAULT '0';
 
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
