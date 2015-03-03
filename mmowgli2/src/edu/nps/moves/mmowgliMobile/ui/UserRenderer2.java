@@ -27,10 +27,14 @@ import com.vaadin.data.Container;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Image;
 
 import edu.nps.moves.mmowgli.components.Hr;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.db.Level;
+import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 import edu.nps.moves.mmowgliMobile.data.*;
