@@ -1,5 +1,14 @@
 # This is a list of SQL commands which may be useful to update old game databases. This file is not intended to be run in its entirety.
 # Remember to also update the MmowgliConstants field DATABASE_VERSION
+UPDATE `Game` SET `version` = '20150225' WHERE `id` = '1';
+CREATE TABLE `Image` (
+  `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `mimeType` varchar(255) NOT NULL DEFAULT '',
+  `bytes` longblob,
+  `description` longtext NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 UPDATE `Game` SET `version` = '20150206' WHERE `id` = '1';
 ALTER TABLE `ActionPlan` DROP `version`;
