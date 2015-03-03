@@ -131,7 +131,7 @@ public class MiscellaneousMmowgliTimer
     // immediate write
     public static void immPrint(Integer logLevel, String... sa)
     {
-      if ((AppMaster.sysOutLogLevel & logLevel) == logLevel)
+      if ((AppMaster.sysOutLogLevel & logLevel) == logLevel) {
         if (sb != null) {
           synchronized (sb) {
             if (logLevel != null) {
@@ -145,7 +145,7 @@ public class MiscellaneousMmowgliTimer
             SysoutVarargs(sa);
           }
         }
-      SysoutVarargs(sa);
+      }
     }
     
     private static void SysoutVarargs(String...sa)
