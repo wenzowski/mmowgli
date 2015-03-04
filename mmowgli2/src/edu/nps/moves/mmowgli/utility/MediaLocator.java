@@ -40,6 +40,7 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
 import edu.nps.moves.mmowgli.db.Media.Source;
 import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.imageServer.ImageServlet;
 import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 
 /**
@@ -156,7 +157,17 @@ public class MediaLocator implements Serializable
       }
 		  
 		case FILESYSTEM_PATH:
-			new FileResource(new File(url));
+			return new FileResource(new File(url));
+			
+		case DATABASE:
+      try {
+        return new ExternalResource(new URL(ImageServlet.getBaseImageUrl(),url));
+      }
+		  catch(MalformedURLException e ) {
+        System.err.println("Bad URL, type DATABASE, in "+e.getClass().getSimpleName()+" "+e.getLocalizedMessage()+" in MediaLocator.locate()");
+        return new ExternalResource(gameImagesUrl); // anything	    
+		  }
+
 		default:
 			System.err.println("Program error in MediaLocator.locate");
 			return null;
