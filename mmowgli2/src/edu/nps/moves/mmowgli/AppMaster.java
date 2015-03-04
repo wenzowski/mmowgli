@@ -55,7 +55,8 @@ import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.messaging.MessagingManager2;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.modules.scoring.ScoreManager2;
-import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.MailManager;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
@@ -274,7 +275,7 @@ public class AppMaster
     if(appUrlString == null || appUrlString.length()<=0) {
       try {
         URL url = Page.getCurrent().getLocation().toURL();
-        url = new URL(url.getProtocol(),url.getHost(),url.getFile());  //lose any query bit
+        url = new URL(url.getProtocol(),url.getHost(),url.getPort(),url.getFile());  //lose any query bit
         appUrl = url;
         appUrlString = url.toString();
         if(appUrlString.endsWith("/") || appUrlString.endsWith("\\"))
