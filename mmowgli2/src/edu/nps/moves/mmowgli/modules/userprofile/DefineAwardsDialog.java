@@ -31,9 +31,11 @@ import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
+import edu.nps.moves.mmowgli.db.Award;
 import edu.nps.moves.mmowgli.db.AwardType;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
+import edu.nps.moves.mmowgli.modules.userprofile.EditAwardTypeDialog.EditAwardResultListener;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
@@ -54,7 +56,7 @@ public class DefineAwardsDialog extends Window
   @HibernateSessionThreadLocalConstructor
   public DefineAwardsDialog()
   {
-    setCaption("Define Player Awards");
+    setCaption("Define Player Award Types");
     setModal(true);
     setSizeUndefined();
     setWidth("700px");
@@ -89,15 +91,19 @@ public class DefineAwardsDialog extends Window
     NativeButton cancelButt = new NativeButton("Cancel", new CancelListener());
     buttPan.addComponent(addButt);
     buttPan.addComponent(delButt);
-
+    
     Label lab;
     buttPan.addComponent(lab = new Label());
     buttPan.setExpandRatio(lab, 1.0f);
     buttPan.addComponent(cancelButt);
     buttPan.addComponent(saveButt);
-    vLay.addComponent(buttPan);
-  }
-
+    vLay.addComponent(buttPan);  
+    
+    //temp
+    saveButt.setEnabled(false);
+    delButt.setEnabled(false);
+  }  
+  
   private ArrayList<AwardType> gridList;
   private void fillPanelTL()
   {
@@ -107,16 +113,15 @@ public class DefineAwardsDialog extends Window
     gridList.addAll(typs);
     gridLayout.removeAllComponents();
     gridLayout.setRows(typs.size()+1);
-    gridLayout.setColumns(4);
+    gridLayout.setColumns(3);
     gridLayout.setSpacing(true);
-    gridLayout.setColumnExpandRatio(1, 0.33f);
-    gridLayout.setColumnExpandRatio(2, 0.33f);
-    gridLayout.setColumnExpandRatio(3, 0.33f);
+    gridLayout.setColumnExpandRatio(1, 0.5f);
+    gridLayout.setColumnExpandRatio(2, 0.5f);
 
     gridLayout.addComponent(new HtmlLabel("<b>Icon</b>"));
     gridLayout.addComponent(new HtmlLabel("<b>Name</b>"));
     gridLayout.addComponent(new HtmlLabel("<b>Description</b>"));
-    gridLayout.addComponent(new HtmlLabel("<b>Story URL</b>"));
+
     MediaLocator mediaLoc = Mmowgli2UI.getGlobals().getMediaLocator();
     for(AwardType at: typs) {
       Embedded emb = new Embedded(null,mediaLoc.locate(at.getIcon55x55()));
@@ -126,8 +131,6 @@ public class DefineAwardsDialog extends Window
       gridLayout.addComponent(tf=makeTa(at.getName()));
       gridLayout.setComponentAlignment(tf, Alignment.MIDDLE_LEFT);     
       gridLayout.addComponent(tf=makeTa(at.getDescription()));
-      gridLayout.setComponentAlignment(tf, Alignment.MIDDLE_LEFT);
-      gridLayout.addComponent(tf=makeTa("url here")); //at.getStoryUrl()));
       gridLayout.setComponentAlignment(tf, Alignment.MIDDLE_LEFT);
     }
   }
@@ -157,8 +160,19 @@ public class DefineAwardsDialog extends Window
     @Override
     public void buttonClick(ClickEvent event)
     {
+      EditAwardTypeDialog.show(null, new EditAwardResultListener()
+      {
+        @Override
+        public void doneTL(AwardType at)
+        {
+          if(at != null) {
+            fillPanelTL();
+          }
+        }        
+      });
     }
   }
+  
   @SuppressWarnings("serial")
   class DelListener implements ClickListener
   {  
