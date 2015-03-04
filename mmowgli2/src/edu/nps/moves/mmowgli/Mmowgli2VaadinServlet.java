@@ -22,7 +22,7 @@
 
 package edu.nps.moves.mmowgli;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.SYSTEM_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -126,7 +126,24 @@ public class Mmowgli2VaadinServlet extends VaadinServlet implements SessionInitL
 
   @Override
   public void sessionInit(SessionInitEvent event) throws ServiceException
-  {
+  {  
+    VaadinRequest req = event.getRequest();
+    String client;
+    String val =  req.getHeader(CAC_CLIENT_VERIFY_HEADER);
+    cactest: {
+      if(val != null) {
+        if(val.equals(VERIFY_SUCCESS)) {
+          client = req.getHeader(CAC_CLIENT_DN_HEADER);
+          if(client != null) {
+            break cactest;
+          }
+        }
+      }
+    // here if we failed CAC
+      // todo, check if game is configured as 1)requiring CAC, 2)allowing CAC, or not using CAC
+    }
+    
+    
   /*  Enumeration<String> en = event.getRequest().getHeaderNames();
     while(en.hasMoreElements()) {
       String hdr = en.nextElement();

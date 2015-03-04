@@ -98,7 +98,12 @@ public class MmowgliConstants
   public static final String TWEETBUTTONEMBEDDED_1 = "' style='width:56pxx; height:20px;'></iframe>"; // just the button, otherwise: default: 130px w 50px h
   public static final String TWEETBUTTON_WIDTH = "56px";
   public static final String TWEETBUTTON_HEIGHT = "20px";
-
+  
+  // CAC Card constants
+  public static final String CAC_CLIENT_DN_HEADER = "SSL_CLIENT_S_DN";   //Request headers: SSL_CLIENT_S_DN = /C=US/O=U.S. Government/OU=DoD/OU=PKI/OU=USN/CN=BAILEY.JOSEPH.M.1254218711
+  public static final String CAC_CLIENT_VERIFY_HEADER = "SSL_CLIENT_VERIFY"; //Request headers: SSL_CLIENT_VERIFY = SUCCESS
+  public static final String VERIFY_SUCCESS = "SUCCESS";
+  
   // Logging
   //@formatter:off
   public static final int ALL_LOGS = -1;
