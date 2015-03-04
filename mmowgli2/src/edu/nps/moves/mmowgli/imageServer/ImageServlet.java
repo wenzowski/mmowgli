@@ -23,6 +23,8 @@
 package edu.nps.moves.mmowgli.imageServer;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -128,5 +130,14 @@ public class ImageServlet extends HttpServlet
       lcType.equals(Image.MIMETYPE_JPEG) ||
       lcType.equals(Image.MIMETYPE_PNG)  ||
       lcType.equals(Image.MIMETYPE_TIFF);
+  }
+  
+  public static URL getBaseImageUrl() throws MalformedURLException
+  {
+    WebServlet ann = ImageServlet.class.getAnnotation(WebServlet.class);
+    String s = ann.urlPatterns()[0];
+    if(s.endsWith("*"))
+      s=s.substring(0,s.length()-1);   
+    return new URL(AppMaster.instance().getAppUrlString()+s);
   }
 }
