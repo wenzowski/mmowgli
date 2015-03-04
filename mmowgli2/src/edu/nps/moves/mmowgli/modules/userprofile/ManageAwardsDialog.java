@@ -36,7 +36,7 @@ import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
- * HistoryDialog.java Created on Apr 5, 2012
+ * ManageAwardsDialog.java Created on Apr 5, 2012
  * Modified on 13 Mar 2014
  * 
  * MOVES Institute Naval Postgraduate School, Monterey, CA, USA www.nps.edu
@@ -69,7 +69,7 @@ public class ManageAwardsDialog extends Window
     vLay.setSizeFull();
     setContent(vLay);
     
-    Panel p = new Panel();
+    Panel p = new Panel("Award Assignments -- a check applies the award to player "+u.getUserName());
     p.setWidth("99%");
     p.setHeight("99%");
     vLay.addComponent(p);
@@ -84,7 +84,7 @@ public class ManageAwardsDialog extends Window
     HorizontalLayout buttPan = new HorizontalLayout();
     buttPan.setWidth("100%");
     buttPan.setSpacing(true);
-    NativeButton defineButt = new NativeButton("Define Awards",new DefineListener());
+    NativeButton defineButt = new NativeButton("Define Award Types",new DefineListener());
     NativeButton saveButt = new NativeButton("Save", new SaveListener());
     NativeButton cancelButt = new NativeButton("Cancel", new CancelListener());
     
