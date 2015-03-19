@@ -103,6 +103,14 @@ public class MmowgliConstants
   public static final String CAC_CLIENT_DN_HEADER = "SSL_CLIENT_S_DN";   //Request headers: SSL_CLIENT_S_DN = /C=US/O=U.S. Government/OU=DoD/OU=PKI/OU=USN/CN=BAILEY.JOSEPH.M.1254218711
   public static final String CAC_CLIENT_VERIFY_HEADER = "SSL_CLIENT_VERIFY"; //Request headers: SSL_CLIENT_VERIFY = SUCCESS
   public static final String VERIFY_SUCCESS = "SUCCESS";
+  public static final String CAC_CERT_HEADER = "SSL_CLIENT_CERT";
+  // http://www.oid-info.com/
+  public static final String OID_COUNTRY_NAME = "2.5.4.6";         //US
+  public static final String OID_ORGANIZATION_NAME = "2.5.4.10";  //U.S. Government
+  public static final String OID_ORGANIZATION_UNIT_NAME = "2.5.4.11"; // Dod and PKI and USN
+  public static final String OID_COMMON_NAME_3 = "2.5.4.3"; //DOD EMAIL CA-31  and BAILEY.JOSEPH.M.1254218711
+  public static final String OID_SUBJECT_ALT_NAME = "2.5.29.17";  //email address
+  public static final String OID_CITIZENSHIP = "1.3.61.5.57.9.4";
   
   // Logging
   //@formatter:off
