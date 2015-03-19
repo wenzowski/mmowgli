@@ -48,7 +48,7 @@ import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
-public class SignupWindow extends Window
+public class SignupWindow extends VerticalLayout//Window
 {
   private static final long serialVersionUID = -7472323396288688209L;
   
@@ -58,28 +58,27 @@ public class SignupWindow extends Window
   private final SignupServer ui;
   private String appUrl;
   
-  @SuppressWarnings("serial")
   @HibernateSessionThreadLocalConstructor
   public SignupWindow(String title, SignupServer ssui)
   {
-    super(title);
+   // super(title);
     this.ui = ssui;
     gameImagesUrl = AppMaster.instance().getGameImagesUrlString();
     if(!gameImagesUrl.endsWith("/"))
       gameImagesUrl = gameImagesUrl+"/";
     appUrl = Page.getCurrent().getLocation().toString();
     appUrl = appUrl.substring(0,appUrl.lastIndexOf("/"));
-    
-    setContent(new Content());
-    setHeight("90%");
-    this.addCloseListener(new CloseListener()
-    {
-      @Override
-      public void windowClose(CloseEvent e)
-      {
-        ui.quitAndGoTo(appUrl);        
-      }     
-    });
+    addComponent(new Content());
+  //  setContent(new Content());
+  //  this.setHeightUndefined();
+//    this.addCloseListener(new CloseListener()
+//    {
+//      @Override
+//      public void windowClose(CloseEvent e)
+//      {
+//        ui.quitAndGoTo(appUrl);        
+//      }     
+//    });
   }
   
   String thanksHdr1 = "Thanks for your interest in the <a href='";
@@ -131,7 +130,9 @@ public class SignupWindow extends Window
       addComponent(vl);
       setComponentAlignment(vl,Alignment.MIDDLE_CENTER);
       vl.setWidth("800px"); //"66%");
-      vl.addStyleName("m-greyborder");
+      //vl.addStyleName("m-greyborder");
+      vl.addStyleName("m-greyborder3");
+      vl.addStyleName("m-mmowglidialog2-middle"); // after a while, change to this .m-background-white
       vl.setMargin(true);
       vl.setSpacing(true);
 
@@ -139,8 +140,8 @@ public class SignupWindow extends Window
       SignupWindow.this.aboutLink = gl.getAboutLink();
 
       String brand = g.getCurrentMove().getTitle();
-      SignupWindow.this.setCaption("Signup for "+brand+" mmowgli");
-      
+     // SignupWindow.this.setCaption("Signup for "+brand+" mmowgli");
+      ui.getPage().setTitle("Signup for "+brand+" mmowgli");
       String blog = gl.getBlogLink();
       String mainText = g.getCurrentMove().getCurrentMovePhase().getSignupText();
 
@@ -171,9 +172,21 @@ public class SignupWindow extends Window
       interestTF.setInputPrompt("required for approval");
       interestTF.setWidth("100%");
 
-      vl.addComponent(submitButton = new Button("Signup"));
+      HorizontalLayout butts = new HorizontalLayout();
+      butts.setSpacing(true);
+      vl.addComponent(butts);
+      butts.addComponent(submitButton = new Button("Signup"));
       submitButton.addClickListener(this);
-
+      butts.addComponent(new Button("Cancel", new ClickListener()
+      {
+        private static final long serialVersionUID = 1L;
+        @Override
+        public void buttonClick(ClickEvent event)
+        {
+          ui.quitAndGoTo(appUrl);
+        }
+      }));
+      
       /*
       Embedded npsBanner = new Embedded(null,new ExternalResource(npsUrl));
       npsBanner.setWidth(npsWidthPx);
