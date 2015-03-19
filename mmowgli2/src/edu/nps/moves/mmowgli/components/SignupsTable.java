@@ -482,8 +482,8 @@ public class SignupsTable extends Table
   public static void dumpSignupsTL()
   {
     StringBuilder sb = new StringBuilder();
-   // sb.append("<html><body>");
-    sb.append("<h2>");
+
+    sb.append("<h3>");
     String title = Game.getTL().getTitle();
 
     Session sess = VHibPii.getASession();
@@ -494,17 +494,21 @@ public class SignupsTable extends Table
         .list();
 
     sb.append(title);
-    sb.append(" Mmowgli user signup list</h2>");
+    sb.append("</h3>");
+    sb.append("<h3>User signup list</h3>");
     SimpleDateFormat dateFormatter = new SimpleDateFormat("y/MM/dd HH:mm z");
-    sb.append("<h2>");
+    sb.append("<h3>");
     sb.append(dateFormatter.format(new Date())); // now
     sb.append("</h2>");
-    sb.append("<h3>total count: ");
+    sb.append("<h4>total count: ");
     sb.append(lis.size());
-    sb.append("</h3>");
+    sb.append("</h4>");
     sb.append("<pre>");
 
     String linesep = System.getProperty("line.separator");
+    sb.append("ID\tEMAIL\tSIGNUP DATE\tINTEREST IN MMOWGLI\tCONFIRMED\tELIGIBLE\tIN-GAME");
+    sb.append(linesep);
+    
     int count = lis.size();
     for (Query2Pii q2 : lis) {
       sb.append(count);
@@ -528,15 +532,14 @@ public class SignupsTable extends Table
       sb.append(linesep);
       count--;
     }
+    sb.append(linesep);
+    sb.append("Please note: These game signups are not Personal Identifying Information (PII) for anonymous in-game players.");
+    sb.append(linesep);
+    sb.append("Rather, this list of individuals interested in notification supports the game design team during game preparations.");
     sb.append("</pre>");
-   // sb.append("</pre></body></html>");
+
     title = title.replace(' ', '_');
-/*    StreamResource.StreamSource ss = new QuickStringStream(sb);
-    StreamResource sr = new StreamResource(ss, title + "_mmowgli_signups" + UUID.randomUUID(), app);
-    sr.setMIMEType("text/html");
     
-    app.getMainWindow().open(sr, "_blank");
-*/    
     title = title+"_mmowgli_signups"+UUID.randomUUID();
     BrowserWindowOpener.openWithInnerHTML(sb.toString(),title,"_blank");
  }
