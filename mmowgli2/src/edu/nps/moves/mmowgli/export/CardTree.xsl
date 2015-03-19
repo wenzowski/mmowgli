@@ -218,7 +218,7 @@
 
     <xsl:template match="GameSummary">
         <h2>
-            <xsl:value-of select="."/>
+            <xsl:value-of select="." disable-output-escaping="yes"/>
         </h2>
     </xsl:template>
 
@@ -557,7 +557,7 @@
                         <xsl:when test="(@hidden = 'true') and (($displayHiddenCards = 'true') or (($displayHiddenCards = 'summaryOnly') and not($recurse = 'true')))">
                             <!-- strike or strikethrough style, do not link urls since hidden and may be undesirable -->
                             <del title="hidden: {.}" style="color:$roundColor">
-                                <xsl:value-of select="."/>
+                                <xsl:value-of select="." disable-output-escaping="yes"/>
                             </del>
                             <!-- link to game -->
                             <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go online to Card {@id}">
@@ -1734,7 +1734,7 @@ text-shadow:; /* off */
             <xsl:matching-substring>
                 <xsl:element name="a">
                     <xsl:attribute name="href">
-                        <xsl:value-of select="."/>
+                        <xsl:value-of select="." disable-output-escaping="yes"/>
                         <xsl:if test="(contains(.,'youtube.com') or contains(.,'youtu.be')) and not(contains(.,'rel='))">
                             <!-- prevent advertising other YouTube videos when complete -->
                             <xsl:text disable-output-escaping="yes">&amp;rel=0</xsl:text>
@@ -1743,7 +1743,7 @@ text-shadow:; /* off */
                     <xsl:attribute name="target">
                         <xsl:text>_blank</xsl:text>
                     </xsl:attribute>
-                    <xsl:value-of select="."/>
+                    <xsl:value-of select="." disable-output-escaping="yes"/>
                 </xsl:element>
                 <xsl:text> </xsl:text>
             </xsl:matching-substring>
@@ -1769,7 +1769,7 @@ text-shadow:; /* off */
                         </xsl:variable>
                         <!-- bookmark #IdeaCard1234 - see IdeaCardLabel above for consistency -->
                         <a href="{concat($IdeaCardChainLink,'#IdeaCard',regex-group(6))}">
-                            <xsl:value-of select="."/>
+                            <xsl:value-of select="." disable-output-escaping="yes"/>
                         </a>
                         <xsl:text> </xsl:text>
                     </xsl:matching-substring>
@@ -1779,14 +1779,14 @@ text-shadow:; /* off */
                             <xsl:matching-substring>
                                 <!-- bookmark #ActionPlan456 - see ActionPlanLabel above for consistency -->
                                 <a href="{concat($ActionPlanLocalLink,'#ActionPlan',regex-group(5))}">
-                                    <xsl:value-of select="."/>
+                                    <xsl:value-of select="." disable-output-escaping="yes"/>
                                 </a>
                                 <xsl:text> </xsl:text>
                             </xsl:matching-substring>
                             <xsl:non-matching-substring>
                                 <!-- avoid returning excess whitespace -->
                                 <xsl:if test="string-length(normalize-space(.)) > 0">
-                                    <xsl:value-of select="." />
+                                    <xsl:value-of select="." disable-output-escaping="yes" />
                                 </xsl:if>
                             </xsl:non-matching-substring>
                         </xsl:analyze-string>

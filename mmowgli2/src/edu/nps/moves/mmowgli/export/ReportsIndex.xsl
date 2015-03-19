@@ -135,7 +135,7 @@
 
     <xsl:template match="GameSummary">
         <h2>
-            <xsl:value-of select="."/>
+            <xsl:value-of select="." disable-output-escaping="yes"/>
         </h2>
     </xsl:template>
 
