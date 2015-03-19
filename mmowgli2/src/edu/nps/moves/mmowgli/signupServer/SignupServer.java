@@ -74,9 +74,13 @@ public class SignupServer extends UI implements HasUUID
     MovePhase ph = g.getCurrentMove().getCurrentMovePhase();
     
     if(ph.isSignupPageEnabled()) {
-      Window w = new SignupWindow("Signup for mmowgli",this);
-      w.center();
-      addWindow(w);
+      //Window w = new SignupWindow("Signup for mmowgli",this);
+      VerticalLayout vl = new VerticalLayout();
+      setContent(vl);
+      vl.addComponent(new SignupWindow("Signup for mmowgli",this));
+    // w.center();
+    //  addWindow(w);
+    //  w.setHeight("750px");
     }
     else {  // Redirect to game site
       Class<SignupServlet> obj = SignupServlet.class;
