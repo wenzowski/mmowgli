@@ -230,7 +230,7 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     emailConfirmationMI.setChecked(game.isEmailConfirmation());
     ret.addSeparator();
 
-    ret.addItem("Manage signup and VIP lists", new MCommand(MENUGAMEADMINMANAGESIGNUPS)).setIcon(FontAwesome.USER_MD);
+    ret.addItem("Manage signups", new MCommand(MENUGAMEADMINMANAGESIGNUPS)).setIcon(FontAwesome.USER_MD);
     ret.addItem("Add to VIP list", new MCommand(MENUGAMEMASTERADDTOVIPLIST)).setIcon(FontAwesome.USER_MD);
     ret.addItem("View and/or delete from VIP list", new MCommand(MENUGAMEMASTERVIEWVIPLIST)).setIcon(FontAwesome.USER_MD);
 
