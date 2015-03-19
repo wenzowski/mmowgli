@@ -28,6 +28,8 @@ import java.util.Vector;
 
 import org.hibernate.Session;
 
+import com.vaadin.event.LayoutEvents.LayoutClickEvent;
+import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
@@ -37,11 +39,13 @@ import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.CardSummary;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
+import edu.nps.moves.mmowgli.utility.BackArrowFontIcon;
 
 /**
  * HorizontalCardDisplay.java
@@ -72,6 +76,7 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
   int myWidth;
   private String PANELSTATEKEY;
   Button start, left, right, end;
+  Label leftLab;
   
   public HorizontalCardDisplay(Dimension componentSize, int numVisible, User me, boolean mockupOnly, String key)
   {
@@ -148,10 +153,33 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       left.addStyleName("m-vcr-fonticon");
       left.setDescription("show earlier cards");
       left.setHtmlContentAllowed(true);
-      //left.setIcon(FontAwesome.BACKWARD);      
-      left.setCaption("<i class=\"fa fa-play fa-rotate-180\"></i>");       // want to get a reverse play button
-      addComponent(left);
       
+      // All these attempts below didn't work to make us be able to rotate the fontawesome play icon like we could in Vaadin 7.3
+      // The method to used the Fontawesome.com-supported way works with a Vaadin label, not a button.
+      // We still use the button, although it's not added to layout to process the click
+      
+      //left.setIcon(new BackArrowFontIcon()); //FontAwesome.PLAY); 
+      //left.setCaption(new BackArrowFontIcon().getHtml());
+      //left.setCaption("<i class=\"fa fa-play fa-rotate-180\"></i>");       // want to get a reverse play button
+      //left.setCaption("<i class=\"fa-rotate-180\"></i>");       // want to get a reverse play button
+      //addComponent(left);
+      
+      // instead:
+      addComponent(leftLab = new HtmlLabel(new BackArrowFontIcon().getHtml()));
+      leftLab.setWidth("14px");
+      leftLab.setDescription("show earlier cards");
+      leftLab.addStyleName("m-cursor-pointer");
+      leftLab.addStyleName("m-vcr-fonticon");
+      this.addLayoutClickListener(new LayoutClickListener()
+      {
+        @Override
+        public void layoutClick(LayoutClickEvent event)
+        {
+          if(event.getChildComponent() == leftLab)
+            left.click();          
+        }        
+      });
+           
       addComponent(sp=new Label());
       sp.setWidth("35px");
       
