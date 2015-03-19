@@ -533,7 +533,7 @@ public class SignupsTable extends Table
       count--;
     }
     sb.append(linesep);
-    sb.append("Please note: These game signups are not Personal Identifying Information (PII) for anonymous in-game players.");
+    sb.append("Please note: these game signups are not Personal Identifying Information (PII) for anonymous in-game players.");
     sb.append(linesep);
     sb.append("Rather, this list of individuals interested in notification supports the game design team during game preparations.");
     sb.append("</pre>");
