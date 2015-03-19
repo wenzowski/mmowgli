@@ -378,7 +378,7 @@ b.error {color: #CC0000}
         </h3>
         <xsl:if test="(local-name()='GameSecurity')">
             <indent>
-                <xsl:value-of select="."/>
+                <xsl:value-of select="." disable-output-escaping="yes"/>
                 <br />
                 <xsl:choose>
                     <xsl:when test="($gameSecurity='FOUO')">
@@ -408,7 +408,7 @@ b.error {color: #CC0000}
                             <!-- plain text -->
                             <xsl:when test="(local-name()='BrandingText') or
                                             (local-name()='WindowTitle')">
-                                <xsl:value-of select="."/>
+                                <xsl:value-of select="." disable-output-escaping="yes"/>
                             </xsl:when>
                             <!-- html source -->
                             <xsl:when test="(local-name()='OrientationHeadline') or
@@ -442,13 +442,13 @@ b.error {color: #CC0000}
                                 <!-- TODO prefix online url -->
                                 <a href="{.}" target="_blank"><img src="{.}" width="20" align="top"/></a>
                                 <xsl:text> </xsl:text>
-                                <a href="{.}" target="_blank"><xsl:value-of select="."/></a>
+                                <a href="{.}" target="_blank"><xsl:value-of select="." disable-output-escaping="yes"/></a>
                             </xsl:when>
                             <!-- video -->
                             <xsl:when test="(local-name()='Video')">
                                 <!-- TODO other sources besides YouTube -->
                                 <xsl:text>YouTube </xsl:text>
-                                <a href="https://youtube.com/watch?v={.}" target="_blank"><xsl:value-of select="."/></a>
+                                <a href="https://youtube.com/watch?v={.}" target="_blank"><xsl:value-of select="." disable-output-escaping="yes"/></a>
                                 <br/>
                                 <iframe width="560" height="315" src="https://www.youtube.com/embed/{.}" frameborder="0" allowfullscreen="true"></iframe>
                             </xsl:when>
@@ -490,7 +490,7 @@ b.error {color: #CC0000}
                     </xsl:matching-substring>
                     <xsl:non-matching-substring>
                         <!-- Third: remainder is text -->
-                        <xsl:value-of select="."/>
+                        <xsl:value-of select="." disable-output-escaping="yes"/>
                     </xsl:non-matching-substring>
                 </xsl:analyze-string>
             </xsl:non-matching-substring>
@@ -506,7 +506,7 @@ b.error {color: #CC0000}
             </xsl:matching-substring>
             <xsl:non-matching-substring>
                 <!-- Second: remainder is text -->
-                <xsl:value-of select="."/>
+                <xsl:value-of select="." disable-output-escaping="yes"/>
             </xsl:non-matching-substring>
         </xsl:analyze-string>
     </xsl:template>
