@@ -2102,7 +2102,7 @@ b.error {color: #CC0000}
             <xsl:matching-substring>
                 <xsl:element name="a">
                     <xsl:attribute name="href">
-                        <xsl:value-of select="."/>
+                        <xsl:value-of select="." disable-output-escaping="yes"/>
                         <xsl:if test="(contains(.,'youtube.com') or contains(.,'youtu.be')) and not(contains(.,'rel='))">
                             <!-- prevent advertising other YouTube videos when complete -->
                             <xsl:text disable-output-escaping="yes">&amp;rel=0</xsl:text>
@@ -2111,7 +2111,7 @@ b.error {color: #CC0000}
                     <xsl:attribute name="target">
                         <xsl:text>_blank</xsl:text>
                     </xsl:attribute>
-                    <xsl:value-of select="."/>
+                    <xsl:value-of select="." disable-output-escaping="yes"/>
                 </xsl:element>
                 <xsl:text> </xsl:text>
             </xsl:matching-substring>
@@ -2121,7 +2121,7 @@ b.error {color: #CC0000}
                     <xsl:matching-substring>
                         <!-- bookmark #IdeaCard1234 - see IdeaCardLabel above for consistency -->
                         <a href="{concat($IdeaCardChainLocalLink,'#IdeaCard',regex-group(6))}">
-                            <xsl:value-of select="."/>
+                            <xsl:value-of select="." disable-output-escaping="yes"/>
                         </a>
                         <xsl:text> </xsl:text>
                     </xsl:matching-substring>
@@ -2147,14 +2147,14 @@ b.error {color: #CC0000}
                                 </xsl:variable>
                                 <!-- bookmark #ActionPlan456 - see ActionPlanLabel above for consistency -->
                                 <a href="{concat($ActionPlanLink,'#ActionPlan',regex-group(5))}">
-                                    <xsl:value-of select="."/>
+                                    <xsl:value-of select="." disable-output-escaping="yes"/>
                                 </a>
                             <xsl:text> </xsl:text>
                             </xsl:matching-substring>
                             <xsl:non-matching-substring>
                                 <!-- avoid returning excess whitespace -->
                                 <xsl:if test="string-length(normalize-space(.)) > 0">
-                                    <xsl:value-of select="." />
+                                    <xsl:value-of select="." disable-output-escaping="yes"/>
                                 </xsl:if>
                             </xsl:non-matching-substring>
                         </xsl:analyze-string>
