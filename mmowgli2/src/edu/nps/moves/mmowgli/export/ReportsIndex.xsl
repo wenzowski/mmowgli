@@ -298,8 +298,14 @@ td.longtext {
                     </xsl:choose>
                 </xsl:variable>
 
-                <table align="center" border="0" class="banner">
+                <table align="left" border="0" class="banner">
                     <tr>
+                        <td>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                        </td>
                         <td align="center" valign="middle">
                             <h1 align="center">
                                 <xsl:value-of disable-output-escaping="yes" select="$gameLabel"/> <!-- want escaped <br /> intact for line break -->
@@ -337,6 +343,16 @@ td.longtext {
                 </p>
                         </td>
                     </tr>
+                    <tr align="center" rowspan="3">
+                        <td colspan="6">
+                            <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                        </td>
+                    </tr>
+                    <tr align="center" rowspan="3">
+                        <td colspan="6">
+                            <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                        </td>
+                    </tr>
                 </table>
                 
                 <!-- Table of Contents
@@ -351,8 +367,10 @@ td.longtext {
                     <a name="GameReports">Game Reports</a>
                 </h2> -->
                 
-                <br />
-                <br />
+                <!-- vertical line spacing -->
+                <p>
+                    <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                </p>
                 
                 <!-- TODO add totals?  requires reaching into other files -->
 
@@ -450,12 +468,12 @@ td.longtext {
                     </tr>
                     
                     <tr align="center" rowspan="3">
-                        <td colspan="6">
+                        <td colspan="7">
                             <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
                         </td>
                     </tr>
                     <tr align="center" rowspan="3">
-                        <td colspan="6">
+                        <td colspan="7">
                             <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
                         </td>
                     </tr>
@@ -524,7 +542,7 @@ td.longtext {
                         </td>
                     </tr>
                     <tr align="center" rowspan="3">
-                        <td colspan="6">
+                        <td colspan="7">
                             <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
                         </td>
                     </tr>
