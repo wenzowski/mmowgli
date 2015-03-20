@@ -69,6 +69,7 @@
 	<target name="evtp.war"       depends="confirmClean,zipVaadinDir"> <deployOne outFile="evtp.war"       webxml="evtp_web.xml"       /></target>
 	<target name="hamming.war"    depends="confirmClean,zipVaadinDir"> <deployOne outFile="hamming.war"    webxml="hamming_web.xml"    /></target>
 	<target name="nato.war"       depends="confirmClean,zipVaadinDir"> <deployOne outFile="nato.war"       webxml="nato_web.xml"       /></target>
+	<target name="ndu.war"        depends="confirmClean,zipVaadinDir"> <deployOne outFile="ndu.war"        webxml="ndu_web.xml"        /></target>
 	<target name="nps.war"        depends="confirmClean,zipVaadinDir"> <deployOne outFile="nps.war"        webxml="nps_web.xml"        /></target>
 	<target name="piracy.war"     depends="confirmClean,zipVaadinDir"> <deployOne outFile="piracy.war"     webxml="piracy_web.xml"     /></target>
 	<target name="training.war"   depends="confirmClean,zipVaadinDir"> <deployOne outFile="training.war"   webxml="training_web.xml"   /></target>
@@ -104,6 +105,7 @@
 		evtp.war,
 		hamming.war,
 		nato.war,
+		ndu.war,
 		nps.war,
 		piracy.war,
 		piracy2011_1.war,
