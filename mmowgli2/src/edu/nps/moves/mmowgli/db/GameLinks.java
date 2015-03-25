@@ -73,6 +73,7 @@ public class GameLinks implements Serializable
   String troubleLink;
   String troubleMailto;
   String userAgreementLink;
+  String videosLink;
 
   public static GameLinks get(Session sess)
   {
@@ -366,5 +367,16 @@ public class GameLinks implements Serializable
   public void setHowToPlayLink(String s)
   {
     howToPlayLink = s;
+  }
+  
+  @Basic
+  public String getVideosLink()
+  {
+    return videosLink;
+  }
+  
+  public void setVideosLink(String s)
+  {
+    videosLink = s;
   }
 }
