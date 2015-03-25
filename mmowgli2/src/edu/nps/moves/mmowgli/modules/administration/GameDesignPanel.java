@@ -215,7 +215,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
   TitlesGameDesignPanel titlesPan;
   TopCardsGameDesignPanel topCardsPan;
   SubCardsGameDesignPanel subCardsPan;
-  SeedCardsGameDesignPanel seedCardsPan;
+  //SeedCardsGameDesignPanel seedCardsPan;
   ActionPlanChaptersGameDesignPanel chaptersPan;
 
   MoveSelector moveSelector;
@@ -234,7 +234,8 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     tabPanels.add(titlesPan = new TitlesGameDesignPanel(editMove, globs));
     tabPanels.add(topCardsPan = new TopCardsGameDesignPanel(editMove, globs));
     tabPanels.add(subCardsPan = new SubCardsGameDesignPanel(editMove, globs));
-    tabPanels.add(seedCardsPan = new SeedCardsGameDesignPanel(editMove, globs));
+    // this is not understandable to users, nor very functional
+    //tabPanels.add(seedCardsPan = new SeedCardsGameDesignPanel(editMove, globs));
     tabPanels.add(chaptersPan = new ActionPlanChaptersGameDesignPanel(editMove, globs));
   }
 
@@ -283,14 +284,14 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
     tabSh.addTab(titlesPan, "Game Titles");
     tabSh.addTab(topCardsPan, "Top Card Types");
     tabSh.addTab(subCardsPan, "Sub Card Types");
-    tabSh.addTab(seedCardsPan, "Seed Card Initialization");
+    //tabSh.addTab(seedCardsPan, "Seed Card Initialization");
     tabSh.addTab(chaptersPan, "Action Plan Headings");
     addComponent(tabSh);
 
     titlesPan.initGui();
     topCardsPan.initGui();
     subCardsPan.initGui();
-    seedCardsPan.initGui();
+    //seedCardsPan.initGui();
     chaptersPan.initGui();
     moveSelector.setMove(Game.getTL().getCurrentMove());
   }
@@ -365,7 +366,7 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
         titlesPan.moveChangedTL(mov);
         topCardsPan.moveChangedTL(mov);
         subCardsPan.moveChangedTL(mov);
-        seedCardsPan.moveChangedTL(mov);
+       // seedCardsPan.moveChangedTL(mov);
         chaptersPan.moveChangedTL(mov);
 
         if(externalListener != null)
