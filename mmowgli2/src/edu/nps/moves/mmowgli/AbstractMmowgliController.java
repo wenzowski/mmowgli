@@ -680,11 +680,16 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     // Return null if don't understand
     private String handleEventTL(AppEvent appEvent)
     {
+      MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       MmowgliEvent mEv = appEvent.getEvent();
       Object param = appEvent.getData();
       switch(mEv) {
         case CARDCLICK:
-          myView = new CardChainPage(Long.parseLong(param.toString()));
+          long cardid = Long.parseLong(param.toString());
+          if(Card.canSeeCardTL(Card.getTL(cardid),globs.getUserTL()))
+            myView = new CardChainPage(Long.parseLong(param.toString()));
+          else
+            myView = new CallToActionPage(); // default
           break;
         case MAPCLICK:
           myView = new LeafletMap();
@@ -708,13 +713,22 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
           myView = new ActionDashboard();
           break;            
         case MENUGAMEADMIN_BUILDGAMECLICK_READONLY:
-          myView = new GameDesignPanel(true);
+          if(globs.getUserTL().isGameMaster())
+            myView = new GameDesignPanel(true);
+          else
+            myView = new CallToActionPage();
           break;       
         case MENUGAMEADMIN_BUILDGAMECLICK:
-          myView = new GameDesignPanel(false);
+          if(globs.getUserTL().isDesigner())
+            myView = new GameDesignPanel(false);
+          else
+            myView = new CallToActionPage();
           break;
         case MENUGAMEMASTERUSERADMIN:
-          myView = new UserAdminPanel();
+          if(globs.getUserTL().isAdministrator())
+            myView = new UserAdminPanel();
+          else
+            myView = new CallToActionPage();
           break;
         case ACTIONPLANSHOWCLICK:
           myView = new ActionPlanPage2(Long.parseLong(param.toString()));
