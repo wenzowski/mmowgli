@@ -208,7 +208,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
   /*
    * Synchronization could be used to prevent the minute possiblity of a race condition between lines A and B.  This is the only place in the app
    * where users are added to the db.  Hibernate transaction serialization may also deal with this.
-   * Synchronized keywork would not help in a clustered environment, however.
+   * Synchronized keyword would not help in a clustered environment, however.
    */
   private User checkUserNameTL(String uName, String email)//, String password)
   {
@@ -384,8 +384,9 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
         return;
       }
             
-      // 2. No user already there with given email
-      if(!checkEmail(email)){
+      // 2. No user already there with given email unless new gamemaster signing up
+      String uname = userIDTf.getValue().toString();
+      if(!uname.toLowerCase().startsWith("gm_") && !checkEmail(email)){
         errorOutTL("Email address already used.");
         HSess.close();
         return;
@@ -415,7 +416,6 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       }
 
       // 5. No user already there with given username
-      String uname = userIDTf.getValue().toString();
       User _usr = checkUserNameTL(uname,email);       // This saves the user and builds UserPii
       if(_usr == null) {
         errorOutTL("Existing user with that name/ID");
