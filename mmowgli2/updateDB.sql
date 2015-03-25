@@ -1,5 +1,9 @@
 # This is a list of SQL commands which may be useful to update old game databases. This file is not intended to be run in its entirety.
 # Remember to also update the MmowgliConstants field DATABASE_VERSION
+
+UPDATE `Game` SET `version` = '20150325' WHERE `id` = '1';
+ALTER TABLE `GameLinks` ADD `videosLink` VARCHAR(255)  NOT NULL  DEFAULT 'https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Video+Resources'  AFTER `userAgreementLink`;
+
 UPDATE `Game` SET `version` = '20150225' WHERE `id` = '1';
 CREATE TABLE `Image` (
   `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT,
