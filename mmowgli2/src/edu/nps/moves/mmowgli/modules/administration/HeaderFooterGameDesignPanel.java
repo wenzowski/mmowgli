@@ -62,9 +62,10 @@ public class HeaderFooterGameDesignPanel extends AbstractGameBuilderPanel
     addEditLine("7 Glossary Link",   "GameLinks.glossaryLink", links, links.getId(), "GlossaryLink");
     addEditLine("8 Terms Link",      "GameLinks.termsLink",    links, links.getId(), "TermsLink");
     addEditLine("9 Trouble Link",    "GameLinks.troubleLink",  links, links.getId(), "TroubleLink");
+    addEditLine("10 Videos Link",    "GameLinks.videosLink",   links, links.getId(), "VideosLink");
 //@formatter:on
     addSeparator();
-    addEditBoolean("8 Show FOUO branding","Game.showFouo", Game.getTL(), 1L, "ShowFouo");
+    addEditBoolean("11 Show FOUO branding","Game.showFouo", Game.getTL(), 1L, "ShowFouo");
 }
   
   @Override
