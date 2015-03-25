@@ -69,7 +69,8 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
     fixesButt    = makeLink("Fixes",               gl.getFixesLink(),    "Common game fixes and workarounds"); //"https://portal.mmowgli.nps.edu/fixes", "Common game fixes and workarounds");
     twitterButt  = makeLink("Twitter",             getTwitterLink(),     "The Mmowgli twitter feed");
     reportsButt  = makeLink("Reports",             getReportsLink(),     "Game play reports page");
-    videosButt   = makeLink("Videos",              getVideosLinkTL(),    "Game videos");
+    //videosButt   = makeLink("Videos",              getVideosLinkTL(),    "Game videos");
+    videosButt   = makeLink("Videos",              gl.getVideosLink(),   "Game videos");
   }
   //@formatter:on
 
@@ -160,12 +161,12 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
   {
     return "http://twitter.com/MMOWGLI";
   }
-  
+/*   old
   private String getVideosLinkTL()
   {
     return Mmowgli2UI.getGlobals().getAlternateVideoUrlTL();
   }
-  
+*/  
   @Override
   public boolean gameUpdatedExternallyTL(Object nullObj)
   {
