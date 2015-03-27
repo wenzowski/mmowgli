@@ -3,6 +3,13 @@
 
 UPDATE `Game` SET `version` = '20150325' WHERE `id` = '1';
 ALTER TABLE `GameLinks` ADD `videosLink` VARCHAR(255)  NOT NULL  DEFAULT 'https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Video+Resources'  AFTER `userAgreementLink`;
+ALTER TABLE `User` ADD `mapCenterLatitude` FLOAT  NULL  DEFAULT NULL  AFTER `revision`;
+ALTER TABLE `User` ADD `mapCenterLongitude` FLOAT  NULL  DEFAULT NULL  AFTER `mapCenterLatitude`;
+ALTER TABLE `User` ADD `mapZoom` INT  NULL  DEFAULT NULL  AFTER `mapCenterLongitude`;
+CREATE TABLE `User_ActiveMapLayers` (
+  `User_id` bigint(20) NOT NULL,
+  `activeMapLayers` varchar(255) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 UPDATE `Game` SET `version` = '20150225' WHERE `id` = '1';
 CREATE TABLE `Image` (
