@@ -24,6 +24,7 @@ package edu.nps.moves.mmowgli.modules.registrationlogin;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -234,7 +235,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       u.setRegisterDate(new Date());
       VHibPii.setUserPiiEmail(u.getId(), email);
 
-      User.updateTL(u);
+      User.updateTL(u);  //update 1
       return u;
     }
     catch(Exception ex) {
@@ -363,7 +364,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
     }
     return false;  // we in previously, no go
   }
-
+  
   @SuppressWarnings("serial")
   class MyContinueListener implements Button.ClickListener
   {
@@ -384,12 +385,20 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
         return;
       }
             
-      // 2. No user already there with given email unless new gamemaster signing up
+      // 2. Check for existing email; GMS and GAs handled differently
       String uname = userIDTf.getValue().toString();
-      if(!uname.toLowerCase().startsWith("gm_") && !checkEmail(email)){
-        errorOutTL("Email address already used.");
-        HSess.close();
-        return;
+          
+      if (!checkEmail(email)) {
+        // Here if there was an existing email in the system
+        if (!uname.toLowerCase().startsWith("gm_")) {
+          // Here if the attempted login does not start with gm
+          if (!anyGMsorGAsHaveThisEmail(email)) {
+            // here if the existing email does not belong to a GM or GA
+            errorOutTL("Email address already used.");
+            HSess.close();
+            return;
+          }
+        }
       }
 
       // 3. (email address in list of invitees?
@@ -448,6 +457,19 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       HSess.close();
 
       listener.buttonClick(event);
+    }
+    
+    private boolean anyGMsorGAsHaveThisEmail(String email)
+    {
+      Session piiSess = VHibPii.getASession();
+      ArrayList<User> uAr =  UserPii.getUserFromEmailTL(email, piiSess);
+      for(User u :uAr)
+        if(u.isGameMaster() || u.isAdministrator()) {
+          piiSess.close();
+          return true;
+        }
+      piiSess.close();
+      return false;   
     }
 
     private void errorOutTL(String s)
