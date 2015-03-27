@@ -140,6 +140,21 @@ public class HSess
     return;
   }
   
+  // Definitely close (and flush) session, but reopen since caller expects and open one
+  public static void closeAndCheckReopen(Object obj)
+  {
+    close();
+    Boolean b = (Boolean)obj;
+    if(!b.booleanValue())
+      init();
+  }
+  
+  public static void closeAndReopen()
+  {
+    close();
+    init();
+  }
+  
   public static void conditionallyClose()
   {
     if(get() == null)
