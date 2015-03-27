@@ -54,6 +54,7 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
   private Link aboutButt, faqsButt, glossaryButt, creditsButt, 
                troubleButt, termsButt, fixesButt, twitterButt, reportsButt, videosButt;
   private Link fouoLink;
+  
 
   //@formatter:off
   @HibernateSessionThreadLocalConstructor
@@ -113,6 +114,7 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
     innerHorLay.addComponent(termsButt);
     innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
     innerHorLay.addComponent(troubleButt);
+    troubleButt.addStyleName("m-red-text");
     innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
     innerHorLay.addComponent(twitterButt);
     innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
