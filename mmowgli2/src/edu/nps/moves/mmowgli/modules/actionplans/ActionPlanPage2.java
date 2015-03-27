@@ -1477,7 +1477,8 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     boolean au = amIAnAuthor(sess);
     imAuthor = au; // save locally
-    boolean gm = User.get(globs.getUserID(),sess).isGameMaster();
+    User me = User.get(globs.getUserID(),sess);
+    boolean gm = me.isGameMaster();
 
     thePlanTab.setImAuthor(au && !readonly);
 
@@ -1508,7 +1509,6 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
       rfeButt.removeClickListener(interestedListener);
     }
     else {
-
       if (helpWanted != null) {
         rfeButt.setStyleName("m-helpWantedButton");
         rfeButt.enableAction(false);
@@ -1524,7 +1524,11 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
         rfeButt.setDescription("Click to offer help with this action plan");
       }
     }
+    // but, If I'm a guest, disable the rfeButton entirely
+    if(me.isViewOnly())
+      rfeButt.setEnabled(false);
   }
+  
   private boolean amIAnAuthor_oobTL()
   {
     return amIAnAuthor(HSess.get());
