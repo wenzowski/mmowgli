@@ -215,6 +215,9 @@ div .m-textarea-greyborder, .m-greyborder {
   .m-margintop-5 {
     margin-top: 5px;
   }
+  .m-margintop-20 {
+    margin-top: 20px;
+  }
   .m-marginbottom-5 {
     margin-bottom: 5px;
   }
@@ -1905,7 +1908,7 @@ div div .m-useradmin-search-combo .v-filterselect-button {
   /* color: white;*/
   background-color: #b61861;
 }
-.m-red-text {
+.m-red-text, div .m-red-text a:link span, div .m-red-text a:visited span {
   color: #B20062;
 }
 .m-blue, .m-adapt-color, .m-0f75bc, #m-blue {
