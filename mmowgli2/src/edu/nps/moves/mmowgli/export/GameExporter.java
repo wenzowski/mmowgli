@@ -29,7 +29,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -298,30 +301,25 @@ public class GameExporter extends BaseExporter
     addElementWithText(reactCardsElem,"ReactCard4Prompt",s==null?"":s);
   }
   
+  @SuppressWarnings("unchecked")
   private void addSeedCards(Element root, Session sess, Game g)
   {
     Element seedCardsElem = createAppend(root,"SeedCards");
     //addElementWithText(seedCardsElem,"ScreenShot","seedcardsScreenShot.png");
     
-    Card[] seeds = new Card[10];
-    int idx=0;
+    Criteria criteria = sess.createCriteria(Card.class)
+        .setMaxResults(10)
+        .add(Restrictions.ne("hidden", true))
+        .addOrder(Order.asc("id"));
     
-    for(int i=1;i<=20;i++) {
-      Card c = Card.get((long)i,sess);
-      if(c != null) {
-        seeds[idx++]=c;
-        if(idx > 9)
-          break;
-      }
-    }
-       
-    for(int n=0;n<idx;n++) {
-      Card cd = seeds[n];
+    List<Card> lis = (List<Card>)criteria.list();
+    int n=0;
+    for(Card cd : lis) {
       String typ = cd.getCardType().getTitle();
       typ = typ.replaceAll("\\W","");  // remove non chars
-      //String typ = n<5?"Innovate":"Defend"; //"Positive":"Negative";
       String txt = cd.getText();
       addElementWithText(seedCardsElem,typ+"SeedCard"+(n+1),txt==null?"":txt);
+      n++;
    }
   }
 
