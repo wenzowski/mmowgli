@@ -297,6 +297,15 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
     baseVLayout.addComponent(bottomHLayout);
     baseVLayout.setComponentAlignment(bottomHLayout, Alignment.TOP_CENTER);
 
+    lab = new HtmlLabel("<center>Each MMOWGLI game is independent.<br>&nbsp;You need a new account for every game.&nbsp;</center>");
+    lab.setSizeUndefined();
+    lab.addStyleName("m-margintop-20");
+    lab.addStyleName("m-greyborder");
+    lab.addStyleName("m-background-white");
+    lab.addStyleName("m-opacity-75");
+    baseVLayout.addComponent(lab);
+    baseVLayout.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
+    
     String troubleUrl = GameLinks.getTL().getTroubleLink();
     Link lnk = new Link("Trouble signing in?",new ExternalResource(troubleUrl));
     baseVLayout.addComponent(lnk);
@@ -517,8 +526,11 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       user.setOkSurvey(okSurvey);  // saved above
       Game g = Game.getTL();
       user.setRegisteredInMove(g.getCurrentMove());
+      
       User.updateTL(user);
-
+      HSess.closeAndReopen();
+      user = User.mergeTL(user);
+      
       Mmowgli2UI.getGlobals().getScoreManager().userCreatedTL(user);  // give him his points if appropriate
 
       UI.getCurrent().setScrollTop(0);
@@ -670,9 +682,10 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         MailManager mmgr = AppMaster.instance().getMailManager();
         mmgr.onNewUserSignupTL(user);
         user.setWelcomeEmailSent(true);
-        User.updateTL(user);
         
-        HSess.close();HSess.init();  // because further down the thread, a User.get is performed, which loses the update
+        User.updateTL(user);        
+        HSess.closeAndReopen();  // because further down the thread, a User.get is performed, which loses the update
+        user = User.mergeTL(user);
       }
       
       // Adjust session timeouts.  Default (standard user) is set in web.xml
