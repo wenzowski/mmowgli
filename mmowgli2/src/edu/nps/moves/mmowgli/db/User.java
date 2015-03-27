@@ -152,6 +152,12 @@ public class User implements Serializable
         innovScoreMove10=0.0f,innovScoreMove11=0.0f,innovScoreMove12=0.0f,innovScoreMove13=0.0f,
         innovScoreMove14=0.0f,innovScoreMove15=0.0f,innovScoreMove16=0.0f;  
 
+  // can be null if not set
+  Float mapCenterLatitude;
+  Float mapCenterLongitude;
+  Integer  mapZoom;
+  List<String> activeMapLayers;
+  
   public User(String userName)
   {
     this(userName, null);
@@ -1113,4 +1119,50 @@ public class User implements Serializable
   {
     combinedBasicScore = f;
   }
+  
+  @Basic
+  public Float getMapCenterLatitude()
+  {
+    return mapCenterLatitude;
+  }
+  public void setMapCenterLatitude(Float f)
+  {
+    mapCenterLatitude = f;
+  }
+
+  @Basic
+  public Float getMapCenterLongitude()
+  {
+    return mapCenterLongitude;
+  }
+  public void setMapCenterLongitude(Float f)
+  {
+    mapCenterLongitude = f;
+  }
+  
+  @Basic
+  public Integer getMapZoom()
+  {
+    return mapZoom;
+  }
+  public void setMapZoom(Integer i)
+  {
+    mapZoom = i;
+  }
+  
+  @ElementCollection
+  @CollectionTable(name="User_ActiveMapLayers")
+  public List<String> getActiveMapLayers()
+  {
+    return activeMapLayers;
+  }
+
+  /**
+   * @param planFields the planFields to set
+   */
+  public void setActiveMapLayers(List<String> layers)
+  {
+    activeMapLayers = layers;
+  }
+
 }
