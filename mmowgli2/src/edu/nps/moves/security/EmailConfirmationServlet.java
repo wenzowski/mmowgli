@@ -189,8 +189,8 @@ public class EmailConfirmationServlet extends HttpServlet
       sb.append("<img src='http://test.mmowgli.nps.edu/mmowgli.png'/><br/>");
       sb.append("Your email address is confirmed. Thanks for joining <i>");
       sb.append(acronym);
-      sb.append(" mmowgli / ");
-      sb.append(gamename);
+      sb.append(" mmowgli"); // / ");
+      //sb.append(gamename);
       sb.append("</i>&nbsp;!<br/><br/>");
       sb.append("If you have the <i>mmowgli</i> \"Email Confirmation\" dialog still visible in your browser,<br/>");
       sb.append("you may click the \"Check confirmation status\" button to begin game play.<br/><br/>");
