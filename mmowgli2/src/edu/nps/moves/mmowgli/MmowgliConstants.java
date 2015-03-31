@@ -48,6 +48,10 @@ public class MmowgliConstants
   public static double MAP_LON_DEFAULT = 53.613281;
   public static int    MAP_ZOOM_DEFAULT = 5;
   
+  public static String MOBILE_QR_IMAGE_NAME = "mobileqr.png";
+  public static String MOBILE_QR_IMAGE_MIMETYPE = "image/png";
+  public static String MOBILE_QR_IMAGE_FILETYPE = "png";
+  
   // Database version matching this code
   public static long DATABASE_VERSION = 20150325; // db which matches this code
 
