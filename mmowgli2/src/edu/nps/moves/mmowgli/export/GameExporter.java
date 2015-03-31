@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli.export;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -45,6 +47,7 @@ import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
+import edu.nps.moves.mmowgliMobile.MmowgliMobileVaadinServlet;
 
 /**
  * ActionPlanExporter.java Created on Nov 28, 2011
@@ -175,6 +178,18 @@ public class GameExporter extends BaseExporter
     addElementWithText(metaElem,"ShowingPriorMovesActionPlans", Boolean.toString(g.isShowPriorMovesActionPlans()));
     addElementWithText(metaElem,"ActiveRound",Integer.toString(g.getCurrentMove().getNumber()));
     addElementWithText(metaElem,"ActivePhase",g.getCurrentMove().getCurrentMovePhase().getDescription());
+    
+    String mobileUrl = "";
+    String mobileQR = "";
+    try {
+      mobileUrl = MmowgliMobileVaadinServlet.getBaseMobileUrl().toURI().toString();
+      mobileQR = AppMaster.instance().getMobileQRUrlStringTL();
+     }
+    catch(URISyntaxException | MalformedURLException ex) {
+      System.err.println("Program error in GameExporter.addMetaData() generating mobile qr link: "+ex.getClass().getSimpleName()+"/ "+ex.getLocalizedMessage());
+    }
+    addElementWithText(metaElem,"MobileUrl", mobileUrl);
+    addElementWithText(metaElem,"MobileQRImageUrl", mobileQR);
   }
   
   private void addHeaderFooter(Element root, Session sess, Game g)
