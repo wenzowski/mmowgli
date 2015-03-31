@@ -29,6 +29,8 @@
 				<xs:element ref="ShowingPriorMovesActionPlans" />
 				<xs:element ref="ActiveRound" />
 				<xs:element ref="ActivePhase" />
+                <xs:element ref="MobileUrl" />
+                <xs:element ref="MobileQRImageUrl" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -64,6 +66,8 @@
 	<xs:element name="TermsURL" type="xs:anyURI"/>
 	<xs:element name="ActiveRound" type="xs:int"/>
 	<xs:element name="ActivePhase" type="xs:string"/>
+    <xs:element name="MobileUrl" type="xs:anyURI"/>
+    <xs:element name="MobileQRImageUrl" type="xs:anyURI"/>  
     <xs:element name="VideoYouTubeID" type="xs:string"/>
     <xs:element name="VideoAlternateUrl" type="xs:string"/>
   
