@@ -22,6 +22,11 @@
 
 package edu.nps.moves.mmowgliMobile;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.MOBILE_LOGS;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -31,8 +36,8 @@ import com.vaadin.addon.touchkit.settings.TouchKitSettings;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.*;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 /**
  * Mmowgli2VaadinServlet.java
@@ -49,7 +54,7 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.*;
  * @version $Id$
  */
 
-@WebServlet(value = "/mobile/*", asyncSupported = true, loadOnStartup=1)
+@WebServlet(urlPatterns = { "/mobile/*"} , asyncSupported = true, loadOnStartup=1)
 @VaadinServletConfiguration(productionMode = false, ui = MmowgliMobileUI.class)
 public class MmowgliMobileVaadinServlet extends TouchKitServlet implements SessionInitListener, SessionDestroyListener
 {
@@ -62,6 +67,15 @@ public class MmowgliMobileVaadinServlet extends TouchKitServlet implements Sessi
   public MmowgliMobileVaadinServlet()
   {
     MSysOut.println(MOBILE_LOGS,"MmowgliMobileVaadinServlet().....");
+  }
+  
+  public static URL getBaseMobileUrl() throws MalformedURLException
+  {
+    WebServlet ann = MmowgliMobileVaadinServlet.class.getAnnotation(WebServlet.class);
+    String s = ann.urlPatterns()[0];
+    if(s.endsWith("*"))
+      s=s.substring(0,s.length()-1);   
+    return new URL(AppMaster.instance().getAppUrlString()+s);
   }
 
   @Override
