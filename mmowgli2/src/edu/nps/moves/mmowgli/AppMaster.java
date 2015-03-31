@@ -24,17 +24,27 @@ package edu.nps.moves.mmowgli;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
+import javax.imageio.ImageIO;
 import javax.net.ssl.*;
 import javax.servlet.ServletContext;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.vaadin.server.*;
 import com.vaadin.shared.Version;
 import com.vaadin.shared.ui.ui.Transport;
@@ -42,12 +52,12 @@ import com.vaadin.shared.ui.ui.Transport;
 import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.components.BadgeManager;
 import edu.nps.moves.mmowgli.components.KeepAliveManager;
-import edu.nps.moves.mmowgli.db.Game;
-import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.export.ReportGenerator;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHib;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
+import edu.nps.moves.mmowgli.imageServer.ImageServlet;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.messaging.InterTomcatIO;
@@ -58,6 +68,7 @@ import edu.nps.moves.mmowgli.modules.scoring.ScoreManager2;
 import edu.nps.moves.mmowgli.utility.MailManager;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import edu.nps.moves.mmowgliMobile.MmowgliMobileVaadinServlet;
 
 /**
  * AppMaster.java Created on Jan 22, 2014
@@ -716,6 +727,49 @@ public class AppMaster
     return userImagesFileSystemPath;
   }
 
+  @SuppressWarnings("unchecked")
+  public String getMobileQRUrlStringTL()
+  {
+    String rets = "errorInAppMaster.getMobileQRUrlStringTL()"; // error default
+
+    try {
+      rets = ImageServlet.getBaseImageUrl().toURI().toString() + MOBILE_QR_IMAGE_NAME;
+
+      List<Media> lis = HSess.get().createCriteria(Media.class).add(Restrictions.eq("url", MOBILE_QR_IMAGE_NAME)).list();
+      if (lis == null || lis.size() <= 0)
+        createQrImageTL();
+    }
+    catch (Exception ex) {
+      System.err.println("Program error in AppMaster.getMobileQRUrlStringTL(): " + ex.getClass().getSimpleName() + "/ " + ex.getLocalizedMessage());
+    }
+    return rets;
+  }
+  
+  private void createQrImageTL() throws WriterException, IOException
+  {
+    Image imgObj = new Image(MOBILE_QR_IMAGE_NAME, MOBILE_QR_IMAGE_MIMETYPE);
+
+    QRCodeWriter writer = new QRCodeWriter();
+    HashMap<EncodeHintType, Object> hints = new HashMap<>();
+    hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+    hints.put(EncodeHintType.MARGIN, 4);
+
+    String url = MmowgliMobileVaadinServlet.getBaseMobileUrl().toExternalForm();
+    BitMatrix bm = writer.encode(url, BarcodeFormat.QR_CODE, 550, 550, hints);
+    BufferedImage bi = MatrixToImageWriter.toBufferedImage(bm);
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ImageIO.write(bi, MOBILE_QR_IMAGE_FILETYPE, baos);
+    baos.flush();
+    imgObj.setBytes(baos.toByteArray());
+    Image.saveTL(imgObj);
+    Media media = new Media();
+    media.setDescription(imgObj.getName() + " in db");
+    // media.setHandle("300x300");
+    media.setSource(Media.Source.DATABASE);
+    media.setUrl(imgObj.getName());
+    Media.saveTL(media);
+  }
+  
   /**
    * Called from the servlet listener, which keeps track of our myInstance count
    * 
