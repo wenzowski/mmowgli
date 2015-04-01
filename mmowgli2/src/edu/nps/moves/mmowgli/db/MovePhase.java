@@ -974,6 +974,8 @@ public class MovePhase implements Serializable
     return Move.getCurrentMove(sess).getCurrentMovePhase();
   }
   
+  // no longer used
+  @Deprecated
   public static boolean isGuestAndIsPreparePhaseTL(User me)
   {
     if(!me.isViewOnly())
