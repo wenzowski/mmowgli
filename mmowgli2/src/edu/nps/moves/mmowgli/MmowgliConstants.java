@@ -119,26 +119,27 @@ public class MmowgliConstants
   // Logging
   //@formatter:off
   public static final int ALL_LOGS = -1;
-  public static final int MESSAGING_LOGS             = 0x1;
-  public static final int DB_LISTENER_LOGS           = 0x2;
-  public static final int MCACHE_LOGS                = 0x4;
-  public static final int TICK_LOGS                  = 0x8;
-  public static final int USER_UPDATE_LOGS          = 0x10;
-  public static final int CARD_UPDATE_LOGS          = 0x20;
-  public static final int PUSH_LOGS                 = 0x40;
-  public static final int BROADCASTER_LOGS          = 0x80;
-  public static final int HIBERNATE_LOGS           = 0x100;
-  public static final int BADGEMANAGER_LOGS        = 0x200;
-  public static final int SYSTEM_LOGS              = 0x400;
-  public static final int SCOREMANAGER_LOGS        = 0x800;
-  public static final int ACTIONPLAN_UPDATE_LOGS  = 0x1000;
-  public static final int REPORT_LOGS             = 0x2000;
-  public static final int JMS_LOGS                = 0x4000;
-  public static final int ERROR_LOGS              = 0x8000;
-  public static final int MISC_LOGS              = 0x10000;
-  public static final int MAIL_LOGS              = 0x20000;
-  public static final int MOBILE_LOGS            = 0x40000;
-  public static final int HIBERNATE_SESSION_LOGS = 0x80000;
+  public static final int MESSAGING_LOGS              = 0x1;
+  public static final int DB_LISTENER_LOGS            = 0x2;
+  public static final int MCACHE_LOGS                 = 0x4;
+  public static final int TICK_LOGS                   = 0x8;
+  public static final int USER_UPDATE_LOGS           = 0x10;
+  public static final int CARD_UPDATE_LOGS           = 0x20;
+  public static final int PUSH_LOGS                  = 0x40;
+  public static final int BROADCASTER_LOGS           = 0x80;
+  public static final int HIBERNATE_LOGS            = 0x100;
+  public static final int BADGEMANAGER_LOGS         = 0x200;
+  public static final int SYSTEM_LOGS               = 0x400;
+  public static final int SCOREMANAGER_LOGS         = 0x800;
+  public static final int ACTIONPLAN_UPDATE_LOGS   = 0x1000;
+  public static final int REPORT_LOGS              = 0x2000;
+  public static final int JMS_LOGS                 = 0x4000;
+  public static final int ERROR_LOGS               = 0x8000;
+  public static final int MISC_LOGS               = 0x10000;
+  public static final int MAIL_LOGS               = 0x20000;
+  public static final int MOBILE_LOGS             = 0x40000;
+  public static final int HIBERNATE_SESSION_LOGS  = 0x80000;
+  public static final int NEWUSER_CREATION_LOGS  = 0x100000;
   //@formatter:on
   
   public static HashMap<Integer,String> logTokens = new HashMap<Integer,String>();
@@ -163,6 +164,7 @@ public class MmowgliConstants
     logTokens.put(MAIL_LOGS, "MAI");
     logTokens.put(MOBILE_LOGS,  "MOB");
     logTokens.put(HIBERNATE_SESSION_LOGS, "SES");
+    logTokens.put(NEWUSER_CREATION_LOGS, "NEW");
   }
   // web.xml param names
 //@formatter:off
