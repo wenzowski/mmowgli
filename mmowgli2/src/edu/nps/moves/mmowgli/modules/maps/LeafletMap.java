@@ -22,20 +22,32 @@
 
 package edu.nps.moves.mmowgli.modules.maps;
 
-import org.vaadin.addon.leaflet.LMap;
-import org.vaadin.addon.leaflet.control.LScale;
+import java.util.*;
 
+import org.vaadin.addon.leaflet.*;
+import org.vaadin.addon.leaflet.control.LLayers;
+import org.vaadin.addon.leaflet.shared.Point;
+import org.vaadin.hene.popupbutton.PopupButton;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.server.Extension;
+import com.vaadin.ui.*;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 
+import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
+import edu.nps.moves.mmowgli.modules.maps.LeafletLayers.MLTileLayer;
+import edu.nps.moves.mmowgli.modules.maps.LeafletLayers.MLWmsLayer;
+import edu.nps.moves.mmowgli.modules.maps.LeafletLayers.MLayer;
 
 /**
  * LeafletMap.java
@@ -54,10 +66,17 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
   private static final long serialVersionUID = 6277983933298162890L;
   private String title;
   private LMap map= new LMap();
-
+  HashMap<String,MLayer> layerMap;
+  private PopupButton baseLayerPopup;
+  private OptionGroup baseOptGr;
+  private PopupButton overlayPopup;
+  private OptionGroup overlayOpt;
+  
   public static String DEF_TITLE_FIRST_PART = "<b style=\"color:#4F4F4F;font-family:'Arial';font-size:2.0em;line-height:150%;margin-left:20px;\">";
   public static String DEF_TITLE_LAST_PART  = "</b>";
  
+  private boolean imAGuest = false;
+  
   // Find providers at http://leaflet-extras.github.io/leaflet-providers/preview/index.html
   @HibernateSessionThreadLocalConstructor
   public LeafletMap()
@@ -79,52 +98,283 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
   {
     setSpacing(true);
     setSizeUndefined();
-    setWidth("100%");
+    setWidth("950px");
     addStyleName("m-marginleft-20"); 
-    
     Label lab;
-    addComponent(lab=new HtmlLabel(title));
-    lab.setWidth(null);
-    setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
+    
+    HorizontalLayout hLay = new HorizontalLayout();
+    hLay.setMargin(false); hLay.setSpacing(false);hLay.setWidth("100%");
+    NativeButton butt;
+    hLay.addComponent(butt=new NativeButton("go to default game location", new MyDefaultLocationListener()));
+    hLay.setExpandRatio(butt, 0.5f);
+    hLay.setComponentAlignment(butt, Alignment.BOTTOM_LEFT);
 
+    hLay.addComponent(lab=new HtmlLabel(title));
+    lab.setWidth(null);
+    
+    makeLayerPopups();
+    HorizontalLayout popLay = new HorizontalLayout();
+    popLay.setMargin(false); popLay.setSpacing(false); popLay.setWidth("100%");
+    
+    popLay.addComponent(lab = new Label());
+    lab.setWidth("1px");
+    popLay.setExpandRatio(lab, 1.0f);   
+    popLay.addComponent(baseLayerPopup);
+    popLay.addComponent(overlayPopup);
+    
+    hLay.addComponent(popLay);
+    hLay.setComponentAlignment(popLay, Alignment.BOTTOM_RIGHT);
+    hLay.setExpandRatio(popLay, 0.5f);
+    
+    addComponent(hLay);
+
+    User me = Mmowgli2UI.getGlobals().getUserTL();
+    this.imAGuest = me.isViewOnly() || me.isAccountDisabled();
+    
     map.setAttributionPrefix("Powered by Leaflet with v-leaflet");
     map.addStyleName("m-greyborder");
     map.removeAllComponents();
-    map.addControl(new LScale());
-    installAllLayers(map);
-    
-    Game g = Game.getTL();    
-    map.setCenter(g.getMapLatitude(),g.getMapLongitude());
-    map.setZoomLevel(g.getMapZoom());
+   // map.addControl(new LScale());
+    layerMap = installAllLayers(map);
+    if(!imAGuest)
+      activateLayersFromDBTL(me);
+    fillLayerPopupsTL();
+    centerAndZoomTL(me);
+   
+    Collection<Extension> exts = map.getExtensions();
+    LLayers llayers = null;
+    for(Extension ex : exts)
+      if(ex instanceof LLayers) {
+        llayers = (LLayers)ex;
+        break;
+      }
+    if(llayers != null)
+      map.removeExtension(llayers);
     
     addComponent(map);
 
     setExpandRatio(map, 1);
     map.setHeight("600px");
-    map.setWidth("950px");
+    map.setWidth("100%");
+    map.addMoveEndListener(new MyMoveEndListener());
   }
-/*
-  private LeafletProvider installLayer(String key, LMap map)
+  
+  private void makeLayerPopups()
   {
-    try {
-      return LeafletLayers.installProvider(key, map);
+    baseLayerPopup = new PopupButton("Base layer");
+    baseLayerPopup.addStyleName("popupbutton-legacy");
+    overlayPopup = new PopupButton("Overlays");
+    LayerChoiceListener lis = new LayerChoiceListener();
+    
+    initting=true;
+    baseOptGr = new OptionGroup();
+    baseOptGr.addValueChangeListener(lis);
+    baseOptGr.setImmediate(true);
+    baseOptGr.setNullSelectionAllowed(false);
+    baseLayerPopup.setContent(baseOptGr);
+    
+    overlayOpt = new OptionGroup();
+    overlayOpt.addValueChangeListener(lis);
+    overlayOpt.setMultiSelect(true);
+    overlayOpt.setImmediate(true);
+    overlayOpt.setNullSelectionAllowed(true);
+    overlayPopup.setContent(overlayOpt);
+    initting=false;
+  }
+  
+  boolean initting = false;
+  private class LayerChoiceListener implements ValueChangeListener
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public void valueChange(ValueChangeEvent event)
+    {
+      if(!initting) {
+        Object prop = event.getProperty();  // this is the option group
+        if(prop == baseOptGr) {
+          Collection<?> allBaseLayers = baseOptGr.getItemIds();
+          for(Object o : allBaseLayers) {
+            ((AbstractLeafletLayer)o).setActive(false);
+          }
+          AbstractLeafletLayer lay = (AbstractLeafletLayer)event.getProperty().getValue();
+          lay.setActive(true);
+        }
+        else /* if(prop == overlayOpt)*/ {
+         Collection<?> allLayers = overlayOpt.getItemIds();
+         for(Object o : allLayers) {
+           ((AbstractLeafletLayer)o).setActive(false);
+         }
+          Set<?> checked = (Set<?>)event.getProperty().getValue();
+          for(Object o : checked)
+            ((AbstractLeafletLayer)o).setActive(true);
+        }
+        if(!imAGuest)
+          updateDBActiveList();
+      }
     }
-    catch (Exception ex) {
-      System.err.println("Error installing leaflet layer "+key.toString());
-      return null;
-    }   
   }
-*/
-  private void installAllLayers(LMap map)
+  
+  private void updateDBActiveList()
+  {
+    HSess.init();
+    User me = Mmowgli2UI.getGlobals().getUserTL();
+    List<String> lis= me.getActiveMapLayers();
+    lis.clear();
+    for(MLayer lay : layerMap.values()) {
+      if(lay.isActive())
+        lis.add(lay.getHandle());     
+    }
+    User.updateTL(me);
+    HSess.close();
+  }
+  
+  private void fillLayerPopupsTL()
+  {
+    boolean oldinitting = initting;
+    initting = true;
+    
+    Iterator<Component> itr = map.iterator();
+    while (itr.hasNext()) {
+      LTileLayer lay = (LTileLayer) itr.next();
+      boolean baseLayer = false;
+      String handle = "";
+      if (lay instanceof MLTileLayer) {
+        baseLayer = ((MLTileLayer) lay).isBaseLayer();
+        handle = ((MLTileLayer) lay).getHandle();
+      }
+      if (lay instanceof MLWmsLayer) {
+        baseLayer = ((MLWmsLayer) lay).isBaseLayer();
+        handle = ((MLWmsLayer) lay).getHandle();
+      }
+      if (baseLayer) {
+        baseOptGr.addItem(lay);
+        baseOptGr.setItemCaption(lay, handle);
+      }
+      else {
+        overlayOpt.addItem(lay);
+        overlayOpt.setItemCaption(lay, handle);
+      }
+    }
+    if(!imAGuest)
+      setOptionGroupWidgetsFromDBTL();
+    else
+      setOptionGroupWidgetsDefault();
+    initting = oldinitting;
+  }
+  
+  private void setOptionGroupWidgetsDefault()
+  {
+    Collection<MLayer> vals = layerMap.values();
+    ArrayList<MLayer> overlays = new ArrayList<>();
+    
+    for(MLayer lay : vals) {
+      if(lay.isActive()) {
+        if(baseOptGr.containsId(lay))
+          baseOptGr.setValue(lay);
+        else if(overlayOpt.containsId(lay))
+          overlays.add(lay);
+      }
+    }
+    overlayOpt.setValue(overlays);
+  }
+  
+  private void setOptionGroupWidgetsFromDBTL()
+  {
+    User me = Mmowgli2UI.getGlobals().getUserTL();
+    List<String> actives = me.getActiveMapLayers();
+    ArrayList<MLayer> overlays = new ArrayList<>();
+    for(String s : actives) {
+      MLayer lay = layerMap.get(s);
+      if(baseOptGr.containsId(lay))
+        baseOptGr.setValue(lay);
+      else if(overlayOpt.containsId(lay))
+        overlays.add(lay);     
+    }
+    overlayOpt.setValue(overlays);
+  }
+  
+  private void activateLayersFromDBTL(User me)
+  {
+    if(me == null)
+      me = Mmowgli2UI.getGlobals().getUserTL(); 
+
+    List<String> activeLayers = me.getActiveMapLayers();
+    boolean oldinitting = initting;
+    initting = true;
+    for(String key : activeLayers) {
+      MLayer lay = layerMap.get(key);      
+      lay.setActive(true);
+    }
+    initting = oldinitting;
+  }
+  
+  private void centerAndZoomTL(User me)
+  {
+    if(me == null)
+      me = Mmowgli2UI.getGlobals().getUserTL();
+    
+    Float myLat = me.getMapCenterLatitude();
+    Float myLon = me.getMapCenterLongitude();
+    Integer myZoom = me.getMapZoom();
+    if(myLat != null && myLon != null & myZoom != null) {
+      map.setCenter(myLat, myLon);
+      map.setZoomLevel(myZoom);
+    }
+    else {
+      Game g = Game.getTL();
+      map.setCenter(g.getMapLatitude(),g.getMapLongitude());
+      map.setZoomLevel(g.getMapZoom());
+    }
+  }
+
+  @SuppressWarnings("serial")
+  class MyDefaultLocationListener implements ClickListener
+  {
+    @Override
+    public void buttonClick(ClickEvent event)
+    {
+      HSess.init();
+      User me = Mmowgli2UI.getGlobals().getUserTL();
+      me.setMapCenterLatitude(null);
+      me.setMapCenterLongitude(null);
+      me.setMapZoom(null);
+      centerAndZoomTL(me);
+      User.updateTL(me);
+      HSess.close();
+    }
+    
+  }
+  class MyMoveEndListener implements LeafletMoveEndListener
+  {
+    @Override
+    public void onMoveEnd(LeafletMoveEndEvent event)
+    {
+      if(imAGuest)
+        return;
+      HSess.init();
+      User me = Mmowgli2UI.getGlobals().getUserTL();
+      Point center = event.getCenter();
+      me.setMapCenterLatitude(center.getLat().floatValue());
+      me.setMapCenterLongitude(center.getLon().floatValue());
+      me.setMapZoom(event.getZoomLevel());
+      User.updateTL(me);
+      HSess.close();
+    }    
+  }
+
+  private HashMap<String,MLayer> installAllLayers(LMap map)
   {
     try {
-      LeafletLayers.installAllProviders(map);
+      return LeafletLayers.installAllProviders(map);
     }
     catch (Exception ex) {
       ex.printStackTrace();
       System.err.println("Error installing all leaflet layers / "+ex.getLocalizedMessage());
+      return new HashMap<String,MLayer>(); // empty
     }   
   }
+  
   @Override 
   public void enter(ViewChangeEvent event)
   {
