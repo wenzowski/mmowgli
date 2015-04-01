@@ -403,7 +403,7 @@ public class Card implements Serializable
     // since the combination of the 2 would potentially prohibit viewing all cards, only use one at at time.
     // since the guest case is the special and most unfrequent one one, check for it first
     Move thisMove = Move.getCurrentMoveTL();
-    boolean canSeeCurrent = !MovePhase.isGuestAndIsPreparePhaseTL(me);
+    boolean canSeeCurrent = true; // not used anymore !MovePhase.isGuestAndIsPreparePhaseTL(me);
     boolean canSeePast = me.isAdministrator() || Game.getTL().isShowPriorMovesCards();
 
     if (!canSeeCurrent && !canSeePast) {
