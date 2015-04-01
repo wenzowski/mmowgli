@@ -127,6 +127,7 @@ public class AppMaster
     //sysOutLogLevel |= MISC_LOGS;
     //sysOutLogLevel |= MAIL_LOGS;
     //sysOutLogLevel |= MOBILE_LOGS;
+    sysOutLogLevel |= NEWUSER_CREATION_LOGS;
     
     MSysOut.println(SYSTEM_LOGS,"System log level = "+sysOutLogLevel);
   }
