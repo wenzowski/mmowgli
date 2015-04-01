@@ -73,6 +73,11 @@ public class Image implements Serializable
     DB.saveTL(img);
   }
   
+  public static void deleteTL(Image img)
+  {
+    DB.deleteTL(img);
+  }
+
   public static HbnContainer<Image> getContainer()
   {
     return DB.getContainer(Image.class);
