@@ -33,6 +33,9 @@ import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.Affiliation;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+
+import static edu.nps.moves.mmowgli.MmowgliConstants.NEWUSER_CREATION_LOGS;
 
 /**
  * RegistrationPagePopupFirst.java
@@ -140,7 +143,7 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
       localUser.setAffiliation(aflStr);
       User.updateTL(localUser);
       HSess.close();
-      
+      MSysOut.println(NEWUSER_CREATION_LOGS,"Affiliation dialog continue button clicked, user "+localUser.getUserName());
       listener.buttonClick(event); // up the chain
     }
   }

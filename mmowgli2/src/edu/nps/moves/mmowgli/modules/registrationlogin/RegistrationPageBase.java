@@ -378,6 +378,8 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
     }
     Object key = HSess.checkInit();
     if (event.getButton() == imNewButt) {
+      MSysOut.println(NEWUSER_CREATION_LOGS,"\"I'm new to Mmowgli\" clicked");
+
       RegistrationPageAgreementCombo comboPg = new RegistrationPageAgreementCombo(this);
       openPopup(comboPg, comboPg.getUsualWidth());
       HSess.checkClose(key);
@@ -469,8 +471,12 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       closePopup(currentPopup);
       // don't have to do the survey
       boolean rejected = ((RegistrationPageSurvey)currentPopup).getRejected();
-      if(!rejected)
+      if(!rejected) {
+        MSysOut.println(NEWUSER_CREATION_LOGS,"Accept survey clicked");
         okSurvey = true;
+      }
+      else
+        MSysOut.println(NEWUSER_CREATION_LOGS,"Reject survey clicked");
 
       RegistrationPagePopupFirst p1 = new RegistrationPagePopupFirst(this);
       openPopup(p1,p1.getUsualWidth());
@@ -536,6 +542,8 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       UI.getCurrent().setScrollTop(0);
       wereInTL();
       HSess.checkClose(key);
+      
+      MSysOut.println(NEWUSER_CREATION_LOGS,"New user registration successful, user "+user.getUserName());
       return;
     }
    if(currentPopup instanceof LoginPopup) {
@@ -601,6 +609,8 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
 
       GridLayout grid = new GridLayout();
       vLay.addComponent(grid);
+      
+      MSysOut.println(NEWUSER_CREATION_LOGS,"email confirmation dialog displayed, user "+user.getUserName());
 
       final Button contButt = new Button("Am I confirmed yet?",new ClickListener()
       {
@@ -609,10 +619,13 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         public void buttonClick(ClickEvent event)
         {
           HSess.init();
+          MSysOut.println(NEWUSER_CREATION_LOGS,"\"Am I confirmed?\" clicked, user "+user.getUserName());
+
           if(confirmed) {
             closePopup(emailDialog);
             user = User.mergeTL(user); // into this session
             wereInReallyTL();
+            MSysOut.println(NEWUSER_CREATION_LOGS,"\"Am I confirmed?\", positive confirmation, user "+user.getUserName());
           }
           else {
             User locUsr = User.getTL(user.getId());// must get from db, since it's externally updated
@@ -622,6 +635,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
               user = locUsr;
             }
             else {
+              MSysOut.println(NEWUSER_CREATION_LOGS,"\"Am I confirmed?\", negative confirmation, user "+user.getUserName());
               Notification.show("Your email is not yet confirmed");
             }
           }

@@ -375,6 +375,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
     public void buttonClick(ClickEvent event)
     {
       HSess.init();
+      MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog continue clicked");
 
       // Checks:
       // 1. Email address has ampersand
@@ -382,6 +383,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       if(email == null || email.indexOf('@')==-1 || email.indexOf('.') == -1 || email.length()<5) {
         errorOutTL("Invalid email address");
         HSess.close();
+        MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog failed: invalid email address");
         return;
       }
             
@@ -396,6 +398,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
             // here if the existing email does not belong to a GM or GA
             errorOutTL("Email address already used.");
             HSess.close();
+            MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog failed: email already used, user "+uname);
             return;
           }
         }
@@ -406,6 +409,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
         GameEventLogger.logRegistrationAttemptTL(email);     // visited/link stuff doesn't work in notification
         errorOutTL("Email address not found on invitee list (or other reason).  Request an invitation at <a class='m-link-nodifference-white' href='http://mmowgli.nps.edu/trouble'>http://mmowgli.nps.edu/trouble</a>.");
         HSess.close();
+        MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog failed: email not on list, user "+uname);
         return;
       }
 
@@ -414,6 +418,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       if(pw == null || pw.length()<3) {
         errorOutTL("Enter a password of at least 3 characters");
         HSess.close();
+        MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog failed: password < 3 characters, user "+uname);
         return;
       }
       String pwconf = confirmTf.getValue().toString();
@@ -421,6 +426,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       if(!pw.equals(pwconf)) {
         errorOutTL("Passwords do not match.");
         HSess.close();
+        MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog failed: entered passwords do not match, user "+uname);
         return;
       }
 
@@ -429,6 +435,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       if(_usr == null) {
         errorOutTL("Existing user with that name/ID");
         HSess.close();
+        MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog failed: existing user with entered email, user "+uname);
         return;
       }
 
@@ -455,6 +462,8 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
 
       VHibPii.markInGame(localUser);
       HSess.close();
+      
+      MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog SUCCEEDED: new user "+ uname+" in database");
 
       listener.buttonClick(event);
     }

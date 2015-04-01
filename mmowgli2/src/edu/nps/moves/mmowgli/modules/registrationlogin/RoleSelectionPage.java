@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.NEWUSER_CREATION_LOGS;
+
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
@@ -35,6 +37,7 @@ import edu.nps.moves.mmowgli.db.GameQuestion;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * RoleSelectionPage.java Created on Dec 15, 2010
@@ -139,6 +142,7 @@ public class RoleSelectionPage extends MmowgliDialog
     {
       HSess.init();
       localUser = User.mergeTL(localUser);
+      MSysOut.println(NEWUSER_CREATION_LOGS,"Expertise/get-email dialog \"later\" button clicked, user "+localUser.getUserName());
       localUser.setQuestion(ques);  // This is what was asked
       User.updateTL(localUser);
       HSess.close();
@@ -154,6 +158,7 @@ public class RoleSelectionPage extends MmowgliDialog
     {
       HSess.init();
       localUser = User.mergeTL(localUser);
+      MSysOut.println(NEWUSER_CREATION_LOGS,"Expertise/get-email dialog continue button clicked, user "+localUser.getUserName());
 //      user.setRole((Role)rolesCb.getValue());
 //      o = expertiseCb.getValue();
 //      if(o != null)

@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli.modules.registrationlogin;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.NEWUSER_CREATION_LOGS;
+
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
@@ -31,6 +33,7 @@ import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * LoginPopup.java Created on Dec 15, 2010
@@ -97,6 +100,8 @@ public class RegistrationPageSecondPermissionPopup extends MmowgliDialog
     @Override
     public void buttonClick(ClickEvent event)
     {
+      MSysOut.println(NEWUSER_CREATION_LOGS,"Reject 2nd login permission dialog clicked");
+
       rejected = true;
       listener.buttonClick(event);
     }
@@ -108,6 +113,8 @@ public class RegistrationPageSecondPermissionPopup extends MmowgliDialog
     @Override
     public void buttonClick(ClickEvent event)
     {
+      MSysOut.println(NEWUSER_CREATION_LOGS,"Accept/continue 2nd login permission dialog clicked");
+      
       rejected = false;
       listener.buttonClick(event); // back up the chain
     }

@@ -35,6 +35,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+
 /**
  * EmailConfirmationServlet.java Created on Sep 6, 2012
  * 
@@ -83,7 +85,7 @@ public class EmailConfirmationServlet extends HttpServlet
     connection = dbUrl + dbName + "?user=" + dbUser + "&password=" + dbPassword;
 
     MyResponse myresp = null;
-
+    Integer userId = null;
     Object uid = req.getParameter(URI_PARAM);
 
     if (uid == null) {
@@ -105,7 +107,7 @@ public class EmailConfirmationServlet extends HttpServlet
         statement = connect.prepareStatement(query);
 
         resultSet = statement.executeQuery();
-        Integer userId = null;
+
         while (resultSet.next()) {
           userId = resultSet.getInt(USER_ID_COL);
           break;
@@ -164,11 +166,15 @@ public class EmailConfirmationServlet extends HttpServlet
     }
 
     // if error == null, we're good
-    if (error == null)
+    if (error == null) {
       myresp = MyResponse.GOOD;
+      MSysOut.println(NEWUSER_CREATION_LOGS,"Email confirmationServlet positive result, userID: "+userId);
+    }
     else {
-      if (myresp == null)
+      if (myresp == null) {
         myresp = MyResponse.ERROR;
+        MSysOut.println(NEWUSER_CREATION_LOGS,"Email confirmationServlet NEGATIVE result, userID: "+userId);
+      }
     }
 
     doResponse(req, resp, myresp, error, gamename, acronym, PORTALWIKI_URL);
