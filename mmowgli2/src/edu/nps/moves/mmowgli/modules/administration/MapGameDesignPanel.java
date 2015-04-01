@@ -167,7 +167,7 @@ public class MapGameDesignPanel extends AbstractGameBuilderPanel
       }
     });
    Button b;
-   this.addComponentLine(b=new Button("Set Map Default Values",new MapDefaultSetter()));
+   this.addComponentLine(b=new Button("Set to generic Mmowgli Map Defaults",new MapDefaultSetter()));
    b.setEnabled(!globs.readOnlyCheck(false));
   }
   
