@@ -23,6 +23,7 @@
 package edu.nps.moves.mmowgli.utility;
 
 import static edu.nps.moves.mmowgli.MmowgliConstants.ERROR_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.NEWUSER_CREATION_LOGS;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -366,9 +367,11 @@ public class MailManager
       body = Pages.replaceTokens(body, data);
 
       mailer.send(email, from, subj, body, true);
+      MSysOut.println(NEWUSER_CREATION_LOGS,"email confirmation reminder message sent to user "+uname);
     }
     catch (Throwable t) {
       System.err.println("Error sending confirmation reminder email: " + t.getClass().getSimpleName() + ": " + t.getLocalizedMessage());
+      MSysOut.println(NEWUSER_CREATION_LOGS,"email confirmation reminder message sent to user "+uname);
     }
   }
 
@@ -388,8 +391,10 @@ public class MailManager
       String from = buildMmowgliReturnAddressTL();
 
       mailer.send(email, from, subj, body, true);
+      MSysOut.println(NEWUSER_CREATION_LOGS,"email confirmation message sent to user "+uname);
     }
     catch (Throwable t) {
+      MSysOut.println(NEWUSER_CREATION_LOGS,"email confirmation message sending FAILED to user "+uname);
       System.err.println("Error sending confirmation email: " + t.getClass().getSimpleName() + ": " + t.getLocalizedMessage());
     }
   }

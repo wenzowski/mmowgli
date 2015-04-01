@@ -32,6 +32,8 @@ import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.GameLinks;
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.NEWUSER_CREATION_LOGS;
 
 /**
  * LoginPopup.java Created on Dec 15, 2010
@@ -166,6 +168,8 @@ public class RegistrationPageAgreementCombo extends MmowgliDialog
     @Override
     public void buttonClick(ClickEvent event)
     {
+      MSysOut.println(NEWUSER_CREATION_LOGS,"Reject user agreement clicked");
+
       rejected = true;
       listener.buttonClick(event);
     }
@@ -177,6 +181,8 @@ public class RegistrationPageAgreementCombo extends MmowgliDialog
     @Override
     public void buttonClick(ClickEvent event)
     {
+      MSysOut.println(NEWUSER_CREATION_LOGS,"Accept user agreement clicked");
+
       rejected = false;
       listener.buttonClick(event); // back up the chain
     }
