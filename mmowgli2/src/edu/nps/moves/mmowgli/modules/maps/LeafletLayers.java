@@ -177,19 +177,94 @@ public class LeafletLayers
     return Double.parseDouble(d);
   }
   
+  public static interface MLayer
+  {
+    public boolean isActive();
+    public void setActive(boolean b);
+    public boolean isBaseLayer();
+    public void setBaseLayer(boolean b);
+    public String getHandle();
+  }
+  
+  public static class MLTileLayer extends LTileLayer implements MLayer
+  {
+    private static final long serialVersionUID = 1L;
+    private boolean baseLayer;
+    private String handle;
+    MLTileLayer(String link, String handle)
+    {
+      super(link);
+      this.handle = handle;
+    }
+    public boolean isActive()
+    {
+      return getState().active;
+    }
+    public boolean isBaseLayer()
+    {
+      return baseLayer;
+    }
+    public void setBaseLayer(boolean b)
+    {
+      baseLayer = b;
+    }
+    public String getHandle()
+    {
+      return handle;
+    }
+    public void setActive(boolean b)
+    {
+      super.setActive(b);
+    }
+  }
+  
+  public static class MLWmsLayer extends LWmsLayer implements MLayer
+  {
+    private static final long serialVersionUID = 1L;
+    private boolean baseLayer;
+    private String handle;
+    MLWmsLayer(String handle)
+    {
+      super();
+      this.handle = handle;
+    }
+    public boolean isActive()
+    {
+      return getState().active;
+    }
+    public boolean isBaseLayer()
+    {
+      return baseLayer;
+    }
+    public void setBaseLayer(boolean b)
+    {
+      baseLayer = b;
+    }
+    public String getHandle()
+    {
+      return handle;
+    }
+    public void setActive(boolean b)
+    {
+      super.setActive(b);
+    }
+  }
+
   public static LTileLayer installProvider(String key, LMap map) throws Exception
   {
     LeafletProvider prov = providers.get(key);
     if (prov == null)
       throw new Exception("Unrecognized provider key");
-    
     LTileLayer tileLayer;
     if(prov.wms) {
-      tileLayer = new LWmsLayer();
+      tileLayer = new MLWmsLayer(key);
       tileLayer.setUrl(prov.link);
+      ((MLWmsLayer)tileLayer).setBaseLayer(prov.baseLayer);
     }
-    else
-      tileLayer = new LTileLayer(prov.link);
+    else {
+      tileLayer = new MLTileLayer(prov.link,key);
+      ((MLTileLayer)tileLayer).setBaseLayer(prov.baseLayer);
+    }
     
     if(prov.attribution != null && prov.attribution.length()>0)
       tileLayer.setAttributionString(prov.attribution);
@@ -217,15 +292,21 @@ public class LeafletLayers
       map.addOverlay(tileLayer, prov.prettyName);
       tileLayer.bringToFront();  // overlays must be above base
     }
+
     return tileLayer;
   }
   
-  public static void installAllProviders(LMap map) throws Exception
+  public static HashMap<String,MLayer> installAllProviders(LMap map) throws Exception
   {
+    HashMap<String,MLayer> retArr = new HashMap<>();
+    
     List<String> lis = new ArrayList<String>(providers.keySet());
     Collections.sort(lis);
-    
-    for(String key : lis)
-      installProvider(key,map);
+
+    for(String key : lis) {
+      LTileLayer tileLayer = installProvider(key,map);
+      retArr.put(key, (MLayer)tileLayer);
+    }
+    return retArr;
   }
 }
