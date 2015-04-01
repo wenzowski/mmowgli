@@ -731,13 +731,21 @@ public class AppMaster
   public String getMobileQRUrlStringTL()
   {
     String rets = "errorInAppMaster.getMobileQRUrlStringTL()"; // error default
-
     try {
       rets = ImageServlet.getBaseImageUrl().toURI().toString() + MOBILE_QR_IMAGE_NAME;
 
-      List<Media> lis = HSess.get().createCriteria(Media.class).add(Restrictions.eq("url", MOBILE_QR_IMAGE_NAME)).list();
-      if (lis == null || lis.size() <= 0)
+      List<Image> iLis = HSess.get().createCriteria(Image.class).add(Restrictions.eq("name", MOBILE_QR_IMAGE_NAME)).list();
+      if(iLis == null || iLis.size() <= 0) {
         createQrImageTL();
+      }
+      else {
+        Image img = iLis.get(0);
+        if(! img.getDescription().equals(MmowgliMobileVaadinServlet.getBaseMobileUrl().toExternalForm())) {
+          // deployment url has changed
+          Image.deleteTL(img);
+          createQrImageTL();
+        }
+      }
     }
     catch (Exception ex) {
       System.err.println("Program error in AppMaster.getMobileQRUrlStringTL(): " + ex.getClass().getSimpleName() + "/ " + ex.getLocalizedMessage());
@@ -761,6 +769,7 @@ public class AppMaster
     ImageIO.write(bi, MOBILE_QR_IMAGE_FILETYPE, baos);
     baos.flush();
     imgObj.setBytes(baos.toByteArray());
+    imgObj.setDescription(url);
     Image.saveTL(imgObj);
     Media media = new Media();
     media.setDescription(imgObj.getName() + " in db");
