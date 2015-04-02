@@ -22,6 +22,7 @@
 
 package edu.nps.moves.mmowgli;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.DEBUG_LOGS;
 import static edu.nps.moves.mmowgli.MmowgliConstants.SYSTEM_LOGS;
 
 import java.io.Serializable;
@@ -31,6 +32,7 @@ import java.util.*;
 import org.hibernate.Session;
 
 import com.vaadin.server.SessionInitEvent;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.ui.UI;
 
@@ -197,7 +199,8 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   
   public void setUserIDTL(Object userId)
   {
-    this.userId = (Serializable)userId;      
+    this.userId = (Serializable)userId; 
+    MSysOut.println(DEBUG_LOGS,"User.getTL() in MmowgliSessionGlobals.setUserIDTL()");
     User me = User.getTL(userId);
     gameAdministrator = me.isAdministrator();
     gameMaster = me.isGameMaster();
@@ -212,6 +215,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   
   public User getUserTL()
   {
+    MSysOut.println(DEBUG_LOGS,"User.getTL() in MmowgliSessionGlobals.getUserTL()");
     return User.getTL(getUserID());
   }
   
@@ -384,16 +388,24 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
   {
     Mmowgli2UI.getAppUI().setWindowTitle(HSess.get());
 
-    Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
-    for(UI ui : uis) {
-      if(ui instanceof Mmowgli2UI) {
-        AppMenuBar menubar = ((Mmowgli2UI)ui).getMenuBar();
-        if (menubar != null) { // can be at start
-          menubar.gameUpdatedExternallyTL(null);
+    // Got a null ptr exception here once, so do some checking
+    // Collection<UI> uis = Mmowgli2UI.getAppUI().getSession().getUIs();
+    
+    Mmowgli2UI mui = Mmowgli2UI.getAppUI();
+    if (mui != null) {
+      VaadinSession sess = mui.getSession();
+      if (sess != null) {
+        Collection<UI> uis = sess.getUIs();
+        for (UI ui : uis) {
+          if (ui instanceof Mmowgli2UI) {
+            AppMenuBar menubar = ((Mmowgli2UI) ui).getMenuBar();
+            if (menubar != null) { // can be at start
+              menubar.gameUpdatedExternallyTL(null);
+            }
+          }
         }
       }
     }
-
     setGameBooleans(Game.getTL());
     return true;
   }
