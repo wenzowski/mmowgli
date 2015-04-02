@@ -628,6 +628,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
             MSysOut.println(NEWUSER_CREATION_LOGS,"\"Am I confirmed?\", positive confirmation, user "+user.getUserName());
           }
           else {
+            MSysOut.println(DEBUG_LOGS,"User.getTL() in RegistrationPageBase.wereInTL()");
             User locUsr = User.getTL(user.getId());// must get from db, since it's externally updated
             if(locUsr.isEmailConfirmed()) {
               confirmed=true;
@@ -712,14 +713,15 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       
       MSysOut.println(SYSTEM_LOGS,"Vaadin heartbeat interval (sec): "+vsess.getConfiguration().getHeartbeatInterval());
       MSysOut.println(SYSTEM_LOGS,"Tomcat timeout (\"maxInactiveInterval\") (sec): "+sess.getMaxInactiveInterval());
+      GameEventLogger.logUserLoginTL(user);
 
+      HSess.closeAndReopen();
       MmowgliController cntlr = globs.getController();
       if (cntlr != null)
         cntlr.handleEventTL(MmowgliEvent.HANDLE_LOGIN_STARTUP, user.getId(), null);
       else
         System.err.println("No controller in RegistrationPageBase.wereIn()");
 
-      GameEventLogger.logUserLoginTL(user);
       AppMaster.instance().sendMySessionReport();
     }
   }
@@ -746,6 +748,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
   {
     Serializable uid = Mmowgli2UI.getGlobals().getUserID();
     if(uid != NO_LOGGEDIN_USER_ID) {  // can't do this check if we don't have a user yet
+      MSysOut.println(DEBUG_LOGS,"User.getTL() in RegistrationPageBase.checkUserLimitsTL()");
       User u = User.getTL(uid);
       if(u != null) // why should it be?
         if(u.getUserName() != null) // why should it be?
