@@ -22,6 +22,7 @@
 
 package edu.nps.moves.mmowgli.modules.userprofile;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.DEBUG_LOGS;
 import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
 import static edu.nps.moves.mmowgli.db.Badge.BADGE_AP_AUTHOR;
 import static edu.nps.moves.mmowgli.db.Badge.BADGE_EIGHT_ID;
@@ -57,6 +58,7 @@ import edu.nps.moves.mmowgli.modules.gamemaster.CreateActionPlanPanel;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 /**
  * UserProfile3Top.java
  * Created on Oct 7, 2011
@@ -784,6 +786,8 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
 
     ClickListener lis = new BadgeListener();
     Game g = Game.get(sess);
+    
+    MSysOut.println(DEBUG_LOGS, "User.get(sess) from UserProfile3Top.displayBadgesAndAwards(sess)");
     User u = User.get(uid, sess);
     Set<Badge> badges = u.getBadges();
 
