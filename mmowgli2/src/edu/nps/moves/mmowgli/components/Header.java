@@ -55,6 +55,7 @@ import edu.nps.moves.mmowgli.messaging.WantsGameUpdates;
 import edu.nps.moves.mmowgli.messaging.WantsMoveUpdates;
 import edu.nps.moves.mmowgli.utility.IDNativeButton;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * Header.java Created on Feb 5, 2011
@@ -404,6 +405,7 @@ public class Header extends AbsoluteLayout implements MmowgliComponent, WantsGam
     if(!uid.equals(Mmowgli2UI.getGlobals().getUserID()))
        return false;
     
+    MSysOut.println(DEBUG_LOGS, "User.get(sess) Header.refreshUser(sess)");    
     User u = User.get(uid, sess);
     userNameButt.setCaption(u.getUserName());
     userNameButt.setParam(uid);
