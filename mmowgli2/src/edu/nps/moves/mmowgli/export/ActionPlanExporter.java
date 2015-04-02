@@ -134,6 +134,7 @@ public class ActionPlanExporter extends BaseExporter
       Game g = (Game) sess.get(Game.class, 1L);
       String s = g.getTitle();
       addElementWithText(root, "GameTitle", s.replace(' ','_'));  // better file name handling
+      addElementWithText(root, "GameAcronym", g.getAcronym());
       addElementWithText(root, "GameSecurity", g.isShowFouo()?"FOUO":"open");
       addElementWithText(root, "GameSummary", metaString);
       newAddCall2Action(root, sess, g);
