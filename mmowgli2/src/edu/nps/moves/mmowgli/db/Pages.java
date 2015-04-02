@@ -35,6 +35,8 @@ import org.hibernate.Session;
 import edu.nps.moves.mmowgli.*;
 import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 @Entity
 public class Pages implements Serializable
@@ -290,16 +292,27 @@ public class Pages implements Serializable
     
     public PagesData()
     {
-      this(HSess.get());
+      this((User)null);
+    }
+    
+    public PagesData(User u)
+    {
+      this(u,HSess.get());
     }
 
-    public PagesData(Session sess)
+    public PagesData(User u, Session sess)
     {
       map = new HashMap<String,String> (15);
       MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
       map.put(gmurlT, AppMaster.instance().getAppUrlString());//.toExternalForm());
-      Serializable uid = globs.getUserID();
-      map.put(unameT, (uid==null?"null":User.get(uid, sess).getUserName()));
+      if(u == null) {
+        Serializable uid = globs.getUserID();
+        if(uid != null) {
+          MSysOut.println(DEBUG_LOGS, "User.get(sess) from Pages.PagesData()");
+          u = User.get(uid, sess);
+        }
+      }
+      map.put(unameT, (u==null?"null":u.getUserName()));
       map.put(dtimeT, new SimpleDateFormat("MM/dd HH:mm z").format(new Date()));
       map.put(portlT, MmowgliConstants.PORTALWIKI_URL);      
      
