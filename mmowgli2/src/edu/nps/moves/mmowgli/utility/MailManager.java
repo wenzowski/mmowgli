@@ -22,8 +22,7 @@
 
 package edu.nps.moves.mmowgli.utility;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.ERROR_LOGS;
-import static edu.nps.moves.mmowgli.MmowgliConstants.NEWUSER_CREATION_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -154,6 +153,8 @@ public class MailManager
 
   public void mailToUserTL(Object from, Object to, String subject, String body, String ccEmail, Channel chan)
   {
+    MSysOut.println(DEBUG_LOGS,"2 User.getTL() in MailManager.mailToUserTL()");
+
     User uFrom = User.getTL(from);
     User uTo = User.getTL(to);
     String fromUser = uFrom.getUserName();
