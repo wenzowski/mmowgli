@@ -381,6 +381,7 @@ public class AbstractMmowgliControllerHelper2
     sb.append("<br/>");
     sb.append(content);
     // filterContent(sb);
+    sb.append("<br/><span style='font-size:x-small'>Click to close.</span>");
     Notification notif = new Notification(title, sb.toString(), Notification.Type.ERROR_MESSAGE);
     notif.setHtmlContentAllowed(true);
     notif.setPosition(Position.MIDDLE_CENTER);
