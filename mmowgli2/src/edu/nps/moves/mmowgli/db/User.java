@@ -177,31 +177,36 @@ public class User implements Serializable
   public static void updateTL(User u)
   {
     u.incrementRevision();
-    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.updateTL() id/newrev="+u.getId()+"/"+u.getRevision());
     DB.updateTL(u);
+    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.updateTL() id/newrev="+u.getId()+"/"+u.getRevision());
   }
   
   public static User merge(User u, Session sess)
   {
-    return DB.merge(u,sess);
+    User usr = DB.merge(u, sess);
+    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.merge() id="+usr.getId()+" revis="+usr.getRevision());
+    return usr;
   }
   
   public static User mergeTL(User u)
   {
-    return DB.mergeTL(u);
+    User usr = DB.mergeTL(u);
+    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.mergeTL() id="+usr.getId()+" revis="+usr.getRevision());
+    return usr;
   }
 
   public static User get(Object id, Session sess)
   {
-    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.get() id="+id);
-    
-    return DB.get(User.class, id, sess);
+    User u = DB.get(User.class, id, sess);
+    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.get() id="+id+" revis="+u.getRevision());
+    return u;
   }
   
   public static User getTL(Object id)
   {
-    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.getTL() id="+id);
-    return DB.getTL(User.class, id);
+    User u = DB.getTL(User.class, id);
+    MSysOut.println(HIBERNATE_SESSION_LOGS,"User.getTL() id="+id+" revis="+u.getRevision());
+    return u;
   }
 
   public static void saveTL(User u)
