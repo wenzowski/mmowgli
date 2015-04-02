@@ -139,6 +139,7 @@ public class EventMonitorPanel extends VerticalLayout implements MmowgliComponen
         GameEventLogger.logGameMasterBroadcastTL(GameEvent.EventType.MESSAGEBROADCASTGM, msg, u);
         HSess.close();
       }
+      messageTA.selectAll();
     }    
   }
   
