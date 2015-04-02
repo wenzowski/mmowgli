@@ -4,6 +4,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="GameTitle"/>
+        <xs:element ref="GameAcronym"/>
         <xs:element ref="GameSecurity"/>
         <xs:element ref="GameSummary"/>
         <xs:element ref="CallToAction"/> 
@@ -17,6 +18,7 @@
   </xs:element>
   
   <xs:element name="GameTitle" type="xs:string"/>
+  <xs:element name="GameAcronym" type="xs:string"/>
   <xs:element name="GameSecurity" type="xs:string"/>
   <xs:element name="GameSummary" type="xs:string"/>
   

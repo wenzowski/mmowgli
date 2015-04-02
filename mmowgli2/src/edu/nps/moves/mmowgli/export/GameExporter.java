@@ -138,6 +138,8 @@ public class GameExporter extends BaseExporter
       root.setAttribute("description", metaString);
       
       Game g = Game.getTL();
+      root.setAttribute("acronym", g.getAcronym());
+      
       Session sess = HSess.get();
       addMetaData(root,sess,g);
       addHeaderFooter(root,sess,g);
