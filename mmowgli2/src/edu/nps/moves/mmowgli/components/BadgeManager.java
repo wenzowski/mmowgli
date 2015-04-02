@@ -359,6 +359,7 @@ public class BadgeManager implements Runnable
     Session sess = HSess.get();
     for(Card crd : roots) {
       User author = crd.getAuthor();
+      MSysOut.println(DEBUG_LOGS, "User.get(sess) from BadgeManager.checkBadgeThreeTL()");
       author = User.get(author.getId(), sess);  // Hb class not current in this sess
       if(!hasBadge(author,BADGE_THREE_ID)) {
         Badge third = (Badge)sess.get(Badge.class, BADGE_THREE_ID);
