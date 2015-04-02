@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli.db.pii;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.DEBUG_LOGS;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,7 @@ import org.hibernate.search.annotations.*;
 import org.jasypt.hibernate4.type.EncryptedStringType;
 
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /** Used for jasypt encryption of fields */
 
@@ -105,6 +108,7 @@ public class UserPii implements Serializable
       for(EmailPii epii : elis) {
         String s = epii.getAddress().trim();
         if(s.equalsIgnoreCase(email)) {
+          MSysOut.println(DEBUG_LOGS,"User.getTL() in UserPii.getUserFromEmailTL()");
           aLis.add( User.getTL(upii.getUserObjectId()));
         }          
       }
