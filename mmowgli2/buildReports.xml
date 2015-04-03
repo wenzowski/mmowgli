@@ -648,7 +648,7 @@
 
     <target name="get.reports.dd.check">
         <property name="gameName"  value="dd"/>
-        <property name="gameTitle" value="dd"/>
+        <property name="gameTitle"  value="dd"/>
         <condition property="found.dd" else="false">
             <available file="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml"/>
         </condition>
@@ -657,7 +657,7 @@
 
     <target name="build.reports.dd"> <!--  depends="build.reports.dd.IdeaCards,build.reports.dd.ActionPlans,build.reports.dd.GameDesign" -->
         <property name="gameName"  value="dd"/>
-        <property name="gameTitle" value="dd"/>
+        <property name="gameTitle"  value="dd"/>
         <saxon9.XML inputXML="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml"
                   outputFile="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.html"
                   stylesheet="${stylesheets.dir}/CardTree.xsl"
@@ -683,7 +683,7 @@
 
     <target name="view.reports.dd" description="view dd idea cards in web browser (via Netbeans only)">
         <property name="gameName"  value="dd"/>
-        <property name="gameTitle" value="dd"/>
+        <property name="gameTitle"  value="dd"/>
         <nbbrowse file="${reports.dir}/${gameName}/ReportsIndex_${gameTitle}MmowgliGame.html" />
         <nbbrowse file="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.html" />
         <nbbrowse file="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.html" />
@@ -748,6 +748,69 @@
     <target name="view.reports.em2" description="view em2 idea cards in web browser (via Netbeans only)">
         <property name="gameName"  value="em2"/>
         <property name="gameTitle" value="em2"/>
+        <nbbrowse file="${reports.dir}/${gameName}/ReportsIndex_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/PlayerProfiles_${gameTitle}MmowgliGame.html" />
+        <nbbrowse file="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.html" />
+        <!-- TODO implementation-independent approach if possible.  other Ant approaches have to be customized for each OS -->
+    </target>
+
+    <!-- ========== ndu ======================================================================== -->
+
+    <target name="all.reports.ndu" depends="clean.reports.ndu,get.reports.ndu,build.reports.ndu,view.reports.ndu">
+        <echo message="all.reports.ndu complete"/>
+    </target>
+
+    <target name="clean.reports.ndu">
+        <property name="gameName"  value="ndu"/>
+        <delete dir="${reports.dir}/${gameName}" verbose="true"/>
+        <echo message="clean.reports.ndu complete"/>
+    </target>
+
+    <target name="get.reports.ndu" description="get XML files from ndu MMOWGLI game reports if not already available" depends="get.reports.ndu.check"> <!--  unless="found.ndu" -->
+        <getGameReportXmlFiles gameName="ndu" gameTitle="ndu"/>
+        <echo message="get.reports.ndu complete"/>
+    </target>
+
+    <target name="get.reports.ndu.check">
+        <property name="gameName"  value="ndu"/>
+        <property name="gameTitle" value="ndu"/>
+        <condition property="found.ndu" else="false">
+            <available file="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml"/>
+        </condition>
+        <echo message="found ${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml: ${found.ndu}"/>
+    </target>
+
+    <target name="build.reports.ndu"> <!--  depends="build.reports.ndu.IdeaCards,build.reports.ndu.ActionPlans,build.reports.ndu.GameDesign" -->
+        <property name="gameName"  value="ndu"/>
+        <property name="gameTitle" value="ndu"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/CardTree.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/ActionPlanList.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/GameDesign.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/GameDesign_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/ReportsIndex_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/ReportsIndex.xsl"
+                     verbose="true"/>
+        <saxon9.XML inputXML="${reports.dir}/${gameName}/PlayerProfiles_${gameTitle}MmowgliGame.xml"
+                  outputFile="${reports.dir}/${gameName}/PlayerProfiles_${gameTitle}MmowgliGame.html"
+                  stylesheet="${stylesheets.dir}/PlayerProfiles.xsl"
+                     verbose="true"/>
+        <echo message="build.reports.ndu complete"/>
+    </target>
+
+    <target name="view.reports.ndu" description="view ndu idea cards in web browser (via Netbeans only)">
+        <property name="gameName"  value="ndu"/>
+        <property name="gameTitle" value="ndu"/>
         <nbbrowse file="${reports.dir}/${gameName}/ReportsIndex_${gameTitle}MmowgliGame.html" />
         <nbbrowse file="${reports.dir}/${gameName}/IdeaCardChain_${gameTitle}MmowgliGame.html" />
         <nbbrowse file="${reports.dir}/${gameName}/ActionPlanList_${gameTitle}MmowgliGame.html" />
