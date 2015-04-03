@@ -44,7 +44,7 @@
             <xsl:when test="contains($gameTitle,'bii') or contains($gameTitle,'Bii')">
                 <xsl:text>Business Innovation Initiative (bii)</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'em2') or contains($gameTitle,'em') or contains($gameTitle,'Em2') or contains($gameTitle,'Em')">
+            <xsl:when test="contains($gameTitle,'em2') or contains($gameTitle,'Em2')">
                 <xsl:text>EM Maneuver (em2)</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'vtp')"> <!-- evtp -->
@@ -82,6 +82,15 @@
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                 <xsl:text>Unmanned Vehicle Digital Manufacturing (uxvdm)</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'dd') or contains($gameTitle,'Dilemma')">
+                <xsl:text>Data Dilemma</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'ndu')">
+                <xsl:text>National Defense University (NDU)</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'pcc')">
+                <xsl:text>Professional Core Competencies (pcc)</xsl:text>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of disable-output-escaping="yes" select="//GameTitle"/>
