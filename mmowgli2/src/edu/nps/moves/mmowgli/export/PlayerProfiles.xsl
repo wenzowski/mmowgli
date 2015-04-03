@@ -105,6 +105,15 @@
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                 <xsl:text>Unmanned Vehicle Digital Manufacturing (uxvdm)</xsl:text>
             </xsl:when>
+            <xsl:when test="contains($gameTitle,'dd') or contains($gameTitle,'Dilemma')">
+                <xsl:text>Data Dilemma</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'ndu')">
+                <xsl:text>National Defense University (NDU)</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'pcc')">
+                <xsl:text>Professional Core Competencies (pcc)</xsl:text>
+            </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of disable-output-escaping="yes" select="//GameTitle"/>
             </xsl:otherwise>
@@ -131,7 +140,7 @@
             <xsl:when test="contains($gameTitle,'bii') or contains($gameTitle,'Bii')">
                 <xsl:text>bii</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'em2') or contains($gameTitle,'em') or contains($gameTitle,'Em2') or contains($gameTitle,'Em')">
+            <xsl:when test="contains($gameTitle,'em2') or contains($gameTitle,'Em2')">
                 <xsl:text>em2</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'vtp')"> <!-- evtp -->
@@ -159,10 +168,13 @@
                 <xsl:text>blackswan</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'dd') or contains(lower-case($gameTitle),'DD')">
-                <xsl:text>https://portal.mmowgli.nps.edu/dd</xsl:text>
+                <xsl:text>dd</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'pcc') or contains(lower-case($gameTitle),'PCC')">
-                <xsl:text>https://portal.mmowgli.nps.edu/pcc</xsl:text>
+                <xsl:text>pcc</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains($gameTitle,'ndu') or contains(lower-case($gameTitle),'NDU')">
+                <xsl:text>ndu</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
                 <xsl:text>uxvdm</xsl:text>
@@ -412,7 +424,7 @@ text-shadow:; /* off */
                         <xsl:when test="contains($gameTitle,'darkportal') or contains($gameTitle,'darkportal')">
                             <xsl:text>https://portal.mmowgli.nps.edu/darkportal</xsl:text>
                         </xsl:when>
-                        <xsl:when test="contains($gameTitle,'em2') or contains($gameTitle,'em')">
+                        <xsl:when test="contains($gameTitle,'em2') or contains($gameTitle,'EM2')">
                             <xsl:text>https://portal.mmowgli.nps.edu/em2</xsl:text>
                         </xsl:when>
                         <xsl:when test="contains($gameTitle,'vtp')"> <!-- evtp -->
