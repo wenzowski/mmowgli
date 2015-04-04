@@ -560,6 +560,15 @@ td.longtext {
                 <h2>
                     <a name="DatabaseExports">Database Exports</a>
                 </h2>
+                
+                <p>
+                    <a href="data/" title="Database tables as XML data" target="_blank">
+                        <!-- open-source license, https://www.iconfinder.com/icons/315116/file_xml_icon#size=128 -->
+                        <img src="images/1428177355_699265-icon-37-file-xml-94.png" width="24" height="24" align="left"/>
+                    </a>
+                    <xsl:text> XML data files for this game are converted into web pages using
+                        XSLT stylesheets. </xsl:text>
+                </p>
 
                 <ul>
                     <li>
