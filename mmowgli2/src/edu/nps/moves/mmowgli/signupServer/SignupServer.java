@@ -22,13 +22,20 @@
 
 package edu.nps.moves.mmowgli.signupServer;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import javax.servlet.annotation.WebServlet;
 
+import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Widgetset;
+import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.shared.Position;
+import com.vaadin.shared.communication.PushMode;
+import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -51,6 +58,10 @@ import edu.nps.moves.mmowgli.markers.HasUUID;
  * @author Mike Bailey, jmbailey@nps.edu
  * @version $Id$
  */
+
+// Push is used to goose the redir
+@Push(value=PushMode.MANUAL,transport=Transport.LONG_POLLING) // possibly overridden in web.xml
+
 @Theme("mmowgli2")
 @Widgetset("edu.nps.moves.mmowgli.widgetset.Mmowgli2Widgetset")
 public class SignupServer extends UI implements HasUUID
@@ -74,13 +85,9 @@ public class SignupServer extends UI implements HasUUID
     MovePhase ph = g.getCurrentMove().getCurrentMovePhase();
     
     if(ph.isSignupPageEnabled()) {
-      //Window w = new SignupWindow("Signup for mmowgli",this);
       VerticalLayout vl = new VerticalLayout();
       setContent(vl);
       vl.addComponent(new SignupWindow("Signup for mmowgli",this));
-    // w.center();
-    //  addWindow(w);
-    //  w.setHeight("750px");
     }
     else {  // Redirect to game site
       Class<SignupServlet> obj = SignupServlet.class;
@@ -95,19 +102,57 @@ public class SignupServer extends UI implements HasUUID
         url = url.substring(0, url.length()-tail2.length());
       else
         System.err.println("********* Don't recognize this url: "+url);
-      Window w = new RedirWindow(url);
-      w.center();
-      addWindow(w);
+      
+      doRedirNotification(url);
+    //  Window w = new RedirWindow(url);
+    //  w.center();
+    //  addWindow(w);
     }    
     HSess.close();
   }
   
+  private void doRedirNotification(final String url)
+  {
+    Notification notif = new Notification(
+        "<center>Thanks for your interest in MMOWGLI!<center>","The sign-up-for-information period is over for this <i>mmowgli</i> game, "+
+        "so we're taking you to the game home page.<center>",
+        Notification.Type.HUMANIZED_MESSAGE);
+    
+    notif.setDelayMsec(3000);
+    notif.setPosition(Position.MIDDLE_CENTER);
+    notif.setHtmlContentAllowed(true);
+    notif.setStyleName("m-green-notification");
+    notif.show(Page.getCurrent());
+    
+
+    Timer timer = new Timer();
+    timer.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        UI.getCurrent().access(new Runnable()
+        {
+          @Override
+          public void run() {
+            quitUIAndGoTo(url);
+          }
+        });
+      }     
+    }, 4000);
+  }
+  
+  /* This one is used from other places; may be possible to combine with quitUIAndGoTo, but the 2nd is the only one that works in this servlet */
   public void quitAndGoTo(String logoutUrl)
   {
     getPage().setLocation(logoutUrl);
     getSession().close();
   }
 
+  private void quitUIAndGoTo(String logoutUrl)
+  {
+    getPage().setLocation(logoutUrl);
+    UI.getCurrent().close();    
+  }
+  
   class RedirWindow extends Window implements ClickListener
   {
     private static final long serialVersionUID = 1L;
