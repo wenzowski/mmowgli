@@ -1108,7 +1108,7 @@ text-shadow:; /* off */
                 <h1 style="background-color:lightgray;" align="center">
                     <a name="CallToActionRound{@round}"> 
                         <xsl:text>Call To Action</xsl:text>
-                        <xsl:if test="number(@round) > 0">
+                        <xsl:if test="(@multipleMoves='true')">
                             <xsl:text>, Round </xsl:text>
                             <xsl:value-of select="@round"/>
                         </xsl:if>
@@ -1205,11 +1205,11 @@ text-shadow:; /* off */
 
         <!-- Process User elements -->
 
-        <h2 title="List of all registered players, in alphabetic order">
+        <h1 style="background-color:lightgray;" align="center" title="List of all registered players, in alphabetic order">
             <a name="PlayerList">
                 <xsl:text> Player List </xsl:text>
             </a>
-        </h2>
+        </h1>
         <table border="1" width="100%" cellpadding="1">
             <xsl:for-each select="//User">
                 <xsl:sort select="lower-case(@gameName)" data-type="text" order="ascending"/>
