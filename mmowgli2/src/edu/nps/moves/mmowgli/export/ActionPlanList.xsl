@@ -1854,7 +1854,7 @@ b.error {color: #CC0000}
                 <h1 style="background-color:lightgray;" align="center">
                     <a name="CallToActionRound{@round}"> 
                         <xsl:text>Call To Action</xsl:text>
-                        <xsl:if test="number(@round) > 0">
+                        <xsl:if test="//CallToAction[@round = '2']">
                             <xsl:text>, Round </xsl:text>
                             <xsl:value-of select="@round"/>
                         </xsl:if>
