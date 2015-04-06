@@ -232,7 +232,8 @@ public class MailManager
 
       String toAddr = sLis.get(0);
       String from = buildMmowgliReturnAddressTL(); // "mmowgli<mmowgli@nps.navy.mil>";
-      String subj = "Thank you for registering in " + gameName + " " + gameHandle + "game";
+     // String subj = "Thank you for registering in " + gameName + " " + gameHandle + "game";
+      String subj = "Welcome new player in the " + g.getAcronym()+" mmowgli game";
 
       String gameUrl = AppMaster.instance().getAppUrlString(); // ((Mmowgli2UI)UI.getCurrent()).getGlobalse().gameUrl();app.globs().gameUrl();
       if (gameUrl.endsWith("/"))
