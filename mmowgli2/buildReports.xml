@@ -101,6 +101,18 @@
                <url url="${mmowgli.url}/@{gameName}/reports/GameDesign_@{gameTitle}MmowgliGame.xml"/>
                <url url="${mmowgli.url}/@{gameName}/reports/PlayerProfiles_@{gameTitle}MmowgliGame.xml"/>
           </get>
+          <copy todir="${reports.dir}/@{gameName}/images" verbose="true">
+            <fileset dir="${reports.dir}/images">
+                <include name="*.png"/>
+                <include name="*.jpg"/>
+            </fileset>
+          </copy>
+          <!-- appropriate qr image goes to reports/images/ subdirectory, not qr/ subdirectory -->
+          <copy todir="${reports.dir}/@{gameName}/images" verbose="true">
+            <fileset dir="${reports.dir}/images/qr">
+                <include name="mmowgli.nps.edu.@{gameName}.mobile.qr.png"/>
+            </fileset>
+          </copy>
         </sequential>
     </macrodef>
 
