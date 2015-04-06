@@ -197,6 +197,7 @@
                 <meta name="identifier" content="http:// TODO /ActionPlanList.html"/>
             -->
                 <link rel="shortcut icon" href="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.ico" title="MMOWGLI game"/>
+                <meta http-equiv="refresh" content="600"/> <!-- 600 seconds = 10 minutes -->
                 <meta name="description" content="Action plan outputs from MMOWGLI game"/>
                 <meta name="created"     content="{current-date()}"/>
                 <meta name="exported"    content="{$exportDateTime}"/>
