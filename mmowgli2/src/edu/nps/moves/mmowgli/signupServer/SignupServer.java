@@ -115,7 +115,7 @@ public class SignupServer extends UI implements HasUUID
   {
     Notification notif = new Notification(
         "<center>Thanks for your interest in MMOWGLI!<center>","The sign-up-for-information period is over for this <i>mmowgli</i> game, "+
-        "so we're taking you to the game home page.<center>",
+        "so we're taking you to the game entry page.<center>",
         Notification.Type.HUMANIZED_MESSAGE);
     
     notif.setDelayMsec(3000);
