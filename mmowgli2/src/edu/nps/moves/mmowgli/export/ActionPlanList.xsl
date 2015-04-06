@@ -153,13 +153,13 @@
                 <xsl:text>https://mmowgli.nps.edu/blackswan</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'dd') or contains(lower-case($gameTitle),'DD')">
-                <xsl:text>https://portal.mmowgli.nps.edu/dd</xsl:text>
+                <xsl:text>https://mmowgli.nps.edu/dd</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'pcc') or contains(lower-case($gameTitle),'PCC')">
-                <xsl:text>https://portal.mmowgli.nps.edu/pcc</xsl:text>
+                <xsl:text>https://mmowgli.nps.edu/pcc</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
-                <xsl:text>https://mmowgli.nps.edu/uxvdm</xsl:text>
+            <xsl:when test="contains($gameTitle,'ndu') or contains($gameTitle,'NDU')">
+                <xsl:text>https://mmowgli.nps.edu/ndu</xsl:text>
             </xsl:when>
             <xsl:otherwise>
                 <!-- TODO add GameIdentifier in source XML, then insert here -->
@@ -195,7 +195,7 @@
     </xsl:variable>
 
     <xsl:variable name="numberOfRounds">
-        <xsl:value-of select="max(//CallToAction/@moveNumber)"/>
+        <xsl:value-of select="max(//CallToAction/@round)"/>
     </xsl:variable>
     
     <!-- TODO get game acronym, url in XML file -->
@@ -264,26 +264,28 @@
         -->
         
         <!-- print header if already-sorted Action Plans start a new round -->
-        <xsl:if test="($numberOfRounds != '1') and (count(preceding-sibling::ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')]) = 0)">
+        <xsl:if test="(count(preceding-sibling::ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')]) = 0)">
             <!--
             ($numberOfRounds != '1') and 
                       ((($roundNumber = '1') and (count(preceding-sibling::ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')]) = 0)) or 
                        ( $roundNumber != preceding-sibling::ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')][1]/@moveNumber))
                        -->
             <h1 style="background-color:lightgray;" align="center">
-                <a name="Round{$roundNumber}"> 
-                    <xsl:text>Round </xsl:text>
-                    <xsl:value-of select="$roundNumber"/>
+                <a name="ActionPlansRound{$roundNumber}"> 
                     <xsl:text> Action Plans </xsl:text>
+                    <xsl:if test="($numberOfRounds != '1')">
+                        <xsl:text>Round </xsl:text>
+                        <xsl:value-of select="$roundNumber"/>
+                    </xsl:if>
                 </a>
-                                <xsl:text> (</xsl:text>
-                                <xsl:value-of select="count(//ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')])"/>
-                                <xsl:text> plans</xsl:text>
-                                <xsl:if test="($numberOfRounds != '1')">
-                                    <xsl:text> out of </xsl:text>
-                                    <xsl:value-of select="count(//ActionPlan[not(@hidden='true')])"/>
-                                </xsl:if>
-                                <xsl:text> total)</xsl:text>
+                <xsl:text> (</xsl:text>
+                <xsl:value-of select="count(//ActionPlan[(@moveNumber = $roundNumber) and not(@hidden='true')])"/>
+                <xsl:text> plans</xsl:text>
+                <xsl:if test="($numberOfRounds != '1')">
+                    <xsl:text> out of </xsl:text>
+                    <xsl:value-of select="count(//ActionPlan[not(@hidden='true')])"/>
+                </xsl:if>
+                <xsl:text> total)</xsl:text>
             </h1>
             <hr />
         </xsl:if>
@@ -771,20 +773,30 @@
                                                         <xsl:value-of select="$imageUrl"/>
                                                     </xsl:attribute>
                                                     <xsl:choose>
+                                                        <xsl:when test="(@height > 600)">
+                                                            <xsl:attribute name="height">
+                                                                <xsl:text>600</xsl:text>
+                                                            </xsl:attribute>
+                                                            <!-- width to match -->
+                                                        </xsl:when>
+                                                        <xsl:when test="(string-length(@height) > 0)">
+                                                            <xsl:attribute name="height">
+                                                                <xsl:value-of select="@height"/>
+                                                            </xsl:attribute>
+                                                            <!-- width to match -->
+                                                        </xsl:when>
                                                         <xsl:when test="(@width > 800)">
                                                             <xsl:attribute name="width">
                                                                 <xsl:text>800</xsl:text>
                                                             </xsl:attribute>
                                                             <!-- height to match -->
                                                         </xsl:when>
-                                                        <xsl:otherwise>
+                                                        <xsl:when test="(string-length(@width) > 0)">
                                                             <xsl:attribute name="width">
                                                                 <xsl:value-of select="@width"/>
                                                             </xsl:attribute>
-                                                            <xsl:attribute name="height">
-                                                                <xsl:value-of select="@height"/>
-                                                            </xsl:attribute>
-                                                        </xsl:otherwise>
+                                                            <!-- height to match -->
+                                                        </xsl:when>
                                                     </xsl:choose>
                                                     <!--<img src="{$url}" width="{$width}" height="{$height}"/> -->
                                                 </xsl:element>
@@ -857,7 +869,18 @@
                             <dd>
                                 <table class="media">
                                     <xsl:for-each select="VideoList/Video">
-                                        <xsl:variable name="videoUrl" select="normalize-space(URL)"/>
+                                        <xsl:variable name="videoUrl">
+                                            <xsl:choose>
+                                                <!-- fix software bug in URL creation -->
+                                                <xsl:when test="contains(URL,'watch?v=watch?v=')">
+                                                    <xsl:value-of select="normalize-space(substring-before(URL,'watch?v='))"/>
+                                                    <xsl:value-of select="normalize-space(substring-after (URL,'watch?v='))"/>
+                                                </xsl:when>
+                                                <xsl:otherwise>
+                                                    <xsl:value-of select="normalize-space(URL)"/>
+                                                </xsl:otherwise>
+                                            </xsl:choose>
+                                        </xsl:variable>
                                         <!-- build a variable to hold the munged url -->
                                         <xsl:variable name="youTubeEmbedUrl">
                                             <xsl:analyze-string select="$videoUrl" regex="(https://www.youtube.com/)watch\?v=(.*)">
@@ -870,9 +893,11 @@
                                                     <xsl:value-of select="$videoUrl"/>
                                                 </xsl:non-matching-substring>
                                             </xsl:analyze-string>
+                                            <!--
                                             <xsl:text disable-output-escaping="yes">?version=3&amp;feature-player_detailpage</xsl:text>
-                                            <!-- prevent advertising other YouTube videos when complete -->
-                                            <xsl:text disable-output-escaping="yes">&amp;rel=0</xsl:text>
+                                            -->
+                                            <!-- prevent advertising other YouTube videos when complete
+                                            <xsl:text disable-output-escaping="yes">&amp;rel=0</xsl:text> -->
                                         </xsl:variable>
                                         <tr>
                                             <td align="right" valign="top">
@@ -931,7 +956,8 @@
                                                     </p>
                                                 </xsl:if>
                                                 <xsl:if test="Caption and not(contains(normalize-space(Description/.),
-                                                                                       normalize-space(Caption/.)))">
+                                                                                       normalize-space(Caption/.)))
+                                                                      and not(contains(normalize-space(Caption/.),'Describe this video here'))">
                                                     <p>
                                                         <xsl:call-template name="hyperlink">
                                                             <xsl:with-param name="string">
@@ -941,7 +967,7 @@
                                                     </p>
                                                 </xsl:if>
                                                 <p>
-                                                    <a href="{$youTubeEmbedUrl}"><xsl:value-of select="$videoUrl"/></a>
+                                                    <a href="{$videoUrl}"><xsl:value-of select="$videoUrl"/></a>
                                                 </p>
                                             </td>
                                         </tr>
@@ -1533,7 +1559,7 @@ b.error {color: #CC0000}
                     </tr>
                 </xsl:if>
 
-                <!-- index list for sll plans, grouped by round and sorted by ID number -->
+                <!-- index list for all plans, grouped by round and sorted by ID number -->
                 <xsl:for-each select="//ActionPlan">
                     <xsl:sort select="number(@moveNumber)" />
                     <xsl:sort select="number(ID)" />
@@ -1726,7 +1752,6 @@ b.error {color: #CC0000}
                                     <xsl:value-of select="@roundRanking"/>
                                 </td>
                                 <td align="right">
-                                    <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
                                     <!-- link to game -->
                                     <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{ID}" target="_{$gameAcronym}Game" title="play the game! go online to Action Plan {ID}">
                                         <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" width="16px" align="right"/>
@@ -1924,7 +1949,7 @@ b.error {color: #CC0000}
             <xsl:when test="(string-length($displaySingleActionPlanNumber) > 0)">
                 <xsl:apply-templates select="ActionPlan[number($displaySingleActionPlanNumber)]"/>
             </xsl:when>
-            <!-- show sll plans, grouped by round and sorted by ID number -->
+            <!-- show all plans, grouped by round and sorted by ID number -->
             <xsl:otherwise>
                 <xsl:apply-templates select="ActionPlan[not(@hidden='true') or ($displayHiddenPlans='true')]">
                     <xsl:sort select="number(@moveNumber)" />
