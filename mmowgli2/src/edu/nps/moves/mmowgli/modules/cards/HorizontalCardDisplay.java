@@ -312,7 +312,7 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
   private void buttonsEnabledSet(Boolean startb, Boolean leftb, Boolean rightb, Boolean endb)
   {
     if(startb != null) start.setEnabled(startb);
-    if(leftb != null) left.setEnabled(leftb);
+    if(leftb != null) leftLab.setEnabled(leftb);//left.setEnabled(leftb);
     if(rightb != null) right.setEnabled(rightb);
     if(endb != null) end.setEnabled(endb);
   }
