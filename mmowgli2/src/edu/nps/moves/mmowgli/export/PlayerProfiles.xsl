@@ -319,6 +319,7 @@
                 <meta name="identifier" content="http:// TODO /IdeaCardChains.html"/>
             -->
                 <link rel="shortcut icon" href="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.ico" title="MMOWGLI game"/>
+                <meta http-equiv="refresh" content="600"/> <!-- 600 seconds = 10 minutes -->
                 <meta name="author"      content="Don Brutzman and Mike Bailey"/>
                 <meta name="description" content="Idea card chain outputs from MMOWGLI game"/>
                 <meta name="created"     content="{current-date()}"/>
