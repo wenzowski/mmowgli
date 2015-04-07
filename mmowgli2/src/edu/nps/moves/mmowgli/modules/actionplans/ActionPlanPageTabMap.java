@@ -641,7 +641,7 @@ public class ActionPlanPageTabMap extends ActionPlanPageTabPanel
   }
     
   @Override
-  public void setImAuthor(boolean yn)
+  public void setICanEdit(boolean yn)
   {
     editingOK = yn;
     toggleSaveButtPan(yn);

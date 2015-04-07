@@ -1480,15 +1480,15 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
     User me = User.get(globs.getUserID(),sess);
     boolean gm = me.isGameMaster();
 
-    thePlanTab.setImAuthor(au && !readonly);
+    thePlanTab.setICanEdit((gm ||au) && !readonly);
 
     talkTab.setICanChat((au || gm) && !readonly); // temp until todo below
-    talkTab.setImAuthor(au);
+    talkTab.setICanEdit(au);
     talkTab.setImGM(gm);
 
-    imagesTab.setImAuthor(au && !readonly); // todo, separate into author, gm and ro
-    videosTab.setImAuthor(au && !readonly);
-    mapTab.setImAuthor(au && !readonly);
+    imagesTab.setICanEdit(au && !readonly); // todo, separate into author, gm and ro
+    videosTab.setICanEdit(au && !readonly);
+    mapTab.setICanEdit(au && !readonly);
 
     titleUnion.setRo(!au || readonly); // titleTA.setReadOnly (!au || ro);
     titleHistoryButt.setVisible(au && !readonly);
