@@ -198,7 +198,7 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
   }
 
   @Override
-  public Long getUserId()
+  public User getUser()
   {
     return null;
   }
