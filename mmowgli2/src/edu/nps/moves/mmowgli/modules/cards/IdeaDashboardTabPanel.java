@@ -224,7 +224,8 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
     {
       Criteria crit = super.getBaseCriteriaTL();
       crit.createAlias("cardType", "TYPE")
-      .add(Restrictions.eq("TYPE.cardClass", cls));
+      .add(Restrictions.eq("TYPE.cardClass", cls))
+      .addOrder(Order.desc("creationDate"));
 
       if(me.isGameMaster() || me.isAdministrator())
         ;
@@ -297,6 +298,23 @@ public abstract class IdeaDashboardTabPanel extends AbsoluteLayout implements Mm
       return crit;
     }
   }  
+  
+  @SuppressWarnings({ "serial", "unchecked" })
+  public static class AllCardsDescendingContainer<T> extends HbnContainer<T>
+  {
+    public AllCardsDescendingContainer()
+    {
+      super((Class<T>)Card.class,HSess.getSessionFactory());
+    }
+    
+    @Override
+    protected Criteria getBaseCriteriaTL()
+    {
+      Criteria crit = super.getBaseCriteriaTL()
+      .addOrder(Order.desc("creationDate"));
+      return crit;
+    }
+  }
   
   @SuppressWarnings({ "serial", "unchecked" })
   public static class NotHiddenCardContainer<T> extends HbnContainer<T>
