@@ -129,7 +129,7 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
   {
     if (allIdeasTable == null || (lastTable != null && lastTable != allIdeasTable)) {
       if(isGameMaster)
-        allIdeasTable = new CardTable(null, null, true, false, false);
+        allIdeasTable = new CardTable(null, new AllCardsDescendingContainer(), true, false, false);
       else {
         User me = Mmowgli2UI.getGlobals().getUserTL();
         allIdeasTable = new CardTable(null,new NotHiddenCardContainer(me),true,false,false);
