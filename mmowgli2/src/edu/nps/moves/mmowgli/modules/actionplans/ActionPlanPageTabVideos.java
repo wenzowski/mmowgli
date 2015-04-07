@@ -495,7 +495,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
   }
 
   @Override
-  public void setImAuthor(boolean yn)
+  public void setICanEdit(boolean yn)
   {
     addVideoButt.setEnabled(yn && !isReadOnly);
     nonAuthorLabel.setVisible(!yn);

@@ -489,7 +489,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
   }
 
   @Override
-  public void setImAuthor(boolean yn)
+  public void setICanEdit(boolean yn)
   {
     addImageButt.setEnabled(yn && !isReadOnly);
     nonAuthorLabel.setVisible(!yn);

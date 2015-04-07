@@ -583,7 +583,7 @@ public class ActionPlanPageTabTalk extends ActionPlanPageTabPanel implements/* C
   }
   
   @Override
-  public void setImAuthor(boolean yn)
+  public void setICanEdit(boolean yn)
   {
     author = yn;
   }

@@ -531,22 +531,22 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
   }
 
   @Override
-  public void setImAuthor(boolean yn)
+  public void setICanEdit(boolean canEdit)
   {
     //whoTA.setReadOnly(!yn);
-    whoGroup.setRo(!yn || isReadOnly);
-    whoGroup.getHistoryButton().setVisible(yn);
+    whoGroup.setRo(!canEdit || isReadOnly);
+    whoGroup.getHistoryButton().setVisible(canEdit);
     //whatTA.setReadOnly(!yn);
-    whatGroup.setRo(!yn || isReadOnly);
-    whatGroup.getHistoryButton().setVisible(yn);
+    whatGroup.setRo(!canEdit || isReadOnly);
+    whatGroup.getHistoryButton().setVisible(canEdit);
     //whatWillItTakeTA.setReadOnly(!yn);
-    whatTakeGroup.setRo(!yn || isReadOnly);
-    whatTakeGroup.getHistoryButton().setVisible(yn);
+    whatTakeGroup.setRo(!canEdit || isReadOnly);
+    whatTakeGroup.getHistoryButton().setVisible(canEdit);
     //howWorkTA.setReadOnly(!yn);
-    howGroup.setRo(!yn || isReadOnly);
-    howGroup.getHistoryButton().setVisible(yn);
+    howGroup.setRo(!canEdit || isReadOnly);
+    howGroup.getHistoryButton().setVisible(canEdit);
     //howChangeTA.setReadOnly(!yn); 
-    howChangeGroup.setRo(!yn || isReadOnly);
-    howChangeGroup.getHistoryButton().setVisible(yn);
+    howChangeGroup.setRo(!canEdit || isReadOnly);
+    howChangeGroup.getHistoryButton().setVisible(canEdit);
   }
 }

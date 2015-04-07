@@ -106,7 +106,7 @@ public abstract class ActionPlanPageTabPanel extends HorizontalLayout implements
     return rightVertLay;
   }
 
-  abstract public void setImAuthor(boolean yn);
+  abstract public void setICanEdit(boolean yn);
   
   /* a utility routing used by images and video tabs */
   protected MediaPanel findMed(Component c)
