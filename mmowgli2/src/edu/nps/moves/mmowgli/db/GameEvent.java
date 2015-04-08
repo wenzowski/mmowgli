@@ -63,7 +63,8 @@ public class GameEvent implements Serializable
     GAMEEMAILCONFIRMATIONSTART,GAMEEMAILCONFIRMATIONEND,
     CARDTEXTEDITED,GAMEDESIGNEDITED,COMMENTSUPERINTERESTING,
     USERGAMENAMECHANGED,COMMENTEDITED,CHATEDITED,USERPASSWORDCHANGED,
-    GAMELOGINBUTTONSTATUS,REPORTGENERATIONREQUESTED;
+    GAMELOGINBUTTONSTATUS,REPORTGENERATIONREQUESTED,
+    EMAILSENT,EMAILFAILURE;
     
     public String description()
     {
@@ -114,6 +115,9 @@ public class GameEvent implements Serializable
         case USERPASSWORDCHANGED: return "User password changed";
         case GAMELOGINBUTTONSTATUS: return "Game login button status";
         case REPORTGENERATIONREQUESTED: return "Game reports generation requested";
+        case EMAILSENT: return "Email successfully sent from game";
+        case EMAILFAILURE: return "Email transmit failure";
+
       }
       throw new AssertionError("Unknown op: " + this);
     }
