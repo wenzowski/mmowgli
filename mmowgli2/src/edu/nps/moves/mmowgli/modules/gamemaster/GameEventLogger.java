@@ -30,9 +30,18 @@ import java.util.Set;
 
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.CardMarking;
+import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.db.GameEvent;
 import edu.nps.moves.mmowgli.db.GameEvent.EventType;
+import edu.nps.moves.mmowgli.db.Message;
+import edu.nps.moves.mmowgli.db.MessageUrl;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.utility.MmowgliMailer;
+import edu.nps.moves.mmowgli.utility.MmowgliMailer.QPacket;
 
 /**
  * GameEventLogger.java
@@ -382,4 +391,24 @@ public class GameEventLogger
     GameEvent ev = new GameEvent(GameEvent.EventType.USERPASSWORDCHANGED,sb.toString());
     GameEvent.saveTL(ev);    
   }
+
+	public static void logEmailSentTL(QPacket qp)
+	{
+		StringBuilder sb = new StringBuilder("Email successfully sent with subject = \"");
+		sb.append(qp.subject);
+		sb.append("\".");
+		GameEvent ev = new GameEvent(GameEvent.EventType.EMAILSENT, sb.toString());
+		GameEvent.saveTL(ev);
+		;
+	}
+
+	public static void logEmailFailureTL(QPacket qp, Throwable ex)
+	{
+		StringBuilder sb = new StringBuilder("Email transmission failure,  subject = \"");
+		sb.append(qp.subject);
+		sb.append("\".");
+		sb.append(MmowgliMailer.explainException(ex));
+		GameEvent ev = new GameEvent(GameEvent.EventType.EMAILFAILURE,sb.toString());
+		GameEvent.saveTL(ev);
+	}
 }
