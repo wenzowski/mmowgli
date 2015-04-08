@@ -57,6 +57,7 @@ public abstract class DefaultInterSessionIO extends InterSessionIOBase
   
   @Override
   abstract public void send(MMessagePacket pkt);
+  
   @Override
   public void addReceiver(JmsReceiver recvr)
   {
