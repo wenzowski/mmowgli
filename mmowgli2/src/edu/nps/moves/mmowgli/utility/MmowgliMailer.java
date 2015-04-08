@@ -22,19 +22,31 @@
 
 package edu.nps.moves.mmowgli.utility;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.MAIL_LOGS;
+
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.mail.*;
-import javax.mail.internet.*;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.SendFailedException;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
-import com.sun.mail.smtp.*;
+import com.sun.mail.smtp.SMTPAddressFailedException;
+import com.sun.mail.smtp.SMTPAddressSucceededException;
+import com.sun.mail.smtp.SMTPSendFailedException;
+import com.sun.mail.smtp.SMTPTransport;
 
+import edu.nps.moves.mmowgli.hibernate.HSess;
+import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 public class MmowgliMailer implements Runnable
 {
@@ -118,6 +130,7 @@ public class MmowgliMailer implements Runnable
 
   private void _send(QPacket qp)
   {
+	  HSess.init();
     Session session = Session.getDefaultInstance(props);
     if (debugAndVerbose)
       session.setDebug(true);
@@ -169,13 +182,13 @@ public class MmowgliMailer implements Runnable
 
       if (debugAndVerbose)
         MSysOut.println(MAIL_LOGS,"\nMail was sent successfully.");
-
-      // return from here
+      
+      GameEventLogger.logEmailSentTL(qp);
     }
     catch (Throwable ex) {
-      /*
-       * Handle SMTP-specific exceptions.
-       */
+      GameEventLogger.logEmailFailureTL(qp,ex);
+
+      //Handle SMTP-specific exceptions.
       if (ex instanceof SendFailedException) {
         MessagingException sfe = (MessagingException) ex;
 
@@ -230,9 +243,42 @@ public class MmowgliMailer implements Runnable
           ex.printStackTrace();
       }
     }
+	  HSess.close();
   }
 
-  class QPacket
+	public static String explainException(Throwable ex)
+	{
+		StringBuilder sb = new StringBuilder(" Exception type: ");
+		sb.append(ex.getClass().getSimpleName());
+
+		if (ex instanceof SMTPSendFailedException) {
+			SMTPSendFailedException ssfe = (SMTPSendFailedException) ex;
+			sb.append(" SMTP SEND FAILED:");
+			sb.append(" Command: " + ssfe.getCommand());
+			sb.append(" RetCode: " + ssfe.getReturnCode());
+			sb.append(" Response: " + ssfe.getMessage());
+			Exception ne;
+			while ((ne = ssfe.getNextException()) != null
+					&& ne instanceof MessagingException) {
+				if (ne instanceof SMTPAddressFailedException) {
+					sb.append("ADDRESS FAILED");
+					sb.append(((SMTPAddressFailedException) ne).getMessage());
+				} else if (ne instanceof SMTPAddressSucceededException) {
+					sb.append("ADDRESS SUCCEEDED");
+					sb.append(((SMTPAddressSucceededException) ne).getMessage());
+				}
+			}
+
+		}
+		else {
+			sb.append(" ");
+			sb.append(ex.getLocalizedMessage());
+		}
+
+		return sb.toString();
+	}
+
+  public static class QPacket
   {
     public String to;
     public String from;
