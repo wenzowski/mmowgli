@@ -22,13 +22,17 @@
 
 package edu.nps.moves.mmowgli.modules.actionplans;
 
+import static edu.nps.moves.mmowgli.MmowgliEvent.ACTIONPLANREQUESTCLICK;
+
 import java.io.Serializable;
 
 import com.vaadin.ui.*;
+import com.vaadin.ui.themes.BaseTheme;
 
 import edu.nps.moves.mmowgli.db.ActionPlan;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanContainers.HelpWantedContainer;
+import edu.nps.moves.mmowgli.utility.IDButton;
 
 /**
  * ActionDashboardTabPowerPlay.java
@@ -77,7 +81,12 @@ public class ActionDashboardTabNeedAuthors extends ActionDashboardTabPanel imple
     flowLay.addComponent(contentLab);
     flowLay.setComponentAlignment(contentLab, Alignment.TOP_LEFT);
     flowLay.addStyleName("m-actionplan-mission-content-text");
-  
+    
+    Button requestActionPlanButt = new IDButton("Action Plan Request",ACTIONPLANREQUESTCLICK);
+    requestActionPlanButt.setStyleName(BaseTheme.BUTTON_LINK);
+    requestActionPlanButt.setDescription("Open a page where you can submit a request to be an action plan author");
+    flowLay.addComponent(requestActionPlanButt);
+    
     AbsoluteLayout rightLay = getRightLayout();
 
     flowLay = new VerticalLayout();
