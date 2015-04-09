@@ -105,8 +105,8 @@ public class ActionDashboardTabMyPlans extends ActionDashboardTabPanel implement
     lab.setHeight("25px");
 
     Button myPlansButt = new Button("My Plans");
-    myPlansButt.setStyleName(BaseTheme.BUTTON_LINK);
-    flowLay.addComponent(myPlansButt);
+    //myPlansButt.setStyleName(BaseTheme.BUTTON_LINK);
+    //flowLay.addComponent(myPlansButt);
 
     Button requestActionPlanButt = new IDButton("Request Action Plan Authorship",ACTIONPLANREQUESTCLICK);
     requestActionPlanButt.setStyleName(BaseTheme.BUTTON_LINK);

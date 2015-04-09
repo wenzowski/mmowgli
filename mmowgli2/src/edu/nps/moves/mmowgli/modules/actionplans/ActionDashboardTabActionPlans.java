@@ -22,15 +22,19 @@
 
 package edu.nps.moves.mmowgli.modules.actionplans;
 
+import static edu.nps.moves.mmowgli.MmowgliEvent.ACTIONPLANREQUESTCLICK;
+
 import java.io.Serializable;
 
 import com.vaadin.ui.*;
+import com.vaadin.ui.themes.BaseTheme;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanContainers.QuickAllPlansInThisMove;
+import edu.nps.moves.mmowgli.utility.IDButton;
 
 
 /**
@@ -79,6 +83,11 @@ public class ActionDashboardTabActionPlans extends ActionDashboardTabPanel imple
     flowLay.addComponent(contentLab);
     flowLay.setComponentAlignment(contentLab, Alignment.TOP_LEFT);
     flowLay.addStyleName("m-actionplan-mission-content-text");
+    
+    Button requestActionPlanButt = new IDButton("Action Plan Request",ACTIONPLANREQUESTCLICK);
+    requestActionPlanButt.setStyleName(BaseTheme.BUTTON_LINK);
+    requestActionPlanButt.setDescription("Open a page where you can submit a request to create an action plan");
+    flowLay.addComponent(requestActionPlanButt);
 
     AbsoluteLayout rightLay = getRightLayout();
     flowLay = new VerticalLayout();
