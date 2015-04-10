@@ -324,7 +324,8 @@ public class MediaLocator implements Serializable
   
   public Resource getActionDashboardPlanBackground()
   {
-    return locate(new Media("actionDashboardBackground.png","actdashbackground","action dashboard background",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
+    return locate(new Media("actionDashboardBackgroundNew980x833.png","actdashbackground","action dashboard background",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
+  //return locate(new Media("actionDashboardBackground.png",          "actdashbackground","action dashboard background",MediaType.IMAGE,Source.GAME_IMAGES_REPOSITORY));
   }
 
   public Resource getGoToIdeaDashboardIcon()
