@@ -191,6 +191,10 @@ public class MCacheUserHelper
     @Override
     public int compare(String s1, String s2)
     {
+      if(s1 == null || s2 == null) {
+        MSysOut.println(ERROR_LOGS, "MCacheUserHelper.UserNameCaseInsensitiveComparator.compare(), s1 = "+s1+", s2  = "+s2);
+        return 0;
+      }
       return s1.compareToIgnoreCase(s2);
     }
   }
@@ -202,6 +206,10 @@ public class MCacheUserHelper
     {
       String n1 = _usersQuick.get(key1);
       String n2 = _usersQuick.get(key2);
+      if(n1 == null || n2 == null) {
+        MSysOut.println(ERROR_LOGS, "MCacheUserHelper.UserNameFullCaseInsensitiveComparator.compare(), key1 "+key1+" returns "+n1+", key2 "+key2+" returns "+n2);
+        return 0;
+      }
       return n1.compareToIgnoreCase(n2);
     }
   }
