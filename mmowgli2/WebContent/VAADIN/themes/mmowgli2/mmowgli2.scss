@@ -87,7 +87,7 @@ div .m-textarea-greyborder, .m-greyborder {
     background: transparent repeat-y;
     background-image:url('#{$imageRepo}/ghostBoxMiddle261w270h.png');		
     padding-left:25px;
-    padding-right:20px;		
+    padding-right:20px;	
 }
 .m-ghostBoxContent {
 	padding-left:inherit;
@@ -2102,12 +2102,14 @@ div div .m-useradmin-search-combo .v-filterselect-button {
   padding:0px; 
 }
 .m-opacity-75 {
-	opacity:0.75;
+  opacity:0.75;
 }
 .m-padding2 {
-	padding: 2px;
+  padding: 2px;
 }
- 
+.m-padding15 {
+  padding: 15px;
+} 
 .m-font-bold14 {
   font-size: 14px;
   font-weight: bold;
