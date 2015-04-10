@@ -311,7 +311,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     if(!(event.getButton() instanceof IDButtonIF))
       throw new RuntimeException("Programming error, AbstractMmowgliController.buttonClick() expets IDButtons");
     
-    HSess.init();
+    Object key = HSess.checkInit();
     
     IDButtonIF butt = (IDButtonIF) event.getButton();
     MmowgliEvent mEv = butt.getEvent();
@@ -392,7 +392,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       default:
         MSysOut.println(SYSTEM_LOGS,"TODO, AbstractMmowgliController.buttonClick(): "+mEv);
     } 
-    HSess.close(); // commit by default
+    HSess.checkClose(key);
   }
   
   public void handleEventTL(MmowgliEvent mEv, Object obj, Component cmp)
