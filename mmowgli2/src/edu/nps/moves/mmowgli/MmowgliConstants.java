@@ -116,6 +116,11 @@ public class MmowgliConstants
   public static final String OID_SUBJECT_ALT_NAME = "2.5.29.17";  //email address
   public static final String OID_CITIZENSHIP = "1.3.61.5.57.9.4";
   
+  // Atmosphere parameters
+  public static final String ATMOS_TIMEOUT = "timeout"; // default = 300,000; max time a connection will stay open with no messages
+  public static final String ATMOS_CONNECT_TIMEOUT = "connectTimeout"; // def = -1; if client fails to connect, fallbackTransport will be used
+  public static final String ATMOS_RECONNECT_INTERVAL = "reconnectInterval"; // def = 0; interval in ms before an attempt to reconnect will be made
+  
   // Logging
   //@formatter:off
   public static final int ALL_LOGS = -1;
@@ -291,6 +296,7 @@ public class MmowgliConstants
   public static final char SESSIONS_REPORT = 'n';
   public static final char JMSKEEPALIVE = 'K';
   public static final char REBUILD_REPORTS = 'R';
+  public static final char KILLALL_SESSIONS = 'X';
   
   public static final String SESSION_REPORT_FIELD_DELIMITER_WIRE = "&euro;";
   public static final String SESSION_REPORT_ITEM_DELIMITER_WIRE = "&yen;";
@@ -357,17 +363,17 @@ public class MmowgliConstants
   public static final int    ACTIONDASHBOARD_HOR_OFFSET  = HEADER_OFFSET_LEFT_MARGIN - 19; // px same as header
   public static final String ACTIONDASHBOARD_OFFSET_POS  = "top:0px;left:"+ACTIONDASHBOARD_HOR_OFFSET+"px";
 
-  public static final String ACTIONPLAN_TABCONTENT_W         = "910px";
-  public static final String ACTIONPLAN_TABCONTENT_H         = "720px"; //"682px";
+  public static final String ACTIONPLAN_TABCONTENT_W         = "956px"; //"910px";
+  public static final String ACTIONPLAN_TABCONTENT_H         = "766px"; //"720px"; //"682px";
   public static final String ACTIONPLAN_TABCONTENT_POS       = "top:357px;left:46px";
-  public static final String ACTIONPLAN_TABCONTENT_LEFT_W    = "188px";
+  public static final String ACTIONPLAN_TABCONTENT_LEFT_W    = "280px"; //"188px";
   public static final String ACTIONPLAN_TABCONTENT_LEFT_H    = "300px";
   public static final String ACTIONPLAN_TABCONTENT_LEFT_POS  = "top:25px;left:0px";
   public static final String ACTIONPLAN_TABCONTENT_RIGHT_W   = "705px";
   public static final String ACTIONPLAN_TABCONTENT_RIGHT_H   = "720px"; //"682px";
-  public static final String ACTIONPLAN_TABCONTENT_RIGHT_POS = "top:0px;left:239px";
+  public static final String ACTIONPLAN_TABCONTENT_RIGHT_POS = "top:0px;left:285px"; //239px";
 
-  public static final String ACTIONDASHBOARD_TABCONTENT_POS       = "top:103px;left:46px";
+  public static final String ACTIONDASHBOARD_TABCONTENT_POS       = "top:103px;left:0px"; //46px";
   public static final String ACTIONDASHBOARD_TABCONTENT_W         = ACTIONPLAN_TABCONTENT_W;
   public static final String ACTIONDASHBOARD_TABCONTENT_H         = ACTIONPLAN_TABCONTENT_H;
   public static final String ACTIONDASHBOARD_TABCONTENT_LEFT_W    = ACTIONPLAN_TABCONTENT_LEFT_W;
