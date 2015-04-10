@@ -114,6 +114,7 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
     Label lab;
     vLay.addComponent(lab=new HtmlLabel("<p>Card play can be fast and thoughtful.  Here are the most recent.  Look for the cards most relevant to your thinking.</p>"));
     lab.addStyleName("m-font-12");
+
     //todo style here
     vLay.addComponent(allIdeasButt);
     vLay.addComponent(supInterestingButt);
@@ -121,7 +122,9 @@ public class IdeaDashboardTabRecent extends IdeaDashboardTabPanel implements Cli
     vLay.addComponent(adaptButt);
     vLay.addComponent(counterButt);
     vLay.addComponent(exploreButt);
-  }
+    vLay.addComponent(lab=new HtmlLabel("<br/><br/><p>(Hint: mouse-over the text entry and a popup tooltip should appear with the full text.)</p>"));
+    lab.addStyleName("m-font-12");
+ }
   
   private CardTable allIdeasTable;
   @SuppressWarnings({ "rawtypes", "unchecked" })

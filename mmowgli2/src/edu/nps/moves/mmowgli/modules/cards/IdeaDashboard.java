@@ -62,7 +62,7 @@ public class IdeaDashboard extends AbsoluteLayout implements MmowgliComponent, V
   public static final String IDEADASHBOARD_TABCONTENT_POS       = "top:140px;left:41px";
   public static final String IDEADASHBOARD_TABCONTENT_W         = "930px"; //ACTIONPLAN_TABCONTENT_W;
   public static final String IDEADASHBOARD_TABCONTENT_H         = "732px";
-  public static final String IDEADASHBOARD_TABCONTENT_LEFT_W    = ACTIONPLAN_TABCONTENT_LEFT_W;
+  public static final String IDEADASHBOARD_TABCONTENT_LEFT_W    = "188px";//ACTIONPLAN_TABCONTENT_LEFT_W;
   public static final String IDEADASHBOARD_TABCONTENT_LEFT_H    = "290px";
   public static final String IDEADASHBOARD_TABCONTENT_RIGHT_W   = ACTIONPLAN_TABCONTENT_RIGHT_W;
   public static final String IDEADASHBOARD_TABCONTENT_RIGHT_H   = "732px";
