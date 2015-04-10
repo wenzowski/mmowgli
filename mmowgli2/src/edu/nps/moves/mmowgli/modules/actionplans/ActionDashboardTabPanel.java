@@ -25,7 +25,10 @@ package edu.nps.moves.mmowgli.modules.actionplans;
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import com.vaadin.ui.AbsoluteLayout;
+import com.vaadin.ui.AbstractLayout;
+import com.vaadin.ui.VerticalLayout;
 
+import edu.nps.moves.mmowgli.components.GhostVerticalLayoutWrapper;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.messaging.WantsActionPlanUpdates;
 
@@ -46,7 +49,8 @@ public abstract class ActionDashboardTabPanel extends AbsoluteLayout implements 
   
   private AbsoluteLayout leftAbsLay;
   private AbsoluteLayout rightAbsLay;
-  
+  private GhostVerticalLayoutWrapper wrapper;
+  private VerticalLayout leftVertLay;
   public ActionDashboardTabPanel()
   {
     setWidth(ACTIONDASHBOARD_TABCONTENT_W);
@@ -55,7 +59,11 @@ public abstract class ActionDashboardTabPanel extends AbsoluteLayout implements 
     leftAbsLay = new AbsoluteLayout();
     leftAbsLay.setWidth(ACTIONDASHBOARD_TABCONTENT_LEFT_W);
     leftAbsLay.setHeight(ACTIONDASHBOARD_TABCONTENT_LEFT_H);
-    
+    leftAbsLay.addComponent(wrapper=new GhostVerticalLayoutWrapper(), "left:0px;right:0px");
+
+    leftVertLay = new VerticalLayout();
+    wrapper.ghost_setContent(leftVertLay);
+       
     rightAbsLay = new AbsoluteLayout();
     rightAbsLay.setWidth("669px"); // this needs about 10 more px //ACTIONDASHBOARD_TABCONTENT_RIGHT_W);
     rightAbsLay.setHeight(ACTIONDASHBOARD_TABCONTENT_RIGHT_H);
@@ -64,9 +72,9 @@ public abstract class ActionDashboardTabPanel extends AbsoluteLayout implements 
     addComponent(rightAbsLay,ACTIONDASHBOARD_TABCONTENT_RIGHT_POS);
   }
   
-  public AbsoluteLayout getLeftLayout()
+  public AbstractLayout getLeftLayout()
   {
-    return leftAbsLay;
+    return leftVertLay; //leftAbsLay;
   }
   public AbsoluteLayout getRightLayout()
   {
