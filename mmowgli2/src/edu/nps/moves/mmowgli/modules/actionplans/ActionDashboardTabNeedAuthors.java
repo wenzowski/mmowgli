@@ -65,11 +65,12 @@ public class ActionDashboardTabNeedAuthors extends ActionDashboardTabPanel imple
 
   public void initGuiTL()
   {
-    AbsoluteLayout leftLay = getLeftLayout();
+    AbstractLayout leftLay = getLeftLayout();
     
     flowLay = new VerticalLayout();
     flowLay.setWidth("100%");
-    leftLay.addComponent(flowLay, "top:0px;left:0px");
+    flowLay.addStyleName("m-padding15");
+    leftLay.addComponent(flowLay); //, "top:0px;left:0px");
     flowLay.setSpacing(true);
 
     Label titleLab = new Label("Action Plans needing Authors");
