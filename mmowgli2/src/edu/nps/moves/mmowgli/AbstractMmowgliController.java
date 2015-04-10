@@ -94,6 +94,7 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
   {
     nav.addProvider(new MyViewProvider());
     nav.addView("", CallToActionPage.class);  // to start with
+    nav.setErrorProvider(new MyErrorViewProvider());
   }
   
   public void miscEventTL(AppEvent appEvent)
@@ -740,4 +741,28 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       return appEvent.getFragmentString();
     }
   }
+
+  @SuppressWarnings("serial")
+  class MyErrorViewProvider implements ViewProvider
+  {
+    @Override
+    public String getViewName(String viewAndParameters)
+    {
+      return "";
+    }
+    
+    @Override
+    @MmowgliCodeEntry
+    @HibernateConditionallyOpened
+    @HibernateConditionallyClosed
+    public View getView(String viewName)
+    {
+      MSysOut.println(ERROR_LOGS,"Bad url tag, error provider redirecting to CallToAction");
+      Object key = HSess.checkInit();
+      View vw = new CallToActionPage();
+      HSess.checkClose(key);
+      return vw;
+    }   
+  }
 }
+
