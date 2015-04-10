@@ -114,11 +114,11 @@ public class SignupServer extends UI implements HasUUID
   private void doRedirNotification(final String url)
   {
     Notification notif = new Notification(
-        "<center>Thanks for your interest in MMOWGLI!<center>","The sign-up-for-information period is over for this <i>mmowgli</i> game, "+
-        "so we're taking you to the game entry page.<center>",
+        "<center>Welcome to MMOWGLI!<center>",
+        "<br/><center>We're taking you directly to the game.<center>",
         Notification.Type.HUMANIZED_MESSAGE);
     
-    notif.setDelayMsec(3000);
+    notif.setDelayMsec(5000);
     notif.setPosition(Position.MIDDLE_CENTER);
     notif.setHtmlContentAllowed(true);
     notif.setStyleName("m-green-notification");
