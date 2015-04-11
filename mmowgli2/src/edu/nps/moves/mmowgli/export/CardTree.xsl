@@ -390,6 +390,15 @@
             <xsl:value-of select="preceding-sibling::*[not(@hidden = 'true')][1]/@moveNumber"/>
         </xsl:comment>
         -->
+        <xsl:variable name="IdeaCardLabel">
+            <xsl:text disable-output-escaping="yes">IdeaCard</xsl:text>
+            <xsl:value-of select="@id"/>
+        </xsl:variable>
+        <xsl:variable name="followOnTopLevelCard">
+            <xsl:value-of select="(number(@level) = 1) and ($recurse = 'true') and not(@hidden = 'true') and 
+                                  not(position() = 1)"/>
+        </xsl:variable>
+                
         <xsl:choose>
             <xsl:when test="(number(@level) = 1) and ($recurse = 'true') and not(@hidden = 'true') and 
                             ((position() = 1) or not(preceding-sibling::*[@type = $currentCardType]) or not(preceding-sibling::*[not(@hidden = 'true')][1][@moveNumber = $currentCardMoveNumber])) and
@@ -426,10 +435,12 @@
                                             <xsl:value-of select="@type"/>
                                         </i>
                                         <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                                    </h2>
+                                    <h3>
                                         <!-- top-level cardType prompt -->
                                         <xsl:value-of select="//TopLevelCardTypes/InnovateType/Type[@title = $currentCardType][@round = $currentCardMoveNumber]/@prompt"/>
                                    <!-- <xsl:text> Idea Card Chains </xsl:text> -->
-                                    </h2>
+                                    </h3>
 				</td>
 				<td align="right" valign="top">
                                     <a href="#index" title="to top">
@@ -439,6 +450,28 @@
                                 </td>
                             </tr>
                         </table>
+                    </td>
+                </tr>
+            </xsl:when>
+            <xsl:when test="($followOnTopLevelCard='true')">
+                <!-- grey dividing bar before top-level seed cards -->
+                <tr>
+                    <td align="left" valign="top" colspan="{number($maxColumnCount) - 1}" style="background-color:lightgrey">
+                        <xsl:element name="a">
+                            <xsl:attribute name="name">
+                                <xsl:value-of select="$IdeaCardLabel"/>
+                                <!-- avoid duplicate creation of master reference; OK to create regular hyperlink if only appearing in summary table -->
+                                <xsl:if test="not($recurse = 'true') and not($displayHiddenCards = 'summaryOnly')">
+                                    <xsl:text>Reference</xsl:text>
+                                </xsl:if>
+                            </xsl:attribute>
+                            <!-- <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>space before link -->
+                        </xsl:element>
+                        <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+                        <a href="#index" title="to top">
+                            <!-- 1158 x 332, width="386" height="111"  -->
+                            <img align="right" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="165" height="47" border="0"/>
+                        </a>
                     </td>
                 </tr>
             </xsl:when>
@@ -484,10 +517,6 @@
                 </xsl:variable>
                 <xsl:variable name="cardText" select="text()"/>
 
-                <xsl:variable name="IdeaCardLabel">
-                    <xsl:text disable-output-escaping="yes">IdeaCard</xsl:text>
-                    <xsl:value-of select="@id"/>
-                </xsl:variable>
                 <xsl:variable name="IdeaCardNumberTitle">
                     <xsl:text>bookmark: </xsl:text>
                     <xsl:value-of select="$IdeaCardLabel"/>
@@ -500,16 +529,18 @@
                 </xsl:variable>
 
                 <td align="center" title="{$IdeaCardNumberTitle}" width="{$cardCellWidth}" class="cardCell">
-                    <xsl:element name="a">
-                        <xsl:attribute name="name">
-                            <xsl:value-of select="$IdeaCardLabel"/>
-                            <!-- avoid duplicate creation of master reference; OK to create regular hyperlink if only appearing in summary table -->
-                            <xsl:if test="not($recurse = 'true') and not($displayHiddenCards = 'summaryOnly')">
-                                <xsl:text>Reference</xsl:text>
-                            </xsl:if>
-                        </xsl:attribute>
-                        <!-- <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>space before link -->
-                    </xsl:element>
+                    <xsl:if test="not($followOnTopLevelCard='true')">
+                        <xsl:element name="a">
+                            <xsl:attribute name="name">
+                                <xsl:value-of select="$IdeaCardLabel"/>
+                                <!-- avoid duplicate creation of master reference; OK to create regular hyperlink if only appearing in summary table -->
+                                <xsl:if test="not($recurse = 'true') and not($displayHiddenCards = 'summaryOnly')">
+                                    <xsl:text>Reference</xsl:text>
+                                </xsl:if>
+                            </xsl:attribute>
+                            <!-- <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>space before link -->
+                        </xsl:element>
+                    </xsl:if>
                     <xsl:element name="a">
                         <xsl:attribute name="href">
                             <xsl:text>#</xsl:text>
