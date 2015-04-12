@@ -438,8 +438,7 @@
                                     </h2>
                                     <h3>
                                         <!-- top-level cardType prompt -->
-                                        <xsl:value-of select="//TopLevelCardTypes/InnovateType/Type[@title = $currentCardType][@round = $currentCardMoveNumber]/@prompt"/>
-                                   <!-- <xsl:text> Idea Card Chains </xsl:text> -->
+                                        <xsl:value-of select="//TopLevelCardTypes/*/Type[@title = $currentCardType][@round = $currentCardMoveNumber]/@prompt"/>
                                     </h3>
 				</td>
 				<td align="right" valign="top">
@@ -600,8 +599,8 @@
                                 <xsl:value-of select="." disable-output-escaping="yes"/>
                             </del>
                             <!-- link to game -->
-                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go online to Card {@id}">
-                                <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
+                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go online to Card {@id}" >
+                                <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right" width="16px" border="0"/>
                             </a>
                         </xsl:when>
                         <xsl:when test="(@hidden = 'true') and not($displayHiddenCards = 'true') and ($singleIdeaCardChainRootNumber = $currentCardId)">
@@ -623,7 +622,7 @@
                             </b>
                             <!-- link to game -->
                             <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go online to Card {@id}">
-                                <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
+                                <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right" width="16px" border="0"/>
                             </a>
                         </xsl:when>
                         <xsl:otherwise>
@@ -635,7 +634,7 @@
                             </span>
                             <!-- link to game -->
                             <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{@id}" target="_{$gameAcronym}Game" title="play the game! go online to Card {@id}">
-                                <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right"/>
+                                <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right" width="16px" border="0"/>
                             </a>
                         </xsl:otherwise>
                     </xsl:choose>
