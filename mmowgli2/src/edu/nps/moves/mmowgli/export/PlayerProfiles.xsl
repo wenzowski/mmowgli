@@ -1614,18 +1614,18 @@ text-shadow:; /* off */
                                 <xsl:text> Idea cards: </xsl:text>
                             </i>
                             <xsl:choose>
-                                <xsl:when test="number(CardsPlayed/@count) eq 0">
+                                <xsl:when test="number(CardsPlayed[not(@hidden='true')]/@count) eq 0">
                                     <xsl:text> none </xsl:text>
                                 </xsl:when>
                                 <xsl:otherwise>
-                                    <xsl:value-of select="CardsPlayed/@count"/>
+                                    <xsl:value-of select="CardsPlayed[not(@hidden='true')]/@count"/>
                                     <xsl:text> total </xsl:text>
                                 </xsl:otherwise>
                             </xsl:choose>
                             <!-- todo sort, list, label, link CardID array -->
-                            <xsl:if test="CardsPlayed/@count > 0">
+                            <xsl:if test="CardsPlayed[not(@hidden='true')]/@count > 0">
                                 <ul>
-                                    <xsl:for-each select="CardsPlayed/CardID">
+                                    <xsl:for-each select="CardsPlayed[not(@hidden='true')]/CardID">
                                         <xsl:sort select="." data-type="number" order="ascending"/>
                                         <xsl:variable name="cardID" select="."/>
 
