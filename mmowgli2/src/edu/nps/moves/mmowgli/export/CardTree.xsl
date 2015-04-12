@@ -415,9 +415,9 @@
                                                 <xsl:value-of select="@type"/>
                                             </xsl:attribute>
                                             <xsl:text>Idea Card Chains</xsl:text>
-                                            <xsl:if test="number(@round) > 0">
+                                            <xsl:if test="//CardTree[@multipleMoves='true']">
                                                 <xsl:text>, Round </xsl:text>
-                                                <xsl:value-of select="@round"/>
+                                                <xsl:value-of select="@moveNumber"/>
                                             </xsl:if>
                                         </xsl:element>
                                     </h1>
@@ -425,10 +425,19 @@
                             </tr>
                             <tr>
 				<td align="left" valign="bottom">
+                                    <xsl:variable name="cardType" select="@type"/>
                                     <h2 title="Idea card chains beginning with an innovation card">
                                         <xsl:if test="//CardTree[@multipleMoves='true']">
                                             <xsl:text> Round </xsl:text>
                                             <xsl:value-of select="@moveNumber"/>
+                                            <xsl:choose>
+                                                <xsl:when test="(//TopLevelCardTypes/InnovateType/Type/@title = $cardType)">
+                                                    <xsl:text> Innovate</xsl:text>
+                                                </xsl:when>
+                                                <xsl:when test="(//TopLevelCardTypes/DefendType/Type/@title = $cardType)">
+                                                    <xsl:text> Defend</xsl:text>
+                                                </xsl:when>
+                                            </xsl:choose>
                                             <xsl:text>: </xsl:text>
                                         </xsl:if>
                                         <i>
@@ -688,10 +697,10 @@
                 -->
             </tr>
         </xsl:if>
-
+        
+        <!-- Recurse and display children cards -->
         <xsl:choose>
             <xsl:when test="($recurse = 'true') and (($displayHiddenCards = 'true')) or (string-length($singleIdeaCardChainRootNumber) > 0)">
-                <xsl:comment>recursing</xsl:comment>
                 <xsl:apply-templates select="*">
                     <xsl:sort select="position()" data-type="number" order="descending"/>
                 </xsl:apply-templates>
@@ -709,10 +718,26 @@
     <xsl:template match="text()"/>
 
     <xsl:template match="InnovateCards">
+        <xsl:param name="roundNumber">
+            <xsl:text></xsl:text>
+        </xsl:param>
+        <!-- debug
+        <p>
+            <xsl:text>InnovateCards looping over Round </xsl:text>
+            <xsl:value-of select="$roundNumber"/>
+            <xsl:text>, $displayHiddenCard=</xsl:text>
+            <xsl:value-of select="$displayHiddenCards"/>
+        </p> -->
         <table border="1" style="table-layout:fixed;width:100%;overflow:hidden;">
             <xsl:choose>
                 <xsl:when test="(string-length($singleIdeaCardChainRootNumber) > 0)">
                     <xsl:apply-templates select="descendant-or-self::Card[@id = $singleIdeaCardChainRootNumber]"/>
+                </xsl:when>
+                <xsl:when test="(string-length($roundNumber) > 0) and ($displayHiddenCards = 'true')">
+                    <xsl:apply-templates select="*[@moveNumber = $roundNumber]"/>
+                </xsl:when>
+                <xsl:when test="(string-length($roundNumber) > 0) and not($displayHiddenCards = 'true')">
+                    <xsl:apply-templates select="*[@moveNumber = $roundNumber][not(@hidden='true')]"/>
                 </xsl:when>
                 <xsl:when test="($displayHiddenCards = 'true')">
                     <xsl:apply-templates select="*"/>
@@ -725,10 +750,26 @@
     </xsl:template>
 
     <xsl:template match="DefendCards">
+        <xsl:param name="roundNumber">
+            <xsl:text></xsl:text>
+        </xsl:param>
+        <!-- debug
+        <p>
+            <xsl:text>DefendCards looping over Round </xsl:text>
+            <xsl:value-of select="$roundNumber"/>
+            <xsl:text>, $displayHiddenCard=</xsl:text>
+            <xsl:value-of select="$displayHiddenCards"/>
+        </p> -->
         <table border="1" style="table-layout:fixed;width:100%;overflow:hidden;">
             <xsl:choose>
                 <xsl:when test="(string-length($singleIdeaCardChainRootNumber) > 0)">
                     <xsl:apply-templates select="descendant-or-self::Card[@id = $singleIdeaCardChainRootNumber]"/>
+                </xsl:when>
+                <xsl:when test="(string-length($roundNumber) > 0) and ($displayHiddenCards = 'true')">
+                    <xsl:apply-templates select="*[@moveNumber = $roundNumber]"/>
+                </xsl:when>
+                <xsl:when test="(string-length($roundNumber) > 0) and not($displayHiddenCards = 'true')">
+                    <xsl:apply-templates select="*[@moveNumber = $roundNumber][not(@hidden='true')]"/>
                 </xsl:when>
                 <xsl:when test="($displayHiddenCards = 'true')">
                     <xsl:apply-templates select="*"/>
@@ -991,8 +1032,9 @@ text-shadow:; /* off */
                                 </xsl:if>
                                 
                                 <ul>
-                                    <!-- Innovate cards -->
+                                    <!-- link to Innovate and Defend categories -->
                                     <xsl:choose>
+                                        <!-- multiple rounds, present index links by round then by listing both categories of innovate/defend -->
                                         <xsl:when test="//CardTree[@multipleMoves='true']">
                                             <xsl:for-each select="//CardTree/TopLevelCardTypes/InnovateType/Type">
                                                 <!-- loop over each @round -->
@@ -1021,7 +1063,7 @@ text-shadow:; /* off */
                                             </xsl:for-each>
                                         </xsl:when>
                                         <xsl:otherwise>
-                                            <!-- single round -->
+                                            <!-- single round, present index links by listing both categories of innovate/defend -->
                                             <li>
                                                 <a href="#{$innovateCardName}" title="{$innovateCardName} Idea Card Chains">
                                                   <xsl:value-of select="$innovateCardName"/>
@@ -1426,7 +1468,57 @@ text-shadow:; /* off */
         </xsl:if>
 
         <!-- Process CardTree/*/Card(s) -->
-        <xsl:apply-templates/> <!-- process CardTree for InnovateCards and DefendCards -->
+        <!-- process CardTree by Round, for InnovateCards and DefendCards -->
+        <xsl:choose>
+            <!-- multiple rounds, sort cards first by round then by categories of innovate/defend -->
+            <xsl:when test="//CardTree[@multipleMoves='true']">
+                <xsl:for-each select="//CardTree/TopLevelCardTypes/InnovateType/Type">
+                    <!-- loop over each @round -->
+                    <xsl:variable name="roundNumber"  select="@round"/>
+                    <!-- debug
+                    <p>
+                        <xsl:text>Top-level looping over Round </xsl:text>
+                        <xsl:value-of select="$roundNumber"/>
+                    </p> -->
+                    <!-- InnovateCards then DefendCards for this round -->
+                    <xsl:apply-templates select="//InnovateCards">
+                        <xsl:with-param name="roundNumber">
+                            <xsl:value-of select="$roundNumber"/>
+                        </xsl:with-param>
+                    </xsl:apply-templates>
+                    <xsl:apply-templates select="//DefendCards">
+                        <xsl:with-param name="roundNumber">
+                            <xsl:value-of select="$roundNumber"/>
+                        </xsl:with-param>
+                    </xsl:apply-templates>
+                    <!--
+                    <xsl:choose>
+                        <xsl:when test="(($displayHiddenCards = 'true')) or (string-length($singleIdeaCardChainRootNumber) > 0)">
+                            <xsl:apply-templates select="//InnovateCards/Card[@moveNumber = $roundNumber]">
+                                <xsl:sort select="position()" data-type="number" order="descending"/>
+                            </xsl:apply-templates>
+                            <xsl:apply-templates select="//DefendCards/Card[@moveNumber = $roundNumber]">
+                                <xsl:sort select="position()" data-type="number" order="descending"/>
+                            </xsl:apply-templates>
+                        </xsl:when>
+                        <xsl:when test="not($displayHiddenCards = 'true')">
+                            <xsl:apply-templates select="//InnovateCards/Card[@moveNumber = $roundNumber][not(@hidden='true')]">
+                                <xsl:sort select="position()" data-type="number" order="descending"/>
+                            </xsl:apply-templates>
+                            <xsl:apply-templates select="//DefendCards/Card[@moveNumber = $roundNumber][not(@hidden='true')]">
+                                <xsl:sort select="position()" data-type="number" order="descending"/>
+                            </xsl:apply-templates>
+                        </xsl:when>
+                    </xsl:choose>
+                    -->
+                </xsl:for-each>
+            </xsl:when>
+            <xsl:otherwise>     
+                <!-- single round -->              
+                <xsl:apply-templates/>
+            </xsl:otherwise>
+        </xsl:choose>
+        
 
         <xsl:if test="(string-length($singleIdeaCardChainRootNumber) = 0)">
 
