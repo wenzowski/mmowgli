@@ -70,7 +70,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
   private NativeButton imNewButt, imRegisteredButt, signupButt, guestButt;
   private boolean lockedOut = false;
   private boolean mockupOnly = false;
-  User user; // new object
+  Long userId; // new object
 
   private static String BIGGESTWINDOW_HEIGHT_S = "1080px";
   private static int TOP_OFFSET_TO_MISS_VIDEO = 450;
@@ -388,8 +388,8 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
 
     if (event.getButton() == guestButt) {
       LoginPopup lp = new LoginPopup(this,true);
-      if(lp.user != null) {
-        handleLoginReturnTL(lp.user);
+      if(lp.userID != null) {
+        handleLoginReturnTL(lp.userID);
         HSess.checkClose(key);
         return;
       }
@@ -492,27 +492,27 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
     }
     if (currentPopup instanceof RegistrationPagePopupFirst) {
       closePopup(currentPopup);
-      user = ((RegistrationPagePopupFirst)currentPopup).getUser();
-      if(user == null) {  // cancelled
+      userId = ((RegistrationPagePopupFirst)currentPopup).getUserId();
+      if(userId == null) {  // cancelled
         UI.getCurrent().setScrollTop(0);
         HSess.checkClose(key);
         return;
       }
       // That user is detached from our session right now
-      RegistrationPagePopupSecond p2 = new RegistrationPagePopupSecond(this,user);
+      RegistrationPagePopupSecond p2 = new RegistrationPagePopupSecond(this,userId);
       openPopup(p2,p2.getUsualWidth());
       HSess.checkClose(key);
       return;
     }
     if (currentPopup instanceof RegistrationPagePopupSecond) {
       closePopup(currentPopup);
-      user = ((RegistrationPagePopupSecond)currentPopup).getUser();
-      if(user == null) {
+      userId = ((RegistrationPagePopupSecond)currentPopup).getUserId();
+      if(userId == null) {
         UI.getCurrent().setScrollTop(0);
         HSess.checkClose(key);
         return;
       }
-      RoleSelectionPage rsp = new RoleSelectionPage(this, user);
+      RoleSelectionPage rsp = new RoleSelectionPage(this, userId);
       openPopup(rsp,rsp.getUsualWidth());
       HSess.checkClose(key);
       return;
@@ -521,33 +521,34 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       // check for good stuff
       // put up warning if can't do it
       closePopup(currentPopup);
-      user = ((RoleSelectionPage)currentPopup).getUser();
-      if(user == null) {
+      userId = ((RoleSelectionPage)currentPopup).getUserId();
+      if(userId == null) {
         UI.getCurrent().setScrollTop(0);
         HSess.checkClose(key);
         return;
       }
-      user = User.mergeTL(user); // into this session
-      doOtherUserInit(user);
-      user.setOkSurvey(okSurvey);  // saved above
+
+      User _usr = User.getTL(userId); // into this session
+      doOtherUserInit(_usr);
+      _usr.setOkSurvey(okSurvey);  // saved above
       Game g = Game.getTL();
-      user.setRegisteredInMove(g.getCurrentMove());
+      _usr.setRegisteredInMove(g.getCurrentMove());
       
-      User.updateTL(user);
+      User.updateTL(_usr);
       HSess.closeAndReopen();
-      user = User.mergeTL(user);
+      _usr = User.getTL(userId);
       
-      Mmowgli2UI.getGlobals().getScoreManager().userCreatedTL(user);  // give him his points if appropriate
+      Mmowgli2UI.getGlobals().getScoreManager().userCreatedTL(_usr);  // give him his points if appropriate
 
       UI.getCurrent().setScrollTop(0);
-      wereInTL();
+      wereInTL(_usr);
       HSess.checkClose(key);
       
-      MSysOut.println(NEWUSER_CREATION_LOGS,"New user registration successful, user "+user.getUserName());
+      MSysOut.println(NEWUSER_CREATION_LOGS,"New user registration successful, userID "+_usr.getUserName());
       return;
     }
    if(currentPopup instanceof LoginPopup) {
-     handleLoginReturnTL(((LoginPopup)currentPopup).getUser());
+     handleLoginReturnTL(((LoginPopup)currentPopup).getUserId());
      HSess.checkClose(key);
      return;
    }
@@ -555,29 +556,30 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
 
    System.err.println("Program logic error in RegistrationPageBase.buttonClick()");
   }
-  private void handleLoginReturnTL(User u)
+  
+  private void handleLoginReturnTL(Long uId)
   {
     UI.getCurrent().setScrollTop(0);
-    if(u == null) { // cancelled
+    if(uId == null) { // cancelled
       UI.getCurrent().removeWindow(currentPopup);
       return;
     }
-    user = u;
-    wereInReallyTL();
+    userId = uId;
+    
+    wereInReallyTL(User.getTL(userId));
   }
 
  // Check for email confirmation
   @SuppressWarnings("serial")
-  private void wereInTL()
+  private void wereInTL(User _usr)
   {
     Game g = Game.getTL();
     if(!g.isEmailConfirmation()) {
-      user.setEmailConfirmed(true); // confirmation didn't happen, but they want to login
-      User.updateTL(user);
-      wereInReallyTL();
+      _usr.setEmailConfirmed(true); // confirmation didn't happen, but they want to login
+      wereInReallyTL(_usr);  // will do update
     }
     else {
-      List<String>sLis = VHibPii.getUserPiiEmails(user.getId());
+      List<String>sLis = VHibPii.getUserPiiEmails(_usr.getId());
       String email = sLis.get(0);
       final Window emailDialog = new Window("Email Confirmation");
       emailDialog.setModal(true);
@@ -610,7 +612,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       GridLayout grid = new GridLayout();
       vLay.addComponent(grid);
       
-      MSysOut.println(NEWUSER_CREATION_LOGS,"email confirmation dialog displayed, user "+user.getUserName());
+      MSysOut.println(NEWUSER_CREATION_LOGS,"email confirmation dialog displayed, user "+_usr.getUserName());
 
       final Button contButt = new Button("Am I confirmed yet?",new ClickListener()
       {
@@ -619,24 +621,23 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         public void buttonClick(ClickEvent event)
         {
           HSess.init();
-          MSysOut.println(NEWUSER_CREATION_LOGS,"\"Am I confirmed?\" clicked, user "+user.getUserName());
+          User u = User.getTL(userId);
+          MSysOut.println(NEWUSER_CREATION_LOGS,"\"Am I confirmed?\" clicked, user "+u.getUserName());
 
           if(confirmed) {
             closePopup(emailDialog);
-            user = User.mergeTL(user); // into this session
-            wereInReallyTL();
-            MSysOut.println(NEWUSER_CREATION_LOGS,"\"Am I confirmed?\", positive confirmation, user "+user.getUserName());
+            wereInReallyTL(u);
+            MSysOut.println(NEWUSER_CREATION_LOGS,"\"Am I confirmed?\", positive confirmation, user "+u.getUserName());
           }
           else {
             MSysOut.println(DEBUG_LOGS,"User.getTL() in RegistrationPageBase.wereInTL()");
-            User locUsr = User.getTL(user.getId());// must get from db, since it's externally updated
+            User locUsr = User.getTL(userId);
             if(locUsr.isEmailConfirmed()) {
               confirmed=true;
               event.getButton().setCaption("I'm ready to play mmowgli!");
-              user = locUsr;
             }
             else {
-              MSysOut.println(NEWUSER_CREATION_LOGS,"\"Am I confirmed?\", negative confirmation, user "+user.getUserName());
+              MSysOut.println(NEWUSER_CREATION_LOGS,"\"Am I confirmed?\", negative confirmation, user "+locUsr.getUserName());
               Notification.show("Your email is not yet confirmed");
             }
           }
@@ -675,16 +676,17 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
 
       openPopupWindowInMainWindow(emailDialog,500);
 
-      EmailConfirmation ec = new EmailConfirmation(user);
+      EmailConfirmation ec = new EmailConfirmation(_usr);
       EmailConfirmation.saveTL(ec);
 
       String confirmUrl = buildConfirmUrl(ec);
-      AppMaster.instance().getMailManager().sendEmailConfirmationTL(email, user.getUserName(), confirmUrl);
+      AppMaster.instance().getMailManager().sendEmailConfirmationTL(email, _usr.getUserName(), confirmUrl);
     } // else weren't confirmed
   }
 
   // User is persistent in this session on entry here.
-  private void wereInReallyTL()
+  // MUST do User update at the end.
+  private void wereInReallyTL(User _u_)
   {
     if (currentPopup != null)
       UI.getCurrent().removeWindow(currentPopup); // app.getMainWindow().removeWindow(currentPopup);
@@ -692,37 +694,35 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     globs.setLoggedIn(true);
 
-    if (user != null) {
-      if (!user.isWelcomeEmailSent()) {
+    if (_u_ != null) {
+      if (!_u_.isWelcomeEmailSent()) {
         MailManager mmgr = AppMaster.instance().getMailManager();
-        mmgr.onNewUserSignupTL(user);
-        user.setWelcomeEmailSent(true);
-        
-        User.updateTL(user);        
-        HSess.closeAndReopen();  // because further down the thread, a User.get is performed, which loses the update
-        user = User.mergeTL(user);
+        mmgr.onNewUserSignupTL(_u_);
+        _u_.setWelcomeEmailSent(true);
       }
       
       // Adjust session timeouts.  Default (standard user) is set in web.xml
       VaadinSession vsess = UI.getCurrent().getSession();
       WrappedSession sess = vsess.getSession();
-      if(user.isGameMaster())
+      if(_u_.isGameMaster())
         sess.setMaxInactiveInterval(GAMEMASTER_SESSION_TIMEOUT_SECONDS);
-      if(user.isAdministrator())
+      if(_u_.isAdministrator())
         sess.setMaxInactiveInterval(ADMINSTRATOR_SESSION_TIMEOUT_SECONDS);
       
       MSysOut.println(SYSTEM_LOGS,"Vaadin heartbeat interval (sec): "+vsess.getConfiguration().getHeartbeatInterval());
       MSysOut.println(SYSTEM_LOGS,"Tomcat timeout (\"maxInactiveInterval\") (sec): "+sess.getMaxInactiveInterval());
-      GameEventLogger.logUserLoginTL(user);
+      GameEventLogger.logUserLoginTL(_u_);
 
-      HSess.closeAndReopen();
+    //  HSess.closeAndReopen();
       MmowgliController cntlr = globs.getController();
       if (cntlr != null)
-        cntlr.handleEventTL(MmowgliEvent.HANDLE_LOGIN_STARTUP, user.getId(), null);
+        cntlr.handleEventTL(MmowgliEvent.HANDLE_LOGIN_STARTUP, userId, null);
       else
         System.err.println("No controller in RegistrationPageBase.wereIn()");
 
       AppMaster.instance().sendMySessionReport();
+      
+      User.updateTL(_u_);
     }
   }
 
