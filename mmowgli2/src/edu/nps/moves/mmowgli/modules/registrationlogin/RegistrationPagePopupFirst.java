@@ -72,8 +72,9 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
   private FormLayout formLay;
 
   private AvatarPanel chooser;
-
-  private User localUser = null;  // what gets returned
+  private NativeButton continueButt;
+  
+  private Long localUserId = null;  // what gets returned
 
   @HibernateSessionThreadLocalConstructor
   public RegistrationPagePopupFirst(ClickListener listener)
@@ -193,7 +194,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
     hl.addComponent(lab = new Label());
     hl.setExpandRatio(lab, 1.0f);
 
-    NativeButton continueButt = new NativeButton(null);
+    continueButt = new NativeButton(null);
     continueButt.setStyleName("m-continueButton");
     //NativeButton continueButt = new NativeButton();
     hl.addComponent(continueButt);
@@ -376,7 +377,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
     {
       HSess.init();
       MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog continue clicked");
-
+      
       // Checks:
       // 1. Email address has ampersand
       String email = emailTf.getValue().toString().trim();
@@ -388,6 +389,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       }
             
       // 2. Check for existing email; GMS and GAs handled differently
+      continueButt.setEnabled(false);
       String uname = userIDTf.getValue().toString();
           
       if (!checkEmail(email)) {
@@ -399,6 +401,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
             errorOutTL("Email address already used.");
             HSess.close();
             MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog failed: email already used, user "+uname);
+            continueButt.setEnabled(true);
             return;
           }
         }
@@ -410,6 +413,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
         errorOutTL("Email address not found on invitee list (or other reason).  Request an invitation at <a class='m-link-nodifference-white' href='http://mmowgli.nps.edu/trouble'>http://mmowgli.nps.edu/trouble</a>.");
         HSess.close();
         MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog failed: email not on list, user "+uname);
+        continueButt.setEnabled(true);
         return;
       }
 
@@ -419,6 +423,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
         errorOutTL("Enter a password of at least 3 characters");
         HSess.close();
         MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog failed: password < 3 characters, user "+uname);
+        continueButt.setEnabled(true);
         return;
       }
       String pwconf = confirmTf.getValue().toString();
@@ -427,6 +432,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
         errorOutTL("Passwords do not match.");
         HSess.close();
         MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog failed: entered passwords do not match, user "+uname);
+        continueButt.setEnabled(true);
         return;
       }
 
@@ -436,10 +442,11 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
         errorOutTL("Existing user with that name/ID");
         HSess.close();
         MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog failed: existing user with entered email, user "+uname);
+        continueButt.setEnabled(true);
         return;
       }
 
-      localUser = _usr;
+      localUserId = _usr.getId();
 
       // 7. Something entered for first and last name
       String fName = firstNameTf.getValue().toString().trim();
@@ -449,22 +456,23 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
         return;
       }
  */
-      UserPii uPii = VHibPii.getUserPii(localUser.getId());
-      uPii.setUserObjectId(localUser.getId());
+      UserPii uPii = VHibPii.getUserPii(localUserId);
+      uPii.setUserObjectId(localUserId);
       uPii.setRealFirstName(fName);
       uPii.setRealLastName(lName);
       String hashedPassword = new StrongPasswordEncryptor().encryptPassword(pw);
       uPii.setPassword(hashedPassword);
       VHibPii.update(uPii);
 
-      localUser.setAvatar(Avatar.getTL(chooser.getSelectedAvatarId()));
-      User.updateTL(localUser);
+      _usr.setAvatar(Avatar.getTL(chooser.getSelectedAvatarId()));
+      User.updateTL(_usr);
 
-      VHibPii.markInGame(localUser);
+      VHibPii.markInGame(_usr);
       HSess.close();
       
       MSysOut.println(NEWUSER_CREATION_LOGS,"User name, etc., dialog SUCCEEDED: new user "+ uname+" in database");
-
+      continueButt.setEnabled(true);
+      
       listener.buttonClick(event);
     }
     
@@ -484,27 +492,27 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
     private void errorOutTL(String s)
     {
       new Notification("Could not register", s, Notification.Type.ERROR_MESSAGE,true).show(Page.getCurrent());
-      if (localUser != null) {
-        User.deleteTL(localUser);
-        UserPii uPii = VHibPii.getUserPii(localUser.getId());
+      if (localUserId != null) {
+        User.deleteTL(localUserId);
+        UserPii uPii = VHibPii.getUserPii(localUserId);
         VHibPii.delete(uPii);
         EmailPii epii = VHibPii.getUserPiiEmail(uPii.getUserObjectId());
         VHibPii.delete(epii);
       }
-      localUser = null;
+      localUserId = null;
     }
   }
 
   @Override
-  public User getUser()
+  public Long getUserId()
   {
-    return localUser;
+    return localUserId;
   }
 
   @Override
   public void setUser(User u)
   {
-    localUser = u;
+    localUserId = (u==null?null:u.getId());
   }
 
   // Used to center the dialog
