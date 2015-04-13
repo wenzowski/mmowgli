@@ -98,6 +98,11 @@ public class DB
     return obj;    
   }
   
+  public static void deleteUserTL(Object id)
+  {
+    HSessionAccessor.deleteUserTL(id);
+  }
+  
   public static void deleteTL(Object obj)
   {
     HSessionAccessor.deleteTL(obj);
