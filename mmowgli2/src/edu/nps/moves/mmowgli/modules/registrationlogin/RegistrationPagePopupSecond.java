@@ -55,15 +55,15 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
   private FormLayout formLay;
   private TextField locTf;
   private BoundAffiliationCombo affilCombo;
-  private User localUser;
+  private Long localUserId;
   
   private String warning = "These fields are optional.  Please be careful that the combination of<br/>player ID, affiliation and location "+
   "do not reveal your actual identity.";
-  public RegistrationPagePopupSecond(Button.ClickListener listener, User u)
+  public RegistrationPagePopupSecond(Button.ClickListener listener, Long uId)
   {
     super(listener);
     super.initGui();
-    localUser = u;
+    localUserId = uId;
     setTitleString("Tell us about you");
  
     contentVLayout.setSpacing(true);
@@ -134,16 +134,16 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
 //        app.getMainWindow().showNotification("Login not complete.","Please enter at least an approximate location from where you are playing.",Notification.TYPE_ERROR_MESSAGE);
 //        return;
 //      }
-      localUser = User.merge(localUser, HSess.get());
-      localUser.setLocation(checkValue(locTf));
+      User _usr = User.getTL(localUserId);
+      _usr.setLocation(checkValue(locTf));
       Affiliation afl = (Affiliation)affilCombo.getValue();
       String aflStr = afl.getAffiliation();
       if(aflStr.equalsIgnoreCase("optional") || aflStr.equalsIgnoreCase("required"))
         aflStr = "";
-      localUser.setAffiliation(aflStr);
-      User.updateTL(localUser);
+      _usr.setAffiliation(aflStr);
+      User.updateTL(_usr);
       HSess.close();
-      MSysOut.println(NEWUSER_CREATION_LOGS,"Affiliation dialog continue button clicked, user "+localUser.getUserName());
+      MSysOut.println(NEWUSER_CREATION_LOGS,"Affiliation dialog continue button clicked, user "+_usr.getUserName());
       listener.buttonClick(event); // up the chain
     }
   }
@@ -158,15 +158,15 @@ public class RegistrationPagePopupSecond extends MmowgliDialog
   }
   
   @Override
-  public User getUser()
+  public Long getUserId()
   {
-    return localUser;
+    return localUserId;
   }
 
   @Override
   public void setUser(User u)
   {
-    this.localUser = u;  
+    localUserId = (u==null?null:u.getId());  
   }
 
   // Used to center the dialog
