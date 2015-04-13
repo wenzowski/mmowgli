@@ -21,6 +21,8 @@
  */
 package edu.nps.moves.mmowgli.hibernate;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.HIBERNATE_SESSION_LOGS;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -32,8 +34,8 @@ import org.hibernate.criterion.Restrictions;
 
 import com.vaadin.data.hbnutil.HbnContainer;
 
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 /**
  * HSessionAccessor.java Created on Jan 20, 2015
  *
@@ -73,6 +75,13 @@ public class HSessionAccessor
   {
     MSysOut.println(HIBERNATE_SESSION_LOGS, "Session delete of "+obj.getClass().getSimpleName()+" "+obj.hashCode()+" session: "+HSess.get().hashCode());
     HSess.get().delete(obj);
+  }
+  
+  static void deleteUserTL(Object id)
+  {
+    Object instance = HSess.get().load(User.class, (Serializable)id);
+    if(instance != null)
+      HSess.get().delete(instance);
   }
   
   static void save(Object obj, Session sess)
