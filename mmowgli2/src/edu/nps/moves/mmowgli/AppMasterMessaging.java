@@ -129,7 +129,7 @@ public class AppMasterMessaging implements JmsReceiver, JmsPreviewListener, Broa
     // This is because we've changed so that now we don't receive the jms messages we've sent
     handleSessionCountMsg(msgStr);
   }
-
+  
   // This has come in off the message bus. Keep track of server/logins.
   private void handleSessionCountMsg(String message)
   {
@@ -193,7 +193,7 @@ public class AppMasterMessaging implements JmsReceiver, JmsPreviewListener, Broa
     }
   }
   
-  private void handleSessionsReportMsg(String message)
+  private void handleSessionsReportMsgTL(String message)
   {
     String[] sa = message.split(SESSION_REPORT_ITEM_DELIMITER_WIRE);
     if(sa.length != 2)
@@ -228,10 +228,14 @@ public class AppMasterMessaging implements JmsReceiver, JmsPreviewListener, Broa
         handleSessionCountMsg(pkt.msg);
         break;
       case SESSIONS_REPORT:
-        handleSessionsReportMsg(pkt.msg);
+        handleSessionsReportMsgTL(pkt.msg);
         break;
       case REBUILD_REPORTS:
-        handleRebuildReportsMsg();
+        handleRebuildReportsMsgTL();
+        break;
+      case KILLALL_SESSIONS:
+        handleKillAllSessionsCommandTL();
+        break;
       default:
         Broadcaster.broadcast(pkt,this);  // last param means I don't want to hear my own messages
     }
@@ -244,7 +248,7 @@ public class AppMasterMessaging implements JmsReceiver, JmsPreviewListener, Broa
     return false; // don't want a retry    
   }
  
-  public void doRebuildReportsRequest()
+  public void doRebuildReportsRequestTL()
   {
     // We want to let everyone know we've been updated
     InterTomcatIO sessIO = getInterTomcatIO();
@@ -252,12 +256,24 @@ public class AppMasterMessaging implements JmsReceiver, JmsPreviewListener, Broa
       sessIO.sendDelayed(REBUILD_REPORTS, "", ""); // let this thread return
 
     // This is because we've changed so that now we don't receive the jms messages we've sent
-    handleRebuildReportsMsg();    
+    handleRebuildReportsMsgTL();    
   }
   
-  private void handleRebuildReportsMsg()
+  private void handleRebuildReportsMsgTL()
   {
     AppMaster.instance().pokeReportGenerator(); // if we don't build reports on the cluster node, nothing happens here
+  }
+  
+  public void sendKillAllSessionsCommand()
+  {
+    InterTomcatIO sessIO = getInterTomcatIO();
+    if (sessIO != null)
+      sessIO.sendDelayed(KILLALL_SESSIONS, "", "");
+  }
+  
+  private void handleKillAllSessionsCommandTL()
+  {
+    AppMaster.instance().killAllSessionsTL();
   }
   
   /**
