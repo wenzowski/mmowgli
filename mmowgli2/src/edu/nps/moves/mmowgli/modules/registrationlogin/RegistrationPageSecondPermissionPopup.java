@@ -120,19 +120,19 @@ public class RegistrationPageSecondPermissionPopup extends MmowgliDialog
     }
   }
 
-  private User u;
+  private Long u;
   /**
-   * @return the user or null if cancelled
+   * @return the userID or null if cancelled
    */
-  public User getUser()
+  public Long getUserId()
   {
     return u;
   }
 
   // used by parent class to set u == null when cancel is hit
-  public void setUser(User u)
+  public void setUser(User usr)
   {
-    this.u = u;
+    u = (usr==null?null:usr.getId());  
   }
 
   public boolean getRejected()
