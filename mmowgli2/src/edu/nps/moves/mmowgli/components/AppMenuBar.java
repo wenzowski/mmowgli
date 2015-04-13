@@ -247,6 +247,7 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
 
     ret.addSeparator();
     ret.addItem("Advance game round and/or phase", advanceRoundClicked).setIcon(FontAwesome.ARROW_RIGHT);
+    ret.addItem("Kill all player sessions for restart", new MCommand(MENUGAMEADMINKILLALLSESSIONS)).setIcon(FontAwesome.ARROW_RIGHT);
     return ret;
   }
 
