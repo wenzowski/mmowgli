@@ -218,7 +218,12 @@ public class User implements Serializable
   {
     DB.deleteTL(u);
   }
-
+  
+  public static void deleteTL(Object id)
+  {
+    DB.deleteUserTL(id);
+  }
+  
   public static User getUserWithUserName(String pUserName, Session sess)
   {
     MSysOut.println(HIBERNATE_SESSION_LOGS,"User.getUserWithUserName() name="+pUserName);
