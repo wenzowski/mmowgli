@@ -33,6 +33,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
+import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.MmowgliMessageBroadcaster;
 import edu.nps.moves.mmowgli.components.*;
 import edu.nps.moves.mmowgli.db.Game;
@@ -213,6 +214,10 @@ public class AdvanceMoveDialog extends Window
       layout.addComponent(message);
 
       UI.getCurrent().addWindow(stopDialog);
+      
+      HSess.init();
+      AppMaster.instance().killAllSessionsAndTellOtherNodesTL();
+      HSess.close();
     }
 
     class MoveWrap
