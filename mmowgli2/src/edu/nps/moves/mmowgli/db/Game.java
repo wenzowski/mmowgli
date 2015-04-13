@@ -76,6 +76,7 @@ public class Game implements Serializable
     double       mapLatitude;
     double       mapLongitude;
     int          mapZoom;
+    String       mapLayersCSV;
     
     String       backgroundImageLink;
     String       headerBannerImage;
@@ -577,7 +578,18 @@ public class Game implements Serializable
   {
     this.mapTitle = mapTitle;
   }
-
+  
+  @Basic
+  public String getMapLayersCSV()
+  {
+    return mapLayersCSV;
+  }
+  
+  public void setMapLayersCSV(String s)
+  {
+    mapLayersCSV = s;
+  }
+  
   @Basic
   public long getVersion()
   {
