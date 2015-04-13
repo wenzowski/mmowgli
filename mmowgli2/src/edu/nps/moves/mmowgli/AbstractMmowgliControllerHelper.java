@@ -38,6 +38,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.vaadin.dialogs.ConfirmDialog;
 import org.vaadin.viritin.fields.MTextField;
 
 import com.vaadin.event.ShortcutAction;
@@ -67,8 +68,9 @@ import edu.nps.moves.mmowgli.modules.gamemaster.CreateActionPlanWindow;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.modules.gamemaster.SetBlogHeadlineWindow;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPageBase;
-import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
+import edu.nps.moves.mmowgli.utility.MmowgliLinkInserter;
 
 /**
  * AbstractMmowgliControllerHelper.java
@@ -892,9 +894,9 @@ public class AbstractMmowgliControllerHelper
     GameEvent.saveTL(ev);        
   }
   
-  public void handlePublishReports()
+  public void handlePublishReportsTL()
   {
-    AppMaster.instance().requestPublishReports();
+    AppMaster.instance().requestPublishReportsTL();
 
     Notification notification = new Notification("", "Report publication begun", Notification.Type.WARNING_MESSAGE);
 
@@ -1360,5 +1362,27 @@ public class AbstractMmowgliControllerHelper
     Window subWin = new CreateActionPlanWindow(null,cardRootId);
     UI.getCurrent().addWindow(subWin);
     subWin.center();   
+  }
+
+  @SuppressWarnings("serial")
+  public void handleKillAllSessions()
+  {
+    ConfirmDialog.show(UI.getCurrent(),
+        "Important:",
+        "Are you sure you want to kill all user sessions in this Mmowgli? This is typically done before redeploying the application.",
+        "Yes, do it",
+        "No, cancel that request",
+        new ConfirmDialog.Listener()
+        {
+          public void onClose(ConfirmDialog dialog)
+          {
+            if (dialog.isConfirmed()) {
+              HSess.init();
+              AppMaster.instance().killAllSessionsAndTellOtherNodesTL();
+              HSess.close();
+            }
+          }
+        });
+
   }
 }
