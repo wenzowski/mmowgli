@@ -63,7 +63,7 @@ public class LoginPopup extends MmowgliDialog
   private PasswordField passwordTf;
   private NativeButton continueButt, pwResetButt;
 
-  User user; // what gets returned
+  Long userID; // what gets returned
   
   @HibernateSessionThreadLocalConstructor
   public LoginPopup(Button.ClickListener listener)
@@ -83,12 +83,12 @@ public class LoginPopup extends MmowgliDialog
       if(lis.size()>0) {
         for(User u : lis) {
           if(u.getUserName().toLowerCase().equals("guest")) {
-            this.user = u;
+            userID = u.getId();
             return;
           }
         }
       }
-      // If here, the guest logon is enabled, but no user named guest is marked "viewOnly", continue and let
+      // If here, the guest logon is enabled, but no userID named guest is marked "viewOnly", continue and let
       // caller realize what happened
     }
     setTitleString("Sign in please.");
@@ -172,9 +172,9 @@ public class LoginPopup extends MmowgliDialog
       HSess.init();
       
       String uname = userIDTf.getValue().toString();
-      user = User.getUserWithUserNameTL(uname);
-      if(user == null) {
-        errorOut("No registered user with that name/ID");
+      User luser = User.getUserWithUserNameTL(uname);
+      if(luser == null) {
+        errorOut("No registered userID with that name/ID");
         HSess.close();
         return;
       }
@@ -183,10 +183,9 @@ public class LoginPopup extends MmowgliDialog
 
       StrongPasswordEncryptor pwEncryptor = new StrongPasswordEncryptor();
       try {
-        //if(!user.getPassword().equalsIgnoreCase(enteredPassword)) {
-        UserPii upii = VHibPii.getUserPii(user.getId());
+        UserPii upii = VHibPii.getUserPii(luser.getId());
 
-        if(!pwEncryptor.checkPassword(enteredPassword,upii.getPassword())) { //user.getPassword())) {
+        if(!pwEncryptor.checkPassword(enteredPassword,upii.getPassword())) { //userID.getPassword())) {
           errorOut("Password does not match.  Try again.");
           passwordTf.focus();
           passwordTf.selectAll();
@@ -202,7 +201,7 @@ public class LoginPopup extends MmowgliDialog
         return;
       }
 
-      if(user.isAccountDisabled()) {
+      if(luser.isAccountDisabled()) {
         errorOut("This account has been disabled.");
         HSess.close();
         return;
@@ -211,19 +210,20 @@ public class LoginPopup extends MmowgliDialog
       Game g = Game.getTL();
       MovePhase mp = g.getCurrentMove().getCurrentMovePhase();
 
-      if(g.isEmailConfirmation() && !user.isEmailConfirmed()) {
+      if(g.isEmailConfirmation() && !luser.isEmailConfirmed()) {
         errorOut("This email address has not been confirmed.");
         HSess.close();
         return;
       }
       else {
         // did not fail confirm check; if confirmation off, make sure they can get in in the future or questions will arise
-        user.setEmailConfirmed(true);
-        User.updateTL(user);
+        luser.setEmailConfirmed(true);
+        userID = luser.getId();
+        User.updateTL(luser);
       }
       /* replaced with clause below it
       if(!g.isLoginAllowAll()) {
-        String errorMsg = checkLoginPermissions(g,user);
+        String errorMsg = checkLoginPermissions(g,userID);
         if(errorMsg != null) {
           errorOut(errorMsg);
           return;
@@ -234,13 +234,13 @@ public class LoginPopup extends MmowgliDialog
         if (!mp.isLoginAllowAll()) {
           if (mp.isLoginAllowRegisteredUsers())
             break loginPermissions;
-          if (user.isAdministrator() && mp.isLoginAllowGameAdmins())
+          if (luser.isAdministrator() && mp.isLoginAllowGameAdmins())
             break loginPermissions;
-          if (user.isGameMaster() && mp.isLoginAllowGameMasters())
+          if (luser.isGameMaster() && mp.isLoginAllowGameMasters())
             break loginPermissions;
-          if (user.isDesigner() && mp.isLoginAllowGameDesigners())
+          if (luser.isDesigner() && mp.isLoginAllowGameDesigners())
             break loginPermissions;
-          if (user.isViewOnly() && mp.isLoginAllowGuests())
+          if (luser.isViewOnly() && mp.isLoginAllowGuests())
             break loginPermissions;
 
           // ok, not allowing everybody in and didn't match any special cases
@@ -302,23 +302,23 @@ public class LoginPopup extends MmowgliDialog
     {
       HSess.init();
       String uname = userIDTf.getValue().toString();
-      user = User.getUserWithUserNameTL(uname);
+      User luser = User.getUserWithUserNameTL(uname);
 
-      if (user == null) {
-        errorOut("No registered user with that User ID");
+      if (luser == null) {
+        errorOut("No registered userID with that User ID");
         HSess.close();
         return;
       }
 
       // This is necessary to receive an email to activate your registration
-      Mmowgli2UI.getGlobals().setUserID(user);
+      Mmowgli2UI.getGlobals().setUserID(luser);
 
       // Lots of stuff borrowed from RegistrationPageBase
       if (event.getButton() == pwResetButt) {
         UI ui = Mmowgli2UI.getGlobals().getFirstUI();
         ui.removeWindow(LoginPopup.this);
 
-        PasswordResetPopup pwp = new PasswordResetPopup(listener, user.getUserName());
+        PasswordResetPopup pwp = new PasswordResetPopup(listener, luser.getUserName());
         ui.addWindow(pwp);
         pwp.center();        
       }
@@ -334,23 +334,23 @@ public class LoginPopup extends MmowgliDialog
   @Override
   protected void cancelClickedTL(ClickEvent event)
   {
-    user = null;
+    userID = null;
     super.cancelClickedTL(event);
   }
 
   /**
-   * @return the user or null if canceled
+   * @return the userID or null if canceled
    */
   @Override
-  public User getUser()
+  public Long getUserId()
   {
-    return user;
+    return userID;
   }
 
   // used by parent class when cancel is hit
   @Override
   public void setUser(User u)
   {
-    user = u;
+    userID = (u==null?null:u.getId());
   }
 }
