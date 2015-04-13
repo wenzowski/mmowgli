@@ -136,11 +136,16 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
     map.removeAllComponents();
    // map.addControl(new LScale());
     layerMap = installAllLayers(map);
+    
+    fillLayerPopupsTL(); // build the widgets
+    
+    setDefaultMapValuesTL(me);  // set default zoom, center, layers
+  
     if(!imAGuest)
-      activateLayersFromDBTL(me);
-    fillLayerPopupsTL();
-    centerAndZoomTL(me);
-   
+      setUserMapValuesTL(me);  // set zoom, center and layers from userID pref.
+    
+    setOptionGroupWidgetsFromLayerMap();// syncs up the widgets to match the active layers
+
     Collection<Extension> exts = map.getExtensions();
     LLayers llayers = null;
     for(Extension ex : exts)
@@ -181,6 +186,127 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
     overlayPopup.setContent(overlayOpt);
     initting=false;
   }
+    
+  private void setDefaultMapValuesTL(User me)
+  {
+    Game g = Game.getTL();
+    activateLayersFromCSV(g.getMapLayersCSV());  //sets the active bit of the appropriate layers in the layer map
+    
+    map.setCenter(g.getMapLatitude(),g.getMapLongitude());
+    map.setZoomLevel(g.getMapZoom());
+  }
+ 
+  private void fillLayerPopupsTL()
+  {
+    boolean oldinitting = initting;
+    initting = true;
+    
+    Iterator<Component> itr = map.iterator();
+    while (itr.hasNext()) {
+      LTileLayer lay = (LTileLayer) itr.next();
+      boolean baseLayer = false;
+      String handle = "";
+      if (lay instanceof MLTileLayer) {
+        baseLayer = ((MLTileLayer) lay).isBaseLayer();
+        handle = ((MLTileLayer) lay).getHandle();
+      }
+      if (lay instanceof MLWmsLayer) {
+        baseLayer = ((MLWmsLayer) lay).isBaseLayer();
+        handle = ((MLWmsLayer) lay).getHandle();
+      }
+      if (baseLayer) {
+        baseOptGr.addItem(lay);
+        baseOptGr.setItemCaption(lay, handle);
+      }
+      else {
+        overlayOpt.addItem(lay);
+        overlayOpt.setItemCaption(lay, handle);
+      }
+    }
+    initting = oldinitting;
+  }
+  
+  private void setOptionGroupWidgetsFromLayerMap()
+  {
+    Collection<MLayer> vals = layerMap.values();
+    ArrayList<MLayer> overlays = new ArrayList<>();
+    
+    for(MLayer lay : vals) {
+      if(lay.isActive()) {
+        if(baseOptGr.containsId(lay))
+          baseOptGr.setValue(lay);
+        else if(overlayOpt.containsId(lay))
+          overlays.add(lay);
+      }
+    }
+    overlayOpt.setValue(overlays);
+  }
+/*
+  private void setOptionGroupWidgetsFromDBTL()
+  {
+    User me = Mmowgli2UI.getGlobals().getUserTL();
+    List<String> actives = me.getActiveMapLayers();
+    ArrayList<MLayer> overlays = new ArrayList<>();
+    for(String s : actives) {
+      MLayer lay = layerMap.get(s);
+      if(baseOptGr.containsId(lay))
+        baseOptGr.setValue(lay);
+      else if(overlayOpt.containsId(lay))
+        overlays.add(lay);     
+    }
+    overlayOpt.setValue(overlays);
+  }
+ */ 
+  private void activateLayersFromCSV(String s)
+  {
+    if(s == null)
+      return;
+    String[] sa = s.split(",");
+    ArrayList<String> aLis = new ArrayList<>(sa.length);
+    for(String layer : sa) {
+      aLis.add(layer.trim());
+    }
+    _activateLayers(aLis);
+  }
+
+  private void setUserMapValuesTL(User me)
+  {
+    if (me == null)
+      me = Mmowgli2UI.getGlobals().getUserTL();
+
+    Float myLat = me.getMapCenterLatitude();
+    Float myLon = me.getMapCenterLongitude();
+    Integer myZoom = me.getMapZoom();
+    if (myLat != null && myLon != null & myZoom != null) {
+      map.setCenter(myLat, myLon);
+      map.setZoomLevel(myZoom);
+    }
+
+    List<String> activeLayers = me.getActiveMapLayers();
+    _activateLayers(activeLayers);
+  }
+  
+  private void _activateLayers(List<String> activeLayers)
+  {
+    if(activeLayers.isEmpty())
+      return;
+    
+    _clearActiveLayers();
+    boolean oldinitting = initting;
+    initting = true;
+    for(String key : activeLayers) {
+      MLayer lay = layerMap.get(key);      
+      lay.setActive(true);
+    }
+    initting = oldinitting;
+  }
+  
+  private void _clearActiveLayers()
+  {
+    Collection<MLayer> lays = layerMap.values();
+    for (MLayer lay : lays)
+      lay.setActive(false);
+  }
   
   boolean initting = false;
   private class LayerChoiceListener implements ValueChangeListener
@@ -217,7 +343,7 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
   
   private void updateDBActiveList()
   {
-    HSess.init();
+    Object key = HSess.checkInit();
     User me = Mmowgli2UI.getGlobals().getUserTL();
     List<String> lis= me.getActiveMapLayers();
     lis.clear();
@@ -226,106 +352,7 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
         lis.add(lay.getHandle());     
     }
     User.updateTL(me);
-    HSess.close();
-  }
-  
-  private void fillLayerPopupsTL()
-  {
-    boolean oldinitting = initting;
-    initting = true;
-    
-    Iterator<Component> itr = map.iterator();
-    while (itr.hasNext()) {
-      LTileLayer lay = (LTileLayer) itr.next();
-      boolean baseLayer = false;
-      String handle = "";
-      if (lay instanceof MLTileLayer) {
-        baseLayer = ((MLTileLayer) lay).isBaseLayer();
-        handle = ((MLTileLayer) lay).getHandle();
-      }
-      if (lay instanceof MLWmsLayer) {
-        baseLayer = ((MLWmsLayer) lay).isBaseLayer();
-        handle = ((MLWmsLayer) lay).getHandle();
-      }
-      if (baseLayer) {
-        baseOptGr.addItem(lay);
-        baseOptGr.setItemCaption(lay, handle);
-      }
-      else {
-        overlayOpt.addItem(lay);
-        overlayOpt.setItemCaption(lay, handle);
-      }
-    }
-    if(!imAGuest)
-      setOptionGroupWidgetsFromDBTL();
-    else
-      setOptionGroupWidgetsDefault();
-    initting = oldinitting;
-  }
-  
-  private void setOptionGroupWidgetsDefault()
-  {
-    Collection<MLayer> vals = layerMap.values();
-    ArrayList<MLayer> overlays = new ArrayList<>();
-    
-    for(MLayer lay : vals) {
-      if(lay.isActive()) {
-        if(baseOptGr.containsId(lay))
-          baseOptGr.setValue(lay);
-        else if(overlayOpt.containsId(lay))
-          overlays.add(lay);
-      }
-    }
-    overlayOpt.setValue(overlays);
-  }
-  
-  private void setOptionGroupWidgetsFromDBTL()
-  {
-    User me = Mmowgli2UI.getGlobals().getUserTL();
-    List<String> actives = me.getActiveMapLayers();
-    ArrayList<MLayer> overlays = new ArrayList<>();
-    for(String s : actives) {
-      MLayer lay = layerMap.get(s);
-      if(baseOptGr.containsId(lay))
-        baseOptGr.setValue(lay);
-      else if(overlayOpt.containsId(lay))
-        overlays.add(lay);     
-    }
-    overlayOpt.setValue(overlays);
-  }
-  
-  private void activateLayersFromDBTL(User me)
-  {
-    if(me == null)
-      me = Mmowgli2UI.getGlobals().getUserTL(); 
-
-    List<String> activeLayers = me.getActiveMapLayers();
-    boolean oldinitting = initting;
-    initting = true;
-    for(String key : activeLayers) {
-      MLayer lay = layerMap.get(key);      
-      lay.setActive(true);
-    }
-    initting = oldinitting;
-  }
-  
-  private void centerAndZoomTL(User me)
-  {
-    if(me == null)
-      me = Mmowgli2UI.getGlobals().getUserTL();
-    
-    Float myLat = me.getMapCenterLatitude();
-    Float myLon = me.getMapCenterLongitude();
-    Integer myZoom = me.getMapZoom();
-    if(myLat != null && myLon != null & myZoom != null) {
-      map.setCenter(myLat, myLon);
-      map.setZoomLevel(myZoom);
-    }
-    else {
-      Game g = Game.getTL();
-      map.setCenter(g.getMapLatitude(),g.getMapLongitude());
-      map.setZoomLevel(g.getMapZoom());
-    }
+    HSess.checkClose(key);
   }
 
   @SuppressWarnings("serial")
@@ -339,12 +366,16 @@ public class LeafletMap extends VerticalLayout implements MmowgliComponent, View
       me.setMapCenterLatitude(null);
       me.setMapCenterLongitude(null);
       me.setMapZoom(null);
-      centerAndZoomTL(me);
+      me.getActiveMapLayers().clear();
+      
+      setDefaultMapValuesTL(me);
+      setOptionGroupWidgetsFromLayerMap();// syncs up the widgets to match the active layers
+
       User.updateTL(me);
       HSess.close();
-    }
-    
+    }    
   }
+  
   class MyMoveEndListener implements LeafletMoveEndListener
   {
     @Override
