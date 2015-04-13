@@ -62,12 +62,6 @@ public class PasswordResetPopup extends Window implements Button.ClickListener
   private static final long serialVersionUID = 353792651604998559L;
   private TextField userIDTf, emailTf;
 
-  /**
-   * @param app      the main Vaadin application currently running
-   * @param listener the end listener to listen for cancel events
-   * @param user     the User who wishes to reset their password
-   */
-
   @SuppressWarnings("serial")
   public PasswordResetPopup(Button.ClickListener listener, String uname)
   {
