@@ -199,8 +199,9 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         break;
         
       case MENUGAMEADMINPUBLISHREPORTS:
-        helper.handlePublishReports();
+        helper.handlePublishReportsTL();
         break;
+        
       case MENUGAMEADMINEXPORTACTIONPLANS:
         new ActionPlanExporter().exportAllPlansToBrowser("Export ActionPlans");
         break;
@@ -297,6 +298,10 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       
       case MENUGAMEMASTERINVITEAUTHORSCLICK:
         AddAuthorEventHandler.inviteAuthorsToActionPlan();
+        break;
+        
+      case MENUGAMEADMINKILLALLSESSIONS:
+        helper.handleKillAllSessions();
         break;
         
       default:
