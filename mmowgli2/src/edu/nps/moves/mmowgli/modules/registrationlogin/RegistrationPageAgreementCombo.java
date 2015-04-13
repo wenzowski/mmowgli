@@ -200,7 +200,7 @@ public class RegistrationPageAgreementCombo extends MmowgliDialog
   // used by parent class to set u == null when cancel is hit
   public void setUser(User usr)
   {
-    this.u = usr.getId();
+    u = (usr==null?null:usr.getId());  
   }
 
   public boolean getRejected()
