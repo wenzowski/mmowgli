@@ -65,7 +65,7 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
   protected String topLabelStyle = "m-dialog-toplabel";
   private Label titleLab = null;
 
-  public abstract User getUser();
+  public abstract Long getUserId();
   public abstract void setUser(User u);
 
   public MmowgliDialog(ClickListener listener)
@@ -164,16 +164,18 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
    */
   protected void cancelClickedTL(ClickEvent event)
   {
-    User u = getUser();
-    if(u != null) {
-      User.deleteTL(u);
-      UserPii uPii = VHibPii.getUserPii(u.getId());
-      VHibPii.delete(uPii);
-      MSysOut.println(MISC_LOGS,"User deleted (didn't finish login) "+u.getId());
-      setUser(null);
+    Long uid = getUserId();
+    if (uid != null) {
+      User u = User.getTL(this.getUserId());
+      if (u != null) {
+        User.deleteTL(u);
+        UserPii uPii = VHibPii.getUserPii(u.getId());
+        VHibPii.delete(uPii);
+        MSysOut.println(MISC_LOGS, "User deleted (didn't finish login) " + u.getId());
+        setUser(null);
+      }
     }
-
-    if(listener != null)
+    if (listener != null)
       listener.buttonClick(event); // back up the chain
   }
 
