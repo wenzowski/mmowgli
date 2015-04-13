@@ -26,9 +26,11 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.io.Serializable;
 
+import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.Position;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.UI;
 
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.DB;
@@ -324,8 +326,7 @@ public class AbstractMmowgliControllerHelper2
         GameLinks gl = GameLinks.getTL();
         showNotification("We're sorry, but your mmowgli account has been locked out and you will now be logged off. " + "Send a trouble report or contact "
             + gl.getTroubleMailto() + " for clarification.", "IMPORTANT!!", "m-yellow-notification");
-        if (myUI.isFirstUI())
-          doLogOutIn8Seconds();
+        doLogOutIn8SecondsTL();
         return true; // show notifications
       }
     }
@@ -359,6 +360,7 @@ public class AbstractMmowgliControllerHelper2
         }
       }
     }
+
     return ret;
   }
 
@@ -390,31 +392,39 @@ public class AbstractMmowgliControllerHelper2
     notif.show(myUI.getPage());
   }
   
-  private void doLogOutIn8Seconds()
+  private void doLogOutIn8SecondsTL()
   {
-    //todo
-    /*
-    Thread thr = new Thread("KickoutThread") {
+    Thread thr = new Thread("KickoutThread")
+    {
       @Override
       public void run()
       {
         try {
-          Thread.sleep(8*1000);
-          SingleSessionManager sessMgr = new SingleSessionManager();
-          doLogOut(sessMgr);
-
-          ApplicationFramework windowFramework = app.getApplicationWindows()[0].getApplicationFramework();
-          windowFramework.needToPushChanges();
-          sessMgr.setNeedsCommit(true);
-          sessMgr.endSession();
+          Thread.sleep(8 * 1000);
+          VaadinSession sess = Mmowgli2UI.getAppUI().getSession();
+          HSess.init();
+          GameLinks links = GameLinks.getTL();
+          HSess.close();
+          final String terms = links.getTermsLink();
+          
+          for (final UI ui : sess.getUIs())
+            ui.access(new Runnable()
+            {
+              public void run()
+              {
+                ui.getPage().setLocation(terms);
+              }
+            });
+          sess.close(); // bye bye
         }
-        catch(InterruptedException ex){}
+        catch (InterruptedException ex) {
+        }
       }
     };
     thr.setPriority(Thread.NORM_PRIORITY);
     thr.start();
-    */
   }
+
   private boolean newUser_TL(Object uId, Component visibleComponent)
   {
     // Let the score manager do something if he wants
