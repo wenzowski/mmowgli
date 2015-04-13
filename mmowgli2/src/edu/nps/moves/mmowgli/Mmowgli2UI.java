@@ -22,9 +22,7 @@
 
 package edu.nps.moves.mmowgli;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.MISC_LOGS;
-import static edu.nps.moves.mmowgli.MmowgliConstants.PUSHTRANSPORT;
-import static edu.nps.moves.mmowgli.MmowgliConstants.SYSTEM_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -85,7 +83,13 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   protected Mmowgli2UI(boolean firstUI)
   {
     this.firstUI = firstUI;
+    setPushParameters();
+  }
+  
+  private void setPushParameters()
+  {
     getPushConfiguration().setTransport(PUSHTRANSPORT);
+    //getPushConfiguration().setParameter(ATMOS_TIMEOUT, "90000"); // ninety seconds  // this severs the conection and a red banner appears
   }
   
   @Override
