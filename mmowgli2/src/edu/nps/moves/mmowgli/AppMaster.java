@@ -48,6 +48,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.vaadin.server.*;
 import com.vaadin.shared.Version;
 import com.vaadin.shared.ui.ui.Transport;
+import com.vaadin.ui.UI;
 
 import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.components.BadgeManager;
@@ -663,12 +664,12 @@ public class AppMaster
   }
   
   // Called from the Game Admin menu to get the reports to be be rebuild
-  public void requestPublishReports()
+  public void requestPublishReportsTL()
   {
     if(reportGenerator != null)  // if we're the master...
       reportGenerator.poke();
     else
-      appMasterMessaging.doRebuildReportsRequest();  // sends requests to other AppMasters  
+      appMasterMessaging.doRebuildReportsRequestTL();  // sends requests to other AppMasters  
   }
 
   public static String getAlternateVideoUrlTL()
@@ -817,6 +818,30 @@ public class AppMaster
     return REPORTS_URL;
   }
 
+  /* This is intended to be used before redeploying */
+  public void  killAllSessionsAndTellOtherNodesTL()
+  {
+    killAllSessionsTL();
+    appMasterMessaging.sendKillAllSessionsCommand();
+  }
+  
+  public void killAllSessionsTL()
+  {
+    // First send a message to everybody else
+    GameLinks links = GameLinks.getTL();
+    String thanks = links.getThanksForPlayingLink();
+    
+    Iterator<VaadinSession> itr = sessionsInThisMmowgliNode.iterator();
+    while(itr.hasNext()) {
+      VaadinSession sess = itr.next();
+      for(UI ui : sess.getUIs()) {
+        ui.getPage().setLocation(thanks);
+        ui.close();
+      }
+      sess.close();
+    }
+  }
+  
   private HashSet<VaadinSession> sessionsInThisMmowgliNode = new HashSet<VaadinSession>();
   
   // The synchronized methods below protect concurrent access to the hashset  
@@ -829,6 +854,7 @@ public class AppMaster
   {
     sessionsInThisMmowgliNode.add(sess);    
   }
+  
    /**
    * Called from servlet
    */
