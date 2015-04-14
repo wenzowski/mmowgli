@@ -55,7 +55,7 @@ public class Media implements Serializable
      GAME_IMAGES_REPOSITORY,  // file name only or relative path plus file name
      USER_UPLOADS_REPOSITORY, // file name only or relative path plus file name
      FILESYSTEM_PATH,         // full path on server machine
-     WEB_FULL_URL,             // full url
+     WEB_FULL_URL,            // full url
      DATABASE
   };
   
