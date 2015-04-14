@@ -102,7 +102,7 @@ public class LoginPopup extends MmowgliDialog
     contentVLayout.addComponent(lay);
     contentVLayout.setComponentAlignment(lay, Alignment.TOP_CENTER);
 
-    lay.addComponent(lab=new Label("Game name:"));
+    lay.addComponent(lab=new Label("Player name:"));
     lab.addStyleName("m-dialog-label");
     
     lay.addComponent(userIDTf = new TextField());
@@ -145,7 +145,7 @@ public class LoginPopup extends MmowgliDialog
 
     h2.addComponent(lab = new Label());
     h2.setExpandRatio(lab, 01.0f);
-    pwResetButt = new NativeButton("Forgot password or game name?");
+    pwResetButt = new NativeButton("Forgot password or player name?");
     pwResetButt.addStyleName("m-signin-forgotButton");
     h2.addComponent(pwResetButt);
 

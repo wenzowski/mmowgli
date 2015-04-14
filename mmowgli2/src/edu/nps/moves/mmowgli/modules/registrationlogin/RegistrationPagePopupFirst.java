@@ -105,7 +105,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
     lab.setWidth(null);  // makes it undefined so it's not 100%
     contentVLayout.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
 
-    contentVLayout.addComponent(lab= new Label("Please choose a game name (ID) that protects your privacy."));
+    contentVLayout.addComponent(lab= new Label("Please choose a player name (ID) that protects your privacy."));
     lab.addStyleName("m-dialog-text");
     lab.setWidth(null);  // makes it undefined so it's not 100%
     contentVLayout.setComponentAlignment(lab, Alignment.MIDDLE_CENTER);
@@ -118,7 +118,7 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
     contentVLayout.addComponent(formLay);
     contentVLayout.setComponentAlignment(formLay, Alignment.TOP_CENTER);
 
-    formLay.addComponent(userIDTf = new TextField("Pick a game name (ID)"));
+    formLay.addComponent(userIDTf = new TextField("Pick a player name (ID)"));
     userIDTf.setColumns(24);
     // userIDTf.setRequired(true);
     // userIDTf.setRequiredError("We really need an occupation.");
