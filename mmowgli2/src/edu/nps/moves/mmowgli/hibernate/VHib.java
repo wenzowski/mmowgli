@@ -75,10 +75,13 @@ public final class VHib extends AbstractVHib
     configureHibernateSearch();
     
     init2();
-    
+   
     // Build search index
     Session srsess = openSession();
     srsess.beginTransaction();
+    
+    AdHocDBInits.databaseCheckUpdate(srsess);  // one-time only stuff, if bootstrapping, create cards, users, etc.
+
     FullTextSession ftSess = Search.getFullTextSession(srsess);
     try {
       ftSess.createIndexer().startAndWait();
@@ -86,8 +89,7 @@ public final class VHib extends AbstractVHib
     catch(InterruptedException ex) {
       System.err.println("Error building search index.");
     }
-      
-    AdHocDBInits.databaseCheckUpdate(srsess);  // one-time only stuff
+     
     srsess.getTransaction().commit();
     srsess.close();
     
