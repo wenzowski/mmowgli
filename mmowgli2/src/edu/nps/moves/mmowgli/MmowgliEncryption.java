@@ -77,7 +77,9 @@ public class MmowgliEncryption
         MSysOut.println(SYSTEM_LOGS,msg);
       }
       context.setAttribute(MmowgliConstants.APPLICATION_STARTUP_ERROR_STRING, msg);
-      return;
+      throw new RuntimeException(t);
+
+      //return;
     }
     // Register various jasypt encryptors, so we encrypt data at rest in the database.
     // Registry for all the PBE*Encryptor which are eligible for use from Hibernate.
