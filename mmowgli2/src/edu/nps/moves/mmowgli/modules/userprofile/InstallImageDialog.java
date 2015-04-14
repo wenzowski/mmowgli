@@ -63,14 +63,24 @@ public class InstallImageDialog extends Window
   private static final long serialVersionUID = 8355175712103259698L;
   public static long MAXUPLOADSIZE = 100*1024l;
   
+  public static void show(boolean showExisting)
+  {
+    show(null,null,showExisting);
+  }
+  
   public static void show()
   {
-    show(null,null);
+    show(null,null,true);
   }
 
   public static void show(String text, InstallImageResultListener lis)
   {
-    InstallImageDialog dialog = new InstallImageDialog(text,lis);
+    show(text,lis,true);
+  }
+  
+  public static void show(String text, InstallImageResultListener lis, boolean showExisting)
+  {
+    InstallImageDialog dialog = new InstallImageDialog(text,lis, showExisting);
     dialog.center();
     UI.getCurrent().addWindow(dialog);
   }
@@ -92,89 +102,92 @@ public class InstallImageDialog extends Window
   private static CheckBox existingCB, newCB;
   
   @SuppressWarnings("serial")
-  private InstallImageDialog(String topText, InstallImageResultListener lis)
+  private InstallImageDialog(String topText, InstallImageResultListener lis, boolean showExisting)
   {
     Object sessKey = HSess.checkInit();
     listener = lis;
 
-    setCaption("Choose Existing or Upload New Image");
+    setCaption(showExisting ? "Choose Existing or Upload New Image" : "Upload New Image");
     setModal(true);
     setWidth("350px");
-    
+    VerticalLayout vl;
+
     VerticalLayout vLay = new VerticalLayout();
     setContent(vLay);
     vLay.setMargin(true);
     vLay.setSpacing(true);
-    
-    if(topText != null && topText.length()>0){
-       HtmlLabel lab = new HtmlLabel(topText);
-       lab.setWidth("100%");
-       vLay.addComponent(lab);
+
+    if (topText != null && topText.length() > 0) {
+      HtmlLabel lab = new HtmlLabel(topText);
+      lab.setWidth("100%");
+      vLay.addComponent(lab);
     }
     
-    @SuppressWarnings({ "unchecked" })
-    List<Media> mlis = HSess.get().createCriteria(Media.class)
-        .add(Restrictions.eq("source", Media.Source.DATABASE))
-        .addOrder(Order.asc("url")).list();
-    BeanItemContainer<Media> beanContainer = new BeanItemContainer<Media>(Media.class,mlis);
-    
-    vLay.addComponent(existingCB = new CheckBox("Choose from existing images",true));
-    VerticalLayout vl;
-    vLay.addComponent(vl=new VerticalLayout());
-    vl.addStyleName("m-greyborder");
-    vl.addStyleName("m-greybackground");
-    vl.setMargin(true);
-    vl.setSpacing(true);
+    if (showExisting) {  // put the existing selector in the dialog
+      @SuppressWarnings({ "unchecked" })
+      List<Media> mlis = HSess.get().createCriteria(Media.class).add(Restrictions.eq("source", Media.Source.DATABASE)).addOrder(Order.asc("url")).list();
+      BeanItemContainer<Media> beanContainer = new BeanItemContainer<Media>(Media.class, mlis);
 
-    vl.addComponent(sel = new ListSelect());
-    sel.setWidth("100%");
-    sel.setNullSelectionAllowed(false);
-    sel.setContainerDataSource(beanContainer);
-    sel.setItemCaptionPropertyId("url");
-    
-    vl.addComponent(saveExistingButt = new NativeButton("Return selected image", new ClickListener()
-    {
-      @Override
-      public void buttonClick(ClickEvent event)
+      vLay.addComponent(existingCB = new CheckBox("Choose from existing images", true));
+
+      vLay.addComponent(vl = new VerticalLayout());
+      vl.addStyleName("m-greyborder");
+      vl.addStyleName("m-greybackground");
+      vl.setMargin(true);
+      vl.setSpacing(true);
+
+      vl.addComponent(sel = new ListSelect());
+      sel.setWidth("100%");
+      sel.setNullSelectionAllowed(false);
+      sel.setContainerDataSource(beanContainer);
+      sel.setItemCaptionPropertyId("url");
+
+      vl.addComponent(saveExistingButt = new NativeButton("Return selected image", new ClickListener()
       {
-        HSess.init();
-        media = (Media)sel.getValue();
-        doneHereTL();
-        HSess.close();
-      }      
-    }));
-    vLay.addComponent(newCB = new CheckBox("Upload new image",false));
-    vLay.addComponent(vl=new VerticalLayout());
+        @Override
+        public void buttonClick(ClickEvent event)
+        {
+          HSess.init();
+          media = (Media) sel.getValue();
+          doneHereTL();
+          HSess.close();
+        }
+      }));
+      vLay.addComponent(newCB = new CheckBox("Upload new image", false));
+    }
+
+    // Here for the file chooser
+    vLay.addComponent(vl = new VerticalLayout());
     vl.addStyleName("m-greyborder");
     vl.addStyleName("m-greybackground");
     vl.setSpacing(true);
     vl.setMargin(true);
 
     ImgReceiver rec;
-    uploadFileWidget = new Upload();//"Image name", rec = new ImgReceiver());
+    uploadFileWidget = new Upload();// "Image name", rec = new ImgReceiver());
     uploadFileWidget.setReceiver(rec = new ImgReceiver());
     uploadFileWidget.setButtonCaption("Browse");
     uploadFileWidget.setImmediate(true);
     uploadFileWidget.addFailedListener(rec);
     uploadFileWidget.addFinishedListener(rec);
-    uploadFileWidget.setEnabled(false);
+    uploadFileWidget.setEnabled(showExisting ? false : true);
     vl.addComponent(uploadFileWidget);
     vl.addComponent(fileNameTF = new TextField());
     fileNameTF.setWidth("100%");
-    fileNameTF.setEnabled(false);
+    fileNameTF.setEnabled(showExisting ? false : true);
     fileNameTFState = false;
     HorizontalLayout hLay;
     vl.addComponent(hLay = new HorizontalLayout());
     hLay.setSpacing(true);
     hLay.addComponent(saveImageButt = new NativeButton("Save image with above name and close", rec));
-    //hLay.addComponent(savedLab = new HtmlLabel("<i>saved</i>"));
-    
+    // hLay.addComponent(savedLab = new HtmlLabel("<i>saved</i>"));
+
     saveImageButt.setImmediate(true);
     saveImageButt.addClickListener(rec);
     saveImageButt.setEnabled(false);
     saveImageButtState = false;
 
-    vLay.addComponent(new NativeButton("Close",new ClickListener()
+    vLay.addComponent(new NativeButton("Close", new ClickListener()
     {
       @Override
       public void buttonClick(ClickEvent event)
@@ -182,11 +195,14 @@ public class InstallImageDialog extends Window
         HSess.init();
         doneHereTL();
         HSess.close();
-      }     
+      }
     }));
-       
-    existingCB.addValueChangeListener(new CheckBoxListener(existingCB));
-    newCB.addValueChangeListener(new CheckBoxListener(newCB));
+
+    if (showExisting) {
+      existingCB.addValueChangeListener(new CheckBoxListener(existingCB));
+      newCB.addValueChangeListener(new CheckBoxListener(newCB));
+    }
+    
     HSess.checkClose(sessKey);
   }
   
