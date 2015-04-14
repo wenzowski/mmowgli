@@ -201,6 +201,10 @@ public class MmowgliLinkInserter
     
   private static String handleGlobalGameReplacements(StringBuilder sb, Game g)
   {
+    // This db field is not used; db had contained an old game:
+    //regex: Game 2011.(\d) Action Plan (\d+)
+    //replacement: <a href="https://web.mmowgli.nps.edu/piracy/ActionPlanList2011.$1.html#ActionPlan$2" target="apwindow">$0</a>
+
     List<RegexPair> regXs = g.getLinkRegexs();
     if(regXs == null || regXs.size()<=0)
       return null;
