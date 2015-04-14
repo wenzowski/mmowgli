@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli.hibernate;
 
+import java.util.*;
+
 import org.hibernate.Session;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 
@@ -41,11 +43,61 @@ import edu.nps.moves.mmowgli.db.pii.UserPii;
  */
 public class AdHocDBInits
 {
+  public static void databaseCheckUpdate(Session sess)
+  {
+    Game game = Game.get(sess);
+    
+    if(game.isBootStrapping()) {
+      setUserPii(sess,"Administrator",true,  true,  true,  false);
+      User seedCard = setUserPii(sess,"SeedCard",     false, true,  false, false);
+      setUserPii(sess,"Guest",        false, false, false, true);
+      setUserPii(sess,"GameMaster",   false, true,  false, false);
+
+      setUpCardsAndAuthor(seedCard, sess, game);
+      
+      MovePhase mp = game.getCurrentMove().getCurrentMovePhase();
+      mp.setNewButtonEnabled(false);
+      sess.update(mp);
+
+      game.setBootStrapping(false);
+      sess.update(game);
+    }
+  }
+  
+  @SuppressWarnings("unchecked")
+  private static void setUpCardsAndAuthor(User u, Session sess, Game g)
+  {
+    Calendar cal = new GregorianCalendar(2015,04,13);
+    cal.set(Calendar.HOUR_OF_DAY, 1300);
+    Move curMov = g.getCurrentMove();
+    CardType pos = CardType.getPositiveIdeaCardType(curMov);
+    CardType neg = CardType.getNegativeIdeaCardType(curMov);
+    
+    Card crd = null;
+    for(int i=0; i<8; i++) {      
+      Card c = new Card("Game designer enter initial text", i<4?pos:neg, cal.getTime());
+      c.setAuthor(u);
+      c.setCreatedInMove(curMov);
+      sess.save(c);
+      
+      if(crd == null)
+        crd = c;
+    }
+    
+    List<ActionPlan> alis = sess.createCriteria(ActionPlan.class).list();
+    for(ActionPlan ap: alis) {
+      ap.addAuthor(u);
+      ap.setChainRoot(crd);
+      sess.update(ap);
+    }
+  }
+  
   /**
    * This is a way to jam passwords into the PII 
    * @param uname
    */
-  private static void setUserPii(Session sess, String uname, boolean admin, boolean gm, boolean designer, boolean guest)
+  @SuppressWarnings("unchecked")
+  private static User setUserPii(Session sess, String uname, boolean admin, boolean gm, boolean designer, boolean guest)
   {
     User u = User.getUserWithUserName(uname, sess);
     if(u == null) {
@@ -62,6 +114,11 @@ public class AdHocDBInits
     u.setAccountDisabled(false);
     u.setEmailConfirmed(true);
     u.setRegisteredInMove(Move.getCurrentMove(sess));
+    
+    List<Avatar> avLis = sess.createCriteria(Avatar.class).list();
+    if(!avLis.isEmpty())
+      u.setAvatar(avLis.get(0));
+    
     sess.update(u);
 
     Long uid = u.getId();
@@ -74,26 +131,9 @@ public class AdHocDBInits
     VHibPii.setUserPiiEmail(uid, GameLinks.get(sess).getTroubleMailto());
 
     VHibPii.update(upii);
+    return u;
   }
-
-  public static void databaseCheckUpdate(Session sess)
-  {
-    Game game = Game.get(sess);
-
-    if(game.isBootStrapping()) {
-      setUserPii(sess,"Administrator",true,  true,  true,  false);
-      setUserPii(sess,"SeedCard",     false, true,  false, false);
-      setUserPii(sess,"Guest",        false, false, false, true);
-      setUserPii(sess,"GameMaster",   false, true,  false, false);
-
-      MovePhase mp = game.getCurrentMove().getCurrentMovePhase();
-      mp.setNewButtonEnabled(false);
-      sess.update(mp);
-
-      game.setBootStrapping(false);
-      sess.update(game);
-    }
-    
+}
    // need to redo for Pii checkRequiredUsers(smgr);
  
 /* This stuff is not needed anymore 
@@ -148,8 +188,9 @@ public class AdHocDBInits
     game.setVersion(MmowgliConstants.DATABASE_VERSION);  // mark that we are up-to-date
     smgr.setNeedsCommit(true);
     smgr.endSession();
+    }
     */
-  }
+
  /* 
   @SuppressWarnings("unchecked")
   private static void handleEmailDigests()
@@ -781,4 +822,4 @@ private void oneTimePrintLeaders()
   }     
 }
 */
-}
+
