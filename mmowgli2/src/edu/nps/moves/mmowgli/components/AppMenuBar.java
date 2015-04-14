@@ -40,6 +40,7 @@ import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsGameUpdates;
 import edu.nps.moves.mmowgli.modules.administration.AdvanceMoveDialog;
 import edu.nps.moves.mmowgli.modules.administration.EntryPermissionsDialog;
+import edu.nps.moves.mmowgli.modules.userprofile.InstallImageDialog;
 
 /**
  * @author Mike Bailey, jmbailey@nps.edu
@@ -248,6 +249,8 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     ret.addSeparator();
     ret.addItem("Advance game round and/or phase", advanceRoundClicked).setIcon(FontAwesome.ARROW_RIGHT);
     ret.addItem("Kill all player sessions for restart", new MCommand(MENUGAMEADMINKILLALLSESSIONS)).setIcon(FontAwesome.ARROW_RIGHT);
+    ret.addSeparator();
+    ret.addItem("Add Image to database", addImageClicked).setIcon(FontAwesome.IMAGE);
     return ret;
   }
 
@@ -338,6 +341,15 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     }
   };
 
+  @SuppressWarnings("serial")
+  private Command addImageClicked = new Command()
+  {
+    public void menuSelected(MenuItem selectedItem)
+    {
+      InstallImageDialog.show("Image names must be unique in the database.",null,false);
+    }
+  };
+ 
   @SuppressWarnings("serial")
   private Command advanceRoundClicked = new Command()
   {
