@@ -115,7 +115,7 @@ public class SigninPopover extends Popover implements Button.ClickListener
   {
     enteredName = nameTF.getValue().trim();
     if(enteredName == null || enteredName.length()<=0)
-      return "Please enter your game name.";
+      return "Please enter your player name.";
     return null;
   }
   private String enteredPW;
@@ -123,7 +123,7 @@ public class SigninPopover extends Popover implements Button.ClickListener
   {
     enteredPW = pwTF.getValue().trim();
     if(enteredPW == null || enteredPW.length()<=0)
-      return "Please enter your game password.";
+      return "Please enter your player password.";
     return null;
   }
   

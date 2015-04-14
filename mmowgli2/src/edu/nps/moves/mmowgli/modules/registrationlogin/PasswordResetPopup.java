@@ -71,7 +71,7 @@ public class PasswordResetPopup extends Window implements Button.ClickListener
     vLay.setMargin(true);
     setContent(vLay);
     
-    vLay.addComponent(new HtmlLabel("<center>Please fill in your game name and/or email address<br/>to initiate a password reset.</center>"));
+    vLay.addComponent(new HtmlLabel("<center>Please fill in your player name and/or email address<br/>to initiate a password reset.</center>"));
     // Use an actual form widget here for data binding and error display.
     FormLayout formLay = new FormLayout();
     formLay.setSizeUndefined();
@@ -80,7 +80,7 @@ public class PasswordResetPopup extends Window implements Button.ClickListener
     vLay.addComponent(formLay);
     vLay.setComponentAlignment(formLay, Alignment.TOP_CENTER);
 
-    formLay.addComponent(userIDTf = new TextField("Game name:"));
+    formLay.addComponent(userIDTf = new TextField("Player name:"));
     userIDTf.addStyleName("m-dialog-textfield");
     userIDTf.setWidth("85%");
     userIDTf.setTabIndex(100);
@@ -136,7 +136,7 @@ public class PasswordResetPopup extends Window implements Button.ClickListener
     String uname = userIDTf.getValue().trim();
     String email = emailTf.getValue().trim();
     if(uname.isEmpty() && email.isEmpty()) {
-      errorOut("Specify game name and/or email address.");
+      errorOut("Specify player name and/or email address.");
       return;
     }
     Session piiSess = VHibPii.getASession();

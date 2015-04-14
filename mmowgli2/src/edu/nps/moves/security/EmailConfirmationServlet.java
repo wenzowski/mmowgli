@@ -205,7 +205,7 @@ public class EmailConfirmationServlet extends HttpServlet
       sb.append(getBaseUrl(req));
       sb.append("'>");
       sb.append(getBaseUrl(req));
-      sb.append("</a><br/>to login with the game name and password you chose.<br/><br/>");
+      sb.append("</a><br/>to login with the player name and password you chose.<br/><br/>");
       sb.append("Problems may always be reported on the<br/>");
       sb.append("<a href='http://mmowgli.nps.edu/trouble'>MMOWGLI Trouble Report</a> ");
       sb.append("page at <a href='http://mmowgli.nps.edu/trouble'>mmowgli.nps.edu/trouble</a>,<br/>");

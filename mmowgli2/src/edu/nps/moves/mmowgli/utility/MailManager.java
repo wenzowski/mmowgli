@@ -42,7 +42,7 @@ public class MailManager
   public static String STANDARDEMAILFOOTER =
         "<br/>------------<br/>"
       + "<ul><li>You can send email to another user in the game.</li>"
-      + "<li>Your identity and email address remains hidden, only game name is sent.</li>"
+      + "<li>Your identity and email address remains hidden, only player name is sent.</li>"
       + "<li>Players can continue to communicate via the game.</li>"
       + "<li>Be very careful if you independently choose to reveal your actual email address identity.</li>"
       + "<li>Email messages sent to you can be found within your Player Profile page under the MY MAIL tab.</li>"
