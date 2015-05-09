@@ -29,6 +29,7 @@ import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.db.pii.EmailPii;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
@@ -166,12 +167,18 @@ public abstract class MmowgliDialog extends Window implements MmowgliComponent
   {
     Long uid = getUserId();
     if (uid != null) {
-      User u = User.getTL(this.getUserId());
+      User u = User.getTL(getUserId());
       if (u != null) {
         User.deleteTL(u);
-        UserPii uPii = VHibPii.getUserPii(u.getId());
+        UserPii uPii = VHibPii.getUserPii(uid);
+        Long uoid = uPii.getUserObjectId();
+        if(uoid != null) {
+          EmailPii epii = VHibPii.getUserPiiEmail(uoid);
+          VHibPii.delete(epii);
+        }
         VHibPii.delete(uPii);
-        MSysOut.println(MISC_LOGS, "User deleted (didn't finish login) " + u.getId());
+
+        MSysOut.println(NEWUSER_CREATION_LOGS, "User cancelled (didn't finish login) " + u.getId());
         setUser(null);
       }
     }

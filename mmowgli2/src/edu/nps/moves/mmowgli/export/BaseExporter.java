@@ -57,6 +57,7 @@ import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
+import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
  * BaseExporter.java Created on Nov 28, 2011
@@ -77,7 +78,8 @@ public abstract class BaseExporter implements Runnable
   protected String metaString = "MMOWGLI: Massive Multiplayer Online Wargame Leveraging the Internet"; 
   protected String BRIEFING_TEXT_ELEM   = "BriefingText";
   protected String REPORTS_DIRECTORY_URL = "reportsDirectoryUrl";
-
+  protected MediaLocator mediaLocator = new MediaLocator();
+  
   protected boolean showXml = true; // default
   
   public BaseExporter()
@@ -96,7 +98,7 @@ public abstract class BaseExporter implements Runnable
     }
   }
   
-  abstract protected Document buildXmlDocumentTL() throws Throwable;
+  abstract protected Document buildXmlDocument() throws Throwable;
   abstract protected String getThreadName();
   abstract protected String getCdataSections();
   abstract protected String getStyleSheetName();
@@ -178,7 +180,7 @@ public abstract class BaseExporter implements Runnable
   {
     HSess.init();
     try {
-      Document doc = buildXmlDocumentTL();
+      Document doc = buildXmlDocument();
       
       if(getStyleSheetName() != null) {
         String fn;
@@ -190,7 +192,6 @@ public abstract class BaseExporter implements Runnable
     catch (Throwable ex) {
       System.err.println(ex.getClass().getSimpleName()+": "+ex.getLocalizedMessage());
     }
-    HSess.close();
   }
   
   protected void _export()
@@ -203,9 +204,9 @@ public abstract class BaseExporter implements Runnable
     thread.start();
   }
 
-  public ExportProducts exportToRepositoryTL() throws Throwable
+  public ExportProducts exportToRepository() throws Throwable
   {
-    Document doc = buildXmlDocumentTL();
+    Document doc = buildXmlDocument();
     StringWriter xmlSW  = this.doc2Xml(doc,  getCdataSections());
     StringWriter htmlSW = null;
     if(getStyleSheetName() != null)
@@ -698,8 +699,11 @@ public abstract class BaseExporter implements Runnable
   
   public String buildFileName(String prefix)
   {
+    Object sessKey = HSess.checkInit();
     Game game = Game.getTL();
     String name = prefix+"_"+game.getTitle();
-    return name.replaceAll(" ", "_"); // no spaces
+    String ret = name.replaceAll(" ", "_"); // no spaces
+    HSess.checkClose(sessKey);
+    return ret;
   }
 }

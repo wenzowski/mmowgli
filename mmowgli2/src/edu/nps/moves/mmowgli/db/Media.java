@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2010-2014 Modeling Virtual Environments and Simulation
+  Copyright (C) 2010-2015 Modeling Virtual Environments and Simulation
   (MOVES) Institute at the Naval Postgraduate School (NPS)
   http://www.MovesInstitute.org and http://www.nps.edu
  
@@ -67,7 +67,8 @@ public class Media implements Serializable
   String    alternateUrl;
   MediaType type;         // one of the above 
   Source    source;       // one of the above
-  
+  Long      width;
+  Long      height;
   boolean inAppropriate = false; // true if judged undesirable
   
   //todo elim one or more  
@@ -264,6 +265,28 @@ public class Media implements Serializable
   {
     this.inAppropriate = inAppropriate;
   }
+    
+  @Basic
+  public Long getWidth()
+  {
+    return width;
+  }
+  
+  public void setWidth(Long width)
+  {
+    this.width = width;
+  }
+  
+  @Basic
+  public Long getHeight()
+  {
+    return height;
+  }
+  public void setHeight(Long height)
+  {
+    this.height = height;
+  }
+  
   public void cloneFrom(Media existing)
   {
 //@formatter:off

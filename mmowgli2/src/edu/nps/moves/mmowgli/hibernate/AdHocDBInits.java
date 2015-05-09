@@ -114,6 +114,7 @@ public class AdHocDBInits
     u.setAccountDisabled(false);
     u.setEmailConfirmed(true);
     u.setRegisteredInMove(Move.getCurrentMove(sess));
+    u.setWelcomeEmailSent(true);
     
     List<Avatar> avLis = sess.createCriteria(Avatar.class).list();
     if(!avLis.isEmpty())

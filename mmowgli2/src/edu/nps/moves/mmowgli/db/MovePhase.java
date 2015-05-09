@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2010-2014 Modeling Virtual Environments and Simulation
+  Copyright (C) 2010-2015 Modeling Virtual Environments and Simulation
   (MOVES) Institute at the Naval Postgraduate School (NPS)
   http://www.MovesInstitute.org and http://www.nps.edu
  
@@ -132,6 +132,7 @@ public class MovePhase implements Serializable
   public static short LOGIN_ALLOW_GUESTS            = 0x0008;
   public static short LOGIN_ALLOW_REGISTEREDPLAYERS = 0x0010;
   public static short LOGIN_ALLOW_NEWPLAYERS        = 0x0020;
+  public static short LOGIN_ALLOW_VIPLIST           = 0x0040;
   
   //public static short LOGIN_ALLOW_ALL = -1; //0xFFFF;
   public static short LOGIN_ALLOW_ALL = (short) (
@@ -140,7 +141,8 @@ public class MovePhase implements Serializable
       LOGIN_ALLOW_GAMEDESIGNERS +
       LOGIN_ALLOW_GUESTS +
       LOGIN_ALLOW_REGISTEREDPLAYERS +
-      LOGIN_ALLOW_NEWPLAYERS );
+      LOGIN_ALLOW_NEWPLAYERS +
+      LOGIN_ALLOW_VIPLIST);
   
   public static short LOGIN_ALLOW_NONE = 0x0;
   
@@ -841,6 +843,22 @@ public class MovePhase implements Serializable
       setLoginPermissions((short) (getLoginPermissions() & ~LOGIN_ALLOW_REGISTEREDPLAYERS));       
   }
 
+  @Transient
+  public boolean isLoginAllowVIPList()
+  {
+    return ( getLoginPermissions() & LOGIN_ALLOW_VIPLIST) != 0;
+  }
+  
+  public void loginAllowVIPList(boolean set)
+  {
+    if(set)
+      setLoginPermissions((short) (getLoginPermissions() | LOGIN_ALLOW_VIPLIST));
+    else
+      setLoginPermissions((short) (getLoginPermissions() & ~LOGIN_ALLOW_VIPLIST));       
+  }
+  
+  // This following should be renamed: it is used only for newly registering players;  For existing
+  // players, use the bit LOGIN_ALLOW_VIPLIST
   @Basic
   public boolean isRestrictByQueryList()
   {

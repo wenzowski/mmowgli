@@ -64,7 +64,7 @@ public class GameEvent implements Serializable
     CARDTEXTEDITED,GAMEDESIGNEDITED,COMMENTSUPERINTERESTING,
     USERGAMENAMECHANGED,COMMENTEDITED,CHATEDITED,USERPASSWORDCHANGED,
     GAMELOGINBUTTONSTATUS,REPORTGENERATIONREQUESTED,
-    EMAILSENT,EMAILFAILURE;
+    EMAILSENT,EMAILFAILURE,ACTIONPLANCREATED;
     
     public String description()
     {
@@ -117,6 +117,7 @@ public class GameEvent implements Serializable
         case REPORTGENERATIONREQUESTED: return "Game reports generation requested";
         case EMAILSENT: return "Email successfully sent from game";
         case EMAILFAILURE: return "Email transmit failure";
+        case ACTIONPLANCREATED: return "Action plan created";
 
       }
       throw new AssertionError("Unknown op: " + this);

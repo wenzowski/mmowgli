@@ -22,6 +22,8 @@
 
 package edu.nps.moves.mmowgli.modules.actionplans;
 
+import org.vaadin.alump.scaleimage.ScaleImage;
+
 import com.vaadin.event.FieldEvents.FocusEvent;
 import com.vaadin.event.FieldEvents.FocusListener;
 import com.vaadin.server.ExternalResource;
@@ -73,7 +75,8 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
   HorizontalLayout captionSavePan;
   Object apId;
   int idx = -1;
-  Embedded image;
+
+  ScaleImage scaledImage;
   Component mediaPlayer;
   Label placeHolder;
 
@@ -258,20 +261,18 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
     AbsoluteLayout imageStack = new AbsoluteLayout();
     imageStack.setWidth(WIDTH);
     imageStack.setHeight(PLAYER_HEIGHT);
-    image = new Embedded();
-    image.setSource(mLoc.locate(m));
-
-    image.setWidth(WIDTH);
-    image.setHeight(PLAYER_HEIGHT);
-    imageStack.addComponent(image, "top:0px;left:0px");
-
+    scaledImage = new ScaleImage();
+    scaledImage.setSource(mLoc.locate(m));
+    scaledImage.setWidth(WIDTH);
+    scaledImage.setHeight(PLAYER_HEIGHT);
+    imageStack.addComponent(scaledImage,"top:0px;left:0px");
     zoom.setIcon(mLoc.getActionPlanZoomButt());
     zoom.addStyleName("m-actionplan-zoom-button");
     zoom.addStyleName("borderless");
     imageStack.addComponent(zoom, "top:10px;left:10px");
     return imageStack;
   }
-  
+    
   private void setVideoMedia(Media m)
   {
     this.m = m;
@@ -313,8 +314,7 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
     if(mediaPlayer != null)
       removeComponent(mediaPlayer);
     addComponent(mediaPlayer = comp, PLAYERINDEX_IN_LAYOUT);
-
-    image.setSource(Mmowgli2UI.getGlobals().getMediaLocator().locate(m));
+    scaledImage.setSource(Mmowgli2UI.getGlobals().getMediaLocator().locate(m));
     if (scaler != null)
       zoom.removeClickListener(scaler);
     zoom.addClickListener(scaler = new Scaler(m));
@@ -404,8 +404,7 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
       this.m = m;
     }
     
-    Embedded embd;
-    
+    ScaleImage image;
     // We now skip trying to get the size of the image -- we were trying to do that to manage aspect ratio.
     // 1. Doing ImageIO.read() was failing because some URLs visible from the client (browser) were not visible from the server (JVM).
     // 2. Eliminates the need for ImageScaler plugin.
@@ -415,23 +414,7 @@ public class MediaPanel extends VerticalLayout implements MmowgliComponent
     public void buttonClick(ClickEvent event)
     {
       Resource r = Mmowgli2UI.getGlobals().getMediaLocator().locate(m);
-
-      final Window win = new Window();
-
-      win.setModal(true);
-      win.setWidth("640px");
-      win.setHeight("480px");
-
-      VerticalLayout layout = new VerticalLayout();
-      layout.setSizeFull();
-      layout.setMargin(true);
-      win.setContent(layout);
-
-      embd = new Embedded(null, r);
-      layout.addComponent(embd);
-      embd.setSizeFull();
-      layout.setExpandRatio(embd, 1.0f);
-
+      MediaSubWindow win = new MediaSubWindow(r);
       UI.getCurrent().addWindow(win);
       win.center();
     }

@@ -32,6 +32,7 @@ import org.hibernate.criterion.Restrictions;
 import org.jasypt.util.password.StrongPasswordEncryptor;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.server.Page;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 
@@ -40,6 +41,7 @@ import edu.nps.moves.mmowgli.components.MmowgliDialog;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.MovePhase;
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.db.pii.EmailPii;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
@@ -174,7 +176,7 @@ public class LoginPopup extends MmowgliDialog
       String uname = userIDTf.getValue().toString();
       User luser = User.getUserWithUserNameTL(uname);
       if(luser == null) {
-        errorOut("No registered userID with that name/ID");
+        errorOut("No registered player with that name / ID");
         HSess.close();
         return;
       }
@@ -242,9 +244,12 @@ public class LoginPopup extends MmowgliDialog
             break loginPermissions;
           if (luser.isViewOnly() && mp.isLoginAllowGuests())
             break loginPermissions;
+          if(mp.isLoginAllowVIPList() && isOnList(luser))
+            break loginPermissions;
 
           // ok, not allowing everybody in and didn't match any special cases
-          errorOut("Sorry.  Logins are currently restricted.");
+          errorOut("<center><br/>Sorry.  Logins are currently restricted.  If you think<br/>you should have permission, please "+
+          "click<br/>\"Trouble signing in?\" to send us a Trouble Report.</center>");
           HSess.close();
           return;
         }
@@ -254,24 +259,16 @@ public class LoginPopup extends MmowgliDialog
       listener.buttonClick(event); // back up the chain
     }
 
+    private boolean isOnList(User u)
+    {
+      EmailPii ePii = VHibPii.getUserPiiEmail(u.getId());
+      return Vips.isVipOrVipDomain(ePii.getAddress());     
+    }
+    
     private void errorOut(String s)
     {
-      Notification.show("Could not log in", s, Notification.Type.ERROR_MESSAGE);
+      new Notification("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Could not log in.", s, Notification.Type.ERROR_MESSAGE,true).show(Page.getCurrent());
     }
-
-    /* Return null if allowed in.  Enter here knowing that g.loginPermissions != LOGIN_ALLOW_ALL */
-    /*   private String checkLoginPermissions(Game g, User u)
-    {
-      if(g.isLoginAllowGameAdmins() && u.isAdministrator())
-        return null; //ok, come on in
-      if(g.isLoginAllowGameMasters() && u.isGameMaster())
-        return null;
-      if(g.isLoginAllowGuests() && u.isViewOnly())
-        return null;
-
-      return "Sorry.  Logins are currently restricted.";
-    }
-    */
   }
 
   @SuppressWarnings("serial")
@@ -305,7 +302,7 @@ public class LoginPopup extends MmowgliDialog
       User luser = User.getUserWithUserNameTL(uname);
 
       if (luser == null) {
-        errorOut("No registered userID with that User ID");
+        errorOut("No registered player with that name / ID");
         HSess.close();
         return;
       }

@@ -74,7 +74,7 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
     videosButt   = makeLink("Videos",              gl.getVideosLink(),   "Game videos");
   }
   //@formatter:on
-
+  HtmlLabel pingPushLab;
   @Override
   public void initGui()
   {
@@ -100,7 +100,7 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
 
     Label sp;
     innerHorLay.addComponent(aboutButt);
-    innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
+    innerHorLay.addComponent(pingPushLab=new HtmlLabel()); pingPushLab.setWidth("7px");
     innerHorLay.addComponent(creditsButt);
     innerHorLay.addComponent(sp=new Label()); sp.setWidth("7px");
     innerHorLay.addComponent(faqsButt);
@@ -192,5 +192,13 @@ public class Footer extends AbsoluteLayout implements MmowgliComponent, WantsGam
     return fouoLink;
   }
 
-
+  int pp = 0;
+	public void pingPush()
+	{
+		pp++;
+		if(pp%2 == 0)
+			pingPushLab.setValue("&nbsp;");
+		else
+			pingPushLab.setValue("");		
+	}
 }

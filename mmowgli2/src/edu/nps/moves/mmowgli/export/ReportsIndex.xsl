@@ -47,19 +47,19 @@
                 <xsl:text>energyMMOWGLI 2012</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'bii') or contains($gameTitle,'Bii')">
-                <xsl:text>Business Innovation Initiative (bii)</xsl:text>
+                <xsl:text>bii Business Innovation Initiative</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'em2') or contains($gameTitle,'Em2')">
-                <xsl:text>EM Maneuver (em2)</xsl:text>
+                <xsl:text>em2 ElectroMagnetic Maneuver</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'vtp')"> <!-- evtp -->
-                <xsl:text>Edge Virtual Training Program (evtp)</xsl:text>
+                <xsl:text>evtp Edge Virtual Training Program</xsl:text>
             </xsl:when>
             <xsl:when test="starts-with($gameTitle,'am') or starts-with($gameTitle,'Am') or contains($gameTitle,'additive') or contains($gameTitle,'Additive')">
-                <xsl:text>Additive Manufacturing (am)</xsl:text>
+                <xsl:text>am Additive Manufacturing</xsl:text>
             </xsl:when>
             <xsl:when test="starts-with($gameTitle,'cap2con') or starts-with($gameTitle,'Cap2con') or contains($gameTitle,'cap2con') or contains($gameTitle,'Cap2con')">
-                <xsl:text>Capacity, Capabilities and Constraints (cap2con)</xsl:text>
+                <xsl:text>cap2con Capacity, Capabilities and Constraints</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'darkportal') or contains($gameTitle,'dark')">
                 <xsl:text>dark Portal (NDU)</xsl:text>
@@ -67,35 +67,26 @@
             <xsl:when test="contains($gameTitle,'ig')">
                 <xsl:text>NPS Inspector General (ig) Review</xsl:text>
             </xsl:when>
-            <xsl:when test="contains($gameTitle,'coin') or contains(lower-case($gameTitle),'accessions') or contains(lower-case($gameTitle),'nstc')">
-                <xsl:text>Officer Accesions</xsl:text>
-            </xsl:when>
             <xsl:when test="contains($gameTitle,'training')">
                 <xsl:text>MMOWGLI Training</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
-                <xsl:text>NAWCAD Strategic Cell</xsl:text>
+                <xsl:text>nsc NAWCAD Strategic Cell</xsl:text>
             </xsl:when>
             <xsl:when test="starts-with($gameTitle,'blackswan') or starts-with($gameTitle,'Blackswan') or contains($gameTitle,'blackswan') or contains($gameTitle,'Blackswan')">
                 <xsl:text>blackswan</xsl:text>
             </xsl:when>
-            <xsl:when test="starts-with($gameTitle,'dd') or starts-with($gameTitle,'DD') or contains($gameTitle,'dd') or contains($gameTitle,'DD')">
-                <xsl:text>Data Dilemma (dd)</xsl:text>
+            <xsl:when test="starts-with($gameTitle,'dd') or starts-with($gameTitle,'DD') or contains($gameTitle,'dd') or contains($gameTitle,'DD') or contains($gameTitle,'Dilemma')">
+                <xsl:text>dd Data Dilemma</xsl:text>
             </xsl:when>
             <xsl:when test="starts-with($gameTitle,'pcc') or starts-with($gameTitle,'PCC') or contains($gameTitle,'pcc') or contains($gameTitle,'PCC')">
-                <xsl:text>Professional Core Competencies (pcc)</xsl:text>
+                <xsl:text>pcc Professional Core Competencies</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
-                <xsl:text>Unmanned Vehicle Digital Manufacturing (uxvdm)</xsl:text>
-            </xsl:when>
-            <xsl:when test="contains($gameTitle,'dd') or contains($gameTitle,'Dilemma')">
-                <xsl:text>Data Dilemma</xsl:text>
+                <xsl:text>uxvdm Unmanned Vehicle Digital Manufacturing</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'ndu')">
-                <xsl:text>National Defense University (NDU)</xsl:text>
-            </xsl:when>
-            <xsl:when test="contains($gameTitle,'pcc')">
-                <xsl:text>Professional Core Competencies (pcc)</xsl:text>
+                <xsl:text>ndu National Defense University</xsl:text>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of disable-output-escaping="yes" select="//GameTitle"/>
@@ -310,32 +301,31 @@ td.longtext {
                 <table align="left" border="0" class="banner">
                     <tr>
                         <td>
-                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
                         </td>
                         <td align="center" valign="middle">
                             <h1 align="center">
-                                <xsl:value-of disable-output-escaping="yes" select="$gameLabel"/> <!-- want escaped <br /> intact for line break -->
+                            <br />
+                                <xsl:text> Game Reports </xsl:text>
                             </h1>
                             <h2 align="center" valign="middle">
-                                <xsl:text> Game Reports </xsl:text>
+                                <xsl:value-of disable-output-escaping="yes" select="$gameLabel"/>
                             </h2>
                         </td>
                         <td>
-                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
                         </td>
                         <td align="left" valign="middle">
-                            <a href="{$portalPage}" title="Game documentation for {$gameLabel}">
+                            <a href="{$portalPage}" title="Game documentation for {$gameLabel}" target="_blank">
                                 <!-- 1158 x 332 -->
                                 <img align="center" valign="middle" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="386" height="111" border="0"/>
                             </a>
                         </td>
                         <td>
-                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
                         </td>
                         <!-- Table of Contents -->
                         <td align="left" valign="middle">
@@ -455,22 +445,22 @@ td.longtext {
                             </a>
                         </td>
                         <td>
-                            <a href="{//ApplicationURLs/Game/.}" target="_{//Other/GameAcronym/.}Game" title="Play the game! go online">
+                            <a href="{//ApplicationURLs/Game/.}" target="{//Other/GameAcronym/.}Game" title="Play the game! go online">
                                 <img src="images/MmowgliWelcomeSplash.png" height="100"/>
                             </a>
                             <br />
-                            <a href="{//ApplicationURLs/Game/.}" target="_{//Other/GameAcronym/.}Game" title="Play the game! go online">
+                            <a href="{//ApplicationURLs/Game/.}" target="{//Other/GameAcronym/.}Game" title="Play the game! go online">
                                 <xsl:text>Play the </xsl:text>
                                 <xsl:value-of select="//HeaderFooter/BrandingText/."/>
                                 <xsl:text> game</xsl:text>
                             </a>
                         </td>
                         <td>
-                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game" title="Play the game! go mobile online">
+                            <a href="{//ApplicationURLs/Game/.}/mobile" target="{//Other/GameAcronym/.}Game" title="Play the game! go mobile online">
                                 <img src="images/mmowgli.nps.edu.{//Other/GameAcronym/.}.mobile.qr.png" height="100"/>
                             </a>
                             <br />
-                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game" title="Play the game! go mobile online">
+                            <a href="{//ApplicationURLs/Game/.}/mobile" target="{//Other/GameAcronym/.}Game" title="Play the game! go mobile online">
                                 <xsl:text>Mobile</xsl:text>
                             </a>
                         </td>
@@ -541,11 +531,11 @@ td.longtext {
                             </a>
                         </td>
                         <td>
-                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game" title="Play the game! go mobile online">
+                            <a href="{//ApplicationURLs/Game/.}/mobile" target="{//Other/GameAcronym/.}Game" title="Play the game! go mobile online">
                                 <img src="images/AndroidHandheldTabletAlphaTestPhoto.jpg" height="100"/>
                             </a>
                             <br />
-                            <a href="{//ApplicationURLs/Game/.}/mobile" target="_{//Other/GameAcronym/.}Game" title="Play the game! go mobile online">
+                            <a href="{//ApplicationURLs/Game/.}/mobile" target="{//Other/GameAcronym/.}Game" title="Play the game! go mobile online">
                                 <xsl:text>Mobile</xsl:text>
                             </a>
                         </td>

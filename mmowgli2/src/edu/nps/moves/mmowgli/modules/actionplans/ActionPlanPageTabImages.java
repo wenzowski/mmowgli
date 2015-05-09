@@ -22,10 +22,18 @@
 
 package edu.nps.moves.mmowgli.modules.actionplans;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.ERROR_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.MISC_LOGS;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+
+import javax.imageio.ImageIO;
 
 import org.hibernate.Session;
 import org.vaadin.dialogs.ConfirmDialog;
@@ -44,11 +52,13 @@ import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
+import edu.nps.moves.mmowgli.db.Image;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.messaging.WantsMediaUpdates;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPageTabVideos.VMPanelWrapper;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 
 /**
  * ActionPlanPageTabImages.java Created on Feb 8, 2011
@@ -332,7 +342,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
               Media med = addDialog.getMedia();
               if (med != null) {
                 HSess.init();
-                Media.saveTL(med);
+               /* already saved Media.saveTL(med); */
                 ActionPlan ap = replaceMediaTL(oldM, med);
                 iPan.setMedia(med);
                 ActionPlan.updateTL(ap);
@@ -390,13 +400,14 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
           Media med = addDialog.getMedia();
           if (med != null) {
             HSess.init();
-            Media.saveTL(med);
             addOneImage(med);
             ActionPlan ap = ActionPlan.getTL(apId);
             ap.getMedia().add(med);
             ActionPlan.updateTL(ap);
             User u = Mmowgli2UI.getGlobals().getUserTL();
             GameEventLogger.logActionPlanImageAddedTL(ap, u.getUserName(), med.getTitle());
+            
+            spawnImageSizeThread(med.getId());
             HSess.close();
           }
         }
@@ -407,6 +418,42 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     }
   }
 
+  private void spawnImageSizeThread(final long mId)
+  {
+    Thread thr = new Thread(new Runnable()
+    {
+
+      @Override
+      public void run()
+      {
+        Object key = HSess.checkInit();
+        Media m = Media.getTL(mId);
+        if(m.getSource() == Media.Source.WEB_FULL_URL) {
+          String url = m.getUrl();     
+          try {
+            BufferedImage bi = ImageIO.read(new URL(url));
+            int w = bi.getWidth();
+            int h = bi.getHeight();
+            m.setHeight((long)h);
+            m.setWidth((long)w);
+            Media.updateTL(m);
+            MSysOut.println(MISC_LOGS,"Computed image size: "+url+" w:"+w+" h: "+h);
+          }
+          catch (IOException e) {
+            MSysOut.println(ERROR_LOGS,"Error computing image size: "+e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
+            m.setHeight(null);
+            m.setWidth(null);
+          }
+         HSess.checkClose(key);
+        }         
+      }      
+    });
+    
+    thr.setDaemon(true); // won't hold up vm
+    thr.setPriority(Thread.NORM_PRIORITY);
+    thr.start();
+  }
+  
   private void doCaption()
   {
     // not implemented: put number of images into tab text

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2010-2014 Modeling Virtual Environments and Simulation
+  Copyright (C) 2010-2015 Modeling Virtual Environments and Simulation
   (MOVES) Institute at the Naval Postgraduate School (NPS)
   http://www.MovesInstitute.org and http://www.nps.edu
  
@@ -71,7 +71,6 @@ public class UploadHandler implements Upload.Receiver
         // this method gets called immediately after upload is started
         window.pi.setValue(0f);
         window.pi.setVisible(true);
-        UI.getCurrent().setPollInterval(500); // hit server frequently to get
         window.textualProgress.setVisible(true);
         // updates to client
         window.state.setValue("Uploading");
@@ -89,7 +88,6 @@ public class UploadHandler implements Upload.Receiver
         if(readBytes>MAXUPLOADSIZE) {
           window.textualProgress.setValue("Upload failed: "+MAXUPLOADSTRING+" limit");
           upload.interruptUpload();
-          UI.getCurrent().setPollInterval(-1);
           window.pi.setVisible(false);
         }
         else {
@@ -105,7 +103,6 @@ public class UploadHandler implements Upload.Receiver
       public void uploadSucceeded(SucceededEvent event)
       {
         window.result.setValue(counter + " (total)");
-        UI.getCurrent().setPollInterval(-1);
       }
     });
 
@@ -115,7 +112,6 @@ public class UploadHandler implements Upload.Receiver
       {
         window.result.setValue(counter + " (upload interrupted at " + Math.round(100 * (Float) window.pi.getValue()) + "%)");
         finalFullFilePath = null;  // indicate error
-        UI.getCurrent().setPollInterval(-1);
       }
     });
 
@@ -127,11 +123,11 @@ public class UploadHandler implements Upload.Receiver
      // window.pi.setVisible(false);
      // window.textualProgress.setVisible(false);
         window.cancelProcessing.setVisible(false);
-        UI.getCurrent().setPollInterval(-1);
       }
     });   
   }
 
+  private static String fileSep = System.getProperty("file.separator");
   private File findUniqueName(String fileName) throws IOException
   {
     fileName=fileName.replace(' ', '_');
@@ -147,6 +143,8 @@ public class UploadHandler implements Upload.Receiver
     int ii=-1;
     String add="";
     File f;
+    if(!savePath.endsWith(fileSep))
+      savePath = savePath+fileSep;
     while((f=new File(savePath+firstPart+add+lastPart)).exists())
       add = ""+ ++ii;
 

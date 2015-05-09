@@ -279,10 +279,12 @@ public class Mmowgli2VaadinServlet extends VaadinServlet implements SessionInitL
   public void sessionDestroy(SessionDestroyEvent event)
   {
     MSysOut.println(SYSTEM_LOGS,"JMETERdebug: Session destroyed, id = "+event.getSession().hashCode()); 
+    MmowgliSessionGlobals globs = event.getSession().getAttribute(MmowgliSessionGlobals.class);
+    if(globs != null)
+    	globs.vaadinSessionClosing();
+    
     if(appMaster != null) { // might be with error on startup
       appMaster.doSessionCountUpdate(decrementSessionCount());
-
-      MmowgliSessionGlobals globs = event.getSession().getAttribute(MmowgliSessionGlobals.class);
       if(globs != null)
         appMaster.sessionEndingFromTimeoutOrLogout(globs, event.getSession());
     }  

@@ -26,6 +26,7 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -63,11 +64,9 @@ import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.messaging.InterTomcatIO;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
-import edu.nps.moves.mmowgli.messaging.MessagingManager2;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.modules.scoring.ScoreManager2;
-import edu.nps.moves.mmowgli.utility.MailManager;
-import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer;
+import edu.nps.moves.mmowgli.utility.*;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 import edu.nps.moves.mmowgliMobile.MmowgliMobileVaadinServlet;
 
@@ -107,12 +106,14 @@ public class AppMaster
   private String userImagesUrlString;
   private URL    userImagesUrl;
   
+  private ClusterMasterController clusterMasterMaster;
+  
   public static int sysOutLogLevel = 0; //ALL_LOGS;
   static {
     //sysOutLogLevel |= BROADCASTER_LOGS;
     //sysOutLogLevel |= BADGEMANAGER_LOGS;
     sysOutLogLevel |= CARD_UPDATE_LOGS;
-    //sysOutLogLevel |= DB_LISTENER_LOGS;
+    sysOutLogLevel |= DB_LISTENER_LOGS;
     //sysOutLogLevel |= HIBERNATE_LOGS;
     //sysOutLogLevel |= HIBERNATE_SESSION_LOGS;
     //sysOutLogLevel |= MCACHE_LOGS;
@@ -178,9 +179,58 @@ public class AppMaster
 
     keepAliveManager = new KeepAliveManager(this, keepAliveInterval); // latter maybe null
     miscTimer = new MiscellaneousMmowgliTimer();
-  }
 
-  private String getInitParameter(String s)
+    clusterMasterMaster = buildClusterMaster();
+  }
+  //@formatter:off
+  private ClusterMasterController buildClusterMaster()
+  {
+    String arbiter = getInitParameter(WEB_XML_CLUSTERMASTER_ARBITER_KEY);
+    if (arbiter == null)
+      return new ClusterMasterController.SingleDeployment();
+
+    String fullClassName = ClusterMasterController.class.getName();
+    Class<?> arbiterCls = null;
+    try { arbiterCls = Class.forName(fullClassName + "$" + arbiter); } catch (ClassNotFoundException ex) {}
+    
+    if (arbiterCls == null) {
+      try {
+        arbiterCls = Class.forName(arbiter);  // for grins
+      }
+      catch (ClassNotFoundException ex) {
+        MSysOut.println(ERROR_LOGS, "ClusterMasterArbiter class not found, using SingleDeployment");
+        return new ClusterMasterController.SingleDeployment();
+      }
+    }
+    // Here if we found a class to work with
+    ClusterMasterController cntl;
+    try {
+      Constructor<?> constr = arbiterCls.getConstructor((Class<?>[]) null);
+      cntl = (ClusterMasterController) constr.newInstance((Object[]) null);
+      return cntl;
+    }
+    catch (Exception ex) {
+      MSysOut.println(ERROR_LOGS, "Could not instantiate ClusterMasterArbiter, using SingleDeployment");
+      return new ClusterMasterController.SingleDeployment();
+    }
+  }
+  //@formatter:on
+  
+  public boolean amIClusterMaster()
+  {
+    return clusterMasterMaster.amIMaster();
+  }
+  
+  public String getMasterLockPath()
+  {
+    String s = getInitParameter(WEB_XML_CLUSTERMASTER_LOCK_PATH_KEY);
+    if(s != null) {
+      s = replaceTokens(s);
+    }
+    return s;
+  }
+  
+  public String getInitParameter(String s)
   {
     String ret = servletContext.getInitParameter(s);
     MSysOut.println(SYSTEM_LOGS,"Web.xml key "+s+" returns "+ret);
@@ -303,7 +353,7 @@ public class AppMaster
       }
     }
     else {
-      MSysOut.println(SYSTEM_LOGS,"AppMaster.oneTimeSetAppUrlFromUI() url NOT set, currently: "+appUrlString);      
+      MSysOut.println(SYSTEM_LOGS,"AppMaster.oneTimeSetAppUrlFromUI() url already set, currently: "+appUrlString);      
     }
   }
   
@@ -340,9 +390,8 @@ public class AppMaster
     vaadinHibernate.installDataBaseListeners();
     
     mCacheManager = MCacheManager.instance();
-    handleMoveSwitchScoring();
-    handleBadgeManager();
-    handleAutomaticReportGeneration();
+    
+    doClusterMasterTasks();
 
     GameEventLogger.logApplicationLaunch();
 
@@ -357,36 +406,41 @@ public class AppMaster
     return initted;
   }
   
+  private void doClusterMasterTasks()
+  {
+    if(amIClusterMaster()) {
+      handleMoveSwitchScoring();
+      doClusterMasterChangedTasks();
+    }
+  }
+  
+  public void doClusterMasterChangedTasks()
+  {
+    if(amIClusterMaster()) {
+      handleBadgeManager();
+      handleAutomaticReportGeneration(); 
+    }
+    else
+      MSysOut.println(REPORT_LOGS,"Report generator NOT launched");
+  }
+  
   /**
    * Called after the db has been setup; We need to read game table to see if we
    * should be the badgemanager among clusters.
    */
   public void handleBadgeManager()
   {
-    String masterCluster = getInitParameter(WEB_XML_DB_CLUSTERMASTER_KEY);
-    String myClusterNode = getServerName();
-    if (myClusterNode.contains(masterCluster)) { // servername may be long, db entry can be a unique portion of is, like web1
-      badgeManager = new BadgeManager(this);
-      MSysOut.println(BADGEMANAGER_LOGS,"** Badge Manager instantiated on " + myClusterNode);
-      // miscStartup(context);
-    }
+    badgeManager = new BadgeManager(this);
+    MSysOut.println(BADGEMANAGER_LOGS,"** Badge Manager instantiated on " + AppMaster.instance().getServerName());
+    // miscStartup(context);
   }
 
   public void handleAutomaticReportGeneration()
   {
-    MSysOut.println(REPORT_LOGS,"Check for automatic report generator launch");
-    String masterCluster = getInitParameter(WEB_XML_DB_CLUSTERMASTER_KEY);
-    String myClusterNode = getServerName();
-    MSysOut.println(REPORT_LOGS,"  master (from web.xml) is " + masterCluster);
-    MSysOut.println(REPORT_LOGS,"  this one (from InetAddress.getLocalHost().getAddress() is " + myClusterNode);
-    if (myClusterNode.contains(masterCluster) || masterCluster.contains(myClusterNode)) {
-      // servername may be long, db entry can be a unique portion of it, like web1
-      reportGenerator = new ReportGenerator(this);
-      MSysOut.println(REPORT_LOGS,"Report generator launched");
-    }
-    else
-      MSysOut.println(REPORT_LOGS,"Report generator NOT launched");
+    reportGenerator = new ReportGenerator(this);
+    MSysOut.println(REPORT_LOGS,"Report generator launched");     
   }
+  
   /**
    * This puts all scores from the userscore/move table into the basicScore field in the user object.  They are duplicates, but the
    * one in the table is required for table sorting.
@@ -396,27 +450,22 @@ public class AppMaster
   @SuppressWarnings("unchecked")
   public void handleMoveSwitchScoring()
   {
-    String masterCluster = servletContext.getInitParameter(WEB_XML_DB_CLUSTERMASTER_KEY);
-    String myClusterNode = getServerName();
+    HSess.init();
+    Session sess = HSess.get();
 
-    if(myClusterNode.contains(masterCluster)) {    // servername may be long, db entry can be a unique portion of is, like web1
-      HSess.init();
-      Session sess = HSess.get();
-
-      Game game = (Game)sess.get(Game.class, 1L);
-      if(game.getCurrentMove().getNumber() != game.getLastMove().getNumber()) {
-        MSysOut.println(SYSTEM_LOGS,"AppMaster setting up user points for new move number "+game.getCurrentMove().getNumber());
-        List<User> users = (List<User>) sess.createCriteria(User.class).list();
-        for(User u : users) {
-          u.setBasicScoreOnly(ScoreManager2.getBasicPointsFromCurrentMove(u, sess)); // needed for table sorting
-          u.setInnovationScoreOnly(ScoreManager2.getInnovPointsFromCurrentMove(u, sess));
-          sess.update(u);
-         }
-        game.setLastMove(game.getCurrentMove());
-        sess.update(game);
+    Game game = (Game) sess.get(Game.class, 1L);
+    if (game.getCurrentMove().getNumber() != game.getLastMove().getNumber()) {
+      MSysOut.println(SYSTEM_LOGS, "AppMaster setting up user points for new move number " + game.getCurrentMove().getNumber());
+      List<User> users = (List<User>) sess.createCriteria(User.class).list();
+      for (User u : users) {
+        u.setBasicScoreOnly(ScoreManager2.getBasicPointsFromCurrentMove(u, sess)); // needed for table sorting
+        u.setInnovationScoreOnly(ScoreManager2.getInnovPointsFromCurrentMove(u, sess));
+        sess.update(u);
       }
-      HSess.close();
+      game.setLastMove(game.getCurrentMove());
+      sess.update(game);
     }
+    HSess.close();
   }
 
   private void startThreads()
@@ -658,9 +707,10 @@ public class AppMaster
   // Called from AppMasterMessaging on receipt of a rebuild_reports message
   public void pokeReportGenerator()
   {
-    MSysOut.println(SYSTEM_LOGS,"AppMaster.pokeReportGenerator(), reportGenerator: "+reportGenerator);
-    if (reportGenerator != null)
+    if (reportGenerator != null) {
+    	MSysOut.println(SYSTEM_LOGS,"AppMaster.pokeReportGenerator()");
       reportGenerator.poke();
+    }
   }
   
   // Called from the Game Admin menu to get the reports to be be rebuild
@@ -774,11 +824,22 @@ public class AppMaster
     imgObj.setBytes(baos.toByteArray());
     imgObj.setDescription(url);
     Image.saveTL(imgObj);
+    
+    @SuppressWarnings("unchecked")
+		List<Media> lis = HSess.get().createCriteria(Media.class)
+																.add(Restrictions.eq("source",Media.Source.DATABASE))
+																.add(Restrictions.eq("url",imgObj.getName()))
+																.list();
+    if(lis != null) {
+    	for(Media m : lis)
+    		Media.deleteTL(m);
+    }
     Media media = new Media();
     media.setDescription(imgObj.getName() + " in db");
-    // media.setHandle("300x300");
+
     media.setSource(Media.Source.DATABASE);
     media.setUrl(imgObj.getName());
+    media.setType(Media.MediaType.IMAGE);
     Media.saveTL(media);
   }
   
@@ -842,6 +903,25 @@ public class AppMaster
     }
   }
   
+  public void pushPingAllSessionsInThisClusterNode()
+  {
+  	Iterator<VaadinSession> itr = sessionsInThisMmowgliNode.iterator();
+    while(itr.hasNext()) {
+      VaadinSession sess = itr.next();
+      for(final UI ui : sess.getUIs()) {
+      	if(!ui.isClosing() && ui instanceof Mmowgli2UI) {
+          ui.access(new Runnable() {
+        	  public void run() {
+        		  ((Mmowgli2UI)ui).pingPush();
+        		  ui.push(); // empty push to keep connection alive over Akamai
+        		  MSysOut.println(TICK_LOGS,"Keep alive push, ui "+ui.hashCode());
+        	  }
+          });
+      	}
+      }
+    }  	
+  }
+  
   private HashSet<VaadinSession> sessionsInThisMmowgliNode = new HashSet<VaadinSession>();
   
   // The synchronized methods below protect concurrent access to the hashset  
@@ -878,17 +958,19 @@ public class AppMaster
     removeVaadinSession(sess);
     sendMySessionReport();
     if(!globs.loggingOut) {
-      Serializable id = globs.getUserID();
-      if(id != null) {
-        User u = globs.getUserTL(); //feb refactorDBGet.getUserTL(globs.getUserID());
-        if(u != null)
-          GameEventLogger.logSessionTimeoutL(u);
-      }
-    }
-    MessagingManager2 mgr = globs.getMessagingManager();
-    if(mgr != null)
-      mgr.unregisterSession();
-    
+    	// Try to do this, but check...the User.get has been generating some misc errors
+    	try {
+        Serializable id = globs.getUserID();
+        if(id != null) {
+          User u = globs.getUserTL();
+          if(u != null)
+            GameEventLogger.logSessionTimeoutL(u);
+        }
+    	}
+    	catch(Throwable t) {
+    		MSysOut.println(ERROR_LOGS, "Error logging Session timeout, probably trying to use db: "+t.getClass().getSimpleName()+": "+t.getLocalizedMessage());
+    	}
+    }    
     HSess.checkClose(key);  
   }
   

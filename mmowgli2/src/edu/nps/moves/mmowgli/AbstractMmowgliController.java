@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2010-2015 Modeling Virtual Environments and Simulation
+  Copyright (C) 2010-2014 Modeling Virtual Environments and Simulation
   (MOVES) Institute at the Naval Postgraduate School (NPS)
   http://www.MovesInstitute.org and http://www.nps.edu
  
@@ -337,11 +337,13 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         globs.loggingOut = true;
         User u = globs.getUserTL();
         GameEventLogger.logUserLogoutTL(u);
+        
         MessagingManager2 mgr = Mmowgli2UI.getGlobals().getMessagingManager();
-        if(mgr != null) {
+        if(mgr != null)
           mgr.sendSessionMessage(new MMessagePacket(USER_LOGOUT,""+globs.getUserID()),ui);
-          mgr.unregisterSession();
-        }
+        
+        globs.vaadinSessionClosing();
+        
       /*  sendToBus(USER_LOGOUT, "" + uid, false);
         
         InterTomcatIO sIO = getSessIO();
@@ -420,11 +422,16 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
   
   private void doStartupTL(Object userId)
   {
-    Mmowgli2UI.getGlobals().setUserIDTL(userId);
+  	User u;
+  	if(userId instanceof User)
+  		u = (User)userId;
+  	else
+      u = User.getTL(userId);
+  	
+    Mmowgli2UI.getGlobals().setUserIDTL(u);
     Mmowgli2UI ui = Mmowgli2UI.getAppUI();
     ui.setRunningApplicationFrameworkTL(); 
 
-    User u = User.getTL(userId);
     Game g = Game.getTL();
     ui.showOrHideFouoButton(g.isShowFouo());
 

@@ -75,6 +75,11 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
     footer.initGui();
   }
   
+  public void pingPush()
+  {
+  	footer.pingPush();
+  }
+  
   public void addMenuBarAndFouoRowTL(User me)
   {
     HorizontalLayout hlay = new MHorizontalLayout().withMargin(false).withSpacing(false).withFullHeight();

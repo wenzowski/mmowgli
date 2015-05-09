@@ -275,10 +275,11 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       if(cm == null) { // markings have been cleared
         if(card.getMarking()!=null && card.getMarking().size()>0) {
           globs.getScoreManager().cardMarkingWillBeClearedTL(card);   // call this before hitting db
+          HashSet<CardMarking> mset = new HashSet<>(card.getMarking());
           card.getMarking().clear();
           card.setHidden(false);
           Card.updateTL(card);
-          GameEventLogger.cardMarkedTL(card,u);
+          GameEventLogger.cardMarkedTL(card,u,mset);
         }
       }
       else {
@@ -287,7 +288,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
         if(!needWarning) {
           setMarkingsTL(card,cm);
           Card.updateTL(card);
-          GameEventLogger.cardMarkedTL(card,u);
+          GameEventLogger.cardMarkedTL(card,u,null);
         }
         else {
           ConfirmDialog.show(CardChainPage.this.getUI(), "Child cards will also be hidden.  Continue?",
@@ -302,7 +303,7 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
                     Card c= Card.getTL(cardId);
                     setMarkingsTL(c,cmm);
                     hideAllChildrenTL(c);  // does the Card.update
-                    GameEventLogger.cardMarkedTL(c,u);
+                    GameEventLogger.cardMarkedTL(c,u,null);
                     HSess.close();
                   }
                 }
@@ -759,6 +760,11 @@ public class CardChainPage extends VerticalLayout implements MmowgliComponent,Ne
       loadMarkingPanel_oobTL(c);
       cardLg.update_oobTL(c); 
       updateFollowers_oobTL(c);
+      
+      for(VerticalLayout vl : columnVLs) {
+      	CardSummaryListHeader lstHdr = (CardSummaryListHeader)vl.getComponent(0);
+      	lstHdr.cardUpdated_oobTL();
+      }
       return true;              // ui
     }
     else 

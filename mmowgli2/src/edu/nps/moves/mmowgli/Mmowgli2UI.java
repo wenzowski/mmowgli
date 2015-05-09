@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2010-2014 Modeling Virtual Environments and Simulation
+  Copyright (C) 2010-2015 Modeling Virtual Environments and Simulation
   (MOVES) Institute at the Naval Postgraduate School (NPS)
   http://www.MovesInstitute.org and http://www.nps.edu
  
@@ -74,6 +74,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
 {
   private MmowgliOuterFrame outerFr;
   private MmowgliSessionGlobals globals;
+  private RegistrationPageBase regpg;
   private AbstractMmowgliControllerHelper2 controllerHelper;
   private Navigator navigator;
   private UUID uuid;
@@ -138,7 +139,6 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
     MmowgliController cntlr = globs.getController();
     mm.addMessageListener((AbstractMmowgliController)cntlr);
     
-    setPollInterval(-1);
     HSess.checkClose(sessKey);
     
     if(!globs.initted)
@@ -182,7 +182,7 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   {
     VerticalLayout layout = (VerticalLayout)getContent();
     layout.removeAllComponents();
-    RegistrationPageBase regpg;
+
     layout.addComponent(regpg = new RegistrationPageBase());
     layout.setComponentAlignment(regpg,  Alignment.TOP_CENTER);    
   }
@@ -375,5 +375,13 @@ abstract public class Mmowgli2UI extends UI implements WantsMoveUpdates, WantsMo
   public UUID getUserSessionUUIDObj()
   {
     return getGlobals().getUserSessionIdentifier();
+  }
+  
+  public void pingPush()
+  {
+  	if(outerFr != null)
+  	  outerFr.pingPush();
+  	else if(regpg != null)
+  	  regpg.pingPush();
   }
 }

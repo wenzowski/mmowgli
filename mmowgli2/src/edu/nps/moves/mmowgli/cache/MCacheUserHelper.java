@@ -138,13 +138,12 @@ public class MCacheUserHelper
       MSysOut.println(ERROR_LOGS, "MCacheUserHelper.externallyNewOrUpdatedUserTL(), cant get user id/rev = " + id+"/"+revision);
       return;
     }
-    
-     usersQuickFull.put(u.getId(), new QuickUser(u));
+    usersQuickFull.put(u.getId(), new QuickUser(u));
      
-      if(u.isViewOnly() || u.isAccountDisabled())
-        ; // don't add
-      else
-        usersQuick.put(u.getUserName(), u.getId());
+    if(u.isViewOnly() || u.isAccountDisabled())
+      ; // don't add
+    else
+      usersQuick.put(u.getUserName(), u.getId());
   }
 
   void dbDeleteUser(char messageType, String message)
@@ -164,18 +163,21 @@ public class MCacheUserHelper
   }
   
   private void removeUser(Long id)
-  {
-    Collection<Long> coll = usersQuick.values();
-    Iterator<Long> itr = coll.iterator();
-    while(itr.hasNext()) {
-      if(itr.next() == id) {
-        usersQuick.remove(id);
-        break;
-      }
-    }
-    _usersQuick.remove(id);
-    if(usersQuickFull.containsKey(id))
-      usersQuickFull.remove(id);
+  { 
+  	String name = _usersQuick.get(id); // key id, value name
+  	
+  	if(name != null)
+  		usersQuick.remove(name);  // key name, value id
+  	else
+      MSysOut.println(ERROR_LOGS, "MCacheUserHelper.removeUser(), _usersQuick had no id for name = "+name);
+  	
+    Object qu = usersQuickFull.remove(id); // key id, value quickuser
+    if(qu == null)
+    	MSysOut.println(ERROR_LOGS,"MCacheUserHelper.removeUser(), usersQuickFull had no QuickUser for id = "+id);     	
+    
+    Object nm = _usersQuick.remove(id);// key id, value name, used by userQuickFull comparator, so do last
+    if(nm == null)
+    	MSysOut.println(ERROR_LOGS,"MCacheUserHelper.removeUser(), _usersQuick had no name for id = "+id);     	
   }
   
   @SuppressWarnings("unchecked")
@@ -191,10 +193,16 @@ public class MCacheUserHelper
     @Override
     public int compare(String s1, String s2)
     {
-      if(s1 == null || s2 == null) {
-        MSysOut.println(ERROR_LOGS, "MCacheUserHelper.UserNameCaseInsensitiveComparator.compare(), s1 = "+s1+", s2  = "+s2);
+    	if(s1 == null && s2 != null)
+    		return -1;
+    	if(s1 != null && s2 == null)
+    		return 1;
+    	
+      if(s1 == null && s2 == null) {
+        // apparently not an error MSysOut.println(ERROR_LOGS, "MCacheUserHelper.UserNameCaseInsensitiveComparator.compare(), both arguments == null");
         return 0;
       }
+      
       return s1.compareToIgnoreCase(s2);
     }
   }
@@ -204,10 +212,25 @@ public class MCacheUserHelper
     @Override
     public int compare(Long key1, Long key2)
     {
+    	if(key1 == null && key2 != null)
+    		return -1;
+    	if(key1 != null && key2 == null)
+    		return 1;
+      if(key1 == null && key2 == null) {
+        // apparently not an errorMSysOut.println(ERROR_LOGS, "MCacheUserHelper.UserNameFullCaseInsensitiveComparator.compare(), both arguments == null");
+        return 0;
+      }
+ 	
+      // Can't get the QuickUser from the same Map being compared (recursion error), so get from other map
       String n1 = _usersQuick.get(key1);
       String n2 = _usersQuick.get(key2);
-      if(n1 == null || n2 == null) {
-        MSysOut.println(ERROR_LOGS, "MCacheUserHelper.UserNameFullCaseInsensitiveComparator.compare(), key1 "+key1+" returns "+n1+", key2 "+key2+" returns "+n2);
+    	if(n1 == null && n2 != null)
+    		return -1;
+    	if(n1 != null && n2 == null)
+    		return 1;
+           
+      if(n1 == null && n2 == null) {
+        // apparently not an error MSysOut.println(ERROR_LOGS, "MCacheUserHelper.UserNameFullCaseInsensitiveComparator.compare(), key1 "+key1+" returns "+n1+", key2 "+key2+" returns "+n2);
         return 0;
       }
       return n1.compareToIgnoreCase(n2);
@@ -293,5 +316,13 @@ public class MCacheUserHelper
     public void setAdmin(boolean admin)               {this.admin = admin;}
     public void setConfirmed(boolean confirmed)       {this.confirmed = confirmed;}
     public void setMultipleEmails(boolean yn)         {this.multipleEmails = yn;}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if(! (obj instanceof QuickUser))
+				return false;
+			return ((QuickUser)obj).getUname().compareToIgnoreCase(getUname()) == 0;
+		}        
   }
 }

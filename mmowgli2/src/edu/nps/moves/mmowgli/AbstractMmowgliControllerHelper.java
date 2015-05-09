@@ -1369,7 +1369,7 @@ public class AbstractMmowgliControllerHelper
   {
     ConfirmDialog.show(UI.getCurrent(),
         "Important:",
-        "Are you sure you want to kill all user sessions in this Mmowgli? This is typically done before redeploying the application.",
+        "Are you sure you want to kill all user sessions (including your own) in this Mmowgli? This is typically done before redeploying the application.",
         "Yes, do it",
         "No, cancel that request",
         new ConfirmDialog.Listener()

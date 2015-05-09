@@ -67,6 +67,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
   private Window currentPopup;
 
   private VideoWithRightTextPanel vidPan;
+  private Label pushPingLab;
   private NativeButton imNewButt, imRegisteredButt, signupButt, guestButt;
   private boolean lockedOut = false;
   private boolean mockupOnly = false;
@@ -115,7 +116,11 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
     baseVLayout.setWidth("988px");
     outerLayout.setComponentAlignment(baseVLayout, Alignment.TOP_CENTER);
     baseVLayout.setSpacing(true);
-
+    
+    // This is just to give us a hidden widget to update to keep push channel alive through Akamai
+    outerLayout.addComponent(pushPingLab = new HtmlLabel(""));
+    pushPingLab.setWidth("5px");
+    
     String headingStr = phase.getOrientationCallToActionText();
     String summaryStr = phase.getOrientationHeadline();
     String textStr = phase.getOrientationSummary();
@@ -700,6 +705,8 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         mmgr.onNewUserSignupTL(_u_);
         _u_.setWelcomeEmailSent(true);
       }
+      // If we're here, we've either been email-confirmed or that is not necessary; make sure here
+      _u_.setEmailConfirmed(true);
       
       // Adjust session timeouts.  Default (standard user) is set in web.xml
       VaadinSession vsess = UI.getCurrent().getSession();
@@ -712,17 +719,18 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
       MSysOut.println(SYSTEM_LOGS,"Vaadin heartbeat interval (sec): "+vsess.getConfiguration().getHeartbeatInterval());
       MSysOut.println(SYSTEM_LOGS,"Tomcat timeout (\"maxInactiveInterval\") (sec): "+sess.getMaxInactiveInterval());
       GameEventLogger.logUserLoginTL(_u_);
-
-    //  HSess.closeAndReopen();
+      
+      User.updateTL(_u_);
+      HSess.closeAndReopen();
+      _u_ = User.getTL(_u_.getId()); // refresh
+      
       MmowgliController cntlr = globs.getController();
       if (cntlr != null)
-        cntlr.handleEventTL(MmowgliEvent.HANDLE_LOGIN_STARTUP, userId, null);
+        cntlr.handleEventTL(MmowgliEvent.HANDLE_LOGIN_STARTUP, _u_, null); //don't want User.get() in this session, userId, null);
       else
         System.err.println("No controller in RegistrationPageBase.wereIn()");
 
       AppMaster.instance().sendMySessionReport();
-      
-      User.updateTL(_u_);
     }
   }
 
@@ -800,5 +808,16 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         }
       });
     }
+  }
+  
+  // A little bit of code to make a minor invisible change in the UI, used to refresh the push channel
+  int pp = 0;
+  public void pingPush()
+  {
+    pp++;
+    if(pp%2 == 0)
+      pushPingLab.setValue("&nbsp;");
+    else
+      pushPingLab.setValue("");   
   }
 }

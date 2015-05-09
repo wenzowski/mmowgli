@@ -1,5 +1,18 @@
 # This is a list of SQL commands which may be useful to update old game databases. This file is not intended to be run in its entirety.
 # Remember to also update the MmowgliConstants field DATABASE_VERSION
+UPDATE `Game` SET `version` = '20150504' WHERE `id` = '1';
+ALTER TABLE `Media` ADD `width` BIGINT(20)  NULL  AFTER `alternateUrl`;
+ALTER TABLE `Media` ADD `height` BIGINT(20)  NULL  DEFAULT NULL  AFTER `width`;
+
+UPDATE `Game` SET `version` = '20150429' WHERE `id` = '1';
+ALTER TABLE `Image` ADD `width` INT(11)  NOT NULL  DEFAULT '0'  AFTER `description`;
+ALTER TABLE `Image` ADD `height` INT(11)  NOT NULL  DEFAULT '0'  AFTER `width`;
+
+UPDATE `Game` SET `version` = '20150420' WHERE `id` = '1';
+ALTER TABLE `Game` ADD `reportsShowHiddenCards` BIT(1)  NOT NULL  DEFAULT b'0'  AFTER `gameHandle`;
+
+UPDATE `Game` SET `version` = '20150417' WHERE `id` = '1';
+UPDATE `CardMarking` SET `description` = 'No more children', `label` = 'No More Children' WHERE `id` = '2';
 
 UPDATE `Game` SET `version` = '20150403' WHERE `id` = '1';
 ALTER TABLE `Game` ADD `mapLayersCSV` VARCHAR(511)  NOT NULL  DEFAULT 'ESRI_WORLD_IMAGERY'  AFTER `mapZoom`;

@@ -36,6 +36,9 @@ import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Resource;
+
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
@@ -90,7 +93,7 @@ public class UserExporter extends BaseExporter
     exportToBrowser(title);      
   }
   
-  public Document buildXmlDocumentTL() throws Throwable
+  public Document buildXmlDocument() throws Throwable
   {
     Document doc;
     try {
@@ -114,21 +117,21 @@ public class UserExporter extends BaseExporter
 
       root.setAttribute("exported", dateFmt.format(new Date()));
       
-      Session sess = HSess.get();
-      
+      HSess.init();      
       Game g = Game.getTL();
       String s = g.getTitle();
       addElementWithText(root, "GameTitle", s.replace(' ','_'));  // better file name handling
       addElementWithText(root, "GameAcronym", g.getAcronym());
       addElementWithText(root, "GameSecurity", g.isShowFouo()?"FOUO":"open");
       addElementWithText(root, "GameSummary", metaString);
-      newAddCall2Action(root, sess, g);
-      doBadgeTypes(root,sess);
-      doAwardTypes(root,sess);
-      doAffiliationDefaults(root,sess);
+      newAddCall2Action(root, HSess.get(), g);
+      doBadgeTypes(root,HSess.get());
+      doAwardTypes(root,HSess.get());
+      doAffiliationDefaults(root,HSess.get());
       
       @SuppressWarnings("unchecked")
-      List<User> lis = sess.createCriteria(User.class).addOrder(Order.asc("id")).list();
+      List<User> lis = HSess.get().createCriteria(User.class).addOrder(Order.asc("id")).list();
+      HSess.close();
       
       int highestMove = g.getCurrentMove().getNumber();  //1-based  
       // Build a work array
@@ -229,10 +232,11 @@ public class UserExporter extends BaseExporter
       // Used the combined order (last sort above) when writing out Users
            
       for (RankedUser ru : ruLis) {
-        addUserToDocument(root, ru.u, ru, HSess.get());
+        addUserToDocument(root, ru.u.getId(), ru);
       }
     }
     catch (Throwable t) {
+      HSess.close(); // will not fail if already closed
       t.printStackTrace();
       throw t; // rethrow
     }
@@ -240,9 +244,11 @@ public class UserExporter extends BaseExporter
     return doc;
   }
   
-  private void addUserToDocument(Element root, User u, RankedUser ru, Session sess)
-  {    
-    u = User.merge(u,sess);
+  private void addUserToDocument(Element root, long userid, RankedUser ru)
+  {
+    HSess.init();
+    User u = User.getTL(userid);
+
     Element uElem = createAppend(root,"User");
     uElem.setAttribute("id", ""+u.getId());
     uElem.setAttribute("gameName", u.getUserName());
@@ -261,6 +267,7 @@ public class UserExporter extends BaseExporter
     uElem.setAttribute("isGameDesigner", Boolean.toString(u.isDesigner()));
     uElem.setAttribute("isAccountDisabled", Boolean.toString(u.isAccountDisabled()));
     
+    // Todo ....got a media locator in base class, see how it's used in awards and badges
     // Want to do this:  but don't have an app instance; should redesign
     // ExternalResource extR = (ExternalResource)app.globs().mediaLocator().locate(u.getAvatar().getMedia());
     // Hack
@@ -287,11 +294,11 @@ public class UserExporter extends BaseExporter
     scores.setAttribute("implementation",""+(int)Math.round(cInn));
     scores.setAttribute("implementationRank", ""+ru.innovScoreRank);
     
-    Game g = Game.get(sess);
+    Game g = Game.getTL();
     int highestMove = g.getCurrentMove().getNumber();
     
     @SuppressWarnings("unchecked")    
-    List<Move> mvs = sess.createCriteria(Move.class).addOrder(Order.asc("number")).list();
+    List<Move> mvs = HSess.get().createCriteria(Move.class).addOrder(Order.asc("number")).list();
     for(Move m : mvs) {
       int num = m.getNumber();
       if(num > highestMove)
@@ -314,12 +321,13 @@ public class UserExporter extends BaseExporter
     }
     Element cardsPlayed = createAppend(uElem,"CardsPlayed");
     @SuppressWarnings("unchecked")
-    List<Card> cds = sess.createCriteria(Card.class).add(Restrictions.eq("author", u)).list();
+    List<Card> cds = HSess.get().createCriteria(Card.class).add(Restrictions.eq("author", u)).list();
     cardsPlayed.setAttribute("count", ""+cds.size());
     for(Card cd : cds) {
       Element c = createAppend(cardsPlayed, "CardID");
       c.setTextContent(""+cd.getId());
-    }   
+    } 
+    HSess.close();
   }
   
   @SuppressWarnings("unchecked")
@@ -333,7 +341,14 @@ public class UserExporter extends BaseExporter
       bdgEl.setAttribute("type",""+b.getBadge_pk());
       bdgEl.setAttribute("name", b.getBadgeName());
       bdgEl.setAttribute("description", b.getDescription());
-      bdgEl.setAttribute("iconUrl", b.getMedia().getUrl());
+      
+      Resource res = mediaLocator.locate(b.getMedia());
+      String url="";
+      if(res instanceof ExternalResource)
+      	url = ((ExternalResource)res).getURL();
+      bdgEl.setAttribute("iconUrl",url);
+      
+      //bdgEl.setAttribute("iconUrl", b.getMedia().getUrl());
     }
   }
   
@@ -361,7 +376,11 @@ public class UserExporter extends BaseExporter
       atEl.setAttribute("type",""+at.getId());
       atEl.setAttribute("name", at.getName());
       atEl.setAttribute("description", at.getDescription());
-      atEl.setAttribute("iconUrl",at.getIcon55x55().getUrl());
+      Resource res = mediaLocator.locate(at.getIcon55x55());
+      String url="";
+      if(res instanceof ExternalResource)
+      	url = ((ExternalResource)res).getURL();
+      atEl.setAttribute("iconUrl",url);
     }   
   }
   

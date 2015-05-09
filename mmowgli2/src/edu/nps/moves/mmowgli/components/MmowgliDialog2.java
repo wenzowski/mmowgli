@@ -26,6 +26,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.db.User;
+import edu.nps.moves.mmowgli.db.pii.EmailPii;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHibPii;
@@ -34,7 +35,6 @@ import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
-
 /**
  * MmowgliDialog2.java
  * Created on Aug 31, 2011
@@ -105,8 +105,14 @@ public abstract class MmowgliDialog2 extends Window implements MmowgliComponent
     if(u != null) {
       User.deleteTL(u);
       UserPii uPii = VHibPii.getUserPii(u.getId());
+      Long uoid = uPii.getUserObjectId();
+      if(uoid != null) {
+      	EmailPii epii = VHibPii.getUserPiiEmail(uoid);
+      	VHibPii.delete(epii);
+      }
       VHibPii.delete(uPii);
-      MSysOut.println(SYSTEM_LOGS,"User deleted (didn't finish login) "+u.getId());
+
+      MSysOut.println(NEWUSER_CREATION_LOGS,"User cancelled (didn't finish login) "+u.getId());
     }
 
     setUser(null);

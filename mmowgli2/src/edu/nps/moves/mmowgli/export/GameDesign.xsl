@@ -168,6 +168,24 @@
         <xsl:text>MmowgliGame.xml</xsl:text>
     </xsl:variable>
 
+    <xsl:variable name="IdeaCardChainLocalLink">
+        <xsl:text>IdeaCardChain_</xsl:text>
+        <xsl:value-of select="$gameTitle"/>
+        <!-- .html or .xml -->
+    </xsl:variable>
+
+    <xsl:variable name="ActionPlanLocalLink">
+        <xsl:text>ActionPlanList_</xsl:text>
+        <xsl:value-of select="$gameTitle"/>
+        <xsl:text>.html</xsl:text>
+    </xsl:variable>
+
+    <xsl:variable name="PlayerProfilesLocalLink">
+        <xsl:text>PlayerProfiles_</xsl:text>
+        <xsl:value-of select="$gameTitle"/>
+        <xsl:text>.html</xsl:text>
+    </xsl:variable>
+
     <xsl:variable name="ReportsIndexLocalLink">
         <!-- supports game titles with spaces
         <xsl:text>index</xsl:text> -->
@@ -259,16 +277,6 @@ b.error {color: #CC0000}
                 <table align="center" border="0" class="banner">
                     <tr>
                         <td align="center">
-                            <a href="{$portalPage}" title="Game documentation for {$gameLabel}">
-                                <!-- 1158 x 332 -->
-                                <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="386" height="111" border="0"/>
-                            </a>
-                        </td>
-                        <td>
-                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                        </td>
-                        <td align="center">
                             <p>
                                 <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
                             </p>
@@ -279,6 +287,49 @@ b.error {color: #CC0000}
                                 <xsl:value-of disable-output-escaping="yes" select="$gameLabel"/> <!-- want escaped <br /> intact for line break -->
                             </h2>
                         </td>
+                        <td>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                        </td>
+                        <td align="center">
+                            <a href="{$portalPage}" title="Game documentation for {$gameLabel}" target="_blank">
+                                <!-- 1158 x 332 -->
+                                <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="386" height="111" border="0"/>
+                            </a>
+                        </td>
+                        <td>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                        </td>
+                            <td rowspan="2" valign="middle">
+                                <xsl:text> Corresponding report products: </xsl:text>
+                                <ul>
+                                    <li>
+                                        <a href="index.html" title="Reports Index for this game"><xsl:text>Reports Index</xsl:text></a>
+                                    </li>
+                                    <xsl:if test="string-length($ActionPlanLocalLink) > 0">
+                                        <li>
+                                            <a href="{$ActionPlanLocalLink}.html">Action Plans</a>
+                                        </li>
+                                    </xsl:if>
+                                    <li>
+                                        <a href="{$IdeaCardChainLocalLink}.html">Idea Card Chains</a>
+                                        <xsl:text> and </xsl:text>
+                                        <!-- Sunburst Visualizer -->
+                                        <a href="cardSunburstVisualizer.html" title="Idea Card Sunburst Visualizer">
+                                            <xsl:text disable-output-escaping="yes">Sunburst&amp;nbsp;Visualizer</xsl:text>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{$PlayerProfilesLocalLink}" title="Player Profiles report">
+                                            <xsl:text>Player Profiles</xsl:text>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="https://portal.mmowgli.nps.edu/reports" target="blank">All MMOWGLI Game Reports</a>
+                                    </li>
+                                </ul>
+                            </td>
                     </tr>
                 </table>
 

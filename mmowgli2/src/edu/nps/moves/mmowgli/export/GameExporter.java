@@ -111,7 +111,7 @@ public class GameExporter extends BaseExporter
   }
 
   @Override
-  public Document buildXmlDocumentTL() throws Throwable
+  public Document buildXmlDocument() throws Throwable
   {
     Document doc;
 
@@ -137,23 +137,32 @@ public class GameExporter extends BaseExporter
       root.setAttribute("exported", dateFmt.format(new Date()));
       root.setAttribute("description", metaString);
       
+      HSess.init();
       Game g = Game.getTL();
       root.setAttribute("acronym", g.getAcronym());
       
-      Session sess = HSess.get();
-      addMetaData(root,sess,g);
-      addHeaderFooter(root,sess,g);
-      addWelcome(root,sess,g);
-      newAddCall2Action(root,sess,g);
-      addTopCards(root,sess,g);
-      addSubCards(root,sess,g);
-      addSeedCards(root,sess,g);
-      addActionPlans(root,sess,g);
-      addMap(root,sess,g);
-      addOther(root,sess,g);
+      addMetaData(root,HSess.get(),g);
+      addHeaderFooter(root,HSess.get(),g);
+      addWelcome(root,HSess.get(),g);
+      newAddCall2Action(root,HSess.get(),g);
+      
+      HSess.closeAndReopen();
+      addTopCards(root,HSess.get(),g);
+      addSubCards(root,HSess.get(),g);
+      
+      HSess.closeAndReopen();
+      addSeedCards(root,HSess.get(),g);
+      addActionPlans(root,HSess.get(),g);
+      
+      HSess.closeAndReopen();
+      addMap(root,HSess.get(),g);
+      addOther(root,HSess.get(),g);
+      
+      HSess.close();
     }
     catch (Throwable t) {
       t.printStackTrace();
+      HSess.close();
       throw t; // rethrow
     }
     return doc;  

@@ -88,7 +88,7 @@
       <xs:attribute name="hidden" type="xs:string"/>
       <xs:attribute name="id" use="required" type="xs:integer"/>
       <xs:attribute name="level" use="required" type="xs:integer"/>
-      <xs:attribute name="scenarioFail" type="xs:boolean"/>
+      <xs:attribute name="noChildren" type="xs:boolean"/>
       <xs:attribute name="superInteresting" type="xs:boolean"/>
       <xs:attribute name="moveNumber" type="xs:integer"/>
       <xs:attribute name="color" type="xs:string"/>
@@ -114,7 +114,7 @@
       <xs:attribute name="hidden" type="xs:string"/>
       <xs:attribute name="id" use="required" type="xs:integer"/>
       <xs:attribute name="level" use="required" type="xs:integer"/>
-      <xs:attribute name="scenarioFail" type="xs:boolean"/>
+      <xs:attribute name="noChildren" type="xs:boolean"/>
       <xs:attribute name="superInteresting" type="xs:boolean"/>
       <xs:attribute name="moveNumber" type="xs:integer"/>
       <xs:attribute name="color" type="xs:string"/>

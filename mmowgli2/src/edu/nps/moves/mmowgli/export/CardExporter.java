@@ -55,16 +55,21 @@ public class CardExporter extends BaseExporter
   private String CARD_ELEMENT         = "Card";
   private String CDATA_ELEMENTS       = BRIEFING_TEXT_ELEM +" "+ CARD_ELEMENT; /* "elem1" + " "+ "elem2" */;
 
-  public final String STYLESHEET_NAME = "CardTree.xsl";
-  public final String THREAD_NAME     = "CardExporter";
-  public final String FILE_NAME       = "IdeaCardChain";
+  public final String STYLESHEET_NAME    = "CardTree.xsl";
+  public final String THREAD_NAME        = "CardExporter";
+  public final String FILE_NAME          = "IdeaCardChain";
+  
   public final String CARD_TREE_ROOT_KEY = "singleIdeaCardChainRootNumber";
+  public final String SHOW_HIDDEN_KEY    = "displayHiddenCards";
   
   private static Map<String,String> parameters = null;
  
-  @HibernateSessionThreadLocalConstructor
   public CardExporter()
   {
+  	parameters = new HashMap<>();
+  	HSess.init();
+  	parameters.put(SHOW_HIDDEN_KEY,Boolean.toString(Game.getTL().isReportsShowHiddenCards()));
+  	HSess.close();
   }
   
   @Override
@@ -86,14 +91,12 @@ public class CardExporter extends BaseExporter
     
     exportToBrowser(title); //_export();    
   }
-
+  
   @Override
-  public Document buildXmlDocumentTL() throws Throwable
+  public Document buildXmlDocument() throws Throwable
   {
     Document doc;;
     try {
-      Session sess = HSess.get();
-      
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       DocumentBuilder parser = factory.newDocumentBuilder();
       doc = parser.newDocument();
@@ -113,39 +116,42 @@ public class CardExporter extends BaseExporter
       //root.setAttribute("xsi:schemaLocation", "http://edu.nps.moves.mmowgli.cardTree CardTree.xsd");
       
       root.setAttribute("exported", dateFmt.format(new Date()));
-      root.setAttribute("multipleMoves", Boolean.toString(isMultipleMoves(sess)));
       
+      HSess.init();      
+      root.setAttribute("multipleMoves", Boolean.toString(isMultipleMoves(HSess.get())));      
       Game g = Game.getTL();
       String s = g.getTitle();
       addElementWithText(root, "GameTitle", s.replace(' ', '_'));     // for better file-name building
       addElementWithText(root, "GameAcronym", g.getAcronym());
       addElementWithText(root, "GameSecurity", g.isShowFouo()?"FOUO":"open");
       addElementWithText(root, "GameSummary", metaString);
-      newAddCall2Action(root, sess, g);
+      newAddCall2Action(root, HSess.get(), g);
       
       Element topCards = createAppend(root, "TopLevelCardTypes");
-      insertTopCardsForAllRounds(topCards,g,sess);
+      insertTopCardsForAllRounds(topCards,g,HSess.get());
       
       Element innovateRoot = createAppend(root, "InnovateCards");
       Element defendRoot = createAppend(root,"DefendCards");
       
+      HSess.closeAndReopen();
+      
       @SuppressWarnings("unchecked")    
-      List<Card> lis = sess.createCriteria(Card.class).list();
-
-      for (Card card : lis) {
-        sess = HSess.get();
-        card = Card.mergeTL(card);
+      ArrayList<Card> alis = new ArrayList<Card>(HSess.get().createCriteria(Card.class).list()); // avoids lazy init after HSess.close();
+      HSess.close();
+      
+      for (Card card : alis) {
         CardType typ = card.getCardType();
         if(typ.isIdeaCard()) {
           if(typ.isPositiveIdeaCard())
-            walkCardTree(innovateRoot,card,1);
+            walkCardTree(innovateRoot,card.getId(),1);
           else 
-            walkCardTree(defendRoot,card,1);;
+            walkCardTree(defendRoot,card.getId(),1);
         }
       }
     }
     catch (Throwable t) {
       t.printStackTrace();
+      HSess.close();  // handles already closed
       throw t; // rethrow
     }
     return doc;  
@@ -182,8 +188,12 @@ public class CardExporter extends BaseExporter
     }    
   }
   
-  private void walkCardTree(Element parent, Card child, int level)
+  private void walkCardTree(Element parent, long cardId, int level)
   {
+    Thread.yield();
+    
+    HSess.init();
+    Card child = Card.getTL(cardId);
     Element elm = addElementWithText(parent,CARD_ELEMENT,toUtf8(child.getText()));
     elm.setAttribute("type", toUtf8(child.getCardType().getTitle()));
     elm.setAttribute("level", ""+level);
@@ -203,10 +213,12 @@ public class CardExporter extends BaseExporter
       elm.setAttribute(label,"true");
     }
     elm.setAttribute("moveNumber", ""+child.getCreatedInMove().getNumber());
-    SortedSet<Card> children = child.getFollowOns();
+    HashSet<Card>children = new HashSet<Card>(child.getFollowOns());  // avoids lazy update
+    HSess.close();
+    
     level++;
     for(Card c : children)
-      walkCardTree(elm,c,level);    
+      walkCardTree(elm,c.getId(),level);    
   }
   
   @Override
