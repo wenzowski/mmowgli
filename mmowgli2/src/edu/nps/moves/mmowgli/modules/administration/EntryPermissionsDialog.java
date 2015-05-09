@@ -57,10 +57,6 @@ public class EntryPermissionsDialog extends Window
 
   public EntryPermissionsDialog(boolean ro)
   {
-    if(ro)
-      setHeight("660px");
-    else
-      setHeight("635px");
     setWidth("735px");
     setContent(new EntryPermissionsPanel(ro,this));
     setCaption("Game login permissions: Who can access the game?");
@@ -71,6 +67,7 @@ public class EntryPermissionsDialog extends Window
     private static final long serialVersionUID = 493889965812032703L;
 
     CheckBox signupCB, newAnyCB, newVipCB, regAnyCB, regGMCB, regGDCB, guestCB;
+    CheckBox regVipCB;
     Embedded tellMeMoreImg, imNewImg, imRegisteredImg, guestImg;
     DisabledHideRadios newRadios,regRadios,signupRadios,guestRadios;
     
@@ -177,7 +174,7 @@ public class EntryPermissionsDialog extends Window
       return hl;
     }
 
-    @SuppressWarnings({ "serial", "deprecation" })
+    @SuppressWarnings({ "serial" })
     private void initializeButtonsTL()
     {
       MovePhase mp = Game.getTL().getCurrentMove().getCurrentMovePhase();
@@ -188,11 +185,14 @@ public class EntryPermissionsDialog extends Window
       if (all) {
         regGMCB.setValue(false);
         regGDCB.setValue(false);
+        regVipCB.setValue(false);
       }
       else {
         regGMCB.setValue(mp.isLoginAllowGameMasters());
         regGDCB.setValue(mp.isLoginAllowGameDesigners());
+        regVipCB.setValue(mp.isLoginAllowVIPList());
       }
+      
       boolean newPlayers = mp.isLoginAllowNewUsers();
       if(newPlayers) {
         boolean vip = mp.isRestrictByQueryList();
@@ -234,10 +234,10 @@ public class EntryPermissionsDialog extends Window
 
       // Adjust the top button bar when the radios are hit
       //@formatter:off
-      signupRadios.addListener(new Property.ValueChangeListener(){@Override public void valueChange(ValueChangeEvent event){adjustSignupImage();}});
-      newRadios.addListener(   new Property.ValueChangeListener(){@Override public void valueChange(ValueChangeEvent event){adjustNewImage();}});
-      regRadios.addListener(   new Property.ValueChangeListener(){@Override public void valueChange(ValueChangeEvent event){adjustRegisteredImage();}});
-      guestRadios.addListener( new Property.ValueChangeListener(){@Override public void valueChange(ValueChangeEvent event){adjustGuestImage();}});
+      signupRadios.addValueChangeListener(new ValueChangeListener(){@Override public void valueChange(Property.ValueChangeEvent event){adjustSignupImage();}});
+      newRadios.addValueChangeListener(   new ValueChangeListener(){@Override public void valueChange(Property.ValueChangeEvent event){adjustNewImage();}});
+      regRadios.addValueChangeListener(   new ValueChangeListener(){@Override public void valueChange(Property.ValueChangeEvent event){adjustRegisteredImage();}});
+      guestRadios.addValueChangeListener( new ValueChangeListener(){@Override public void valueChange(Property.ValueChangeEvent event){adjustGuestImage();}});
       //@formatter:on  
       
       adjustTopButtonGroup();
@@ -305,10 +305,11 @@ public class EntryPermissionsDialog extends Window
       VerticalLayout vl = new VerticalLayout();
       vl.setSizeUndefined();
       
+      ValueChangeListener newLis = new NewCBValueChangeListener();
       vl.addComponent(newAnyCB = new ImmCheckBox("Any"));
-      newAnyCB.addValueChangeListener(new NewCBValueChangeListener(newAnyCB));
+      newAnyCB.addValueChangeListener(newLis);
       vl.addComponent(newVipCB = new ImmCheckBox("On VIP list"));
-      newVipCB.addValueChangeListener(new NewCBValueChangeListener(newVipCB));
+      newVipCB.addValueChangeListener(newLis);
       hl.addComponent(vl);
       
       Label sp;
@@ -354,11 +355,17 @@ public class EntryPermissionsDialog extends Window
       VerticalLayout vl = new VerticalLayout();
       vl.setSizeUndefined();
       vl.addComponent(regAnyCB = new ImmCheckBox("Any"));
-      regAnyCB.addValueChangeListener(new RegisteredValueChangeListener(regAnyCB));
-      vl.addComponent(regGMCB = new ImmCheckBox("Game masters"));
-      regGMCB.addValueChangeListener(new RegisteredValueChangeListener(regGMCB));
-      vl.addComponent(regGDCB = new ImmCheckBox("Game designers"));
-      regGDCB.addValueChangeListener(new RegisteredValueChangeListener(regGDCB));
+      RegisteredValueChangeListener regLis = new RegisteredValueChangeListener();
+      regAnyCB.addValueChangeListener(regLis);
+      VerticalLayout threeVl = new VerticalLayout();
+      threeVl.addStyleName("m-greyborder");
+      vl.addComponent(threeVl);
+      threeVl.addComponent(regGMCB = new ImmCheckBox("Game masters"));
+      regGMCB.addValueChangeListener(regLis);
+      threeVl.addComponent(regGDCB = new ImmCheckBox("Game designers"));
+      regGDCB.addValueChangeListener(regLis);
+      threeVl.addComponent(regVipCB = new ImmCheckBox("On VIP list"));
+      regVipCB.addValueChangeListener(regLis);
       hl.addComponent(vl);
       
       Label sp;
@@ -448,16 +455,17 @@ public class EntryPermissionsDialog extends Window
 
 
     @SuppressWarnings("serial")
-    class RegisteredValueChangeListener implements ValueChangeListener
+    class RegisteredValueChangeListener implements Property.ValueChangeListener
     {
-      CheckBox source;
-      public RegisteredValueChangeListener(CheckBox source)
-      {
-        this.source = source;
-      }
+      boolean inHandler=false;
       @Override
-      public void valueChange(ValueChangeEvent evt)
+      public void valueChange(Property.ValueChangeEvent evt)
       {
+        Property<?> source =  evt.getProperty();
+        
+        if(inHandler)
+          return;
+        inHandler = true;
         if (source == regAnyCB) {
           ;
         }
@@ -467,15 +475,19 @@ public class EntryPermissionsDialog extends Window
         else if (source == regGDCB) {
           regAnyCB.setValue(false);
         }
-
+        else if (source == regVipCB) {
+          regAnyCB.setValue(false);
+        }
         Boolean bool = regAnyCB.getValue();
         if (bool) {
           regGMCB.setValue(false);
           regGDCB.setValue(false);
+          regVipCB.setValue(false);
         }
 
         regRadios.setEnabled(!isRegisteredVisibleAndEnabled());
         adjustRegisteredImage();
+        inHandler = false;
       }
     };
 
@@ -483,14 +495,16 @@ public class EntryPermissionsDialog extends Window
     @SuppressWarnings("serial")
     class NewCBValueChangeListener implements ValueChangeListener
     {
-      CheckBox source;
-      public NewCBValueChangeListener(CheckBox source)
-      {
-        this.source = source;
-      }
+      private boolean inHandler = false;
       @Override
       public void valueChange(ValueChangeEvent evt)
       {
+        if(inHandler)
+          return;
+        inHandler = true;
+        
+        Property<?> source = evt.getProperty();
+        
         if (source == newAnyCB) {
           Boolean bool = newAnyCB.getValue();
           if (bool)
@@ -505,6 +519,7 @@ public class EntryPermissionsDialog extends Window
 
         newRadios.setEnabled(!isNewVisibleAndEnabled());       
         adjustNewImage();
+        inHandler = false;
       }
     };
 
@@ -565,10 +580,11 @@ public class EntryPermissionsDialog extends Window
         mp.loginAllowGameAdmins(true); // always
 
         if (me.regAnyCB.getValue())
-          mp.loginAllowAll();
+          mp.loginAllowAll(); // sets all bits
         else {
           mp.loginAllowGameMasters(me.regGMCB.getValue());
           mp.loginAllowGameDesigners(me.regGDCB.getValue());
+          mp.loginAllowVIPList(me.regVipCB.getValue());
         }
         mp.loginAllowGuests(me.guestCB.getValue());
 

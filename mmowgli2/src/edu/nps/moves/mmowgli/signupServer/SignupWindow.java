@@ -81,7 +81,7 @@ public class SignupWindow extends VerticalLayout//Window
 //    });
   }
   
-  String thanksHdr1 = "Thanks for your interest in the <a href='";
+  String thanksHdr1 = "Please sign up below for the <a href='";
   String thanksHdr2 = "'>";
   String thanksHdr3 = "</a> game.";
   

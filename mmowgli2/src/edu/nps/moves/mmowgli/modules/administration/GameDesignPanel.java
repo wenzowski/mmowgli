@@ -345,8 +345,8 @@ class RoundsEditPanel extends VerticalLayout implements MmowgliComponent
       Move.saveTL(m);
 
       moveSelector.newMoveTL(m);
-      moveSelector.setMove(m);
       HSess.close();
+      moveSelector.setMove(m);
     }
   }
 

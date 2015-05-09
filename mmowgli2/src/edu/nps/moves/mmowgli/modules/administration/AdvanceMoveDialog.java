@@ -58,7 +58,8 @@ public class AdvanceMoveDialog extends Window
       + "typically 1-3, and each round will consist of several phases.  This change must be considered to "
       + "be one-way, i.e., an <i>advancement</i>.  The game is not designed to arbitrarily change phases or "
       + "rounds.  In addition, when deciding to advance the round, keep in mind that the game will need to be "
-      + "rebooted, so you must change the round, then immediately restart the mmowgli web app.</span>";
+      + "rebooted and any existing player sessions will be abruptly closed, so you must change the round, then immediately "
+      + "restart the mmowgli web app.</span>";
 
   public static String bottomParagraph = "<span style='font-size:150%'>You must restart the game after advancing rounds!</span>";
 
@@ -311,12 +312,16 @@ public class AdvanceMoveDialog extends Window
       {
         if (dialog.isConfirmed()) {
           HSess.init();
+          
           newMove = Move.mergeTL(newMove);
           newPhase = MovePhase.mergeTL(newPhase);
           newMove.setCurrentMovePhase(newPhase);
           Move.updateTL(newMove);
           Game.getTL().setCurrentMove(newMove);
           Game.updateTL();
+          
+          AppMaster.instance().killAllSessionsAndTellOtherNodesTL();
+
           HSess.close();
           deadStop();         
         }

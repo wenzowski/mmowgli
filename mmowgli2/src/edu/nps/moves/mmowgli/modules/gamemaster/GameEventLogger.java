@@ -102,15 +102,15 @@ public class GameEventLogger
 
   public static void cardTextEdittedTL(Card c, User u)
   {
-    cardChangedCommonTL(GameEvent.EventType.CARDTEXTEDITED,c,u);
+    cardChangedCommonTL(GameEvent.EventType.CARDTEXTEDITED,c,u,null);
   }
    
-  public static void cardMarkedTL(Card c, User u)
+  public static void cardMarkedTL(Card c, User u, Set<CardMarking> oldMarking)
   {
-    cardChangedCommonTL(GameEvent.EventType.CARDMARKED,c,u);
+    cardChangedCommonTL(GameEvent.EventType.CARDMARKED,c,u,oldMarking);
   }
   
-  private static void cardChangedCommonTL(GameEvent.EventType typ, Card c, User marker)
+  private static void cardChangedCommonTL(GameEvent.EventType typ, Card c, User marker, Set<CardMarking> oldMarking)
   {
     Set<CardMarking> cm = c.getMarking();
     StringBuilder sb = new StringBuilder();
@@ -123,8 +123,12 @@ public class GameEventLogger
     sb.append(marker.getId());
     //sb.append(marker.getUserName());
     sb.append(" / ");
-    if(cm == null || cm.size()<=0)
-      sb.append("unmarked");
+    if(cm == null || cm.size()<=0) {
+    	if(oldMarking != null && oldMarking.size()>0)
+    		sb.append("unmarked / former marking: "+oldMarking.iterator().next().getLabel());
+    	else
+        sb.append("unmarked");
+    }
     else
       sb.append(cm.iterator().next().getLabel());
     sb.append(" / ");
@@ -227,7 +231,7 @@ public class GameEventLogger
     GameEvent.saveTL(ev);
     HSess.close();   
   }
-/*  
+
   private static String clampTitleLength(String s)
   {
     String ret = (s==null?"":s);
@@ -235,7 +239,13 @@ public class GameEventLogger
       ret = ret.substring(0, 69)+"...";
    return ret;
   }
-*/  
+
+  public static void logActionPlanCreationTL(ActionPlan ap)
+  {
+    GameEvent ev = new GameEvent(GameEvent.EventType.ACTIONPLANCREATED," / action plan "+ap.getId()+" created, \""+clampTitleLength(ap.getTitle())+"\"");
+    GameEvent.saveTL(ev);    
+  }
+
   public static void logActionPlanUpdateTL(ActionPlan ap, String field, long id)
   {
     GameEvent ev = new GameEvent(GameEvent.EventType.ACTIONPLANUPDATED," / action plan "+ap.getId()+" by user "+id+", "+field);
@@ -329,7 +339,7 @@ public class GameEventLogger
     txt = txt + " "+url+"reports";
     
     GameEvent ev = new GameEvent(GameEvent.EventType.AUTOREPORTGENERATION, txt);
-    GameEvent.saveTL(ev);;       
+    GameEvent.saveTL(ev);
   }
 
   public static void logNewUserTL(User user)

@@ -53,8 +53,8 @@ public class MmowgliConstants
   public static String MOBILE_QR_IMAGE_FILETYPE = "png";
   
   // Database version matching this code
-  public static long DATABASE_VERSION = 20150325; // db which matches this code
-
+  public static long DATABASE_VERSION = 20150504; // db which matches this code
+  
   public static long DATABASE_VERSION_BEFORE_EMAILPII_DIGESTS = 20130626;
   public static long DATABASE_VERSION_AFTER_EMAILPII_DIGESTS = 20130627;
 
@@ -175,7 +175,6 @@ public class MmowgliConstants
   }
   // web.xml param names
 //@formatter:off
-  public static String WEB_XML_DB_CLUSTERMASTER_KEY = "clusterMaster";
   public static String WEB_XML_DB_DROPCREATE_KEY    = "dbDropAndCreate"; 
   public static String WEB_XML_DB_NAME_KEY          = "dbName"; 
   public static String WEB_XML_DB_PASSWORD_KEY      = "dbPassword";
@@ -214,6 +213,15 @@ public class MmowgliConstants
   public static String WEB_XML_CLAMSCAN_ARGUMENT               = "clamScanArgument";
   
   public static String WEB_XML_PUSH_TRANSPORT_KEY = "transport";
+  
+  // Class to determine cluster master
+  // possible values: static classes in ClusterMasterController (implementations of the interface)
+  public static String WEB_XML_CLUSTERMASTER_ARBITER_KEY   = "clusterMasterArbiter";
+  
+  // parameters for alternate methods:
+  public static String WEB_XML_CLUSTERMASTER_NAME_KEY      = "clusterMaster";         // for WebXmlParameterReader
+  public static String WEB_XML_CLUSTERMASTER_LOCK_PATH_KEY = "clusterMasterLockPath"; //SharedFileLockGetter
+  
 //@formatter:on
 
   // Following get set in ApplicationMaster

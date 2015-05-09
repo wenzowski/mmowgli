@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2010-2014 Modeling Virtual Environments and Simulation
+  Copyright (C) 2010-2015 Modeling Virtual Environments and Simulation
   (MOVES) Institute at the Naval Postgraduate School (NPS)
   http://www.MovesInstitute.org and http://www.nps.edu
  
@@ -22,6 +22,7 @@
 
 package edu.nps.moves.mmowgli.export;
 
+import java.awt.Dimension;
 import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -29,16 +30,18 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import org.hibernate.Session;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.vaadin.server.ExternalResource;
 
 import edu.nps.moves.mmowgli.MmowgliConstants;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
+import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
  * ActionPlanExporter.java Created on Nov 28, 2011
@@ -105,11 +108,10 @@ public class ActionPlanExporter extends BaseExporter
     exportToBrowser(title);      
   }
 
-  public Document buildXmlDocumentTL() throws Throwable
+  public Document buildXmlDocument() throws Throwable
   {
     Document doc;
     try {
-      Session sess = HSess.get();
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       DocumentBuilder parser = factory.newDocumentBuilder();
       doc = parser.newDocument();
@@ -129,24 +131,24 @@ public class ActionPlanExporter extends BaseExporter
       // root.setAttribute("xsi:schemaLocation", "http://edu.nps.moves.mmowgli.actionPlanList ActionPlanList.xsd");
 
       root.setAttribute("exported", dateFmt.format(new Date()));
-      
-      root.setAttribute("multipleMoves", Boolean.toString(isMultipleMoves(sess)));
-      Game g = (Game) sess.get(Game.class, 1L);
+      HSess.init();
+      root.setAttribute("multipleMoves", Boolean.toString(isMultipleMoves(HSess.get())));
+      Game g = (Game) HSess.get().get(Game.class, 1L);
       String s = g.getTitle();
       addElementWithText(root, "GameTitle", s.replace(' ','_'));  // better file name handling
       addElementWithText(root, "GameAcronym", g.getAcronym());
       addElementWithText(root, "GameSecurity", g.isShowFouo()?"FOUO":"open");
       addElementWithText(root, "GameSummary", metaString);
-      newAddCall2Action(root, sess, g);
+      newAddCall2Action(root, HSess.get(), g);
 
       @SuppressWarnings("unchecked")
-      List<ActionPlan> lis = sess.createCriteria(ActionPlan.class).list();     
+      List<ActionPlan> lis = HSess.get().createCriteria(ActionPlan.class).list();     
       List<RankedActionPlan>rlis = sortByRank(lis);
- 
+      HSess.close();
       for (ActionPlan ap : lis)  {
-        sess = HSess.get();
-        ap = ActionPlan.merge(ap,sess);
-        addPlanToDocument(root, ap, getRank(ap,rlis));
+        //sess = HSess.get();
+        //ap = ActionPlan.merge(ap,sess);
+        addPlanToDocument(root, ap.getId(), getRank(ap,rlis));
       }
      
       /* This orders the list...use instead of above if desired
@@ -155,14 +157,17 @@ public class ActionPlanExporter extends BaseExporter
     }
     catch (Throwable t) {
       t.printStackTrace();
+      HSess.close();
       throw t; // rethrow
     }
     return doc;
   }
   
-  private void addPlanToDocument(Element root, ActionPlan ap, int rank) throws Throwable
+  private void addPlanToDocument(Element root, long apId, int rank) throws Throwable
   {
     try {
+      HSess.init();
+      ActionPlan ap = ActionPlan.getTL(apId);
       Element apElem = createAppend(root, "ActionPlan");
       apElem.setAttribute("thumbs", twoPlaceDecimalFmt.format(ap.getAverageThumb()));
       apElem.setAttribute("sumThumbs", onePlaceDecimalFmt.format(ap.getSumThumbs()));
@@ -195,7 +200,9 @@ public class ActionPlanExporter extends BaseExporter
         addElementWithText(author, "GameName", toUtf8(nn(u.getUserName())));
         // do not emit... addElementWithText(author,"Location",toUtf8(nn(u.getLocation())));
       }
-
+      HSess.closeAndReopen();
+      ap = ActionPlan.getTL(apId); // reload
+      
       SortedSet<Message> comments = ap.getComments();
       Element commentList = createAppend(apElem, "CommentList");
 
@@ -208,9 +215,13 @@ public class ActionPlanExporter extends BaseExporter
         message.setAttribute("moveNumber", "" + m.getCreatedInMove().getNumber());
       }
 
+      HSess.closeAndReopen();
+      ap = ActionPlan.getTL(apId); // reload
+      
       List<Media> medlis = ap.getMedia();
       Element images = createAppend(apElem, "ImageList");
-
+      MediaLocator medLoc = new MediaLocator();
+      
       for (Media med : medlis) {
         if (med.getType() == MediaType.IMAGE) {
           Element imageEl = createAppend(images, "Image");
@@ -219,20 +230,34 @@ public class ActionPlanExporter extends BaseExporter
           addElementWithText(imageEl, "Description", toUtf8(nn(med.getDescription())));
           String url = nn(med.getUrl());
           String activeUrl = url;
+           
           if (med.getSource() == Media.Source.USER_UPLOADS_REPOSITORY) {
             activeUrl = "file://" + MmowgliConstants.USER_IMAGES_FILESYSTEM_PATH + url;
             url = MmowgliConstants.REPORT_TO_IMAGE_URL_PREFIX + url;
           }
+          else if (med.getSource() == Media.Source.DATABASE) {
+            activeUrl = ((ExternalResource)medLoc.locate(med)).getURL();
+            url = activeUrl;            
+          }
+          Dimension size;
+          if(med.getWidth()!= null && med.getHeight() != null) {
+            size = new Dimension((int)(long)med.getWidth(),(int)(long)med.getHeight());
+          }
+          else {
+            ImageSize iSz = getImageSize(activeUrl);
+            size = iSz.size;
+          }
           addElementWithText(imageEl, "URL", url);
-          ImageSize iSz = getImageSize(activeUrl);
-          addAttribute(imageEl, "width", "" + iSz.size.width);
-          addAttribute(imageEl, "height", "" + iSz.size.height);
-          addAttribute(imageEl, "scaledWidth", "" + iSz.scaledSize.width);
-          addAttribute(imageEl, "scaledHeight", "" + iSz.scaledSize.height);
+          addAttribute(imageEl, "width", "" + size.width);
+          addAttribute(imageEl, "height", "" + size.height);
+
           addImageContent(imageEl, med);
         }
       }
 
+      HSess.closeAndReopen();
+      ap = ActionPlan.getTL(apId); // reload
+      
       Element videos = createAppend(apElem, "VideoList");
 
       for (Media med : medlis) {
@@ -245,6 +270,9 @@ public class ActionPlanExporter extends BaseExporter
         }
       }
 
+      HSess.closeAndReopen();
+      ap = ActionPlan.getTL(apId); // reload
+      
       ChatLog chat = ap.getChatLog();
       SortedSet<Message> chats = chat.getMessages();
       Element chatLog = createAppend(apElem, "ChatLog");
@@ -257,9 +285,10 @@ public class ActionPlanExporter extends BaseExporter
         message.setAttribute("superInteresting", "" + m.isSuperInteresting());
         message.setAttribute("moveNumber", "" + m.getCreatedInMove().getNumber());
       }
+      HSess.close();
     }
     catch (Throwable t) {
-      // Do something here if needed
+      HSess.close();
       throw t; // rethrow
     }
   }

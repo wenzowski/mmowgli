@@ -197,11 +197,17 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     userName = u.getUserName();    
   }
   
-  public void setUserIDTL(Object userId)
+  public void setUserIDTL(Object userOrUserId)
   {
-    this.userId = (Serializable)userId; 
-    MSysOut.println(DEBUG_LOGS,"User.getTL() in MmowgliSessionGlobals.setUserIDTL()");
-    User me = User.getTL(userId);
+  	User me;
+  	if(userOrUserId instanceof User)
+  		me = (User)userOrUserId;
+  	else {
+  		me = User.getTL((Serializable)userOrUserId);
+      MSysOut.println(DEBUG_LOGS,"User.getTL() in MmowgliSessionGlobals.setUserIDTL()");
+  	}
+  	userId = me.getId();
+  	
     gameAdministrator = me.isAdministrator();
     gameMaster = me.isGameMaster();
     viewOnlyUser = me.isViewOnly();
@@ -420,6 +426,15 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     return messagingManager;   
   }
 
+  public void vaadinSessionClosing()
+  {
+    MessagingManager2 mgr = getMessagingManager();
+    if(mgr != null) {
+      mgr.unregisterSession();
+      mgr.killThread();
+    }  	
+  }
+  
   public void setGameBooleans(Game g)
   {
     setGameReadOnly(g.isReadonly());

@@ -72,7 +72,10 @@ public class ReportGenerator implements Runnable
   {
     //this.appMaster = appMaster;
     thread = new Thread(this,"ReportGeneratorThread");
-    thread.setPriority(Thread.NORM_PRIORITY);
+    // Set thread priority down to not interfere with game play
+    boolean priSense = Thread.MIN_PRIORITY < Thread.NORM_PRIORITY;
+    thread.setPriority(priSense?Thread.NORM_PRIORITY-1:Thread.NORM_PRIORITY+1);
+    
     thread.setDaemon(true);
     thread.start();
   }
@@ -99,6 +102,7 @@ public class ReportGenerator implements Runnable
     while (!killed) {
       HSess.init();
       Game g = Game.getTL();
+      HSess.close();
       // Get report period (which can be changed during game play, or even while a generation run is happening)
       reportPeriod = g.getReportIntervalMinutes() * 60 * 1000;
 
@@ -113,45 +117,50 @@ public class ReportGenerator implements Runnable
         poked = false;
 
         try {
-          g = Game.getTL();
-          reportPeriod = g.getReportIntervalMinutes() * 60 * 1000;
-          
+          HSess.init();
+          g = Game.getTL();  // get again.
+          reportPeriod = g.getReportIntervalMinutes() * 60 * 1000;         
           MSysOut.println(REPORT_LOGS,"Report-generator generating card visualizer and action plan, card, user and game design reports to " + MmowgliConstants.REPORTS_FILESYSTEM_PATH + " at "
                                + df.format(new Date()));
           GameEventLogger.logBeginReportGenerationTL();
+          HSess.close();
 
           MSysOut.println(REPORT_LOGS,"Report-generator building card visualizer");
-          new CardVisualizerBuilder().build();
+          new CardVisualizerBuilder().build(g);
           
           MSysOut.println(REPORT_LOGS,"Report-generator exporting action plans");
-          exportOneTL(new ActionPlanExporter());
+          exportOne(new ActionPlanExporter());
+          
           MSysOut.println(REPORT_LOGS,"Report-generator exporting cards");
-          exportOneTL(new CardExporter());
+          exportOne(new CardExporter());
+          
           MSysOut.println(REPORT_LOGS,"Report-generator exporting users");
-          exportOneTL(new UserExporter());  // keep this last, uses the product of the 2 before
+          exportOne(new UserExporter());  // keep this last, uses the product of the 2 before
+          
           MSysOut.println(REPORT_LOGS,"Report-generator exporting game");
-          String gXmlPath = exportOneTL(new GameExporter());
+          String gXmlPath = exportOne(new GameExporter());
 
           writeIndexDotHtml(MmowgliConstants.REPORTS_FILESYSTEM_PATH + "index.html", gXmlPath);
 
           copyImages(g);
           
+          HSess.init();
           MSysOut.println(REPORT_LOGS,"Report-generator finished");
           GameEventLogger.logEndReportGenerationTL();
+          HSess.close();
         }
         catch (Throwable t) {
           if (!(t instanceof InterruptedException) && !killed) {
             System.err.println("Exception in ReportGenerator: " + t.getClass().getSimpleName() + " / " + t.getLocalizedMessage());
             t.printStackTrace();
           }
-          System.err.println("ReportGenerator shutting down.");
+          System.err.println("Report-generator shutting down.");
           killed = true;
-          HSess.close();
+          HSess.close();  // properly handles already closed
           return; // kills thread
         }
       } // if(poked || reportPeriod == 0)
       
-      HSess.close();
       lastReportMS = System.currentTimeMillis();
 
       long sleepTime = reportPeriod<=0?Long.MAX_VALUE:reportPeriod;
@@ -159,9 +168,9 @@ public class ReportGenerator implements Runnable
     }
   }
 
-  private String exportOneTL(BaseExporter exp) throws Throwable
+  private String exportOne(BaseExporter exp) throws Throwable
   {
-    ExportProducts exProd = exp.exportToRepositoryTL();
+    ExportProducts exProd = exp.exportToRepository();
     String fileName = exp.buildFileName(exp.getFileNamePrefix());
 
     String xmlName = fileName + ".xml";
@@ -197,12 +206,12 @@ public class ReportGenerator implements Runnable
   {
     try {
       asleep = true;
-      MSysOut.println(REPORT_LOGS,"ReportGenerator sleeping.");
+      MSysOut.println(REPORT_LOGS,"Report-generator sleeping.");
       Thread.sleep(ms);
-      MSysOut.println(REPORT_LOGS,"ReportGenerator awake.");
+      MSysOut.println(REPORT_LOGS,"Report-generator awake.");
     }
     catch (InterruptedException ex) {
-      MSysOut.println(REPORT_LOGS,"ReportGenerator sleep interrupted.");
+      MSysOut.println(REPORT_LOGS,"Report-generator sleep interrupted.");
       try{Thread.sleep(5*1000);}catch(InterruptedException ex2){}  // give caller a chance to update db with new interval
     }
     asleep = false;

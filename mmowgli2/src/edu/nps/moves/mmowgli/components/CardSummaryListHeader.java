@@ -44,6 +44,7 @@ import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.actionplans.AddAuthorDialog;
+import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
 import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 import edu.nps.moves.mmowgli.modules.cards.CardTypeManager;
 import edu.nps.moves.mmowgli.utility.BaseCoroutine;
@@ -166,13 +167,20 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
     // content.setDebugId(CardTypeManager.getCardCreateClickDebugId(ct));
     content.setId(CardTypeManager.getCardCreateClickDebugId(ct));
     topHalfLay.addComponent(content, CARDLISTHEADER_CONTENT_POS);
+    
+    boolean cantCreateBecauseHiddenParent = checkNoCreateBecauseHiddenTL(parent);
+    boolean cantCreateBecauseParentMarkedNoChild = checkNoCreateBecauseParentMarkedNoChild(parent);
+    
     if (globs.canCreateCard(ct.isIdeaCard())) {
-      Label lab;
-      topHalfLay.addComponent(lab = new Label("click to add new"), "top:130px;left:75px");
-      lab.addStyleName("m-click-to-add-new");
-      if (textColorStyle != null)
-        lab.addStyleName(textColorStyle);
       markedAsNoCreate = false;
+      if(!cantCreateBecauseHiddenParent && !cantCreateBecauseParentMarkedNoChild) {
+      	//Add the text at the bottom
+        Label lab;
+        topHalfLay.addComponent(lab = new Label("click to add new"), "top:130px;left:75px");
+        lab.addStyleName("m-click-to-add-new");
+        if (textColorStyle != null)
+          lab.addStyleName(textColorStyle);
+      }
     }
     else
       markedAsNoCreate = true;
@@ -184,9 +192,7 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
     setWidth(CARDLISTHEADER_W);
     setHeight(HEIGHT_NODRAWER);
 
-    boolean cantCreateBecauseHiddenParent = checkNoCreateBecauseHiddenTL(parent);
-
-    if (!mockupOnly && !cantCreateBecauseHiddenParent)
+    if (!mockupOnly)// && !cantCreateBecauseHiddenParent && !cantCreateBecauseParentMarkedNoChild)
       topHalfLay.addLayoutClickListener(new LayoutClickListener()
       {
         @Override
@@ -196,6 +202,13 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
         public void layoutClick(LayoutClickEvent event)
         {
           HSess.init();
+          if(checkNoCreateBecauseHiddenTL(parent) || checkNoCreateBecauseParentMarkedNoChild(parent)) {
+            if (drawerComponent.isVisible())
+              closeDrawer();
+          	HSess.close();
+          	return;
+          }
+          
           if (drawerComponent.isVisible())
             closeDrawer();
           else {
@@ -217,6 +230,8 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
       });
     if (cantCreateBecauseHiddenParent)
       handleNoCreate("Can't add card to hidden parent");
+    else if(cantCreateBecauseParentMarkedNoChild)
+    	handleNoCreate("New child cards cannot be added to this card");
     else if (!globs.canCreateCard(ct.isIdeaCard()))
       handleNoCreate();
     else
@@ -230,7 +245,14 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
     User me = Mmowgli2UI.getGlobals().getUserTL();
     return c.isHidden() && !me.isGameMaster();
   }
-
+  
+  private boolean checkNoCreateBecauseParentMarkedNoChild(Card c)
+  {
+    if (c == null)
+      return false; // ok to create
+  	return CardMarkingManager.isNoChildren(c);
+  }
+  
   private void handleCanCreate()
   {
     if (markedAsNoCreate) {
@@ -547,5 +569,13 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
     public void cardCreatedTL(Card c);
 
     public void drawerOpenedTL(Object cardTypeId);
+  }
+  
+  public void cardUpdated_oobTL()
+  {
+  	parent = Card.getTL(parent.getId()); // refresh in case markings have changed
+  	parent.getMarking(); // make sure it's retrieved
+  	if (drawerComponent.isVisible())
+      closeDrawer();
   }
 }

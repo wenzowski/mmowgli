@@ -82,6 +82,7 @@ public class MailManager
 
       if (author.isFirstChildEmailSent())
         return;
+
       if (author.getId() == player.getId())
         return; // don't remind if played on own cards.
 
@@ -122,13 +123,17 @@ public class MailManager
       sb.append(cardPlayer);
       sb.append("</b> played a card on your ");
       sb.append(parentCardType);
-      sb.append(" card saying</p><p><i>");
+      sb.append(" card #");
+      sb.append(parent.getId());
+      sb.append(" saying</p><p><i>");
       sb.append(parent.getText());
       sb.append("</i></p><p><b>");
       sb.append(cardPlayer);
       sb.append("</b> followed your play with a ");
       sb.append(cardType);
-      sb.append(" card saying:</p><p><i>");
+      sb.append(" card #");
+      sb.append(child.getId());
+      sb.append(" saying:</p><p><i>");
       sb.append(cardText);
       sb.append("</i></p>");
       sb.append("<p>You may navigate to this card by visiting your user profile screen (click your user name in the upper left of any mmowgli screen), ");
@@ -219,7 +224,7 @@ public class MailManager
         return;
       }
 
-      PagesData pd = new PagesData();
+      PagesData pd = new PagesData(uTo);
       String troubleEmail = pd.gettroubleMailto();
 
       Game g = Game.getTL();

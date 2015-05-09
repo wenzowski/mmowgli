@@ -22,22 +22,32 @@
 
 package edu.nps.moves.mmowgli.modules.actionplans;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.ERROR_LOGS;
+
+import java.io.File;
+import java.io.IOException;
+
+import com.google.common.io.Files;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Resource;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Upload.FinishedEvent;
 import com.vaadin.ui.Upload.FinishedListener;
 
-import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.db.ActionPlan;
+import edu.nps.moves.mmowgli.db.Image;
 import edu.nps.moves.mmowgli.db.Media;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
+import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.modules.actionplans.UploadHandler.UploadStatus;
+import edu.nps.moves.mmowgli.modules.userprofile.InstallImageDialog;
+import edu.nps.moves.mmowgli.modules.userprofile.InstallImageDialog.MediaImage;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 import edu.nps.moves.security.MalwareChecker;
 
 /**
@@ -57,9 +67,6 @@ public class AddImageDialog extends Window
   
   public static enum Type {IMAGES, VIDEOS};
 
-  private String uploadFSPath;
-  private String uploadUrlBase;
-  
   private AbsoluteLayout holder;
   private TextField localTF;
   private TextField webUrl;
@@ -67,7 +74,10 @@ public class AddImageDialog extends Window
   private Button testButt;
   private Button submitButt;
   private Button cancelButt;
+  
   private Media media = null;
+  private Image image = null; // if put into db
+  
   private UploadHandler handler = null;
   private MediaType mediaType = MediaType.IMAGE;;
   private HorizontalLayout mainHL;
@@ -86,12 +96,6 @@ public class AddImageDialog extends Window
 
     setClosable(false); // no x in corner
 
-    AppMaster apm = AppMaster.instance();
-    uploadFSPath  = apm.getUserImagesFileSystemPath();
-    if(!uploadFSPath.endsWith("/"))
-      uploadFSPath = uploadFSPath+"/";
-    uploadUrlBase = apm.getUserImagesUrlString();
-    
     VerticalLayout mainVL = new VerticalLayout();
     mainVL.setSpacing(true);
     mainVL.setMargin(true);
@@ -162,7 +166,10 @@ public class AddImageDialog extends Window
       localHL.addComponent(uploadWidget = new Upload());
       panel = new UploadStatus(uploadWidget);
       uploadWidget.setButtonCaption("Browse");
-      handler = new UploadHandler(uploadWidget, panel, uploadFSPath+ActionPlan.getTL(apId).getId()+"/"); 
+      
+      File tempDir = Files.createTempDir();
+      tempDir.deleteOnExit();
+      handler = new UploadHandler(uploadWidget, panel, tempDir.getAbsolutePath());
       uploadWidget.setReceiver(handler);
       uploadWidget.setImmediate(true);      
       panel.setWidth("100%");
@@ -187,27 +194,37 @@ public class AddImageDialog extends Window
       @Override
       public void uploadFinished(FinishedEvent event)
       {
+        Object key = HSess.checkInit();
+        System.out.println("AddImageDialog.uploadFinished()");
         String fpath = handler.getFullUploadedPath();
-        if(fpath != null) {  // error of some kind if null
-          
+        if(fpath != null) {  // error of some kind if null 
           if(!MalwareChecker.isFileVirusFree(fpath)) {
             panel.state.setValue("<span style='color:red;'>Failed malware check</span>");
             fpath = null;
             localTF.setValue("");
+            HSess.checkClose(key);
             return;
           }
-          String webAddrs = buildWebAddr(fpath);
-        
-          ExternalResource extRes = new ExternalResource(webAddrs);
 
-          setupEmbeddedImageThumbnail(null,extRes);
+          File f = new File(fpath);
+          f.deleteOnExit();
           
-          String nm = buildRelativeAppAddress(fpath);
-          media = new Media(nm,null,null,mediaType,Media.Source.USER_UPLOADS_REPOSITORY);
-          media.setCaption(null);
-          
-          localTF.setValue(event.getFilename());
+          try {
+            MediaImage mediaImage = InstallImageDialog.putFileImageIntoDbTL(f, f.getName(), event.getMIMEType());
+            f.delete();
+            media = mediaImage.media;
+            image = mediaImage.image; 
+            media.setCaption(null);
+            Resource res = Mmowgli2UI.getGlobals().getMediaLocator().locate(media);
+            setupEmbeddedImageThumbnail(res,media);
+            localTF.setValue(event.getFilename());
+          }
+          catch(IOException ex) {
+            Notification.show("Error loading image", Notification.Type.ERROR_MESSAGE);
+            MSysOut.println(ERROR_LOGS,"Error in AddImageDialog loading image: "+ex.getClass().getSimpleName()+": "+ex.getLocalizedMessage());
+          }
         }
+        HSess.checkClose(key); 
       }
     });
     
@@ -231,11 +248,21 @@ public class AddImageDialog extends Window
     {
       public void buttonClick(ClickEvent event)
       {
-        media = null;
+        Object key = HSess.checkInit();
+        if(media != null) {
+          Media.deleteTL(media);       
+          media = null;
+        }
+        if(image != null) {
+          Image.deleteTL(image);
+          image = null;
+        }
         uploadWidget.interruptUpload();
         UI.getCurrent().removeWindow(AddImageDialog.this);
         if(closer != null)
           closer.windowClose(null);
+        
+        HSess.checkClose(key);
       }      
     });
     
@@ -253,7 +280,7 @@ public class AddImageDialog extends Window
     }
     return false;
   }
-  
+/*  
   private String buildWebAddr(String fpath)
   {
     String lastBitOnly = fpath.replace(uploadFSPath, "");
@@ -264,7 +291,7 @@ public class AddImageDialog extends Window
   {
     return fpath.replace(uploadFSPath,"");
   }
-  
+*/  
   private void setDisabledFields()
   {   
     boolean web = fromWebCheck.getValue();
@@ -315,13 +342,14 @@ public class AddImageDialog extends Window
         media = null;
         return;
       }
+      
       ExternalResource extRes = new ExternalResource(webaddr);
-
-      setupEmbeddedImageThumbnail(null,extRes);
 
       media = new Media(extRes.getURL(),"handle","",mediaType);
       media.setCaption("");
       media.setSource(Media.Source.WEB_FULL_URL);
+      
+      setupEmbeddedImageThumbnail(extRes,media);
     }         
   }
   
@@ -330,18 +358,19 @@ public class AddImageDialog extends Window
    * @param path
    * @param extRes
    */
-  private void setupEmbeddedImageThumbnail(String path, ExternalResource extRes)
+  private void setupEmbeddedImageThumbnail(Resource extRes, Media m)
   {
-    Image comp = new Image();
-    if(path != null)
-      comp.setSource(Mmowgli2UI.getGlobals().getMediaLocator().locateUserImage(path));
-    else
-      comp.setSource(extRes);
+    com.vaadin.ui.Image comp = new com.vaadin.ui.Image();
+    comp.setSource(extRes);
     
     holder.removeAllComponents();
     holder.addComponent(comp,"top:0px;left:0px");
-    comp.setWidth("150px");
-    comp.setHeight("150px");
+    
+    long w = m.getWidth();
+    long h = m.getHeight();
+    float scale = (float)(w>h ? 150./(double)w : 150./(double)h);
+    comp.setWidth(w*scale,Unit.PIXELS);
+    comp.setHeight(h*scale,Unit.PIXELS);
     //embedded.addStyleName("m-greyborder");
   }
 
@@ -353,7 +382,11 @@ public class AddImageDialog extends Window
   {
     return media;
   }
-  
+  public Image getImage()
+  {
+    return image;
+  }
+ 
   private Window.CloseListener closer;
   
   @Override
@@ -362,4 +395,4 @@ public class AddImageDialog extends Window
     closer = listener;
   }
 
-}
+ }

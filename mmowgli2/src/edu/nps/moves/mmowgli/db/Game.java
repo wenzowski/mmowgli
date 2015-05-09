@@ -144,6 +144,7 @@ public class Game implements Serializable
     String       adminLoginMessage;
     String       gameHandle; // default = mmowgli
     Long         revision = 0L;   // used internally by hibernate for optimistic locking, but not here
+    boolean      reportsShowHiddenCards;
     
 //@formatter:on
 /*    
@@ -753,7 +754,18 @@ public class Game implements Serializable
   {
     this.pdfAvailable = pdfAvailable;
   }
+  
+  @Basic
+  public boolean isReportsShowHiddenCards()
+  {
+    return reportsShowHiddenCards;
+  }
 
+  public void setReportsShowHiddenCards(boolean reportsShowHiddenCards)
+  {
+    this.reportsShowHiddenCards = reportsShowHiddenCards;
+  }
+  
   @Basic
   public boolean isInGameMailEnabled()
   {

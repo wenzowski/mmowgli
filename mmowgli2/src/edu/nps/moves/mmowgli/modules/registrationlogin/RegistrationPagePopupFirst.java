@@ -495,9 +495,9 @@ public class RegistrationPagePopupFirst extends MmowgliDialog
       if (localUserId != null) {
         User.deleteTL(localUserId);
         UserPii uPii = VHibPii.getUserPii(localUserId);
-        VHibPii.delete(uPii);
         EmailPii epii = VHibPii.getUserPiiEmail(uPii.getUserObjectId());
         VHibPii.delete(epii);
+        VHibPii.delete(uPii);
       }
       localUserId = null;
     }

@@ -30,14 +30,11 @@ import javax.json.*;
 import javax.json.stream.JsonGenerator;
 
 import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import edu.nps.moves.mmowgli.AppMaster;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.hibernate.HSess;
-//import edu.nps.moves.mmowgli.hibernate.SingleSessionManager;
-import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 import edu.nps.moves.mmowgli.modules.cards.CardMarkingManager;
 import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 
@@ -72,13 +69,12 @@ public class CardVisualizerBuilder
   private final int STRINGDATE = 1;
   private final String DELIM = "\t";
   
-  @HibernateSessionThreadLocalConstructor  
   public CardVisualizerBuilder()
   {
   }
   
-  public void build()
-  {    
+  public void build(Game g)
+  {
     String path = BaseExporter.getReportsDirectory();
     String jsonFilePath     = path+fileSeparator+VISUALIZER_JSON_FILE_NAME;
     String htmlFilePath     = path+fileSeparator+VISUALIZER_HTML_FILE_NAME;
@@ -123,7 +119,7 @@ public class CardVisualizerBuilder
       
       // JSON file
       File jsonTemp = new File(jsonFileTempPath);
-      Game g = Game.getTL();
+
       JsonObject jObj = buildJsonTree(g.isShowPriorMovesCards() ? null : g.getCurrentMove());
       FileWriter fw = new FileWriter(jsonTemp);
       writeCardJson(fw, jObj);
@@ -154,12 +150,13 @@ public class CardVisualizerBuilder
   {
     cardDays.clear();
     rootDays.clear();
-    Session sess = HSess.get();
     
+    HSess.init();    
     // Scan all cards to get master, ordered list of game days, i.e., days when cards were played ; same for only root cards
-    Criteria crit = sess.createCriteria(Card.class);
+    Criteria crit = HSess.get().createCriteria(Card.class);
     crit.add(Restrictions.ne("hidden",true));
     List<Card> lis = crit.list();
+    HSess.close();
     
     for(Card cd : lis) {
       String ds = mangleCardDate(cd);
@@ -184,16 +181,19 @@ public class CardVisualizerBuilder
 
       rootArray = Json.createArrayBuilder();
       
-      crit = sess.createCriteria(Card.class);
+      HSess.init();
+      crit = HSess.get().createCriteria(Card.class);
       crit.add(Restrictions.isNull("parentCard"));  // Gets only the top level
       crit.add(Restrictions.ne("hidden",true));
       
       CardIncludeFilter filter = roundToShow==null ? new AllNonHiddenCards() : new CardsInSingleMove(roundToShow);
       
       lis = crit.list();
+      HSess.close();
+      
       for(Card c : lis) {
         int rootDayIndex = getRootDayIndex(c);
-        addCard(c,rootArray,filter,rootDayIndex);
+        addCard(c.getId(),rootArray,filter,rootDayIndex);
       }      
     }
     catch (Throwable ex) {
@@ -248,8 +248,10 @@ public class CardVisualizerBuilder
     return rootDays.headSet(s).size();
     
   }
-  private void addCard(Card c, JsonArrayBuilder arr, CardIncludeFilter filter, int rootDayIndex)
+  private void addCard(long cardId, JsonArrayBuilder arr, CardIncludeFilter filter, int rootDayIndex)
   {
+    HSess.init();
+    Card c = Card.getTL(cardId);
     JsonObjectBuilder jsonObj = Json.createObjectBuilder();
     jsonObj
         .add("type", c.getCardType().getTitle())
@@ -266,8 +268,11 @@ public class CardVisualizerBuilder
         .add("rootDay", rootDayIndex);
 
     JsonArrayBuilder childArr = Json.createArrayBuilder();
-    for(Card ch : c.getFollowOns()) {
-      addCard(ch,childArr,filter,rootDayIndex); //recurse
+    HashSet<Card> cset = new HashSet<Card>(c.getFollowOns()); // this will avoid lazy init
+    HSess.close();
+    
+    for(Card ch : cset) {
+      addCard(ch.getId(),childArr,filter,rootDayIndex); //recurse
     }
     jsonObj.add("children", childArr);
     arr.add(jsonObj);

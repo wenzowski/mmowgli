@@ -22,13 +22,15 @@
 
 package edu.nps.moves.mmowgli.modules.userprofile;
 
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
 import org.apache.commons.compress.utils.IOUtils;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.*;
 
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItemContainer;
@@ -45,6 +47,7 @@ import com.vaadin.ui.Upload.Receiver;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.Image;
 import edu.nps.moves.mmowgli.db.Media;
+import edu.nps.moves.mmowgli.db.Media.MediaType;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.imageServer.ImageServlet;
 
@@ -61,39 +64,39 @@ import edu.nps.moves.mmowgli.imageServer.ImageServlet;
 public class InstallImageDialog extends Window
 {
   private static final long serialVersionUID = 8355175712103259698L;
-  public static long MAXUPLOADSIZE = 100*1024l;
+  public static long MAXUPLOADSIZE = 512*1024l;
   
   public static void show(boolean showExisting)
   {
-    show(null,null,showExisting);
+    show(null,null,showExisting,null);
   }
   
   public static void show()
   {
-    show(null,null,true);
+    show(null,null,true,null);
   }
 
-  public static void show(String text, InstallImageResultListener lis)
+  public static void show(String text, InstallImageResultListener lis, String filter)
   {
-    show(text,lis,true);
+    show(text,lis,true,filter);
   }
   
-  public static void show(String text, InstallImageResultListener lis, boolean showExisting)
+  public static void show(String text, InstallImageResultListener lis, boolean showExisting, String filter)
   {
-    InstallImageDialog dialog = new InstallImageDialog(text,lis, showExisting);
+    InstallImageDialog dialog = new InstallImageDialog(text,lis, showExisting, filter);
     dialog.center();
     UI.getCurrent().addWindow(dialog);
   }
   
   public static interface InstallImageResultListener
   {
-    public void doneTL(Media m);
+    public void doneTL(MediaImage mi);
   }
   
   //------------------------------------
   
   private InstallImageResultListener listener;
-  private Media media;
+  private MediaImage mediaImage;
   Upload uploadFileWidget;
   TextField fileNameTF;
   NativeButton saveImageButt,saveExistingButt;
@@ -102,7 +105,7 @@ public class InstallImageDialog extends Window
   private static CheckBox existingCB, newCB;
   
   @SuppressWarnings("serial")
-  private InstallImageDialog(String topText, InstallImageResultListener lis, boolean showExisting)
+  private InstallImageDialog(String topText, InstallImageResultListener lis, boolean showExisting, String nameFilter)
   {
     Object sessKey = HSess.checkInit();
     listener = lis;
@@ -124,8 +127,17 @@ public class InstallImageDialog extends Window
     }
     
     if (showExisting) {  // put the existing selector in the dialog
+    	    	
+      Criteria crit = HSess.get().createCriteria(Media.class)
+      .add(Restrictions.eq("source", Media.Source.DATABASE))
+      .addOrder(Order.asc("url"));
+      
+      if(nameFilter != null)
+      	crit.add(Restrictions.like("handle",nameFilter,MatchMode.ANYWHERE));
+            
       @SuppressWarnings({ "unchecked" })
-      List<Media> mlis = HSess.get().createCriteria(Media.class).add(Restrictions.eq("source", Media.Source.DATABASE)).addOrder(Order.asc("url")).list();
+      List<Media> mlis = crit.list();
+      
       BeanItemContainer<Media> beanContainer = new BeanItemContainer<Media>(Media.class, mlis);
 
       vLay.addComponent(existingCB = new CheckBox("Choose from existing images", true));
@@ -148,7 +160,7 @@ public class InstallImageDialog extends Window
         public void buttonClick(ClickEvent event)
         {
           HSess.init();
-          media = (Media) sel.getValue();
+          mediaImage = new MediaImage((Media) sel.getValue(),null);
           doneHereTL();
           HSess.close();
         }
@@ -179,7 +191,7 @@ public class InstallImageDialog extends Window
     HorizontalLayout hLay;
     vl.addComponent(hLay = new HorizontalLayout());
     hLay.setSpacing(true);
-    hLay.addComponent(saveImageButt = new NativeButton("Save image with above name and close", rec));
+    hLay.addComponent(saveImageButt = new NativeButton("Save image with above name", rec));
     // hLay.addComponent(savedLab = new HtmlLabel("<i>saved</i>"));
 
     saveImageButt.setImmediate(true);
@@ -338,20 +350,10 @@ public class InstallImageDialog extends Window
       }
       else {
         try {
-          Image imgObj = new Image(fileNameTF.getValue(), mimeType);
-          FileInputStream fis = new FileInputStream(f);
-          byte[] ba = IOUtils.toByteArray(fis);
-          imgObj.setBytes(ba);
-          Image.saveTL(imgObj);
+          mediaImage = putFileImageIntoDbTL(f,fileNameTF.getValue(),mimeType);
           
-          media = new Media();
-          media.setDescription(imgObj.getName()+" in db");
-          //media.setHandle("300x300");
-          media.setSource(Media.Source.DATABASE);
-          media.setUrl(imgObj.getName());
-          Media.saveTL(media);
-          
-          doneHereTL();
+          fileNameTF.setValue("");
+          Notification.show("Success");
         }
         catch (IOException ex) {
           Notification.show("Error saving image to database / "+ex.getClass().getSimpleName()+" / "+ex.getLocalizedMessage(),
@@ -362,11 +364,47 @@ public class InstallImageDialog extends Window
       return;
     }
   }
-
+  
+  public static class MediaImage
+  {
+    public Media media;
+    public Image image;
+    public MediaImage(Media m, Image i)
+    {
+      media = m;
+      image = i;
+    }
+  }
+  
+  public static MediaImage putFileImageIntoDbTL(File f, String name, String mimeType) throws IOException
+  {
+    Image imgObj = new Image(name, mimeType);
+    FileInputStream fis = new FileInputStream(f);
+    byte[] ba = IOUtils.toByteArray(fis);
+    imgObj.setBytes(ba);
+    
+    InputStream bain = new ByteArrayInputStream(ba);
+    BufferedImage bimg = ImageIO.read(bain);
+    imgObj.setWidth(bimg.getWidth());
+    imgObj.setHeight(bimg.getHeight());
+    Image.saveTL(imgObj);
+    
+    Media med = new Media();
+    med.setDescription(imgObj.getName()+" in db");
+    med.setSource(Media.Source.DATABASE);
+    med.setType(MediaType.IMAGE);
+    med.setHandle(""+bimg.getWidth()+"x"+bimg.getHeight());
+    med.setUrl(imgObj.getName());
+    med.setWidth((long)bimg.getWidth());
+    med.setHeight((long)bimg.getHeight());
+    Media.saveTL(med);
+    return new MediaImage(med,imgObj);
+  }
+  
   private void doneHereTL()
   {
     UI.getCurrent().removeWindow(this);
     if(listener != null)
-      listener.doneTL(media);  // maybe null
+      listener.doneTL(mediaImage);  // maybe null media
   }
 }

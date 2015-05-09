@@ -143,12 +143,13 @@ public class VHibPii extends AbstractVHib
   public static EmailPii getUserPiiEmail(long id)
   {
     Session sess = getASession();
-    UserPii upii =getUserPii(id,sess,false);
-    List<EmailPii> lis = upii.getEmailAddresses();
+    UserPii upii = getUserPii(id,sess,false);
     EmailPii ret = null;
-    if(lis.size() > 0)
-      ret = lis.get(0);
-
+    if(upii != null) {
+      List<EmailPii> lis = upii.getEmailAddresses();
+      if(lis.size() > 0)
+        ret = lis.get(0);
+    }
     sess.close();
     return ret;   
   }

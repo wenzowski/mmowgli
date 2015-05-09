@@ -64,28 +64,28 @@
                 <xsl:text>energyMMOWGLI 2012</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'bii') or contains($gameTitle,'Bii')">
-                <xsl:text>Business Innovation Initiative (bii)</xsl:text>
+                <xsl:text>bii Business Innovation Initiative</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'em2') or contains($gameTitle,'em') or contains($gameTitle,'Em2') or contains($gameTitle,'Em')">
-                <xsl:text>EM Maneuver (em2)</xsl:text>
+                <xsl:text>em2 ElectroMagnetic Maneuver</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'vtp')"> <!-- evtp -->
-                <xsl:text>Edge Virtual Training Program (evtp)</xsl:text>
+                <xsl:text>evtp Edge Virtual Training Program</xsl:text>
             </xsl:when>
             <xsl:when test="starts-with($gameTitle,'am') or starts-with($gameTitle,'Am') or contains($gameTitle,'additive') or contains($gameTitle,'Additive')">
-                <xsl:text>Additive Manufacturing (am)</xsl:text>
+                <xsl:text>am Additive Manufacturing</xsl:text>
             </xsl:when>
             <xsl:when test="starts-with($gameTitle,'blackswan') or starts-with($gameTitle,'Blackswan') or contains($gameTitle,'blackswan') or contains($gameTitle,'Blackswan')">
                 <xsl:text>blackswan</xsl:text>
             </xsl:when>
-            <xsl:when test="starts-with($gameTitle,'dd') or starts-with($gameTitle,'DD') or contains($gameTitle,'dd') or contains($gameTitle,'DD')">
-                <xsl:text>Data Dilemma (dd)</xsl:text>
+            <xsl:when test="starts-with($gameTitle,'dd') or starts-with($gameTitle,'DD') or contains($gameTitle,'dd') or contains($gameTitle,'DD') or contains($gameTitle,'Dilemma')">
+                <xsl:text>dd Data Dilemma</xsl:text>
             </xsl:when>
             <xsl:when test="starts-with($gameTitle,'pcc') or starts-with($gameTitle,'PCC') or contains($gameTitle,'pcc') or contains($gameTitle,'PCC')">
-                <xsl:text>Professional Core Competencies (pcc)</xsl:text>
+                <xsl:text>pcc Professional Core Competencies</xsl:text>
             </xsl:when>
             <xsl:when test="starts-with($gameTitle,'cap2con') or starts-with($gameTitle,'Cap2con') or contains($gameTitle,'cap2con') or contains($gameTitle,'Cap2con')">
-                <xsl:text>Capacity, Capabilities and Constraints (cap2con)</xsl:text>
+                <xsl:text>cap2con Capacity, Capabilities and Constraints</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'darkportal') or contains($gameTitle,'dark')">
                 <xsl:text>dark Portal (NDU)</xsl:text>
@@ -97,22 +97,16 @@
                 <xsl:text>MMOWGLI Training</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'navair') or contains($gameTitle,'nsc')">
-                <xsl:text>NAWCAD Strategic Cell</xsl:text>
+                <xsl:text>nsc NAWCAD Strategic Cell</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'blackswan') or contains(lower-case($gameTitle),'swan')">
                 <xsl:text>blackswan</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'uxvdm') or contains($gameTitle,'Uxvdm')">
-                <xsl:text>Unmanned Vehicle Digital Manufacturing (uxvdm)</xsl:text>
-            </xsl:when>
-            <xsl:when test="contains($gameTitle,'dd') or contains($gameTitle,'Dilemma')">
-                <xsl:text>Data Dilemma</xsl:text>
+                <xsl:text>uxvdm Unmanned Vehicle Digital Manufacturing</xsl:text>
             </xsl:when>
             <xsl:when test="contains($gameTitle,'ndu')">
-                <xsl:text>National Defense University (NDU)</xsl:text>
-            </xsl:when>
-            <xsl:when test="contains($gameTitle,'pcc')">
-                <xsl:text>Professional Core Competencies (pcc)</xsl:text>
+                <xsl:text>ndu National Defense University</xsl:text>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of disable-output-escaping="yes" select="//GameTitle"/>
@@ -465,22 +459,10 @@ text-shadow:; /* off */
                     <table align="center" border="0" class="banner">
                         <tr border="0">
                             <td>
-                                <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                                <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
-                            </td>
-                            <td align="left">
-                                <blockquote>
-                                    <a href="{$portalPage}" title="Game documentation for {$gameLabel}">
-                                        <!-- 1158 x 332 -->
-                                        <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="386" height="111" border="0"/>
-                                    </a>
-                                    <br />
-                                </blockquote>
+                                <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                                <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
                             </td>
                             <td align="center">
-                                <p>
-                                    <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
-                                </p>
                                 <h1 align="center">
                                         <xsl:text> Player Profiles Report </xsl:text>
                                 </h1>
@@ -490,8 +472,44 @@ text-shadow:; /* off */
                                 </h2>
                             </td>
                             <td>
+                                <xsl:text disable-output-escaping="yes"> &amp;nbsp; </xsl:text>
+                            </td>
+                            <td align="left">
+                                <blockquote>
+                                    <a href="{$portalPage}" title="Game documentation for {$gameLabel}" target="_blank">
+                                        <!-- 1158 x 332 -->
+                                        <img align="center" src="https://web.mmowgli.nps.edu/piracy/MmowgliLogo.png" width="386" height="111" border="0"/>
+                                    </a>
+                                    <br />
+                                </blockquote>
+                            </td>
+                            <td>
                                 <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
                                 <xsl:text disable-output-escaping="yes"> &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; </xsl:text>
+                            </td>
+                            <td rowspan="2" valign="middle">
+                                <xsl:text> Corresponding report products: </xsl:text>
+                                <ul>
+                                    <li>
+                                        <a href="index.html" title="Reports Index for this game"><xsl:text>Reports Index</xsl:text></a>
+                                    </li>
+                                    <xsl:if test="string-length($ActionPlanLocalLink) > 0">
+                                        <li>
+                                            <a href="{$ActionPlanLocalLink}.html">Action Plans</a>
+                                        </li>
+                                    </xsl:if>
+                                    <li>
+                                        <a href="{$IdeaCardChainLocalLink}.html">Idea Card Chains</a>
+                                        <xsl:text> and </xsl:text>
+                                        <!-- Sunburst Visualizer -->
+                                        <a href="cardSunburstVisualizer.html" title="Idea Card Sunburst Visualizer">
+                                            <xsl:text disable-output-escaping="yes">Sunburst&amp;nbsp;Visualizer</xsl:text>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="https://portal.mmowgli.nps.edu/reports" target="blank">All MMOWGLI Game Reports</a>
+                                    </li>
+                                </ul>
                             </td>
                         </tr>
                         <tr valign="top">
@@ -516,23 +534,6 @@ text-shadow:; /* off */
                                             </a>
                                             <xsl:text> describing Player Recognition for Game Activity</xsl:text>
                                         </li>
-                                        <li>
-                                            <!-- TOC links for players, blockquote appears below -->
-                                            <a href="#PlayerList" title="List of all registered players, in alphabetic order">
-                                                <xsl:text>Player List</xsl:text>
-                                            </a>
-                                            <xsl:text> (</xsl:text>
-                                            <b>
-                                                <xsl:value-of select="count(//User)"/>
-                                                <xsl:text> total </xsl:text>
-                                            </b>
-                                                <xsl:text> with </xsl:text>
-                                            <b>
-                                                <xsl:value-of select="count(//User[starts-with(@gameName,'gm_')])"/>
-                                                <xsl:text> game masters</xsl:text>
-                                            </b>
-                                            <xsl:text>) and Player Index: </xsl:text>
-                                        </li>
                                     </ul>
                                 </blockquote>
                             </td>
@@ -540,12 +541,29 @@ text-shadow:; /* off */
                                 <blockquote>
                                     <ul>
                                         <li>
+                                            <!-- TOC links for players, blockquote appears below -->
+                                            <a href="#PlayersList" title="List of all registered players, in alphabetic order">
+                                                <xsl:text>Players List</xsl:text>
+                                            </a>
+                                            <xsl:text> (</xsl:text>
+                                            <b>
+                                                <xsl:value-of select="count(//User)"/>
+                                                <xsl:text> total players </xsl:text>
+                                            </b>
+                                                <xsl:text> with </xsl:text>
+                                            <b>
+                                                <xsl:value-of select="count(//User[starts-with(@gameName,'gm_')])"/>
+                                                <xsl:text> game masters</xsl:text>
+                                            </b>
+                                            <xsl:text>)</xsl:text>
+                                        </li>
+                                        <li>
                                             <!-- Table of Contents -->
                                             <xsl:if test="(//CallToAction/*)">
                                                   <a href="#CallToAction" title="Motivation and purpose for this game">
                                                       <xsl:text>Call To Action</xsl:text>
                                                   </a>
-                                                  <xsl:text>: player motivation</xsl:text>
+                                                  <xsl:text>: Player Motivation</xsl:text>
                                                   <br />
                                             </xsl:if>
                                         </li>
@@ -554,31 +572,14 @@ text-shadow:; /* off */
                                             and
                                             <a href="#Contact" title="Contact links for further information"><xsl:text>Contact</xsl:text></a>
                                         </li>
-                                        <xsl:if test="string-length($ActionPlanLocalLink) > 0">
-                                            <li>
-                                                <xsl:text> Corresponding </xsl:text>
-                                                <a href="{$IdeaCardChainLocalLink}.html">Idea Card Chains</a>
-                                                <xsl:text>, </xsl:text>
-                                                <a href="{$ActionPlanLocalLink}.html">Action Plans</a>
-                                                <xsl:text> and </xsl:text>
-                                                <a href="index.html" title="Reports Index for this game"><xsl:text>Reports Index</xsl:text></a>
-                                                <xsl:text> for this game </xsl:text>
-                                            </li>
-                                        </xsl:if>
-                                        <li>
-                                            <xsl:text>Also available: </xsl:text>
-                                            <a href="https://portal.mmowgli.nps.edu/reports" target="_blank">all published MMOWGLI Game Reports</a>
-                                        </li>
                                     </ul>
                                 </blockquote>
                             </td>
                         </tr>
                     </table>
-                    <!--
                     <table align="center" border="0" class="banner" width="95%">
-                        <tr>
-                            <td colspan="4"> -->
-                                <blockquote style="background-color:lightgrey;">
+                        <tr cellspacing="4" cellpadding="4">
+                            <td cellspacing="8" cellpadding="8" style="background-color:lightgrey;">
                                     <xsl:for-each select="//User">
                                         <xsl:sort select="lower-case(@gameName)" data-type="text" order="ascending"/>
                                         <a href="#Player{@id}" title="Player{@id} {@gameName}">
@@ -587,11 +588,9 @@ text-shadow:; /* off */
                                         <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;</xsl:text>
                                         <xsl:text> </xsl:text>
                                     </xsl:for-each>
-                                </blockquote>
-                    <!--
                             </td>
                         </tr>
-                    </table> -->
+                    </table>
         <hr />
 
         <h2 title="Affiliation categories offered to players">
@@ -827,85 +826,18 @@ text-shadow:; /* off */
                     <!-- TODO omit listing awards not actually given to players -->
                     <xsl:sort select="@type" data-type="number" order="ascending"/>
 
-                    <xsl:variable name="awardIconUrl">
-                        <!-- used by AwardsTable and Player Award -->
-                        <xsl:choose>
-                            <!-- TODO -->
-                            <xsl:when test="(@type = '4')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/badge_empty_55w55h.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '5')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/badge_empty_55w55h.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '6')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/badge_empty_55w55h.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '7')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/badge_empty_55w55h.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="@iconUrl">
-                                <xsl:value-of select="@iconUrl"/>
-                            </xsl:when>
-                            <xsl:when test="(@type = '1')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/achievement55w55h.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '2')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/commendation55w55h.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '3')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/legion55w55h.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '8')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/BiiAwardCertificateWatermarked55x55.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '9')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/BiiAwardCertificateWatermarked55x55.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '10')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/BiiAwardCertificateWatermarked55x55.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '11')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/BiiAwardCertificateWatermarked55x55.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '12')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/cap2con1stPlaceRnd1_55x55.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '13')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/cap2con2ndPlaceRnd1_55x55.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '14')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/cap2con3rdPlaceRnd1_55x55.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '15')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/cap2con_badge_wk_2_1st_55w55h.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '16')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/cap2con_badge_wk_2_2nd_55w55h.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '17')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/Stealth_Badge_a_55w55h.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '18')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/FrontlineBadge_a_55w55h.png</xsl:text>
-                            </xsl:when>
-                            <xsl:when test="(@type = '19')">
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/CourageBadge_a_55w55h.png</xsl:text>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <xsl:text>https://web.mmowgli.nps.edu/mmowMedia/images/badge_empty_55w55h.png</xsl:text>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </xsl:variable>
-
+                    <xsl:variable name="awardIconUrl" select="@iconUrl"/>
                     <xsl:variable name="awardType"  select="@type"/>
                     <xsl:variable name="awardCount" select="count(//User/Awards/Award[@type = $awardType])"/>
 
                     <xsl:if test="($awardCount > 0)">
                         <tr>
+                            <!--
                             <td>
                                 <xsl:value-of select="@type"/>
                                 <xsl:text>.</xsl:text>
                             </td>
+                            -->
                             <td>
                                 <a name="Award{@type}">
                                     <img src="{$awardIconUrl}" title="{@description}" width="55" height="55"/>
@@ -1122,7 +1054,7 @@ text-shadow:; /* off */
                 <td align="left">
                     <h2 title="Motivation and purpose for this game">
                         <a name="CallToAction">
-                            <xsl:text> Call to Action: player motivation </xsl:text>
+                            <xsl:text> Call to Action: Player Motivation </xsl:text>
                         </a>
                     </h2>
                     <!-- Debug diagnostic
@@ -1207,8 +1139,8 @@ text-shadow:; /* off */
         <!-- Process User elements -->
 
         <h1 style="background-color:lightgray;" align="center" title="List of all registered players, in alphabetic order">
-            <a name="PlayerList">
-                <xsl:text> Player List </xsl:text>
+            <a name="PlayersList">
+                <xsl:text> Players List </xsl:text>
             </a>
         </h1>
         <table border="1" width="100%" cellpadding="1">
@@ -1251,7 +1183,7 @@ text-shadow:; /* off */
                             </b>
                             
                             <xsl:text disable-output-escaping="yes">&amp;nbsp;&amp;nbsp;&amp;nbsp;</xsl:text>
-                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!91_{@id}" target="_{$gameAcronym}Game" title="play the game! go online to Player {@id}">
+                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!91_{@id}" target="{$gameAcronym}Game" title="play the game! go online to Player {@id}">
                                 <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" width="16px" border="0"/>
                             </a>
 
@@ -1642,7 +1574,7 @@ text-shadow:; /* off */
                                         </xsl:variable>
                                         <li>
                                             <!-- link to game -->
-                                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{$cardID}" target="_{$gameAcronym}Game" title="play the game! go online to Card {$cardID}">
+                                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!86_{$cardID}" target="{$gameAcronym}Game" title="play the game! go online to Card {$cardID}">
                                                 <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" align="right" width="16px" border="0"/>
                                             </a>
                                             <a href="{concat($IdeaCardChainLocalLink,'.html#IdeaCard',.)}" title="to Idea Card {.}">
@@ -1716,7 +1648,7 @@ text-shadow:; /* off */
                                         </xsl:variable>
                                         <li>
                                             <!-- link to game -->
-                                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{$actionPlanID}" target="_{$gameAcronym}Game" title="play the game! go online to Action Plan {$actionPlanID}">
+                                            <a href="https://mmowgli.nps.edu/{$gameAcronym}#!92_{$actionPlanID}" target="{$gameAcronym}Game" title="play the game! go online to Action Plan {$actionPlanID}">
                                                 <img src="https://portal.mmowgli.nps.edu/mmowgli-theme/images/favicon.png" width="16px" align="right" border="0"/>
                                             </a>
                                             <a href="{concat($ActionPlanLocalLink,'.html#ActionPlan',$actionPlanID)}" title="to Action Plan {.}">
@@ -1837,14 +1769,14 @@ text-shadow:; /* off */
                 <tr>
                     <td align="left">
                         <h3>
-                            <a name="ScenarioFailCards">
+                            <a name="NoChildrenCards">
                                 <b>
                                     <xsl:text>?</xsl:text>
                                 </b>
-                                <xsl:text> Scenario Fail</xsl:text>
+                                <xsl:text> No More Children</xsl:text>
                             </a>
                             <xsl:text> (</xsl:text>
-                            <xsl:value-of select="count(//Card[@scenarioFail='true'])"/>
+                            <xsl:value-of select="count(//Card[@noChildren='true'])"/>
                             <xsl:text> cards total)</xsl:text>
                         </h3>
                     </td>
@@ -1857,11 +1789,11 @@ text-shadow:; /* off */
                 </tr>
             </table>
             <p>
-                <xsl:text> Cards marked "Scenario Fail" by a game master are considered as having no relevant value to the game topics.</xsl:text>
+                <xsl:text> Cards marked "No More Children" by a game master are considered to be extensions of the top level card set.</xsl:text>
             </p>
             <table border="1" style="table-layout:fixed;width:100%;overflow:hidden;">
                 <!-- do not recurse, only show cards of interest -->
-                <xsl:apply-templates select="//Card[@scenarioFail='true']">
+                <xsl:apply-templates select="//Card[@noChildren='true']">
                     <xsl:with-param name="recurse">
                         <xsl:text>false</xsl:text>
                     </xsl:with-param>
@@ -2139,7 +2071,7 @@ text-shadow:; /* off */
                     </xsl:attribute>
                     <xsl:value-of select="." disable-output-escaping="yes"/>
                 </xsl:element>
-                <xsl:text> </xsl:text>
+                <!-- <xsl:text> </xsl:text> -->
             </xsl:matching-substring>
             <xsl:non-matching-substring>
                 <!-- Second:  for non-url remainder(s), now find and link 'Idea Card Chain 123' references -->
@@ -2149,7 +2081,7 @@ text-shadow:; /* off */
                         <a href="{concat($IdeaCardChainLocalLink,'.html#IdeaCard',regex-group(6))}">
                             <xsl:value-of select="." disable-output-escaping="yes"/>
                         </a>
-                        <xsl:text> </xsl:text>
+                        <!-- <xsl:text> </xsl:text> -->
                     </xsl:matching-substring>
                     <xsl:non-matching-substring>
                         <!-- Third: for non-url remainder(s), now find and link 'Action Plan 456' references -->
@@ -2159,7 +2091,7 @@ text-shadow:; /* off */
                                 <a href="{concat($ActionPlanLocalLink,'.html#ActionPlan',regex-group(5))}">
                                     <xsl:value-of select="." disable-output-escaping="yes"/>
                                 </a>
-                                <xsl:text> </xsl:text>
+                                <!-- <xsl:text> </xsl:text> -->
                             </xsl:matching-substring>
                             <xsl:non-matching-substring>
                                 <!-- avoid returning excess whitespace -->

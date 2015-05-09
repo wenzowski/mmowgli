@@ -77,6 +77,14 @@ public class MessagingManager2 implements BroadcastListener
     Broadcaster.unregister(this);
   }
   
+  public void killThread()
+  {
+  	if(messageRunnerThread != null) {
+  	  alive = false;
+  	  messageRunnerThread.interrupt();
+  	}
+  }
+  
   public void addMessageListener(MMMessageListener2 ml)
   {
     listenersInThisSession.add(ml);
@@ -147,11 +155,11 @@ public class MessagingManager2 implements BroadcastListener
           }
         }
         catch (InterruptedException ex) { // | UIDetachedException ex) {
-          System.err.println(ex.getClass().getSimpleName() + " in MessagingManager2.queueReader" + myseq);
-          MSysOut.println(ERROR_LOGS,ex.getClass().getSigners() + " in MessageingManager2.queueReader catch");
           if (!alive) {
+          	messageRunnerThread = null;
             return; // End thread
           }
+          MSysOut.println(ERROR_LOGS,ex.getClass().getSimpleName() + " in MessageingManager2.queueReader catch "+myseq);
         }
       }
     }

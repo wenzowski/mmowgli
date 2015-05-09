@@ -111,7 +111,8 @@ public class CardColorChooserComponent extends HorizontalLayout
     {
      if(!inInit) {
        HSess.init();
-       String s = event.getProperty().toString(); 
+       ColorSelect sel = (ColorSelect)event.getProperty();
+       String s = sel.getValue().toString();
        ct = CardType.mergeTL(ct);
        ct.setCssColorStyle(s);
        CardType.updateTL(ct);

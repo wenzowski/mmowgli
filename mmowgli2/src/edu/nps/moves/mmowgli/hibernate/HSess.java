@@ -155,12 +155,6 @@ public class HSess
     init();
   }
   
-  public static void conditionallyClose()
-  {
-    if(get() == null)
-      close();
-  }
-  
   //todo Consolidate with VHib
   public static SessionFactory getSessionFactory()
   {    

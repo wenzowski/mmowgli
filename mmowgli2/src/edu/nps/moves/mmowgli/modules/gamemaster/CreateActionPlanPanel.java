@@ -327,6 +327,7 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
                 ap.setWhatWillItTakeTextWithHistoryTL(ap.getWhatWillItTakeText());
                 
                 ActionPlan.saveTL(ap); // saveorupdate does not get broadcast, save and update do
+                GameEventLogger.logActionPlanCreationTL(ap);
               }
               else
                 ActionPlan.updateTL(ap);

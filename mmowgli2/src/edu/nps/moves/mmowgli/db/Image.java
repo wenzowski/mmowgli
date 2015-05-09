@@ -55,7 +55,9 @@ public class Image implements Serializable
   String mimeType;
   byte[] bytes;
   String description;
-
+  int width;
+  int height;
+  
   public Image()
   {
     setDescription("");
@@ -158,4 +160,27 @@ public class Image implements Serializable
   {
     return getName()+"/"+getMimeType()+"/"+getDescription();
   }
+
+  @Basic
+	public int getWidth()
+	{
+		return width;
+	}
+
+	public void setWidth(int width)
+	{
+		this.width = width;
+	}
+
+	@Basic
+	public int getHeight()
+	{
+		return height;
+	}
+
+	public void setHeight(int height)
+	{
+		this.height = height;
+	}
+  
 }

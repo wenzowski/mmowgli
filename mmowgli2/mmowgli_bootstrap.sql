@@ -595,7 +595,7 @@ LOCK TABLES `CardMarking` WRITE;
 INSERT INTO `CardMarking` (`id`, `description`, `label`)
 VALUES
 	(1,'Use sparingly','Super-Interesting'),
-	(2,'Doesn\'t lead anwhere useful','Scenario Fail'),
+	(2,'No more children','No More Children'),
 	(3,'Self-evident','Common Knowledge'),
 	(4,'Bad behavior or sensitive information','Hidden');
 

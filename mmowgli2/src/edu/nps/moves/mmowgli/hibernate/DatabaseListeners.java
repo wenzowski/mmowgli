@@ -147,7 +147,7 @@ public class DatabaseListeners
         }
       }
       else {
-        MSysOut.println(myLogLevel,"Save db listener didn't understand "+obj.getClass().getSimpleName());
+        MSysOut.println(myLogLevel,"Save db listener saved "+obj.getClass().getSimpleName()+", no messaging");
       }
       
       if(msgTyp != null)
@@ -213,7 +213,7 @@ public class DatabaseListeners
         msg = "" + ((MovePhase) obj).getId();
       }
       else {
-        MSysOut.println(myLogLevel,"Update db listener didn't understand "+obj.getClass().getSimpleName());
+        MSysOut.println(myLogLevel,"Update db listener updated "+obj.getClass().getSimpleName()+", no messaging");
       }
       
       if(msgTyp != null)

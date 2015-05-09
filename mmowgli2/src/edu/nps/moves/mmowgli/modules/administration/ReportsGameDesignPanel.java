@@ -101,6 +101,7 @@ public class ReportsGameDesignPanel extends AbstractGameBuilderPanel
       }
     });
     addEditBoolean("2 Indicate PDF reports available","Game.pdfAvailable",g, 1L, "PdfAvailable");
+    addEditBoolean("2 Show hidden cards","Game.reportsShowHiddenCards",g, 1L, "ReportsShowHiddenCards");
   }
    
   @Override
@@ -118,7 +119,7 @@ public class ReportsGameDesignPanel extends AbstractGameBuilderPanel
   @Override
   protected int getColumn2PixelWidth()
   {
-    return super.getColumn2PixelWidth() - 80; // default = 240
+    return super.getColumn2PixelWidth() - 60; // default = 240
   }
 
   @Override

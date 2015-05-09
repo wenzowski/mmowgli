@@ -44,7 +44,7 @@ public class CardMarking implements Serializable
   private static final long serialVersionUID = -7947016930784739148L;
 
   public static String SUPER_INTERESTING_LABEL = "Super-Interesting";
-  public static String SCENARIO_FAIL_LABEL     = "Scenario Fail";
+  public static String NOCHILDREN_LABEL        = "No More Children";
   public static String COMMON_KNOWLEDGE_LABEL  = "Common Knowledge";
   public static String HIDDEN_LABEL            = "Hidden";
 

@@ -363,6 +363,9 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
         pendingRightBottom = c;
       
       Card.saveTL(c); // this hits the db.
+      
+      HSess.closeAndReopen();
+      c = Card.getTL(c.getId()); // refresh
       GameEventLogger.cardPlayedTL(c);
       Mmowgli2UI.getGlobals().getScoreManager().cardPlayedTL(c);// update score only from this app instance      
     }

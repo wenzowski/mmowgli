@@ -47,7 +47,7 @@ import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
 @HibernateSessionThreadLocalConstructor
 public class CardMarkingManager
 {
-  private static CardMarking superinteresting, scenariofail, commonknowledge, hidden;
+  private static CardMarking superinteresting, nochildren, commonknowledge, hidden;
   
   public static CardMarking getSuperInterestingMarking()
   {
@@ -55,11 +55,11 @@ public class CardMarkingManager
       superinteresting=getMarking(CardMarking.SUPER_INTERESTING_LABEL);
     return superinteresting;
   }
-  public static CardMarking getScenarioFailMarking()
+  public static CardMarking getNoChildrenMarking()
   {
-    if(scenariofail == null)
-      scenariofail = getMarking(CardMarking.SCENARIO_FAIL_LABEL);
-    return scenariofail;
+    if(nochildren == null)
+    	nochildren = getMarking(CardMarking.NOCHILDREN_LABEL);
+    return nochildren;
   }
   public static CardMarking getCommonKnowledgeMarking()
   {
@@ -110,12 +110,12 @@ public class CardMarkingManager
     return false;   
   }
   
-  public static boolean isScenarioFail(Card c)
+  public static boolean isNoChildren(Card c)
   {
     Set<CardMarking> marks = c.getMarking();  // allows more than one, but we're only using one
-    CardMarking fail = getScenarioFailMarking();
+    CardMarking nochild = getNoChildrenMarking();
     for(CardMarking mark : marks)
-      if(mark.getId() == fail.getId())
+      if(mark.getId() == nochild.getId())
         return true;
     return false;   
   }

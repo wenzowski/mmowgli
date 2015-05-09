@@ -41,6 +41,10 @@ public class MiscellaneousMmowgliTimer
                                               // of app
     addRepeatingTask(new Tick(), Tick.PERIOD_MS);
     addRepeatingTask(new MSysOut(), MSysOut.PERIOD_MS);
+    addRepeatingTask(new PushPing(), PushPing.PERIOD_MS);
+   /* use if the cluster-master-selection-scheme supports dynamic re-selection 
+    addRepeatingTask(new CheckClusterMaster(), 5*60*1000,CheckClusterMaster.PERIOD_MS);  // wait 5 minutes before starting
+    */
   }
 
   /* App is being shut down, remove all timers */
@@ -49,9 +53,14 @@ public class MiscellaneousMmowgliTimer
     timer.cancel();
   }
 
+  public void addRepeatingTask(TimerTask task, long delay_in_ms, long period_in_ms)
+  {
+    timer.schedule(task, delay_in_ms, period_in_ms);    
+  }
+  
   public void addRepeatingTask(TimerTask task, long period_in_ms)
   {
-    timer.schedule(task, 0, period_in_ms);
+    addRepeatingTask(task,0,period_in_ms);
   }
 
   // Some default timers
@@ -66,7 +75,36 @@ public class MiscellaneousMmowgliTimer
       MSysOut.immPrint(MmowgliConstants.TICK_LOGS,"-tick-" + tickFormat.format(new Date()));
     }
   }
- 
+/*  
+  public static class CheckClusterMaster extends TimerTask
+  {
+    public static long PERIOD_MS = 60*1000;  // 1 min
+    boolean lastVal = true; // just for starters, may not really be the case
+    @Override
+    public void run()
+    {
+      boolean b = AppMaster.instance().amIClusterMaster();
+      if(b == lastVal)
+        return;
+      
+      lastVal = b;
+      if (b) {      // am I newly chosen?
+        AppMaster.instance().doClusterMasterChangedTasks(); 
+      }
+    }    
+  }
+*/ 
+  public static class PushPing extends TimerTask
+  {
+  	public static long PERIOD_MS = 60*1000 + 45*1000;  // 1 min 45 secs
+  	private PushPing() {}
+  	@Override
+  	public void run()
+  	{
+  		AppMaster.instance().pushPingAllSessionsInThisClusterNode();
+  	}
+  }
+  
   public static class MSysOut extends TimerTask
   {
     public static long PERIOD_MS = 100; //todo back to 5 * 1000;

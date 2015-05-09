@@ -417,7 +417,7 @@ public class ScoreManager2
     while((c = c.getParentCard()) != null && level < numGens) {
       long aId =(long)c.getAuthor().getId();
       if(aId != authorId) {  // can't earn points from your own card
-        if(CardMarkingManager.isHidden(c) || CardMarkingManager.isScenarioFail(c))
+        if(CardMarkingManager.isHidden(c))// || CardMarkingManager.isScenarioFail(c))
           ;
         else
           awardCardAncestorPointsTL(aId, cardAncestorPoints*ancestorFactors[level]);  
