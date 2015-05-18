@@ -1,0 +1,33 @@
+#!/bin/bash
+ 
+# set the email properties
+SUBJECT="CLAMAV: Possible Malware Discovered on `hostname`"
+EMAIL="IAM_distro@nps.edu"
+<% if @clamav_contact_email %>EMAIL="$EMAIL,<%= @clamav_contact_email %>"<% end %>
+<% if @clamav_contact_email_cc %>EMAILCC="<%= @clamav_contact_email_cc %>"<% end %>
+
+# clamav scan log location
+LOG="/var/log/clamav/scan.log"
+
+# this function checks the scan results for items to alert about
+check_scan () {
+    # Check the last set of results. If there are any "Infected" counts that aren't zero, we have a problem.
+    if [ `tail -n 12 ${LOG}  | grep Infected | grep -v 0 | wc -l` != 0 ]
+    then
+        EMAILMESSAGE=`mktemp /tmp/virus-alert.XXXXX`
+        echo "To: ${EMAIL}" >>  ${EMAILMESSAGE}
+        echo "CC: ${EMAILCC}" >>  ${EMAILMESSAGE}
+        echo "From: mailrelay@nps.edu" >>  ${EMAILMESSAGE}
+        echo "Subject: ${SUBJECT}" >>  ${EMAILMESSAGE}
+        echo "Importance: High" >> ${EMAILMESSAGE}
+        echo "X-Priority: 1" >> ${EMAILMESSAGE}
+        echo "`tail -n 50 ${LOG}`" >> ${EMAILMESSAGE}
+        sendmail -t < ${EMAILMESSAGE}
+    fi
+}
+
+# run the actual scan, use nice to lower the execution priority
+nice -n 15 clamscan -r / --exclude-dir=/sys/ --exclude-dir=/usr/share/doc/clamav.*/test/ --quiet --infected --log=${LOG}
+
+# invoke our function to inspect the results
+check_scan

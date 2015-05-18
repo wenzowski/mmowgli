@@ -1,0 +1,22 @@
+## CSI related configurations/setup (not STIG) ##
+
+stig_csi
+
+### Usage ###
+
+    include stig_csi              # to apply ALL policies (except itacs_csi::managed_by and itacs_csi::syslog_conf)
+    include stig_csi::logrotate   # to apply just a SPECIFIC policy
+
+Modules will announce themselves in the log if the global variable `$verbose` is set to `true` or `yes`
+
+------------------- | --------------------------------------------
+stig_csi::logrotate      | sets suitable logfile rotation configuration
+stig_csi::syslog_conf    | sets the permissions of the syslog config files and sets up either longboard or lichtenau as the remote syslog server. **NOT INCLUDED IN THE GLOBAL csi INVOCATION, do not use with stig::syslog_conf**.
+stig_csi::managed_by     | sets a flag to document who the manager is. Uses a global variable `$manager` set to ITACS, CS or Cybersecurity to specify the manager (the default is ITACS if its not set). **NOT INCLUDED IN THE GLOBAL csi INVOCATION**.  This information can subsequently  be queried by `facter -p` or puppetdb
+
+Skip Carter  
+Information Technology and Communication Services (ITACS)  
+Naval Postgraduate School  
+<ecarter@nps.edu>  
+<carteref@nps.navy.smil.mil>  
+

@@ -1,0 +1,4 @@
+# Run the script to clear the puppet agent cert and create new keys and new
+# cert request.
+0 14 3 6 * root /puppet-newcert.sh
+

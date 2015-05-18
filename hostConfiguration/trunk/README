@@ -1,0 +1,24 @@
+WORK IN PROGRESS
+
+Puppet configuration scripts for a mmowgli cluster.
+
+Install puppet modules for 
+
+apache
+concat
+firewall
+java
+mysql
+stdlib
+
+via 
+
+puppet module install puppetlabs-apache
+
+for example.
+
+Install puppet by adding a yum repo that points to the puppet
+labs repo as shown at
+
+http://docs.puppetlabs.com/guides/puppetlabs_package_repositories.html
+
