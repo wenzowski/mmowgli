@@ -1,0 +1,9 @@
+[nps-public]
+name=NPS Releases Repository
+baseurl=http://nexus.nps.edu/content/groups/public
+enabled=0
+protect=0
+gpgcheck=0
+metadata_expire=30s
+autorefresh=1
+type=rpm-md 

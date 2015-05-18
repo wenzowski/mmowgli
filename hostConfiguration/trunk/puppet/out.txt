@@ -1,0 +1,469 @@
+[0;36mDebug: Runtime environment: puppet_version=3.7.5, ruby_version=2.0.0, run_mode=user, default_encoding=UTF-8[0m
+[0;36mDebug: Loading external facts from /var/lib/puppet/facts.d[0m
+[0;32mInfo: Loading facts[0m
+[0;36mDebug: Loading facts from /root/puppet/modules/itacs_custom/lib/facter/bash_vers.rb[0m
+[0;36mDebug: Loading facts from /root/puppet/modules/itacs_custom/lib/facter/mailserver.rb[0m
+[0;36mDebug: Loading facts from /root/puppet/modules/itacs_custom/lib/facter/managed_by.rb[0m
+[0;32mInfo: Loading facts[0m
+[0;36mDebug: Loading facts from /root/puppet/modules/stdlib/lib/facter/facter_dot_d.rb[0m
+[0;36mDebug: Loading facts from /root/puppet/modules/stdlib/lib/facter/pe_version.rb[0m
+[0;36mDebug: Loading facts from /root/puppet/modules/stdlib/lib/facter/puppet_vardir.rb[0m
+[0;36mDebug: Loading facts from /root/puppet/modules/stdlib/lib/facter/root_home.rb[0m
+[0;36mDebug: importing '/root/puppet/modules/mmowgli_base/manifests/init.pp' in environment production[0m
+[0;36mDebug: Automatically imported mmowgli_base from mmowgli_base into production[0m
+[0;36mDebug: importing '/root/puppet/modules/epel/manifests/init.pp' in environment production[0m
+[0;36mDebug: Automatically imported epel from epel into production[0m
+[0;36mDebug: importing '/root/puppet/modules/epel/manifests/params.pp' in environment production[0m
+[0;36mDebug: Automatically imported epel::params from epel/params into production[0m
+[0;36mDebug: hiera(): Hiera YAML backend starting[0m
+[0;36mDebug: hiera(): Looking up epel::epel_mirrorlist in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_baseurl in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_failovermethod in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_proxy in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_enabled in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_gpgcheck in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_baseurl in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_failovermethod in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_proxy in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_enabled in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_gpgcheck in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_source_mirrorlist in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_source_baseurl in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_source_failovermethod in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_source_proxy in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_source_enabled in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_source_gpgcheck in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_debuginfo_mirrorlist in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_debuginfo_baseurl in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_debuginfo_failovermethod in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_debuginfo_proxy in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_debuginfo_enabled in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_debuginfo_gpgcheck in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_source_baseurl in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_source_failovermethod in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_source_proxy in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_source_enabled in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_source_gpgcheck in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_debuginfo_baseurl in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_debuginfo_failovermethod in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_debuginfo_proxy in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_debuginfo_enabled in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::epel_testing_debuginfo_gpgcheck in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up epel::os_maj_release in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: importing '/root/puppet/modules/epel/manifests/rpm_gpg_key.pp' in environment production[0m
+[0;36mDebug: Automatically imported epel::rpm_gpg_key from epel/rpm_gpg_key into production[0m
+[0;36mDebug: importing '/root/puppet/modules/rpmforge/manifests/init.pp' in environment production[0m
+[0;36mDebug: Automatically imported rpmforge from rpmforge into production[0m
+[0;36mDebug: hiera(): Looking up rpmforge::enabled in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up rpmforge::extras in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up rpmforge::testing in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: importing '/root/puppet/modules/stig_clamav/manifests/init.pp' in environment production[0m
+[0;36mDebug: Automatically imported stig_clamav from stig_clamav into production[0m
+[0;36mDebug: Executing '/usr/bin/rpm --version'[0m
+[0;36mDebug: Executing '/usr/bin/rpm -ql rpm'[0m
+[0;36mDebug: Executing '/usr/bin/rpm --version'[0m
+[0;36mDebug: Scope(Class[Stig_clamav]): Retrieving template stig_clamav/puppet-clamavscan-full.sh.erb[0m
+[0;36mDebug: template[/root/puppet/modules/stig_clamav/templates/puppet-clamavscan-full.sh.erb]: Bound template variables for /root/puppet/modules/stig_clamav/templates/puppet-clamavscan-full.sh.erb in 0.00 seconds[0m
+[0;36mDebug: template[/root/puppet/modules/stig_clamav/templates/puppet-clamavscan-full.sh.erb]: Interpolated template /root/puppet/modules/stig_clamav/templates/puppet-clamavscan-full.sh.erb in 0.00 seconds[0m
+[0;36mDebug: importing '/root/puppet/modules/stig_sshd/manifests/init.pp' in environment production[0m
+[0;36mDebug: Automatically imported stig_sshd from stig_sshd into production[0m
+[0;36mDebug: importing '/root/puppet/modules/stig_csi/manifests/init.pp' in environment production[0m
+[0;36mDebug: Automatically imported stig_csi from stig_csi into production[0m
+[0;36mDebug: importing '/root/puppet/modules/stig_csi/manifests/logrotate.pp' in environment production[0m
+[0;36mDebug: Automatically imported stig_csi::logrotate from stig_csi/logrotate into production[0m
+[0;36mDebug: importing '/root/puppet/modules/stig_sudo/manifests/init.pp' in environment production[0m
+[0;36mDebug: Automatically imported stig_sudo from stig_sudo into production[0m
+[0;36mDebug: importing '/root/puppet/modules/ntp/manifests/init.pp' in environment production[0m
+[0;36mDebug: Automatically imported ntp from ntp into production[0m
+[0;36mDebug: importing '/root/puppet/modules/ntp/manifests/params.pp' in environment production[0m
+[0;36mDebug: Automatically imported ntp::params from ntp/params into production[0m
+[0;36mDebug: hiera(): Looking up ntp::autoupdate in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::broadcastclient in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::config in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::config_template in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::disable_auth in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::disable_monitor in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::fudge in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::driftfile in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::leapfile in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::logfile in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::iburst_enable in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::keys_enable in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::keys_file in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::keys_controlkey in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::keys_requestkey in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::keys_trusted in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::minpoll in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::maxpoll in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::package_ensure in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::package_manage in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::package_name in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::panic in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::peers in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::preferred_servers in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::restrict in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::interfaces in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::service_enable in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::service_ensure in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::service_manage in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::service_name in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::stepout in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::tinker in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::udlc in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up ntp::udlc_stratum in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: importing '/root/puppet/modules/ntp/manifests/install.pp' in environment production[0m
+[0;36mDebug: Automatically imported ntp::install from ntp/install into production[0m
+[0;36mDebug: importing '/root/puppet/modules/ntp/manifests/config.pp' in environment production[0m
+[0;36mDebug: Automatically imported ntp::config from ntp/config into production[0m
+[0;36mDebug: Scope(Class[Ntp::Config]): Retrieving template ntp/ntp.conf.erb[0m
+[0;36mDebug: template[/root/puppet/modules/ntp/templates/ntp.conf.erb]: Bound template variables for /root/puppet/modules/ntp/templates/ntp.conf.erb in 0.00 seconds[0m
+[0;36mDebug: template[/root/puppet/modules/ntp/templates/ntp.conf.erb]: Interpolated template /root/puppet/modules/ntp/templates/ntp.conf.erb in 0.00 seconds[0m
+[0;36mDebug: importing '/root/puppet/modules/ntp/manifests/service.pp' in environment production[0m
+[0;36mDebug: Automatically imported ntp::service from ntp/service into production[0m
+[0;36mDebug: importing '/root/puppet/modules/mmowgli_java/manifests/init.pp' in environment production[0m
+[0;36mDebug: Automatically imported mmowgli_java from mmowgli_java into production[0m
+[0;36mDebug: hiera(): Looking up mmowgli_java::tarball in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: hiera(): Looking up mmowgli_java::jdk_dir in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: importing '/root/puppet/modules/mmwogli_tomcat/manifests/init.pp' in environment production[0m
+[0;36mDebug: Automatically imported mmwogli_tomcat from mmwogli_tomcat into production[0m
+[0;36mDebug: hiera(): Looking up mmwogli_tomcat::tarball in YAML backend[0m
+[0;36mDebug: hiera(): Looking for data source common[0m
+[0;36mDebug: hiera(): Cannot find datafile /var/lib/hiera/common.yaml, skipping[0m
+[0;36mDebug: Adding relationship from Anchor[ntp::begin] to Class[Ntp::Install] with 'before'[0m
+[0;36mDebug: Adding relationship from Class[Ntp::Install] to Class[Ntp::Config] with 'before'[0m
+[0;36mDebug: Adding relationship from Class[Ntp::Config] to Class[Ntp::Service] with 'notify'[0m
+[0;36mDebug: Adding relationship from Class[Ntp::Service] to Anchor[ntp::end] with 'before'[0m
+[mNotice: Compiled catalog for localhost.localdomain in environment production in 1.39 seconds[0m
+[0;36mDebug: Puppet::Type::Package::ProviderAix: file /usr/bin/lslpp does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderDpkg: file /usr/bin/dpkg does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderApt: file /usr/bin/apt-get does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderAptitude: file /usr/bin/aptitude does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderAptrpm: file apt-get does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderSun: file /usr/bin/pkginfo does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderFink: file /sw/bin/fink does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderOpenbsd: file pkg_info does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderFreebsd: file /usr/sbin/pkg_info does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderHpux: file /usr/sbin/swinstall does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderNim: file /usr/sbin/nimclient does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderOpkg: file opkg does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderPacman: file /usr/bin/pacman does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderPkg: file /usr/bin/pkg does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderPkgin: file pkgin does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderPortage: file /usr/bin/emerge does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderPorts: file /usr/local/sbin/portupgrade does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderPortupgrade: file /usr/local/sbin/portupgrade does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderRug: file /usr/bin/rug does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderSunfreeware: file pkg-get does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderUp2date: file /usr/sbin/up2date-nox does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderUrpmi: file urpmi does not exist[0m
+[0;36mDebug: Puppet::Type::Package::ProviderZypper: file /usr/bin/zypper does not exist[0m
+[0;36mDebug: Puppet::Type::Service::ProviderDaemontools: file /usr/bin/svc does not exist[0m
+[0;36mDebug: Puppet::Type::Service::ProviderDebian: file /usr/sbin/update-rc.d does not exist[0m
+[0;36mDebug: Puppet::Type::Service::ProviderGentoo: file /sbin/rc-update does not exist[0m
+[0;36mDebug: Puppet::Type::Service::ProviderLaunchd: file /bin/launchctl does not exist[0m
+[0;36mDebug: Puppet::Type::Service::ProviderOpenrc: file /bin/rc-status does not exist[0m
+[0;36mDebug: Puppet::Type::Service::ProviderRunit: file /usr/bin/sv does not exist[0m
+[0;36mDebug: Puppet::Type::Service::ProviderUpstart: 0 confines (of 2) were true[0m
+[0;36mDebug: Puppet::Type::Group::ProviderDirectoryservice: file /usr/bin/dscl does not exist[0m
+[0;36mDebug: Failed to load library 'ldap' for feature 'ldap'[0m
+[0;36mDebug: Puppet::Type::Group::ProviderLdap: feature ldap is missing[0m
+[0;36mDebug: Puppet::Type::Group::ProviderPw: file pw does not exist[0m
+[0;36mDebug: Creating default schedules[0m
+[0;36mDebug: Using settings: adding file resource 'confdir': 'File[/etc/puppet]{:path=>"/etc/puppet", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Puppet::Type::User::ProviderDirectoryservice: file /usr/bin/dsimport does not exist[0m
+[0;36mDebug: Failed to load library 'ldap' for feature 'ldap'[0m
+[0;36mDebug: Puppet::Type::User::ProviderLdap: feature ldap is missing[0m
+[0;36mDebug: Puppet::Type::User::ProviderPw: file pw does not exist[0m
+[0;36mDebug: Puppet::Type::User::ProviderUser_role_add: file roleadd does not exist[0m
+[0;36mDebug: Using settings: adding file resource 'vardir': 'File[/var/lib/puppet]{:path=>"/var/lib/puppet", :owner=>"puppet", :group=>"puppet", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'logdir': 'File[/var/log/puppet]{:path=>"/var/log/puppet", :mode=>"750", :owner=>"puppet", :group=>"puppet", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'statedir': 'File[/var/lib/puppet/state]{:path=>"/var/lib/puppet/state", :mode=>"1755", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'rundir': 'File[/var/run/puppet]{:path=>"/var/run/puppet", :mode=>"755", :owner=>"puppet", :group=>"puppet", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'libdir': 'File[/var/lib/puppet/lib]{:path=>"/var/lib/puppet/lib", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'certdir': 'File[/var/lib/puppet/ssl/certs]{:path=>"/var/lib/puppet/ssl/certs", :mode=>"755", :owner=>"puppet", :group=>"puppet", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'ssldir': 'File[/var/lib/puppet/ssl]{:path=>"/var/lib/puppet/ssl", :mode=>"771", :owner=>"puppet", :group=>"puppet", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'publickeydir': 'File[/var/lib/puppet/ssl/public_keys]{:path=>"/var/lib/puppet/ssl/public_keys", :mode=>"755", :owner=>"puppet", :group=>"puppet", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'requestdir': 'File[/var/lib/puppet/ssl/certificate_requests]{:path=>"/var/lib/puppet/ssl/certificate_requests", :mode=>"755", :owner=>"puppet", :group=>"puppet", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'privatekeydir': 'File[/var/lib/puppet/ssl/private_keys]{:path=>"/var/lib/puppet/ssl/private_keys", :mode=>"750", :owner=>"puppet", :group=>"puppet", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'privatedir': 'File[/var/lib/puppet/ssl/private]{:path=>"/var/lib/puppet/ssl/private", :mode=>"750", :owner=>"puppet", :group=>"puppet", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'hostprivkey': 'File[/var/lib/puppet/ssl/private_keys/localhost.localdomain.pem]{:path=>"/var/lib/puppet/ssl/private_keys/localhost.localdomain.pem", :mode=>"640", :owner=>"puppet", :group=>"puppet", :ensure=>:file, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'hostpubkey': 'File[/var/lib/puppet/ssl/public_keys/localhost.localdomain.pem]{:path=>"/var/lib/puppet/ssl/public_keys/localhost.localdomain.pem", :mode=>"644", :owner=>"puppet", :group=>"puppet", :ensure=>:file, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'statefile': 'File[/var/lib/puppet/state/state.yaml]{:path=>"/var/lib/puppet/state/state.yaml", :mode=>"660", :ensure=>:file, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'clientyamldir': 'File[/var/lib/puppet/client_yaml]{:path=>"/var/lib/puppet/client_yaml", :mode=>"750", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'client_datadir': 'File[/var/lib/puppet/client_data]{:path=>"/var/lib/puppet/client_data", :mode=>"750", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'clientbucketdir': 'File[/var/lib/puppet/clientbucket]{:path=>"/var/lib/puppet/clientbucket", :mode=>"750", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'lastrunfile': 'File[/var/lib/puppet/state/last_run_summary.yaml]{:path=>"/var/lib/puppet/state/last_run_summary.yaml", :mode=>"644", :ensure=>:file, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'lastrunreport': 'File[/var/lib/puppet/state/last_run_report.yaml]{:path=>"/var/lib/puppet/state/last_run_report.yaml", :mode=>"640", :ensure=>:file, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'graphdir': 'File[/var/lib/puppet/state/graphs]{:path=>"/var/lib/puppet/state/graphs", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Using settings: adding file resource 'pluginfactdest': 'File[/var/lib/puppet/facts.d]{:path=>"/var/lib/puppet/facts.d", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: /File[/var/lib/puppet/state]: Autorequiring File[/var/lib/puppet][0m
+[0;36mDebug: /File[/var/lib/puppet/lib]: Autorequiring File[/var/lib/puppet][0m
+[0;36mDebug: /File[/var/lib/puppet/ssl/certs]: Autorequiring File[/var/lib/puppet/ssl][0m
+[0;36mDebug: /File[/var/lib/puppet/ssl]: Autorequiring File[/var/lib/puppet][0m
+[0;36mDebug: /File[/var/lib/puppet/ssl/public_keys]: Autorequiring File[/var/lib/puppet/ssl][0m
+[0;36mDebug: /File[/var/lib/puppet/ssl/certificate_requests]: Autorequiring File[/var/lib/puppet/ssl][0m
+[0;36mDebug: /File[/var/lib/puppet/ssl/private_keys]: Autorequiring File[/var/lib/puppet/ssl][0m
+[0;36mDebug: /File[/var/lib/puppet/ssl/private]: Autorequiring File[/var/lib/puppet/ssl][0m
+[0;36mDebug: /File[/var/lib/puppet/ssl/private_keys/localhost.localdomain.pem]: Autorequiring File[/var/lib/puppet/ssl/private_keys][0m
+[0;36mDebug: /File[/var/lib/puppet/ssl/public_keys/localhost.localdomain.pem]: Autorequiring File[/var/lib/puppet/ssl/public_keys][0m
+[0;36mDebug: /File[/var/lib/puppet/state/state.yaml]: Autorequiring File[/var/lib/puppet/state][0m
+[0;36mDebug: /File[/var/lib/puppet/client_yaml]: Autorequiring File[/var/lib/puppet][0m
+[0;36mDebug: /File[/var/lib/puppet/client_data]: Autorequiring File[/var/lib/puppet][0m
+[0;36mDebug: /File[/var/lib/puppet/clientbucket]: Autorequiring File[/var/lib/puppet][0m
+[0;36mDebug: /File[/var/lib/puppet/state/last_run_summary.yaml]: Autorequiring File[/var/lib/puppet/state][0m
+[0;36mDebug: /File[/var/lib/puppet/state/last_run_report.yaml]: Autorequiring File[/var/lib/puppet/state][0m
+[0;36mDebug: /File[/var/lib/puppet/state/graphs]: Autorequiring File[/var/lib/puppet/state][0m
+[0;36mDebug: /File[/var/lib/puppet/facts.d]: Autorequiring File[/var/lib/puppet][0m
+[0;36mDebug: Finishing transaction 27288540[0m
+[0;36mDebug: Loaded state in 0.31 seconds[0m
+[0;36mDebug: Loaded state in 0.24 seconds[0m
+[0;36mDebug: /Stage[main]/Epel/Epel::Rpm_gpg_key[EPEL-7]/before: requires Yumrepo[epel][0m
+[0;36mDebug: /Stage[main]/Epel/Epel::Rpm_gpg_key[EPEL-7]/before: requires Yumrepo[epel-source][0m
+[0;36mDebug: /Stage[main]/Epel/Epel::Rpm_gpg_key[EPEL-7]/before: requires Yumrepo[epel-debuginfo][0m
+[0;36mDebug: /Stage[main]/Epel/Epel::Rpm_gpg_key[EPEL-7]/before: requires Yumrepo[epel-testing][0m
+[0;36mDebug: /Stage[main]/Epel/Epel::Rpm_gpg_key[EPEL-7]/before: requires Yumrepo[epel-testing-source][0m
+[0;36mDebug: /Stage[main]/Epel/Epel::Rpm_gpg_key[EPEL-7]/before: requires Yumrepo[epel-testing-debuginfo][0m
+[0;36mDebug: /Stage[main]/Rpmforge/Epel::Rpm_gpg_key[rpmforge-dag]/require: requires File[/etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag][0m
+[0;36mDebug: /Stage[main]/Rpmforge/Epel::Rpm_gpg_key[rpmforge-dag]/before: requires Yumrepo[rpmforge][0m
+[0;36mDebug: /Stage[main]/Rpmforge/Epel::Rpm_gpg_key[rpmforge-dag]/before: requires Yumrepo[rpmforge-extras][0m
+[0;36mDebug: /Stage[main]/Rpmforge/Epel::Rpm_gpg_key[rpmforge-dag]/before: requires Yumrepo[rpmforge-testing][0m
+[0;36mDebug: /Stage[main]/Stig_clamav/File[/etc/cron.daily/puppet-update-clamavsigs.sh]/require: requires Package[clamav][0m
+[0;36mDebug: /Stage[main]/Stig_clamav/File[/etc/cron.daily/puppet-clamavscan-full.sh]/require: requires Package[clamav][0m
+[0;36mDebug: /Stage[main]/Stig_sshd/Service[sshd]/require: requires Package[openssh-server][0m
+[0;36mDebug: /Stage[main]/Stig_sshd/Augeas[sshdconfig]/notify: subscribes to Service[sshd][0m
+[0;36mDebug: /Stage[main]/Stig_csi::Logrotate/File[/etc/logrotate.conf]/require: requires Package[logrotate][0m
+[0;36mDebug: /Stage[main]/Stig_csi::Logrotate/File[/etc/cron.daily/logrotate]/require: requires Package[logrotate][0m
+[0;36mDebug: /Stage[main]/Ntp/Anchor[ntp::begin]/before: requires Class[Ntp::Install][0m
+[0;36mDebug: /Stage[main]/Ntp::Install/before: requires Class[Ntp::Config][0m
+[0;36mDebug: /Stage[main]/Ntp::Config/notify: subscribes to Class[Ntp::Service][0m
+[0;36mDebug: /Stage[main]/Ntp::Service/before: requires Anchor[ntp::end][0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/Exec[tar xvf /InstallFiles/jdk-8u45-linux-x64.tar.gz -C /usr/java]/require: requires File[/usr/java][0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/Exec[tar xvf /InstallFiles/jdk-8u45-linux-x64.tar.gz -C /usr/java]/require: requires File[/usr/java/latest][0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/Exec[tar xvf /InstallFiles/jdk-8u45-linux-x64.tar.gz -C /usr/java]/require: requires File[/usr/java/default][0m
+[0;36mDebug: /Stage[main]/Epel/Epel::Rpm_gpg_key[EPEL-7]/Exec[import-EPEL-7]/require: requires File[/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7][0m
+[0;36mDebug: /Stage[main]/Rpmforge/Epel::Rpm_gpg_key[rpmforge-dag]/Exec[import-rpmforge-dag]/require: requires File[/etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag][0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/File[/usr/java/default]: Autorequiring File[/usr/java][0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/File[/usr/java/latest]: Autorequiring File[/usr/java][0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/local_policy.jar]: Autorequiring File[/usr/java/default][0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/US_export_policy.jar]: Autorequiring File[/usr/java/default][0m
+[0;36mDebug: /Stage[main]/Mmwogli_tomcat/File[/usr/java/apache-tomcat]: Autorequiring File[/usr/java][0m
+[0;32mInfo: Applying configuration version '1431121045'[0m
+[0;36mDebug: Prefetching yum resources for package[0m
+[0;36mDebug: Executing '/usr/bin/rpm --version'[0m
+[0;36mDebug: Executing '/usr/bin/rpm -qa --nosignature --nodigest --qf '%{NAME} %|EPOCH?{%{EPOCH}}:{0}| %{VERSION} %{RELEASE} %{ARCH}\n''[0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): Opening augeas with root /, lens path , flags 32[0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): Augeas version 1.1.0 is installed[0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): Will attempt to save and only run if files changed[0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/PermitRootLogin", "no"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/LoginGraceTime", "60"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/IgnoreRhosts", "yes"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/PermitEmptyPasswords", "no"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/PasswordAuthentication", "yes"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/ChallengeResponseAuthentication", "yes"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/UsePAM", "yes"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/AllowTcpForwarding", "no"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/ClientAliveInterval", "5400"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/ClientAliveCountMax", "0"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/MaxStartups", "10"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/PermitTunnel", "no"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/Banner", "/etc/issue"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): sending command 'set' with params ["/files/etc/ssh/sshd_config/PrintMotd", "no"][0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): Skipping because no files were changed[0m
+[0;36mDebug: Augeas[sshdconfig](provider=augeas): Closed the augeas connection[0m
+[0;36mDebug: Executing '/usr/bin/systemctl is-active sshd'[0m
+[0;36mDebug: Augeas[sudowheel](provider=augeas): Opening augeas with root /, lens path , flags 32[0m
+[0;36mDebug: Augeas[sudowheel](provider=augeas): Augeas version 1.1.0 is installed[0m
+[0;36mDebug: Augeas[sudowheel](provider=augeas): Will attempt to save and only run if files changed[0m
+[0;36mDebug: Augeas[sudowheel](provider=augeas): sending command 'set' with params ["/files/etc/sudoers/spec[user = \"%wheel\"]/user", "%wheel"][0m
+[0;36mDebug: Augeas[sudowheel](provider=augeas): sending command 'set' with params ["/files/etc/sudoers/spec[user = \"%wheel\"]/host_group/host", "ALL"][0m
+[0;36mDebug: Augeas[sudowheel](provider=augeas): sending command 'set' with params ["/files/etc/sudoers/spec[user = \"%wheel\"]/host_group/command", "ALL"][0m
+[0;36mDebug: Augeas[sudowheel](provider=augeas): sending command 'set' with params ["/files/etc/sudoers/spec[user = \"%wheel\"]/host_group/command/runas_user", "ALL"][0m
+[0;36mDebug: Augeas[sudowheel](provider=augeas): Skipping because no files were changed[0m
+[0;36mDebug: Augeas[sudowheel](provider=augeas): Closed the augeas connection[0m
+[0;36mDebug: Exec[import-EPEL-7](provider=posix): Executing check 'rpm -q gpg-pubkey-$(echo $(gpg --throw-keyids < /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7) | cut --characters=11-18 | tr '[A-Z]' '[a-z]')'[0m
+[0;36mDebug: Executing 'rpm -q gpg-pubkey-$(echo $(gpg --throw-keyids < /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7) | cut --characters=11-18 | tr '[A-Z]' '[a-z]')'[0m
+[0;36mDebug: /Stage[main]/Epel/Epel::Rpm_gpg_key[EPEL-7]/Exec[import-EPEL-7]/unless: gpg-pubkey-352c64e5-52ae6884[0m
+[0;36mDebug: Prefetching inifile resources for yumrepo[0m
+[0;36mDebug: Executing '/usr/bin/systemctl is-active ntpd'[0m
+[0;36mDebug: Executing '/usr/bin/systemctl is-enabled ntpd'[0m
+[0;36mDebug: Exec[tomcat_tarball](provider=posix): Executing '/usr/bin/tar xvzf /InstallFiles/jdk-8u45-linux-x64.tar.gz -C /usr/java'[0m
+[0;36mDebug: Executing '/usr/bin/tar xvzf /InstallFiles/jdk-8u45-linux-x64.tar.gz -C /usr/java'[0m
+[mNotice: /Stage[main]/Mmwogli_tomcat/Exec[tomcat_tarball]/returns: executed successfully[0m
+[0;36mDebug: /Stage[main]/Mmwogli_tomcat/Exec[tomcat_tarball]: The container Class[Mmwogli_tomcat] will propagate my refresh event[0m
+[0;36mDebug: Exec[import-rpmforge-dag](provider=posix): Executing check 'rpm -q gpg-pubkey-$(echo $(gpg --throw-keyids < /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag) | cut --characters=11-18 | tr '[A-Z]' '[a-z]')'[0m
+[0;36mDebug: Executing 'rpm -q gpg-pubkey-$(echo $(gpg --throw-keyids < /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag) | cut --characters=11-18 | tr '[A-Z]' '[a-z]')'[0m
+[0;36mDebug: /Stage[main]/Rpmforge/Epel::Rpm_gpg_key[rpmforge-dag]/Exec[import-rpmforge-dag]/unless: gpg-pubkey-6b8d79e6-3f49313d[0m
+[0;32mInfo: Computing checksum on file /usr/java/default/jre/lib/security/local_policy.jar[0m
+[0;32mInfo: FileBucket got a duplicate file {md5}57aaaa3176dc28fc554ef0906d01041a[0m
+[0;32mInfo: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/local_policy.jar]: Filebucketed /usr/java/default/jre/lib/security/local_policy.jar to puppet with sum 57aaaa3176dc28fc554ef0906d01041a[0m
+[mNotice: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/local_policy.jar]/content: content changed '{md5}57aaaa3176dc28fc554ef0906d01041a' to '{md5}dabfcb23d7bf9bf5a201c3f6ea9bfb2c'[0m
+[mNotice: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/local_policy.jar]/owner: owner changed '10' to 'root'[0m
+[mNotice: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/local_policy.jar]/group: group changed '143' to 'root'[0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/local_policy.jar]: The container Class[Mmowgli_java] will propagate my refresh event[0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/local_policy.jar]: The container Class[Mmowgli_java] will propagate my refresh event[0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/local_policy.jar]: The container Class[Mmowgli_java] will propagate my refresh event[0m
+[0;36mDebug: Class[Mmwogli_tomcat]: The container Stage[main] will propagate my refresh event[0m
+[0;32mInfo: Computing checksum on file /usr/java/default/jre/lib/security/US_export_policy.jar[0m
+[0;32mInfo: FileBucket got a duplicate file {md5}ee4ed9c75a1aaa04dfd192382c57900c[0m
+[0;32mInfo: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/US_export_policy.jar]: Filebucketed /usr/java/default/jre/lib/security/US_export_policy.jar to puppet with sum ee4ed9c75a1aaa04dfd192382c57900c[0m
+[mNotice: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/US_export_policy.jar]/content: content changed '{md5}ee4ed9c75a1aaa04dfd192382c57900c' to '{md5}ef6e8eae7d1876d7f05d765d2c2e0529'[0m
+[mNotice: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/US_export_policy.jar]/owner: owner changed '10' to 'root'[0m
+[mNotice: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/US_export_policy.jar]/group: group changed '143' to 'root'[0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/US_export_policy.jar]: The container Class[Mmowgli_java] will propagate my refresh event[0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/US_export_policy.jar]: The container Class[Mmowgli_java] will propagate my refresh event[0m
+[0;36mDebug: /Stage[main]/Mmowgli_java/File[/usr/java/default/jre/lib/security/US_export_policy.jar]: The container Class[Mmowgli_java] will propagate my refresh event[0m
+[0;36mDebug: Class[Mmowgli_java]: The container Stage[main] will propagate my refresh event[0m
+[0;36mDebug: Finishing transaction 41204960[0m
+[0;36mDebug: Storing state[0m
+[0;36mDebug: Stored state in 0.30 seconds[0m
+[mNotice: Finished catalog run in 5.61 seconds[0m
+[0;36mDebug: Using settings: adding file resource 'rrddir': 'File[/var/lib/puppet/rrd]{:path=>"/var/lib/puppet/rrd", :mode=>"750", :owner=>"puppet", :group=>"puppet", :ensure=>:directory, :loglevel=>:debug, :links=>:follow, :backup=>false}'[0m
+[0;36mDebug: Finishing transaction 32870960[0m
+[0;36mDebug: Received report to process from localhost.localdomain[0m
+[0;36mDebug: Processing report from localhost.localdomain with processor Puppet::Reports::Store[0m
