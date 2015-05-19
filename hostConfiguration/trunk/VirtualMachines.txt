@@ -1,0 +1,18 @@
+Virtual Machines
+
+I have configured a number of VMWare/ova virtual machines to run
+MMOWGLI. Go to
+
+https://movesinstitute.org/~mcgredo/VMs/mmowgliSingleHost.ova
+
+To download the single-host, all-in-one server. On modern hardware
+this should be good for several hundred users. The host is not
+necessarily locked down for open internet access, and you may need
+further configuration to ensure compliance with your site's 
+security standards.
+
+https://movesinstitute.org/~mcgredo/VMs/MMOWGLISetup.docx
+
+Has documentation on what's needed. There are also a number of
+VMs for a multi-node setup for high volume.
+
