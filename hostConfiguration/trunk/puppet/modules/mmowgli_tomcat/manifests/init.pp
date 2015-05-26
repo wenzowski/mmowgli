@@ -1,13 +1,14 @@
 class mmowgli_tomcat ($tomcat_tarball = "/InstallFiles/apache-tomcat-7.0.61.tar.gz") {
 
-# bleah, fix this somehow
+# bleah, fix this somehow. Uses global variables, looked up from
+# hiera in the site.pp file. Should look them up directly here.
 
 file {"/usr/java/apache-tomcat":
   ensure => "link",
-  target=> "apache-tomcat-7.0.61",
+  target=> "$tomcat_version",
 }
 
-file {"/usr/java/apache-tomcat-7.0.61":
+file {"/usr/java/$tomcat_version":
   recurse => true,
   group   => "tomcat",
   owner   => "tomcat",
@@ -31,6 +32,27 @@ file { "/etc/init.d/tomcat":
    mode =>  "755",
 }
 
+# Sets the jvmroute for AJP
+file { "/usr/java/apache-tomcat/conf/server.xml":
+  ensure => "present",
+  content => template("mmowgli_tomcat/server.xml.erb"),
+  group => "tomcat",
+  owner => "tomcat",
+  mode => "0665",
+  require => Exec["$tomcat_tarball"],
+}
+
+# Sets placeholder password for java melody
+file { "/usr/java/apache-tomcat/conf/tomcat-users.xml":
+  ensure => "present",
+  content => template("mmowgli_tomcat/tomcat-users.xml.erb"),
+  group => "tomcat",
+  owner => "tomcat",
+  mode => "0665",
+  require => Exec["$tomcat_tarball"],
+}
+
+
 # SysV-style service. Works on RHEL7 boxes, which are dual systemd/SysV.
 
 service {"tomcat":
@@ -45,7 +67,7 @@ service {"tomcat":
 exec { "$tomcat_tarball":
     command => "/usr/bin/tar xvzf $tomcat_tarball -C /usr/java",
     cwd => "/usr/java",
-    creates => "/usr/java/apache-tomcat-7.0.61",
+    creates => "/usr/java/$tomcat_version",
     logoutput => on_failure,
     path => "/usr/bin",
   }

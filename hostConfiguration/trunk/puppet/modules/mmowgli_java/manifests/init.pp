@@ -1,5 +1,11 @@
-class mmowgli_java ($tarball = "/InstallFiles/jdk-8u45-linux-x64.tar.gz",
-                    $jdk_dir = "jdk1.8.0_45")
+# java_tarball and jdk_version are picked up from hiera in /etc/puppet
+
+#$java_tarball = hiera("java_tarball")
+#$jdk_version = hiera("jdk_version")
+
+notify{"env vars are $::java_tarball and $::jdk_version": }
+
+class mmowgli_java
 {
 
 file {"/usr/java":
@@ -12,40 +18,43 @@ file {"/usr/java":
 
 file{"/usr/java/default":
    ensure => 'link',
-   target => $jdk_dir,
+   target => "/usr/java/$jdk_version",
 }
 
 file{ "/usr/java/latest":
    ensure => 'link',
-   target => $jdk_dir,
+   target => "/usr/java/$jdk_version",
 }
 
-file{"/usr/java/$jdk_dir":
+file{"/usr/java/$jdk_version":
   recurse=> true,
   owner => 'root',
   group => 'root',
   require => File["/usr/java"],
 }
 
-
-exec { "tar xvf $tarball":
-    #logoutput => on_failure,
+# unpack the java jdk tarball
+exec { "tar xvf $java_tarball":
     cwd => "/usr/java",
-    creates => "/usr/java/jdk1.8.0_45/COPYRIGHT",
-    onlyif => "test ! -f /usr/java/jdk1.8.0_45",
+    creates => "/usr/java/$jdk_version",
     path => ["/usr/bin", "/usr/sbin"],
     require => File["/usr/java"],
   }
 
-file {"/usr/java/default/jre/lib/security/local_policy.jar":
+# The source of these are the jar files in the files directory
+# of this puppet module. They implement better-than-US crypto export
+# capabilities.
+
+file {"/usr/java/$jdk_version/jre/lib/security/local_policy.jar":
   ensure => present,
   source => 'puppet:///modules/mmowgli_java/local_policy.jar',
-  require => File["/usr/java/$jdk_dir"],
+  require => File["/usr/java/$jdk_version"],
 }
 
-file {"/usr/java/default/jre/lib/security/US_export_policy.jar":
+file {"/usr/java/$jdk_version/jre/lib/security/US_export_policy.jar":
   ensure => present,
   source => 'puppet:///modules/mmowgli_java/US_export_policy.jar',
+  require => File["/usr/java/$jdk_version"],
 }
 
 }   
