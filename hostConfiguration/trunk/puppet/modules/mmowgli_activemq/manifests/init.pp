@@ -21,14 +21,14 @@ service {"activemq":
 }
 
 
-  
 # unpack the tarball if not present
 exec { "$activemq_tarball":
-    command => "/usr/bin/tar xvzf $activemq_tarball -C /usr/java",
+    command => "tar xvzf $activemq_tarball -C /usr/java",
     cwd => "/usr/java",
     creates => "/usr/java/$activemq_version",
     logoutput => on_failure,
-    path => "/usr/bin",
+    path => "/usr/bin:/bin",
+    before => Service["activemq"]
   }
 
 
