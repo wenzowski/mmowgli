@@ -1,30 +1,16 @@
-# ************************************
-# Vhost template in module puppetlabs-apache
-# Managed by Puppet
-# ************************************
-
-<VirtualHost *:80>
-  ServerName default
-  ServerAdmin root@localhost
-
-  ## Vhost docroot
-  DocumentRoot "/var/www/html"
-
-  ## Directories, there should at least be a declaration for /var/www/html
-
-  <Directory "/var/www/html">
-    Options Indexes FollowSymLinks MultiViews
-    AllowOverride None
-    Require all granted
-  </Directory>
-
 # Set up a load-balancing cluster. The loadfactor setting says something about
 # the relative power of a host; a host with a loadfactor of 20 is twice as
 # powerful as one with a loadfactor of 10. The name of the balancing entity
 # is balancer://tomcatCluster, and we add uris after that.
+#
+
+# Puppet template drops in some ruby to iterate through all the tomcat hosts
 
 <Proxy balancer://tomcatCluster>
-  BalancerMember ajp://localhost:8009 route=mmowgli1 loadfactor=10
+  <% @tomcat_hosts.each do |aTomcatHost| -%>
+     BalancerMember ajp://<%=aTomcatHost%>:8009 route=<%=aTomcatHost%> loadfactor=10
+  <% end -%>
+  # BalancerMember ajp://localhost:8009 route=mmowgli1 loadfactor=10
   # Other members of the load-balancing pool here. Each must have unique route setting,
   # which is configured in the server.xml jvmRoute connector in the tomcat instance.
   # BalancerMember ajp://tomcatHost1:8009/mmowgli route=mmowgli2 loadfactor=10
@@ -54,11 +40,3 @@ ProxyPassReverse "/mmowgli" "balancer://tomcatCluster/mmowgli"
 #  Allow from all
 #</Location>
 
-
-  ## Logging
-  ErrorLog "/var/log/httpd/default_error.log"
-  ServerSignature Off
-  CustomLog "/var/log/httpd/access_log" combined 
-  ## Script alias directives
-  ScriptAlias /cgi-bin "/var/www/cgi-bin"
-</VirtualHost>

@@ -18,7 +18,7 @@ file {"/etc/init.d/zookeeper":
   before => Service["zookeeper"],
 }
 
-file {"/usr/java/zookeeper-3.4.6/conf/zoo.cfg":
+file {"/usr/java/$zookeeper_version/conf/zoo.cfg":
   ensure => present,
   owner => "zookeeper",
   group => "zookeeper",
@@ -27,7 +27,7 @@ file {"/usr/java/zookeeper-3.4.6/conf/zoo.cfg":
 }
 
 
-file{"/usr/java/zookeeper-3.4.6":
+file{"/usr/java/$zookeeper_version":
   owner => "zookeeper",
   group => "zookeeper",
   ensure => directory,
@@ -38,7 +38,7 @@ file{"/usr/java/zookeeper-3.4.6":
 
 file{"/usr/java/zookeeper":
   ensure => "link",
-  target => "/usr/java/zookeeper-3.4.6",
+  target => "/usr/java/$zookeeper_version",
 }
 
 # Service for zookeeper
@@ -50,10 +50,10 @@ service{ "zookeeper":
 exec { "zookeeper_tarball":
     command => "/usr/bin/tar xvzf $zookeeper_tarball -C /usr/java",
     cwd => "/usr/java",
-    creates => "/usr/java/zookeeper-3.4.6",
+    creates => "/usr/java/$zookeeper_version",
     logoutput => on_failure,
     path => "/usr/bin",
-    before => File["/usr/java/zookeeper-3.4.6"],
+    before => File["/usr/java/$zookeeper_version"],
   }
 
 

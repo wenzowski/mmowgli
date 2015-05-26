@@ -1,4 +1,4 @@
-class mmowgli_activemq ($activemq_tarball = "/InstallFiles/apache-activemq-5.11.1-bin.tar.gz") {
+class mmowgli_activemq  {
 
 # ensure activemq user present
 user { "activemq":
@@ -23,10 +23,10 @@ service {"activemq":
 
   
 # unpack the tarball if not present
-exec { "activemq_tarball":
+exec { "$activemq_tarball":
     command => "/usr/bin/tar xvzf $activemq_tarball -C /usr/java",
     cwd => "/usr/java",
-    creates => "/usr/java/apache-activemq-5.11.1",
+    creates => "/usr/java/$activemq_version",
     logoutput => on_failure,
     path => "/usr/bin",
   }

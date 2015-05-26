@@ -1,5 +1,0 @@
-RPM Mirror Module
------------------
-
-Configures Yum to request artifacts from the RPM mirror on JUJU.
-
