@@ -1,0 +1,31 @@
+#!/bin/bash
+ 
+# set the email properties
+SUBJECT="CLAMAV: Potential Malware Discovered on `hostname`"
+EMAIL="<%= @scanalertrecipient %>"
+
+# clamav scan log location
+NOW=$(date +"%F")
+LOG="/var/log/clamav/daily-$NOW.log"
+
+# this function checks the scan results for items to alert about
+check_scan () {
+    # Check the last set of results. If there are any "Infected" counts that aren't zero, we have a problem.
+    if [ `tail -n 12 ${LOG}  | grep Infected | grep -v "files: 0" | wc -l` != 0 ]
+    then
+        EMAILMESSAGE=`mktemp /tmp/virus-alert.XXXXX`
+        echo "To: ${EMAIL}" >>  ${EMAILMESSAGE}
+        echo "From: tdwyatt@nps.edu" >>  ${EMAILMESSAGE}
+        echo "Subject: ${SUBJECT}" >>  ${EMAILMESSAGE}
+        echo "Importance: High" >> ${EMAILMESSAGE}
+        echo "X-Priority: 1" >> ${EMAILMESSAGE}
+        echo "`cat ${LOG}`" >> ${EMAILMESSAGE}
+        /usr/sbin/sendmail -t < ${EMAILMESSAGE}
+    fi
+}
+
+# run the actual scan, use nice to lower the execution priority
+nice -n 15 /usr/bin/clamscan --recursive --exclude-dir=/sys/ --exclude-dir=/proc/ --exclude-dir=/usr/share/doc/clamav.*/test/ --quiet --infected --log=${LOG} --phishing-scan-urls=no <%= @scanDLP %> <%= @scanPUA %> <%= @crossfs %> <%= @scanbasepath %>
+
+# invoke our function to inspect the results
+check_scan

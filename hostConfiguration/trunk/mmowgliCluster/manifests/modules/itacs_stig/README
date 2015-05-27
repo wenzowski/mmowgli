@@ -1,0 +1,31 @@
+## STIG application ##
+
+itacs_stig
+
+### Usage ###
+
+    include itacs_stig # to apply ALL policies
+    include itacs_stig::logrotate # to apply just a SPECIFIC policy
+
+* Modules will announce themselves in the log if the global variable `$verbose` is set to `true` or `yes`
+* The module itacs_stig::packages uses the global variable `$ids` to decide which packages should be removed or added
+
+| -------------------- | -------------------------------------------------------------------------- |
+| itacs_stig::audit_rules    | installs auditd/audit if necessary and sets up the audit.rules files       |
+| itacs_stig::delusers       | removes useless legacy user accounts                                       |
+| itacs_stig::file_perms     | sets the permissions and ownership of various system files                 |
+| itacs_stig::motd           | installs the standard DOD login banner                                     |
+| itacs_stig::ntp            | configures the NTP service                                                 |
+| itacs_stig::packages       | removes packages that should not be there and installs others that should  |
+| itacs_stig::sshd           | configures SSHD config file                                                |
+| itacs_stig::sysctl         | configures sysctl.conf                                                     |
+| itacs_stig::syslog_conf    | sets the permissions and ownership of syslog config files **NOT INCLUDED IN THE GLOBAL itacs_stig INVOCATION**.                 |
+| itacs_stig::root_home      | sets the permissions and ownership of /root                                |
+
+
+Skip Carter  
+Information Technology and Communication Services (ITACS)  
+Naval Postgraduate School  
+<ecarter@nps.edu>  
+<carteref@nps.navy.smil.mil>  
+

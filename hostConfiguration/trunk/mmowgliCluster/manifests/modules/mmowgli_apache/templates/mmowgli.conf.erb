@@ -1,0 +1,42 @@
+# Set up a load-balancing cluster. The loadfactor setting says something about
+# the relative power of a host; a host with a loadfactor of 20 is twice as
+# powerful as one with a loadfactor of 10. The name of the balancing entity
+# is balancer://tomcatCluster, and we add uris after that.
+#
+
+# Puppet template drops in some ruby to iterate through all the tomcat hosts
+
+<Proxy balancer://tomcatCluster>
+  <% @tomcat_hosts.each do |aTomcatHost| -%>
+     BalancerMember ajp://<%=aTomcatHost%>:8009 route=<%=aTomcatHost%> loadfactor=10
+  <% end -%>
+  # BalancerMember ajp://localhost:8009 route=mmowgli1 loadfactor=10
+  # Other members of the load-balancing pool here. Each must have unique route setting,
+  # which is configured in the server.xml jvmRoute connector in the tomcat instance.
+  # BalancerMember ajp://tomcatHost1:8009/mmowgli route=mmowgli2 loadfactor=10
+  # BalancerMember ajp://tomcatHost2:8009/mmowgli route=mmowgli3 loadfactor=10
+  ProxySet stickysession=JSESSIONID
+</Proxy>
+
+# Order is important here--the "do not mount" or "exclude directory"
+# directive has to come before the main directory proxy.
+
+ProxyPass /mmowgli/reports !
+ProxyPass /mmowgli/images !
+ProxyPass /mmowgli/VAADIN !
+ProxyPass /mmowgli balancer://tomcatCluster/mmowgli
+ProxyPassReverse /mmowgli balancer://tomcatCluster/mmowgli
+
+ProxyPass "/mmowgli" "balancer://tomcatCluster/mmowgli"
+ProxyPassReverse "/mmowgli" "balancer://tomcatCluster/mmowgli"
+
+# This lets you examine the state of the load balancer. Commented out for
+# now, but you could easily add some authentication here to allow admins
+# to examine the state of the load balancer.
+
+#<Location /balancer-manager>
+#  SetHandler balancer-manager
+#  Order Deny,Allow
+#  Allow from all
+#</Location>
+
