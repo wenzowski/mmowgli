@@ -1,0 +1,41 @@
+# Various settings that are used in modules. A lot of these
+# should be broken out into other yaml files to actually use
+# hiera correctly. There's all sorts of hack and slash herp
+# and derp here.
+
+# NTP server lists
+local_ntp_server_list :
+                   - time.nps.edu
+                   - pool.ntp.org
+                   - matrix.nps.edu
+
+# Java versions and locations of tarballs
+jdk_version : jdk1.8.0_45
+java_tarball : /vagrant/InstallFiles/jdk-8u45-linux-x64.tar.gz
+activemq_tarball : /vagrant/InstallFiles/apache-activemq-5.11.1-bin.tar.gz
+activemq_version : apache-activemq-5.11.1
+zookeeper_tarball: /vagrant/InstallFiles/zookeeper-3.4.6.tar.gz
+zookeeper_version : zookeeper-3.4.6
+tomcat_tarball : /vagrant/InstallFiles/apache-tomcat-7.0.61.tar.gz
+tomcat_version : apache-tomcat-7.0.61
+
+
+# Java melody password--should be needed only on tomcats
+java_melody_password : javaMelodyPassword
+
+
+# This is bad, wrong, and stupid. A list of the tomcat servers,
+# so we can build up a load balancing pool in apache. This should
+# be dynamically generated.
+
+tomcat_hosts:
+          - tomcat1 
+          - tomcat2
+          - tomcat3
+
+
+# password for smb server
+smb_server_password : mmowgli
+
+# Password for mmowgli user
+mmowgli_user_password : mmowgli

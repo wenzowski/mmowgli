@@ -1,0 +1,14 @@
+# This file is maintained by puppet. (Not working right now)
+
+[Unit]
+Description=Tomcat 7
+After=syslog.target network.target
+
+[Service]
+Type=forking
+User=tomcat
+ExecStart=/usr/java/apache-tomcat/bin/daemon.sh start
+ExecStop=/usr/java/apache-tomcat/bin/daemon.sh stop
+
+[Install]
+WantedBy=multi-user.target
