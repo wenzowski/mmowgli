@@ -26,12 +26,12 @@ file{ "/usr/java/latest":
    target => "/usr/java/$jdk_version",
 }
 
-file{"/usr/java/$jdk_version":
-  recurse=> true,
-  owner => 'root',
-  group => 'root',
-  require => File["/usr/java"],
-}
+#file{"/usr/java/$jdk_version":
+#  recurse=> true,
+#  owner => 'root',
+#  group => 'root',
+#  require => File["/usr/java"],
+#}
 
 # unpack the java jdk tarball
 exec { "tar xvf $java_tarball":
