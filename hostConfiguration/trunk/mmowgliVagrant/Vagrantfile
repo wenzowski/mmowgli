@@ -87,7 +87,7 @@ Vagrant.configure(2) do |config|
     /usr/bin/puppet module install puppetlabs/mysql
     /usr/bin/puppet module install  puppetlabs/stdlib
     /usr/bin/puppet module install thias/samba
-    cp /vagrant/puppetConfig/hiera.yaml /etc
+    cp /vagrant/puppetConfig/hiera.yaml /etc/puppet
     cp -R /vagrant/puppetConfig/hieradata /etc/puppet
     cp -R /vagrant/puppetConfig/puppet.conf /etc/puppet
     puppet apply --modulepath /etc/puppet/modules:/vagrant/manifests/modules /vagrant/manifests/site.pp
