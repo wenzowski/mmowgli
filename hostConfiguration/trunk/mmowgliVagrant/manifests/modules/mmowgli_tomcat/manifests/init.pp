@@ -1,4 +1,4 @@
-class mmowgli_tomcat ($tomcat_tarball = "/InstallFiles/apache-tomcat-7.0.61.tar.gz") {
+class mmowgli_tomcat {
 
 # bleah, fix this somehow. Uses global variables, looked up from
 # hiera in the site.pp file. Should look them up directly here.
@@ -69,7 +69,7 @@ exec { "$tomcat_tarball":
     cwd => "/usr/java",
     creates => "/usr/java/$tomcat_version",
     logoutput => on_failure,
-    path => "/usr/bin",
+    path => "/bin:/usr/sbin:/usr/bin",
   }
 
 }

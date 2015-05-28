@@ -1,4 +1,4 @@
-class mmowgli_zookeeper ($zookeeper_tarball = "/InstallFiles/zookeeper-3.4.6.tar.gz") {
+class mmowgli_zookeeper {
 
 # ensure activemq user present
 user { "zookeeper":
@@ -52,7 +52,7 @@ exec { "zookeeper_tarball":
     cwd => "/usr/java",
     creates => "/usr/java/$zookeeper_version",
     logoutput => on_failure,
-    path => "/usr/bin",
+    path => "/usr/bin:/bin:/usr/sbin",
     before => File["/usr/java/$zookeeper_version"],
   }
 
