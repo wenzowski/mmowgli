@@ -16,11 +16,16 @@ file {"/etc/httpd/conf.d/mmowgli.conf.frag":
   content => template("mmowgli_apache/mmowgli.conf.erb"),
 }
 
+file {"/etc/httpd/conf.d/proxy.load":
+  ensure => present,
+  source => "puppet:///modules/mmowgli_apache/proxy.load",
+}
+
 # The mod_ssl is installed
 apache::mod {"ssl":}
 
 # mod_proxy, for tomcat loadbalancing
-apache::mod{"proxy":}
+#apache::mod{"proxy":}
 
 # make sure there's a host files entry for mmowgli
 host { "mmowgli":
