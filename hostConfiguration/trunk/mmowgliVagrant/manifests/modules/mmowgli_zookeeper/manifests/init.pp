@@ -1,3 +1,5 @@
+# Zookeeper is used for leader election of a master tomcat instance
+
 class mmowgli_zookeeper {
 
 # ensure activemq user present
@@ -48,7 +50,7 @@ service{ "zookeeper":
 
 # unpack the tarball if not present
 exec { "zookeeper_tarball":
-    command => "/usr/bin/tar xvzf $zookeeper_tarball -C /usr/java",
+    command => "tar xvzf $zookeeper_tarball -C /usr/java",
     cwd => "/usr/java",
     creates => "/usr/java/$zookeeper_version",
     logoutput => on_failure,

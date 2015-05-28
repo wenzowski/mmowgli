@@ -83,13 +83,20 @@ Vagrant.configure(2) do |config|
   # This bootstraps up some puppet stuff so we can run the actual puppet
   # manifests
    config.vm.provision "shell", inline: <<-SHELL
-    /usr/bin/puppet module install puppetlabs/apache
-    /usr/bin/puppet module install puppetlabs/mysql
-    /usr/bin/puppet module install  puppetlabs/stdlib
-    /usr/bin/puppet module install thias/samba
-    cp /vagrant/puppetConfig/hiera.yaml /etc/puppet
-    cp -R /vagrant/puppetConfig/hieradata /etc/puppet
-    cp -R /vagrant/puppetConfig/puppet.conf /etc/puppet
-    puppet apply --modulepath /etc/puppet/modules:/vagrant/manifests/modules /vagrant/manifests/site.pp
+
+     # puppet and hiera config files
+
+     cp /vagrant/puppetConfig/hiera.yaml /etc/puppet
+     cp -R /vagrant/puppetConfig/hieradata /etc/puppet
+     cp /vagrant/puppetConfig/puppet.conf /etc/puppet
+    
+     # baseline puppet modules. Note that you need to be connected to the internet
+     # to retreive these.
+
+     /usr/bin/puppet module install puppetlabs/apache
+     /usr/bin/puppet module install puppetlabs/mysql
+     /usr/bin/puppet module install  puppetlabs/stdlib
+     /usr/bin/puppet module install thias/samba
+     puppet apply --modulepath /etc/puppet/modules:/vagrant/manifests/modules /vagrant/manifests/site.pp
    SHELL
 end
