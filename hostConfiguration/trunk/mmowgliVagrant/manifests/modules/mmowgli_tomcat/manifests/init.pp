@@ -65,7 +65,7 @@ service {"tomcat":
 
 # unpack the tarball if not present
 exec { "$tomcat_tarball":
-    command => "/usr/bin/tar xvzf $tomcat_tarball -C /usr/java",
+    command => "tar xvzf $tomcat_tarball -C /usr/java",
     cwd => "/usr/java",
     creates => "/usr/java/$tomcat_version",
     logoutput => on_failure,
