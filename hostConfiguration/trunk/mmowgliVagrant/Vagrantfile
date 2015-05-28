@@ -10,29 +10,33 @@ Vagrant.configure(2) do |config|
   # For a complete reference, please see the online documentation at
   # https://docs.vagrantup.com.
 
+  # "vagrant box add puppetlabs/centos-6.6-64-puppet" to add the vm image
+  # to the list of images vagrant knows about. This will download the 
+  # image from the vagrant catalog. (You may need a url if not in the
+  # catalog)
+
+  # front end web server
+
   config.vm.define "mmowgli" do |mmowgli|
     mmowgli.vm.box = "puppetlabs/centos-6.6-64-puppet"
     mmowgli.vm.hostname = "mmowgli"
   end
+
+  # database, zookeeper, JMS server
 
   config.vm.define "mmowgliServer" do |mmowgliServer|
     mmowgliServer.vm.box = "puppetlabs/centos-6.6-64-puppet"
     mmowgliServer.vm.hostname = "mmowgliServer"
   end
 
+  # one of N tomcat servers that can be loadbalanced across. 
+  # Add the list of tomcat servers to the tomcats list in
+  # hiera.
+
   config.vm.define "tomcat1" do |tomcat1|
     tomcat1.vm.box = "puppetlabs/centos-6.6-64-puppet"
     tomcat1.vm.hostname = "tomcat1"
   end
-
-  # Every Vagrant development environment requires a box. You can search for
-  # boxes at https://atlas.hashicorp.com/search.
-  #config.vm.box = "puppetlabs/centos-6.6-64-puppet"
-
-  # Disable automatic box update checking. If you disable this, then
-  # boxes will only be checked for updates when the user runs
-  # `vagrant box outdated`. This is not recommended.
-  # config.vm.box_check_update = false
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
@@ -81,7 +85,9 @@ Vagrant.configure(2) do |config|
   # documentation for more information about their specific syntax and use.
   #
   # This bootstraps up some puppet stuff so we can run the actual puppet
-  # manifests
+  # manifeshts. Do some intial config with the shell, then use puppet
+  # after that.
+
    config.vm.provision "shell", inline: <<-SHELL
 
      # puppet and hiera config files
@@ -97,6 +103,7 @@ Vagrant.configure(2) do |config|
      /usr/bin/puppet module install puppetlabs/mysql
      /usr/bin/puppet module install  puppetlabs/stdlib
      /usr/bin/puppet module install thias/samba
+
      puppet apply --modulepath /etc/puppet/modules:/vagrant/manifests/modules /vagrant/manifests/site.pp
    SHELL
 end
