@@ -38,7 +38,7 @@ exec { "tar xvf $java_tarball":
     cwd => "/usr/java",
     creates => "/usr/java/$jdk_version",
     path => ["/usr/bin", "/usr/sbin"],
-  #  require => File["/usr/java"],
+    require => File["/usr/java"],
   }
 
 # The source of these are the jar files in the files directory
@@ -48,13 +48,14 @@ exec { "tar xvf $java_tarball":
 file {"/usr/java/$jdk_version/jre/lib/security/local_policy.jar":
   ensure => present,
   source => 'puppet:///modules/mmowgli_java/local_policy.jar',
-  require => File["/usr/java/$jdk_version"],
+  require => Exec["tar xvf $java_tarball"],
 }
 
 file {"/usr/java/$jdk_version/jre/lib/security/US_export_policy.jar":
   ensure => present,
   source => 'puppet:///modules/mmowgli_java/US_export_policy.jar',
-  require => File["/usr/java/$jdk_version"],
+  require => Exec["tar xvf $java_tarball"],
+
 }
 
 }   
