@@ -21,18 +21,30 @@ $tomcat_hosts = hiera("tomcat_hosts")
 # assorted half-assed STIG operations
 include mmowgli_base
 
-# The default operation if the host doesn't match any nodes
-
-node 'default' {
-
-include mmowgli_java
-include mmowgli_tomcat 
-include mmowgli_mysql
-
-include mmowgli_apache
-include mmowgli_activemq
-include mmowgli_zookeeper
-
+# The front end web server
+node 'mmowgli' {
+  include mmowgli_java
+  include mmowgli_apache
+  include mmowgli_samba_client
 }
 
+# The mmowgliServer node includes database, activemq, samba, zookeeper, and any other
+# centralized services.
+node 'mmowgliServer' {
+  include mmowgli_java
+  include mmowgli_mysql
+  include mmowgli_activemq
+  include mmowgli_zookeeper
+  include mmowgli_samba_server
+  include mmowgli_samba_client
+}
+
+# Runs a tomcat instance. You can add more tomcat instances as needed.
+# You should modify the tomcat_hosts variable in hiera if you do.
+
+node 'tomcat1' {
+  include mmowgli_java
+  include mmowgli_tomcat
+  include mmowgli_samba_client
+}
 
