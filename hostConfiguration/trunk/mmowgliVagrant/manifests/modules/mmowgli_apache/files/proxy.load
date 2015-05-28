@@ -1,0 +1,4 @@
+# Configured from puppet. Load the ajp proxy modules
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_ajp_module modules/mod_proxy_ajp.so
+LoadModule proxy_balancer_module modules/mod_proxy_balancer.so
