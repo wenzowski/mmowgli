@@ -37,6 +37,11 @@ node 'mmowgliServer' {
   include mmowgli_zookeeper
   include mmowgli_samba_server
   include mmowgli_samba_client
+  host{"mmowgliServer":
+    ensure => "present",
+    comment => "MMOWGLI database server",
+    ip => $ipaddress,
+   } 
 }
 
 # Runs a tomcat instance. You can add more tomcat instances as needed.
@@ -46,5 +51,10 @@ node 'tomcat1' {
   include mmowgli_java
   include mmowgli_tomcat
   include mmowgli_samba_client
+  host{"tomcat1":
+    ensure=>"present",
+    comment => "tomcat server",
+    ip => $ipaddress,
+   }
 }
 
