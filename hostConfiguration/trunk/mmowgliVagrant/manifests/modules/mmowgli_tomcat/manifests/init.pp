@@ -23,7 +23,7 @@ file {"/usr/java/apache-tomcat/.bash_profile":
   group => "tomcat",
   mode => 644,
   source => "puppet:///modules/mmowgli-tomcat/bash_profile",
-  requires => Exec["$tomcat_tarball"],
+  require => Exec["$tomcat_tarball"],
 }
 
 file {"/usr/java/$tomcat_version":
