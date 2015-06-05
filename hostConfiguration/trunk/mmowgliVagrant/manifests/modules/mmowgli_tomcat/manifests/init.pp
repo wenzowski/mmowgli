@@ -8,6 +8,23 @@ file {"/usr/java/apache-tomcat":
   target=> "$tomcat_version",
 }
 
+# Lucene (indexing) tmp directory
+file {"/tmp/mmowgliLucene":
+  ensure => "directory",
+  owner => "tomcat",
+  group => "tomcat",
+  mode => 775,
+}
+
+# We need this around to set environment variables
+file {"/usr/java/apache-tomcat/.bash_profile":
+  ensure => present,
+  owner => "tomcat",
+  group => "tomcat",
+  mode => 644,
+  source => "puppet:///modules/mmowgli-tomcat/bash_profile,
+}
+
 file {"/usr/java/$tomcat_version":
   recurse => true,
   group   => "tomcat",
@@ -16,9 +33,10 @@ file {"/usr/java/$tomcat_version":
 
 user { "tomcat":
    name => "tomcat",
+   home => "/usr/java/apache-tomcat",
    ensure => "present",
    comment => "Tomcat User",
-   shell => "/sbin/nologin",
+   shell => "/bin/bash",
 }
 
 # sysv style init.d script. Still works on systemd hosts, should migrate
