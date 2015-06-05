@@ -47,7 +47,6 @@ exec { "$activemq_tarball":
     logoutput => on_failure,
     path => "/usr/bin:/bin",
     before => Service["activemq"],
-    require => Group["activemq"],
   }
 
 
