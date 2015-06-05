@@ -19,7 +19,7 @@ $smb_server_password = hiera("smb_server_password")
 $mmowgli_user_password = hiera("mmowgli_user_password")
 $mmowgli_samba_password = hiera("mmowgli_samba_password")
 $mmowgli_database_root_password = hiera("mmowgli_database_root_password")
-$mmowgli_database_application_password = hiera("mmowgli_database_application_password)
+$mmowgli_database_application_password = hiera("mmowgli_database_application_password")
 
 
 # operations done on all hosts
