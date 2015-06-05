@@ -3,6 +3,13 @@
 # hiera correctly. There's all sorts of hack and slash herp
 # and derp here.
 
+# baseline yum packages
+base_packages :
+       - cifs-utils
+       - samba-client
+       - fail2ban
+       - clamav
+
 # NTP server lists
 local_ntp_server_list :
                    - time.nps.edu
@@ -18,6 +25,7 @@ zookeeper_tarball: /vagrant/InstallFiles/zookeeper-3.4.6.tar.gz
 zookeeper_version : zookeeper-3.4.6
 tomcat_tarball : /vagrant/InstallFiles/apache-tomcat-7.0.61.tar.gz
 tomcat_version : apache-tomcat-7.0.61
+smb_server_password: mmowgli
 
 
 # Java melody password--should be needed only on tomcats
@@ -37,5 +45,6 @@ tomcat_hosts:
 # password for smb server
 smb_server_password : mmowgli
 
-# Password for mmowgli user
-mmowgli_user_password : mmowgli
+# Password for mmowgli user. Encrypted form of "mmowgli" in /etc/shadow.
+mmowgli_user_password : $1$pKNcldMQ$GyjEaRcjE7mWgYlbWbaj11
+mmowgli_samba_password: mmowgli
