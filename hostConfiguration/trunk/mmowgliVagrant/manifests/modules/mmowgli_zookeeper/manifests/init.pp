@@ -20,6 +20,13 @@ file {"/etc/init.d/zookeeper":
   before => Service["zookeeper"],
 }
 
+# Open data port for zookeeper
+firewall {"110 apache zookeeper leader election data port":
+  port => "2181",
+  proto => "tcp",
+  action => "accept",
+ }
+
 file {"/usr/java/$zookeeper_version/conf/zoo.cfg":
   ensure => present,
   owner => "zookeeper",
