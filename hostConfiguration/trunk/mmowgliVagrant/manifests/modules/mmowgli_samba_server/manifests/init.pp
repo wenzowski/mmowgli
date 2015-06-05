@@ -49,8 +49,6 @@ class {"::samba::server":
 # This sets the smb password in /var. It uses tdb (trivial database) format
 # file format. 
 
-notify{"^^^^^^^^^^^^maybe doing samba password ${mmowgli_user_password}":}
-
 exec{ "mmowgliSambaUser":
   command=>"/bin/echo -ne '${mmowgli_samba_password}\n${mmowgli_samba_password}\n' | /usr/bin/smbpasswd -a -s mmowgli",
   path=> "/bin:/usr/bin",
