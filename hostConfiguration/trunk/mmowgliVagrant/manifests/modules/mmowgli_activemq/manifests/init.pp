@@ -3,6 +3,7 @@ class mmowgli_activemq  {
 # ensure activemq user present
 user { "activemq":
   name => "activemq",
+  group => "activemq",
   ensure => present,
   shell => "/sbin/nologin", 
 }
@@ -34,6 +35,7 @@ service {"activemq":
   name => "activemq",
   ensure => running,
   enable => true,
+  require =>Exec["untarJdk"],
   
 }
 
@@ -45,7 +47,8 @@ exec { "$activemq_tarball":
     creates => "/usr/java/$activemq_version",
     logoutput => on_failure,
     path => "/usr/bin:/bin",
-    before => Service["activemq"]
+    before => Service["activemq"],
+    require => Group["activemq"],
   }
 
 
