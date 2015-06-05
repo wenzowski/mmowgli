@@ -8,6 +8,9 @@ class mmowgli_base {
 include epel
 include rpmforge
 
+# Firewall set to a semi-plausible initial state. 
+include stig_firewall
+
 # Antivirus
 include stig_clamav
 
@@ -36,6 +39,7 @@ class { '::ntp':
   servers => [ $local_ntp_server_list ],
 }
 
+
 # mmowgli user, for shared filesystem. Should be present on all hosts,
 # including front end (readonly-mounted samba dir), tomcats, and server.
 # The uid should be the same on all the hosts.
@@ -46,6 +50,8 @@ user { "mmowgli":
   password => "$mmowgli_user_password",
   groups => "mmowgli",
   shell => "/bin/bash",
+  home => "/home/mmowgli",
+  managehome => true,
   uid => 1004,
 }
 
