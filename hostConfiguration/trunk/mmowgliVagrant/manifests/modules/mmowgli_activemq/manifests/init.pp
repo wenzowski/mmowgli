@@ -34,6 +34,7 @@ service {"activemq":
   name => "activemq",
   ensure => running,
   enable => true,
+  
 }
 
 
