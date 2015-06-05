@@ -13,6 +13,22 @@ file {"/etc/init.d/activemq":
   before => Service["activemq"],
 }
 
+# ensure firewall is open for activemq. 61616 is the data port,
+# and 8161 is the management port. The management port should
+# be shut down if this is public facing.
+firewall{'101 activemq data port':
+  port => '61616',
+  proto => 'tcp',
+  action => accept,
+}
+
+firewall{'102 activemq management port':
+  port => '8161',
+  proto => 'tcp',
+  action => accept,
+}
+
+
 # ensure activemq is running
 service {"activemq":
   name => "activemq",
