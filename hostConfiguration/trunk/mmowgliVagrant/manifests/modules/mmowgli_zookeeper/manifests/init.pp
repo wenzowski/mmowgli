@@ -5,6 +5,7 @@ class mmowgli_zookeeper {
 # ensure activemq user present
 user { "zookeeper":
   name => "zookeeper",
+  group => "zookeeper",
   ensure => present,
   shell => "/sbin/nologin",
 }
@@ -53,6 +54,7 @@ file{"/usr/java/zookeeper":
 # Service for zookeeper
 service{ "zookeeper":
   ensure => running,
+  require => Exec["untarJdk"],
 }
 
 # unpack the tarball if not present
