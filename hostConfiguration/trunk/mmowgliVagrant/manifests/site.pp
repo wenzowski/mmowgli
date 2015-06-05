@@ -15,6 +15,9 @@ $tomcat_tarball = hiera("tomcat_tarball")
 $tomcat_version = hiera("tomcat_version")
 $java_melody_password = hiera("java_melody_password")
 $tomcat_hosts = hiera("tomcat_hosts")
+$smb_server_password = hiera("smb_server_password")
+$mmowgli_user_password = hiera("mmowgli_user_password")
+$mmowgli_samba_password = hiera("mmowgli_samba_password")
 
 # operations done on all hosts
 
@@ -35,8 +38,8 @@ node 'mmowgliServer' {
   include mmowgli_mysql
   include mmowgli_activemq
   include mmowgli_zookeeper
-  include mmowgli_samba_server
   include mmowgli_samba_client
+  include mmowgli_samba_server
   host{"mmowgliServer":
     ensure => "present",
     comment => "MMOWGLI database server",

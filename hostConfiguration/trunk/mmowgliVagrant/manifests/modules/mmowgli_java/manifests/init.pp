@@ -33,11 +33,15 @@ file{ "/usr/java/latest":
 #  require => File["/usr/java"],
 #}
 
-# unpack the java jdk tarball
-exec { "tar xvf $java_tarball":
+# unpack the java jdk tarball. Careful, the tar command is
+# stored in several different places in different unices
+# and versions.
+
+exec { "untarJdk":
+    command => "tar xvf $java_tarball; chown -R root:root jdk*",
     cwd => "/usr/java",
     creates => "/usr/java/$jdk_version",
-    path => ["/usr/bin", "/usr/sbin"],
+    path => "/bin:/usr/bin:/usr/sbin",
     require => File["/usr/java"],
   }
 
@@ -48,13 +52,13 @@ exec { "tar xvf $java_tarball":
 file {"/usr/java/$jdk_version/jre/lib/security/local_policy.jar":
   ensure => present,
   source => 'puppet:///modules/mmowgli_java/local_policy.jar',
-  require => Exec["tar xvf $java_tarball"],
+  require => Exec["untarJdk"],
 }
 
 file {"/usr/java/$jdk_version/jre/lib/security/US_export_policy.jar":
   ensure => present,
   source => 'puppet:///modules/mmowgli_java/US_export_policy.jar',
-  require => Exec["tar xvf $java_tarball"],
+  require => Exec["untarJdk"],
 
 }
 
