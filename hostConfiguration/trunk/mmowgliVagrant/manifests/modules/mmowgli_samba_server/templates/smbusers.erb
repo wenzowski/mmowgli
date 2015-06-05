@@ -1,0 +1,11 @@
+# Unix_name = SMB_name1 SMB_name2 ...
+# This file is maintained by puppet, and any manual changes
+# may be wiped out in the next puppet run. Edit the puppet
+# module for mmowlgi_samba_server.
+#
+# The password for samba/smb/cifs is actually saved over in
+# /var in the smbpasswd.tdb file. To set it, as root
+# run smbpasswd -u mmowgli
+
+root = administrator admin
+nobody = guest pcguest smbguest
