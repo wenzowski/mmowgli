@@ -5,7 +5,6 @@ class mmowgli_zookeeper {
 # ensure activemq user present
 user { "zookeeper":
   name => "zookeeper",
-  group => "zookeeper",
   ensure => present,
   shell => "/sbin/nologin",
 }
