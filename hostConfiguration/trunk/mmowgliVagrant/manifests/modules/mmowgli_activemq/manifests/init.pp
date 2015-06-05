@@ -3,7 +3,6 @@ class mmowgli_activemq  {
 # ensure activemq user present
 user { "activemq":
   name => "activemq",
-  group => "activemq",
   ensure => present,
   shell => "/sbin/nologin", 
 }
