@@ -29,7 +29,7 @@ smb_server_password: mmowgli
 
 # mysql/mariadb database passwords
 mmowgli_database_root_password: mmowgli
-mmowgli_database_application_password: mmowgli
+mmowgli_database_application_password: gwtservelet
 
 # Java melody password--should be needed only on tomcats
 java_melody_password : javaMelodyPassword
