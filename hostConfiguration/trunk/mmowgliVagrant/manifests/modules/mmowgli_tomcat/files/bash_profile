@@ -1,0 +1,7 @@
+# Bash profile, used to set environment variables on login (or su)
+if [ -f ~/.bashrc ]; then
+      . ~/.bashrc
+fi 
+
+export JAVA_HOME=/usr/java/default
+export PATH=${JAVA_HOME}/bin:$PATH
