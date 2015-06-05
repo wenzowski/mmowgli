@@ -33,7 +33,8 @@
 # Application
 APP_NAME="ActiveMQ"
 APP_LONG_NAME="ActiveMQ Broker"
-ACTIVEMQ_HOME="/usr/java/apache-activemq-5.11.1"
+export ACTIVEMQ_HOME="/usr/java/apache-activemq-5.11.1"
+export JAVA_HOME="/usr/java/default"
 
 # Wrapper
 WRAPPER_CMD="/usr/java/apache-activemq-5.11.1/bin/linux-x86-64/wrapper"
