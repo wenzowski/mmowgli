@@ -57,19 +57,19 @@ file { "/usr/java/apache-tomcat/conf/server.xml":
   content => template("mmowgli_tomcat/server.xml.erb"),
   group => "tomcat",
   owner => "tomcat",
-  mode => "0665",
+  mode => "0664",
   require => Exec["$tomcat_tarball"],
 }
 
 # Sets placeholder password for java melody
-file { "/usr/java/apache-tomcat/conf/tomcat-users.xml":
-  ensure => "present",
-  content => template("mmowgli_tomcat/tomcat-users.xml.erb"),
-  group => "tomcat",
-  owner => "tomcat",
-  mode => "0665",
-  require => Exec["$tomcat_tarball"],
-}
+#file { "/usr/java/apache-tomcat/conf/tomcat-users.xml":
+#  ensure => "present",
+#  content => template("mmowgli_tomcat/tomcat-users.xml.erb"),
+#  group => "tomcat",
+#  owner => "tomcat",
+#  mode => "0665",
+#  require => Exec["$tomcat_tarball"],
+#}
 
 
 # SysV-style service. Works on RHEL7 boxes, which are dual systemd/SysV.
@@ -84,7 +84,7 @@ service {"tomcat":
 
 # unpack the tarball if not present
 exec { "$tomcat_tarball":
-    command => "tar xzf $tomcat_tarball -C /usr/java",
+    command => "tar xzf $tomcat_tarball",
     cwd => "/usr/java",
     creates => "/usr/java/$tomcat_version",
     logoutput => on_failure,
