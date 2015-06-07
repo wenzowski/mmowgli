@@ -17,12 +17,12 @@ file {"/tmp/mmowgliLucene":
 }
 
 # We need this around to set environment variables
-file {"/usr/java/apache-tomcat/.bash_profile":
+file {"/usr/java/$tomcat_version/.bash_profile":
   ensure => present,
   owner => "tomcat",
   group => "tomcat",
   mode => 644,
-  source => "puppet:///modules/mmowgli-tomcat/bash_profile",
+  source => "puppet:///modules/mmowgli_tomcat/bash_profile",
   require => Exec["$tomcat_tarball"],
 }
 
@@ -84,7 +84,7 @@ service {"tomcat":
 
 # unpack the tarball if not present
 exec { "$tomcat_tarball":
-    command => "tar xvzf $tomcat_tarball -C /usr/java",
+    command => "tar xzf $tomcat_tarball -C /usr/java",
     cwd => "/usr/java",
     creates => "/usr/java/$tomcat_version",
     logoutput => on_failure,

@@ -38,7 +38,7 @@ file{ "/usr/java/latest":
 # and versions.
 
 exec { "untarJdk":
-    command => "tar xvf $java_tarball; chown -R root:root jdk*",
+    command => "tar xf $java_tarball; chown -R root:root jdk*",
     cwd => "/usr/java",
     creates => "/usr/java/$jdk_version",
     path => "/bin:/usr/bin:/usr/sbin",
