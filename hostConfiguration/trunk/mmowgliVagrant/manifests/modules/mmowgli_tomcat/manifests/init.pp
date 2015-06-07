@@ -62,14 +62,14 @@ file { "/usr/java/apache-tomcat/conf/server.xml":
 }
 
 # Sets placeholder password for java melody
-#file { "/usr/java/apache-tomcat/conf/tomcat-users.xml":
-#  ensure => "present",
-#  content => template("mmowgli_tomcat/tomcat-users.xml.erb"),
-#  group => "tomcat",
-#  owner => "tomcat",
-#  mode => "0665",
-#  require => Exec["$tomcat_tarball"],
-#}
+file { "/usr/java/apache-tomcat/conf/tomcat-users.xml":
+  ensure => "present",
+  content => template("mmowgli_tomcat/tomcat-users.xml.erb"),
+  group => "tomcat",
+  owner => "tomcat",
+  mode => "0665",
+  require => Exec["$tomcat_tarball"],
+}
 
 
 # SysV-style service. Works on RHEL7 boxes, which are dual systemd/SysV.
@@ -78,7 +78,7 @@ service {"tomcat":
    provider => "redhat",
    ensure => running,
    enable => true,
-   require => File['/etc/init.d/tomcat'],
+   require => [File['/etc/init.d/tomcat'],Exec["$tomcat_tarball"]],
 }
 
 

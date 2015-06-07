@@ -56,6 +56,7 @@ node 'mmowgliServer' {
 node 'tomcat1' {
   include mmowgli_java
   include mmowgli_tomcat
+  include mmowgli_war
   include mmowgli_samba_client
   host{"tomcat1":
     ensure=>"present",

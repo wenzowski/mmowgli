@@ -24,19 +24,19 @@ Vagrant.configure(2) do |config|
 
   # database, zookeeper, JMS server
 
-  config.vm.define "mmowgliServer" do |mmowgliServer|
-    mmowgliServer.vm.box = "puppetlabs/centos-6.6-64-puppet"
-    mmowgliServer.vm.hostname = "mmowgliServer"
-  end
+#  config.vm.define "mmowgliServer" do |mmowgliServer|
+#    mmowgliServer.vm.box = "puppetlabs/centos-6.6-64-puppet"
+#    mmowgliServer.vm.hostname = "mmowgliServer"
+#  end
 
   # one of N tomcat servers that can be loadbalanced across. 
   # Add the list of tomcat servers to the tomcats list in
   # hiera.
 
-#  config.vm.define "tomcat1" do |tomcat1|
-#    tomcat1.vm.box = "puppetlabs/centos-6.6-64-puppet"
-#    tomcat1.vm.hostname = "tomcat1"
-#  end
+  config.vm.define "tomcat1" do |tomcat1|
+    tomcat1.vm.box = "puppetlabs/centos-6.6-64-puppet"
+    tomcat1.vm.hostname = "tomcat1"
+  end
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
