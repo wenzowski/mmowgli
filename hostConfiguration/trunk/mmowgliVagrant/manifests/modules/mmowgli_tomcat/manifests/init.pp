@@ -51,6 +51,14 @@ file { "/etc/init.d/tomcat":
    mode =>  "755",
 }
 
+# Opens AJP port for load balancing from the front end
+firewall("130 AJP port for tomcat":
+{
+ port => "8009",
+  proto => "tcp",
+  action => "accept",
+ }
+
 # Sets the jvmroute for AJP
 file { "/usr/java/apache-tomcat/conf/server.xml":
   ensure => "present",

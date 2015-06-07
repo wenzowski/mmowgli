@@ -20,6 +20,43 @@ file{"/exports":
   mode => 755,
 }
 
+# Firewall ports for the samba server
+firewall {"201 samba port":
+  port => "135",
+  proto => "tcp",
+  action => "accept",
+ }
+
+# Firewall ports for the samba server
+firewall {"202 samba port":
+  port => "139",
+  proto => "tcp",
+  action => "accept",
+ }
+
+# Firewall ports for the samba server
+firewall {"203 samba port":
+  port => "145",
+  proto => "tcp",
+  action => "accept",
+ }
+
+# Firewall ports for the samba server
+firewall {"204 samba port":
+  port => "137",
+  proto => "udp",
+  action => "accept",
+ }
+
+# Firewall ports for the samba server
+firewall {"201 samba port":
+  port => "138",
+  proto => "udp",
+  action => "accept",
+ }
+
+
+
 # the mmowlgi shared filesystem directory
 file{"/exports/mmowgli":
   ensure => "directory",
