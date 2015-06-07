@@ -58,7 +58,7 @@ service{ "zookeeper":
 
 # unpack the tarball if not present
 exec { "zookeeper_tarball":
-    command => "tar xvzf $zookeeper_tarball -C /usr/java",
+    command => "tar xzf $zookeeper_tarball -C /usr/java",
     cwd => "/usr/java",
     creates => "/usr/java/$zookeeper_version",
     logoutput => on_failure,
