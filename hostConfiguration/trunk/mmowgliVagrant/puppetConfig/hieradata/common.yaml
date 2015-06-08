@@ -3,14 +3,17 @@
 # hiera correctly. There's all sorts of hack and slash herp
 # and derp here.
 
-# baseline yum packages
+# baseline yum packages, should be present on all
 base_packages :
        - cifs-utils
        - samba-client
        - fail2ban
        - clamav
 
-# NTP server lists
+# NTP server lists. These should be changed depending on the site
+# NTP settings; very often the enterprise firewalls will block 
+# access to generic NTP servers like pool.ntp.org
+
 local_ntp_server_list :
                    - time.nps.edu
                    - pool.ntp.org
@@ -19,22 +22,8 @@ local_ntp_server_list :
 # Java versions and locations of tarballs
 jdk_version : jdk1.8.0_45
 java_tarball : /vagrant/InstallFiles/jdk-8u45-linux-x64.tar.gz
-activemq_tarball : /vagrant/InstallFiles/apache-activemq-5.11.1-bin.tar.gz
-activemq_version : apache-activemq-5.11.1
-zookeeper_tarball: /vagrant/InstallFiles/zookeeper-3.4.6.tar.gz
-zookeeper_version : zookeeper-3.4.6
-tomcat_tarball : /vagrant/InstallFiles/apache-tomcat-7.0.61.tar.gz
-tomcat_version : apache-tomcat-7.0.61
+
 smb_server_password: mmowgli
-
-# mysql/mariadb database passwords
-mmowgli_database_root_password: mmowgli
-mmowgli_database_application_password: gwtservelet
-
-# Java melody password--should be needed only on tomcats
-java_melody_password : javaMelodyPassword
-
-
 
 # This is bad, wrong, and stupid. A list of the tomcat servers,
 # so we can build up a load balancing pool in apache. This should

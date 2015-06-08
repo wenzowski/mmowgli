@@ -1,0 +1,9 @@
+# Settings specific to tomcat1 (or tomcats generally, need
+# to figure that out.) 
+
+tomcat_tarball : /vagrant/InstallFiles/apache-tomcat-7.0.61.tar.gz
+tomcat_version : apache-tomcat-7.0.61
+
+# Java melody password--should be needed only on tomcats
+java_melody_password : javaMelodyPassword
+

@@ -1,0 +1,11 @@
+# Things specific to the mmowgliServer--database, activemq, and so on.
+
+activemq_tarball : /vagrant/InstallFiles/apache-activemq-5.11.1-bin.tar.gz
+activemq_version : apache-activemq-5.11.1
+zookeeper_tarball: /vagrant/InstallFiles/zookeeper-3.4.6.tar.gz
+zookeeper_version : zookeeper-3.4.6
+
+# mysql/mariadb database passwords
+mmowgli_database_root_password: mmowgli
+mmowgli_database_application_password: gwtservelet
+
