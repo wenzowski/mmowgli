@@ -49,7 +49,7 @@ firewall {"204 samba port":
  }
 
 # Firewall ports for the samba server
-firewall {"201 samba port":
+firewall {"205 samba port":
   port => "138",
   proto => "udp",
   action => "accept",

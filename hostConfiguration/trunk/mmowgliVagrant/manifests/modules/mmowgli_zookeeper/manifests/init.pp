@@ -2,6 +2,8 @@
 
 class mmowgli_zookeeper {
 
+include mmowgli_zookeeper::params
+
 # ensure activemq user present
 user { "zookeeper":
   name => "zookeeper",
@@ -27,7 +29,7 @@ firewall {"110 apache zookeeper leader election data port":
   action => "accept",
  }
 
-file {"/usr/java/$zookeeper_version/conf/zoo.cfg":
+file {"/usr/java/${mmowgli_zookeeper::params::zookeeper_version}/conf/zoo.cfg":
   ensure => present,
   owner => "zookeeper",
   group => "zookeeper",
@@ -36,7 +38,7 @@ file {"/usr/java/$zookeeper_version/conf/zoo.cfg":
 }
 
 
-file{"/usr/java/$zookeeper_version":
+file{"/usr/java/${mmowgli_zookeeper::params::zookeeper_version}":
   owner => "zookeeper",
   group => "zookeeper",
   ensure => directory,
@@ -47,7 +49,7 @@ file{"/usr/java/$zookeeper_version":
 
 file{"/usr/java/zookeeper":
   ensure => "link",
-  target => "/usr/java/$zookeeper_version",
+  target => "/usr/java/${mmowgli_zookeeper::params::zookeeper_version}",
 }
 
 # Service for zookeeper
@@ -58,9 +60,9 @@ service{ "zookeeper":
 
 # unpack the tarball if not present
 exec { "zookeeper_tarball":
-    command => "tar xzf $zookeeper_tarball -C /usr/java",
+    command => "tar xzf ${mmowgli_zookeeper::params::zookeeper_tarball} -C /usr/java",
     cwd => "/usr/java",
-    creates => "/usr/java/$zookeeper_version",
+    creates => "/usr/java/${mmowgli_zookeeper::params::zookeeper_version}",
     logoutput => on_failure,
     path => "/usr/bin:/bin:/usr/sbin",
     before => File["/usr/java/$zookeeper_version"],

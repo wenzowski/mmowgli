@@ -8,6 +8,7 @@
 #  :datadir: /etc/puppet/hieradata
 :hierarchy:
   - "%{::clientcert}"
+  - mmowgliServer
 #  - "%{::custom_location}"
 #  - "%{::tomcat}"
   - common

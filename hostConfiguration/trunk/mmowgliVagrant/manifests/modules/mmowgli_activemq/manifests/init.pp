@@ -1,5 +1,7 @@
 class mmowgli_activemq  {
 
+include mmowgli_activemq::params
+
 # ensure activemq user present
 user { "activemq":
   name => "activemq",
@@ -40,10 +42,10 @@ service {"activemq":
 
 
 # unpack the tarball if not present
-exec { "$activemq_tarball":
-    command => "tar xvzf $activemq_tarball -C /usr/java",
+exec { "${mmowgli_activemq::params::activemq_tarball}":
+    command => "tar xvzf ${mmowgli_activemq::params::activemq_tarball} -C /usr/java",
     cwd => "/usr/java",
-    creates => "/usr/java/$activemq_version",
+    creates => "/usr/java/${mmowgli_activemq::params::activemq_version}",
     logoutput => on_failure,
     path => "/usr/bin:/bin",
     before => Service["activemq"],

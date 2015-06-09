@@ -1,6 +1,8 @@
 
 class mmowgli_samba_client {
 
+include mmowgli_samba_client::params
+
 package {"samba-client":
   ensure => "installed",
  }
