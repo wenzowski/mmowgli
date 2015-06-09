@@ -1,8 +1,13 @@
 # Settings specific to tomcat1 (or tomcats generally, need
 # to figure that out.) 
 
+# Should handle this better; the tarball from apache
 tomcat_tarball : /vagrant/InstallFiles/apache-tomcat-7.0.61.tar.gz
 tomcat_version : apache-tomcat-7.0.61
+
+# Location of mmowgli war file and VAADIN file
+mmowgli_war : /vagrant/InstallFiles/mmowgli.war
+mmowgli_vaadin : /vagrant/InstallFiles/VAADIN.zip
 
 # Java melody password--should be needed only on tomcats
 java_melody_password : javaMelodyPassword

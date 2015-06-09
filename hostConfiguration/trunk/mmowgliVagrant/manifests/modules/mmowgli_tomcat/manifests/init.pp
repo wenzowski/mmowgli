@@ -4,7 +4,7 @@ include mmowgli_tomcat::params
 
 file {"/usr/java/apache-tomcat":
   ensure => "link",
-  target=> "$tomcat_version",
+  target=> "/usr/java/$tomcat_version",
 }
 
 # Lucene (indexing) tmp directory
@@ -22,7 +22,7 @@ file {"/usr/java/${mmowgli_tomcat::params::tomcat_version}/.bash_profile":
   group => "tomcat",
   mode => 644,
   source => "puppet:///modules/mmowgli_tomcat/bash_profile",
-  require => Exec["$tomcat_tarball"],
+  require => Exec["${mmowgli_tomcat::params::tomcat_tarball}"],
 }
 
 file {"/usr/java/${mmowgli_tomcat::params::tomcat_version}":
@@ -64,7 +64,7 @@ file { "/usr/java/apache-tomcat/conf/server.xml":
   group => "tomcat",
   owner => "tomcat",
   mode => "0664",
-  require => Exec["$tomcat_tarball"],
+  require => Exec["${mmowgli_tomcat::params::tomcat_tarball}"],
 }
 
 # Sets placeholder password for java melody
