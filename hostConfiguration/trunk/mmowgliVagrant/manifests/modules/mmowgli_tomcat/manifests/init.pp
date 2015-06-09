@@ -1,7 +1,6 @@
 class mmowgli_tomcat {
 
-# bleah, fix this somehow. Uses global variables, looked up from
-# hiera in the site.pp file. Should look them up directly here.
+include mmowgli_tomcat::params
 
 file {"/usr/java/apache-tomcat":
   ensure => "link",
@@ -17,7 +16,7 @@ file {"/tmp/mmowgliLucene":
 }
 
 # We need this around to set environment variables
-file {"/usr/java/$tomcat_version/.bash_profile":
+file {"/usr/java/${mmowgli_tomcat::params::tomcat_version}/.bash_profile":
   ensure => present,
   owner => "tomcat",
   group => "tomcat",
@@ -26,7 +25,7 @@ file {"/usr/java/$tomcat_version/.bash_profile":
   require => Exec["$tomcat_tarball"],
 }
 
-file {"/usr/java/$tomcat_version":
+file {"/usr/java/${mmowgli_tomcat::params::tomcat_version}":
   recurse => true,
   group   => "tomcat",
   owner   => "tomcat",
@@ -48,13 +47,12 @@ file { "/etc/init.d/tomcat":
    source => "puppet:///modules/mmowgli_tomcat/tomcat_sysv_script",
    owner => "root",
    group => "root",
-   mode =>  "755",
+   mode =>  755,
 }
 
 # Opens AJP port for load balancing from the front end
-firewall("130 AJP port for tomcat":
-{
- port => "8009",
+firewall{'130 AJP port for tomcat':
+  port => "8009",
   proto => "tcp",
   action => "accept",
  }
@@ -76,7 +74,7 @@ file { "/usr/java/apache-tomcat/conf/tomcat-users.xml":
   group => "tomcat",
   owner => "tomcat",
   mode => "0665",
-  require => Exec["$tomcat_tarball"],
+  require => Exec["${mmowgli_tomcat::params::tomcat_tarball}"],
 }
 
 
@@ -86,15 +84,15 @@ service {"tomcat":
    provider => "redhat",
    ensure => running,
    enable => true,
-   require => [File['/etc/init.d/tomcat'],Exec["$tomcat_tarball"]],
+   require => [File['/etc/init.d/tomcat'],Exec["${mmowgli_tomcat::params::tomcat_tarball}"]],
 }
 
 
 # unpack the tarball if not present
-exec { "$tomcat_tarball":
-    command => "tar xzf $tomcat_tarball",
+exec { "${mmowgli_tomcat::params::tomcat_tarball}":
+    command => "tar xzf ${mmowgli_tomcat::params::tomcat_tarball}",
     cwd => "/usr/java",
-    creates => "/usr/java/$tomcat_version",
+    creates => "/usr/java/${mmowgli_tomcat::params::tomcat_version}",
     logoutput => on_failure,
     path => "/bin:/usr/sbin:/usr/bin",
   }

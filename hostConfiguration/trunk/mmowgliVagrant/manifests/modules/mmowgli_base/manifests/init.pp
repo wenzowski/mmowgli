@@ -4,6 +4,8 @@
 
 class mmowgli_base {
 
+include mmowgli_base::params
+
 # include yum repositories that should be on all boxes
 include epel
 include rpmforge
@@ -47,7 +49,7 @@ class { '::ntp':
 user { "mmowgli":
   ensure => "present",
   name => "mmowgli",
-  password => "$mmowgli_user_password",
+  password => "${mmowgli_base::params::mmowgli_user_password}",
   groups => "mmowgli",
   shell => "/bin/bash",
   home => "/home/mmowgli",

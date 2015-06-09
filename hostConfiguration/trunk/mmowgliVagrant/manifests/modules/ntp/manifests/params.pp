@@ -23,6 +23,8 @@ class ntp::params {
   $disable_auth      = false
   $broadcastclient   = false
 
+  $local_ntp_server_list = hiera("local_ntp_server_list")
+
   # Allow a list of fudge options
   $fudge             = []
 
