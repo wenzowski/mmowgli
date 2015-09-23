@@ -29,37 +29,46 @@ import org.openqa.selenium.support.ui.*;
  */
 public class GhostDriver implements Runnable
 {
-    public static final String TEST_BASE_URL = "http://test.mmowgli.nps.edu/piracy";
+    //public static final String TEST_BASE_URL = "https://mmowgli.nps.edu/training";
+    public static final String TEST_BASE_URL = "http://drudgereport.com";
     public static final int TEST_ITERATIONS = 5;
+    public final static String USER_NAME="boomstick";
+    public final static String USER_PASSWORD="ColaWarrior";
+    public final static int SCREEN_WIDTH = 1100;
+    public final static int SCREEN_HEIGHT = 1024;
     
-    protected WebDriver driver;
-    
-    protected int userNumber = 0;
-    
+    protected WebDriver driver;    
 
     public GhostDriver(String url)
-    {
+    {        
         DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setJavascriptEnabled(true);                //< not really needed: JS enabled by default
-        caps.setCapability("takesScreenshot", true);    //< yeah, GhostDriver haz screenshotz!
+        long rand = Math.round(Math.random() * 10000.0);
+        String cookiesFile = "/tmp/cookieFile_" + rand;
+        String cookiesFileArg = "--cookies-file=/" + cookiesFile;
+        String[] phantomJSArgs = {"--ingore-ssl-errors=true"};
+      
+        caps.setJavascriptEnabled(true);                // not really needed: JS enabled by default
+        caps.setBrowserName("phantomjs");
+        caps.setCapability("takesScreenshot", true);    // Enable screenshots for when things go bad
         caps.setCapability(
             PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY,
-            //"./phantomjs-1.8.0-macosx/bin/phantomjs");
-            "./phantomjs-1.8.0-linux-x86_64/bin/phantomjs");
-        //caps.setCapability(PhantomJSDriverService.  .PHANTOMJS_SERVICE_ARGS_PROPERTY,"--ignore-ssl-errors=yes" );
-        
+            "./phantomjs-2.0.0-macosx/bin/phantomjs");
+            //"./phantomjs-1.9.8-linux-x86_64/bin/phantomjs");
+        caps.setCapability(PhantomJSDriverService.PHANTOMJS_GHOSTDRIVER_CLI_ARGS , phantomJSArgs );
+
         driver = new PhantomJSDriver(caps);
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+        
+        // Delete any existing cookies
+        driver.manage().deleteAllCookies();
         
       
+        System.out.println("Setting virtual window size");
         // If the viewport isn't big enough, off-viewport elements will 
         // be reported as not displayed and you will therefore be unable
         // to interact with them.
-        Dimension windowSize = new Dimension(1100, 1024);
+        Dimension windowSize = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
         driver.manage().window().setSize(windowSize);
-        
-        driver.get(url);
-        
     }
     
   public ExpectedCondition<WebElement> visibilityOfElementLocated(final By locator) 
@@ -166,12 +175,10 @@ public class GhostDriver implements Runnable
   public void takeScreenshot(String message)
   {
       File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-    //System.out.println(scrFile.getAbsolutePath());
 
     try
     {
         File screenshot = File.createTempFile("scr_" + message, "");
-        //File screenshot = new File("/home/mcgredo/scr_" + (int)(Math.random() * 10000));
         Files.copy(scrFile, screenshot);
         System.out.println("************* Screenshot: " + screenshot.getAbsolutePath());
     }
@@ -510,23 +517,70 @@ public class GhostDriver implements Runnable
         //driver.quit();
     }
     
-    public void login(int userNumber)
+    public void login()
     {
         driver.get(TEST_BASE_URL);
-        this.sleep(5);
+        this.sleep(40);
        
         String s = driver.getPageSource();
-        //System.out.println(s); 
-
-        System.out.println("Logging in as test" + userNumber + " to URL " + TEST_BASE_URL);
         
-        //WebElement alreadyRegisteredButton = this.buttonWithImageText("imaplayer");
-        WebElement loginButton = driver.findElement(new By.ByClassName("loginbutton"));
-        //System.out.println(alreadyRegisteredButton);
-        loginButton.click();
-              
-         
-        Wait<WebDriver> wait = new WebDriverWait(driver, 30);
+        this.sleep(15);
+        this.takeScreenshot("initialPageload");
+         System.exit(0);
+        System.out.println("Logging in as " + GhostDriver.USER_NAME + " to URL " + TEST_BASE_URL);       
+
+       // Click on the im registered button
+        try
+        {   
+            System.out.println("Preparing to click login button");
+            WebElement loginButton = driver.findElement(By.xpath("//button[contains(@class, 'loginbutton')]"));
+            //WebElement loginButton = driver.findElement(By.xpath("//button[contains(@class, 'asda asdfasdfas')]"));
+            
+            WebElement img = loginButton.findElement(By.xpath("//img"));
+            
+            
+            
+            System.out.println("Button to click, " + loginButton.getAttribute("src") + " login button class:" + loginButton.getClass());
+            System.out.println(loginButton.getLocation());
+            System.out.println("size:" + loginButton.getSize());
+            System.out.println(loginButton.toString());
+            System.out.println("isEnabled:" + loginButton.isEnabled());
+            loginButton.click();
+            System.out.println("Clicked button");
+            this.takeScreenshot("AfterButtonclick");
+            System.out.println(driver.getPageSource());
+        }
+        catch(Exception e)
+        {
+            System.out.println("----->Can't find element");
+            System.out.println(e);
+            System.exit(0);
+        }
+        
+        System.exit(0);
+        /*
+        
+        
+        
+        
+        Wait<WebDriver> wait = new WebDriverWait(driver, 60);
+        this.sleep(30);
+        driver.manage().timeouts().pageLoadTimeout(60l, TimeUnit.SECONDS);
+        
+        s = driver.getPageSource();
+        System.out.println("========");
+        //System.out.println(s); 
+        System.out.println("========");
+
+        
+        
+        
+        System.out.println("=====after login button clicked");
+        
+        this.sleep(30);
+        
+        this.takeScreenshot("loginButtonClicked");
+        
         WebElement e1= wait.until(visibilityOfElementLocated(new By.ByClassName("m-dialog-textfield")));
         wait.until(visibilityOfElementLocated(new By.ByClassName("v-nativebutton-borderless")));
        
@@ -540,8 +594,8 @@ public class GhostDriver implements Runnable
         //WebElement pwField = driver.findElement(new By.ById("user_password_textbox"));
         
        
-        userNameField.sendKeys(new String("test" + userNumber));
-        pwField.sendKeys(new String("test"));
+        userNameField.sendKeys(new String("boomstick"));
+        pwField.sendKeys(new String("ColaWarrior"));
         
         //this.takeScreenshot("afterLoginCredTyped");
         
@@ -552,19 +606,20 @@ public class GhostDriver implements Runnable
         System.out.println("Logged on");
         
          WebElement e2= wait.until(visibilityOfElementLocated(new By.ByClassName("m-playIdeaButton")));
-
+*/
     }
     
     public void runTests()
     {
-        this.login(userNumber);
+        this.login();
+        
         for(int idx = 0; idx < TEST_ITERATIONS; idx++)
             {
                 System.out.println("runTests iteration " + idx);
                 int randomSleepTime = (int)Math.random() * 20;
                 
-                this.actionPlanInteraction();
-                this.sleep(randomSleepTime);
+                //this.actionPlanInteraction();
+                //this.sleep(randomSleepTime);
                 
                 this.lookAtCards();
                 this.sleep(randomSleepTime);
@@ -575,7 +630,7 @@ public class GhostDriver implements Runnable
                 // every nTh iteration play a card
                 if((idx % 5) == 0)
                 {
-                    this.playACard();
+                    //this.playACard();
                 }
                 
             }
@@ -593,46 +648,23 @@ public class GhostDriver implements Runnable
      * @param args the command line arguments
      */
     public static void main(String[] args)
-    {
-        int userNumber = 1;
-        
-        if(args.length > 0)
-        {
-            userNumber = Integer.parseInt(args[0]);
-            System.out.println("Number of concurrent users:" + userNumber);
-        }
-        
-        Thread[] threads = new Thread[userNumber];
-        for(int idx = 0; idx < userNumber; idx++)
-        {
-            GhostDriver ghostDriver = new GhostDriver(TEST_BASE_URL);
-            ghostDriver.userNumber = idx;
-            //ghostDriver.login(idx);
-            
-            Thread aThread = new Thread(ghostDriver);
-            aThread.setDaemon(false);
-            threads[idx] = aThread;
-            aThread.start();
-        }
+    {        
+      
+        System.out.println("Starting test thread for " + TEST_BASE_URL);
+        GhostDriver ghostDriver = new GhostDriver(TEST_BASE_URL);
+
+        Thread aThread = new Thread(ghostDriver);
+        aThread.setDaemon(false);
+        aThread.start();
         
         try
-        {
-            for(int idx = 0; idx < userNumber; idx++)
-            {
-                threads[idx].join();
-            }
+        {          
+            aThread.join();
         }
         catch(Exception e)
         {
             System.out.println(e);
         }
-        /*
-        for(int idx = 0; idx < 1; idx++)
-        {
-            System.out.println("Look at card iteration " + idx);
-            ghostDriver.lookAtCards();
-        }
-        * */
        
         
         System.exit(0);
