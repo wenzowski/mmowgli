@@ -1,0 +1,92 @@
+## Ansible file for configuring the mmowgli file server, database server, etc.
+## There should be one of these.
+---
+- hosts: mmowgliServer
+  sudo: true
+  remote_user: vagrant
+  
+  vars:
+      GAME_NAME: mmowgli
+      JDK_URL: http://download.oracle.com/otn-pub/java/jdk/8u65-b17/jdk-8u65-linux-x64.tar.gz
+      JDK_VERSION: jdk1.8.0_65
+      JCE_URL: http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip
+      ZOOKEEPER_URL: http://apache.mirrorcatalogs.com/zookeeper/zookeeper-3.4.7/zookeeper-3.4.7.tar.gz
+      ZOOKEEPER_VERSION: zookeeper-3.4.7
+      ZOOKEEPER_PORT: 2181
+      ZOOKEEPER_UID: 510
+      ZOOKEEPER_GUID: 510
+      
+      
+  tasks:
+      
+    - name: debug
+      debug: msg="Hello world"
+
+    - name: get jdk
+      command: "wget --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' {{ JDK_URL }} -O /tmp/jdk1.8.tar.gz"
+
+    - name: install JDK
+      unarchive: src=/tmp/jdk1.8.tar.gz dest=/usr/java copy=no
+
+    - name: symlinks for jdk
+      file: state=link src=/usr/java/{{ JDK_VERSION }} dest=/usr/java/default
+
+    - name: symlinks for jdk
+      file: state=link src=/usr/java/{{ JDK_VERSION }} dest=/usr/java/latest
+
+    - name: get java cryptography extensions
+      command: "wget --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' {{ JCE_URL }} -O /tmp/jce.zip"
+
+    - name: create dir to hold jce
+      file: state=directory dest=/tmp/jce
+
+    - name: unzip java cryptography extensions
+      unarchive: copy=no src=/tmp/jce.zip dest=/tmp/jce
+
+    - name: Copy jce jar files to destination
+      command: cp /tmp/jce/UnlimitedJCEPolicyJDK8/local_policy.jar /usr/java/default/jre/lib/security/local_policy.jar
+
+    - name: copy jce jar file to destination
+      command: cp /tmp/jce/UnlimitedJCEPolicyJDK8/US_export_policy.jar /usr/java/default/jre/lib/security/US_export_policy.jar
+
+    - name: set permissions on java directory
+      file: path=/usr/java/{{ JDK_VERSION }} owner=root group=root state=directory recurse=yes
+    
+    # Tomcat should have a consistent uid and gid across all hosts for the shared filesystem
+    - name: create zookeepr group
+      group: state=present name=zookeeper gid={{ ZOOKEEPER_GUID }}
+
+    - name: create zookeeper user
+      user: name=zookeeper comment="Zookeeper user" createhome=yes state=present group=zookeeper shell=/sbin/nologin uid={{ ZOOKEEPER_UID }}
+
+    - name: ensure .bashrc present
+      copy: src=files/bashrc dest=/home/zookeeper/.bashrc owner=zookeeper group=zookeeper
+
+    - name: ensure .bash_profile present, has path for java
+      copy: src=files/bash_profile dest=/home/zookeeper/.bash_profile owner=zookeeper group=zookeeper
+      
+    - name: get zookeeper
+      command: "wget http://apache.mirrorcatalogs.com/zookeeper/zookeeper-3.4.7/zookeeper-3.4.7.tar.gz -O /tmp/zookeeper.tar.gz"
+    
+    - name: unarchive zookeeper
+      unarchive: copy=no src=/tmp/zookeeper.tar.gz dest=/usr/java
+      
+    - name: copy zookeeper init.d file
+      template: src=templates/zookeeper.jn2 dest=/etc/init.d/zookeeper
+      
+    - name: zookeeper init file permisions
+      file: path=/etc/init.d/zookeeper owner=root group=root mode=755
+      
+    - name: add zookeeper init file
+      command: "/sbin/chkconfig --add zookeeper"
+    
+    - name: zookeeper config file
+      template: src=templates/zoo.cfg.jn2 dest=/usr/java/{{ ZOOKEEPER_VERSION }}/conf/zoo.cfg mode=0644
+      
+    - name: set permissions on zookeper directory
+      file: path=/usr/java/{{ ZOOKEEPER_VERSION }} owner=zookeeper group=zookeeper state=directory recurse=yes
+      
+    - name: start zookeeper
+      service: state=started name=zookeeper
+      
+    

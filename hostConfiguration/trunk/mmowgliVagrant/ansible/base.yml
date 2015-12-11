@@ -1,0 +1,48 @@
+- hosts: all
+  sudo: true
+  remote_user: vagrant
+  
+  # The variables here will be interprolated with {{VAR_NAME}} below
+  vars: 
+     GAME_NAME: mmowgli
+     EPEL_REPO_URL: http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+     EPEL_REPO_KEY_URL: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6
+
+  tasks:
+    
+    - name: whatev
+      debug: msg="in base playbook"
+      
+      
+    # Install epel and rpmforge repositories
+    
+    - name: get epel repo rpm
+      get_url: url={{ EPEL_REPO_URL }} dest=/tmp/epel.rpm
+      register: epel_repo_retrieved
+      
+    - name: install epel repo 
+      yum: 
+         name: /tmp/epel.rpm
+         state: present
+      when: epel_repo_retrieved is defined
+      
+    - name: install epel key
+      rpm_key:
+          key: "{{ EPEL_REPO_KEY_URL }}"
+          #key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6
+          state: present
+      when: epel_repo_retrieved is defined
+        
+    # Install base packages, those that should be present on all hosts
+    - name: install base yum packages
+      yum: pkg={{ item }} state=installed
+      with_items:
+          - clamav
+          - fail2ban
+          - samba
+           
+    - name: install yum updates
+      yum: name=* state=latest
+      
+    - name: Directories for landing various java-related things
+      file: path=/usr/java owner=root group=root mode=0755 state=directory

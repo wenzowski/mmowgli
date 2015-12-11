@@ -1,0 +1,17 @@
+; Simulated mmowgli hosts. The IPs are on the private network
+; This specifies the host to connect to. (odroid[n] is an ansible-only alias).
+; The IP, port, username, and private key are specified for each host.
+; 
+
+; The front-end web server. 
+[web]
+mmowgli ansible_ssh_host=10.1.100.2 ansible_ssh_port=22 ansible_ssh_user=vagrant ansible_ssh_private_key_file=/Users/mcgredo/projects/mmowgli-code/hostConfiguration/trunk/mmowgliVagrant/.vagrant/machines/mmowgli/virtualbox/private_key
+
+; The main server. Runs mysql, zookeeper, a samba file server, activemq,
+; and so on.
+[server]
+mmowgliServer ansible_ssh_host=10.1.100.3 ansible_ssh_port=22 ansible_ssh_user=vagrant ansible_ssh_private_key_file=/Users/mcgredo/projects/mmowgli-code/hostConfiguration/trunk/mmowgliVagrant/.vagrant/machines/mmowgliServer/virtualbox/private_key
+
+; One or more tomcat servers
+[tomcats] 
+tomcat1 ansible_ssh_host=10.1.100.4 ansible_ssh_port=22 ansible_ssh_user=vagrant ansible_ssh_private_key_file=/Users/mcgredo/projects/mmowgli-code/hostConfiguration/trunk/mmowgliVagrant/.vagrant/machines/tomcat1/virtualbox/private_key
