@@ -7,14 +7,17 @@
      GAME_NAME: mmowgli
      EPEL_REPO_URL: http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
      EPEL_REPO_KEY_URL: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6
-
+     REMI_REPO_URL: http://rpms.remirepo.net/enterprise/remi-release-6.rpm
+     
+     
   tasks:
     
     - name: whatev
       debug: msg="in base playbook"
       
       
-    # Install epel and rpmforge repositories
+    # Install epel and remi repositories. Remi is needed for more
+    # recent versions of mysql.
     
     - name: get epel repo rpm
       get_url: url={{ EPEL_REPO_URL }} dest=/tmp/epel.rpm
@@ -32,6 +35,12 @@
           #key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6
           state: present
       when: epel_repo_retrieved is defined
+      
+    - name: get remi repo
+      command: wget  {{ REMI_REPO_URL }} -O /tmp/remi-release-6.rpm
+      
+    - name: install remi rpm
+      command: rpm -Uvh /tmp/remi-release-6.rpm
         
     # Install base packages, those that should be present on all hosts
     - name: install base yum packages

@@ -15,6 +15,7 @@
       ZOOKEEPER_PORT: 2181
       ZOOKEEPER_UID: 510
       ZOOKEEPER_GUID: 510
+      MYSQL_PORT: 3306
       
       
   tasks:
@@ -52,7 +53,8 @@
     - name: set permissions on java directory
       file: path=/usr/java/{{ JDK_VERSION }} owner=root group=root state=directory recurse=yes
     
-    # Tomcat should have a consistent uid and gid across all hosts for the shared filesystem
+    # Install zookeeper, a piece of software that can select a lead tomcat from the tomcat
+    # cluster.
     - name: create zookeepr group
       group: state=present name=zookeeper gid={{ ZOOKEEPER_GUID }}
 
@@ -89,4 +91,19 @@
     - name: start zookeeper
       service: state=started name=zookeeper
       
+    # Install MySQL
+    - name: Install mysql
+      yum: pkg={{ item }} state=installed enablerepo=remi
+      with_items:
+          - mysql
+          - mysql-devel
+          - mysql-server
+          - mysql-libs
+          
+    - name: mysql service startup
+      service: name=mysqld state=started
+      
+    # Should lock it down with root password, etc here.
+    
+    # Install apache-mq. 
     
