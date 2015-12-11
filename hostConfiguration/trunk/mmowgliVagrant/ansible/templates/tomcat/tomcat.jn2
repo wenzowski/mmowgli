@@ -1,0 +1,70 @@
+#! /bin/bash
+#
+# Runs tomcat on the mmowgli.nps.edu server. runs on 8009 AJP.
+#
+# tomcat          Start/Stop the Tomcat Http/Servlet server.
+#
+# chkconfig: 2345 95 65
+# description: Tomcat is a java based HTTP/Servlet server
+# processname: tomcat
+# pidfile: /var/run/tomcat-test.pid
+
+# Source function library.
+. /etc/init.d/functions
+. /etc/profile
+
+RETVAL=0
+export TOMCAT_HOME=/usr/java/{{ TOMCAT_VERSION }}
+export JAVA_HOME=/usr/java/default
+export CATALINA_OPTS="-Xms1024m -Xmx2048m"
+RUN_AS_USER=tomcat
+
+# Reset log ownership
+chown ${RUN_AS_USER}. /usr/java/{{ TOMCAT_VERSION }}/logs/*
+
+# See how we were called.
+
+start() {
+        echo -n $"Starting tomcat"
+        rm -rf /tmp/mmowgliLucene/{{ GAME_NAME }}
+        su - $RUN_AS_USER -c  "$TOMCAT_HOME/bin/startup.sh"
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch  /var/lock/subsys/tomcat-training
+        return $RETVAL
+}
+
+stop() {
+        echo -n $"Stopping tomcat"
+        $TOMCAT_HOME/bin/shutdown.sh
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/tomcat
+        return $RETVAL
+}
+
+restart() {
+        stop
+        start
+}
+
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart)
+        restart
+        ;;
+  status)
+        ps ax | grep $TOMCAT_HOME
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|status|restart}"
+        exit 1
+esac
+
+exit $?
