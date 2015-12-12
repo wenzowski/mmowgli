@@ -5,16 +5,22 @@
   # The variables here will be interprolated with {{VAR_NAME}} below
   vars: 
      GAME_NAME: mmowgli
-     EPEL_REPO_URL: http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-     EPEL_REPO_KEY_URL: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6
+     EPEL_REPO_URL: https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
      REMI_REPO_URL: http://rpms.remirepo.net/enterprise/remi-release-6.rpm
+     NTP_SERVER: time.nps.edu
      
+     # Need consistent UID and GID for shared filesystem
+     MMOWGLI_USER: mmowgli
+     MMOWGLI_UID: 503
+     MMOWGLI_GUID: 503
+     # Password for mounting SMB shared directory. Better ways to handle this.
+     SMB_PASSWORD: mmowgli
      
   tasks:
     
     - name: whatev
       debug: msg="in base playbook"
-      
+
       
     # Install epel and remi repositories. Remi is needed for more
     # recent versions of mysql.
@@ -29,29 +35,86 @@
          state: present
       when: epel_repo_retrieved is defined
       
-    - name: install epel key
-      rpm_key:
-          key: "{{ EPEL_REPO_KEY_URL }}"
-          #key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6
-          state: present
-      when: epel_repo_retrieved is defined
-      
     - name: get remi repo
       command: wget  {{ REMI_REPO_URL }} -O /tmp/remi-release-6.rpm
+      register: got_remi_repo
       
     - name: install remi rpm
-      command: rpm -Uvh /tmp/remi-release-6.rpm
+      yum: name=/tmp/remi-release-6.rpm state=present
+      when: got_remi_repo is defined
         
     # Install base packages, those that should be present on all hosts
+    # ferm is a tool for managing iptables, libselinux for selinux
     - name: install base yum packages
       yum: pkg={{ item }} state=installed
       with_items:
           - clamav
           - fail2ban
           - samba
+          - samba-client
+          - samba-common
+          - ntp
+          - libselinux-python
+          - cifs-utils
+          - ferm
            
     - name: install yum updates
       yum: name=* state=latest
       
+          
+    # Fuck you, selinux
+    - name: Turn off selinux. libselinux-python package has to be installed before this.
+      selinux: state=disabled
+      
     - name: Directories for landing various java-related things
       file: path=/usr/java owner=root group=root mode=0755 state=directory
+      
+    # NTP client. All the hosts must be closely synchronized on time.
+    - name: Configure NTP client
+      template: src=templates/ntp.conf.jn2 dest=/etc/ntp.conf
+      
+    - name: start NTP client service
+      service: name=ntpd state=started
+      
+    # Ensure that a standard user is present on all hosts. This is needed for SMB shares.
+    # Should have a consistent uid and gid across all hosts for the shared filesystem
+    - name: create mmowlgi group
+      group: state=present name={{ MMOWGLI_USER }} gid={{ MMOWGLI_GUID }}
+
+    - name: create mmowgli user
+      user: name={{ MMOWGLI_USER }} comment="mmowgli user" createhome=yes state=present group={{ MMOWGLI_USER }} shell=/bin/bash uid={{ MMOWGLI_UID }} 
+
+    - name: ensure .bashrc present
+      copy: src=files/bashrc dest=/home/{{ MMOWGLI_USER }}/.bashrc owner={{ MMOWGLI_USER }} group={{ MMOWGLI_USER }}
+
+    - name: ensure .bash_profile present, has path for java
+      copy: src=files/bash_profile dest=/home/{{ MMOWGLI_USER }}/.bash_profile owner={{ MMOWGLI_USER }} group={{ MMOWGLI_USER }}
+      
+    - name: Mount point for mmowgli shared smb filesystem
+      file: path=/mmowgli/shared/images owner={{ MMOWGLI_USER }} group={{ MMOWGLI_USER }} mode=0775 state=directory
+     
+    # see http://sharknet.us/2014/01/14/automating-iptables-with-ansible for details on ferm
+    - name: Turn on iptables at boot
+      command: chkconfig iptables on
+      
+    - name: ensure iptables started
+      service: name=iptables state=started
+      
+    - name: add /etc/ferm directory
+      file: path=/etc/ferm mode=0700 state=directory
+      
+    - name: add ferm conf file (for managing iptables)
+      template: src=templates/ferm.conf.jn2 dest=/etc/ferm/ferm.conf owner=root group=root
+    
+     
+  # Handlers run once and only once when notified by a task
+  handlers:
+     
+    - name: run ferm
+      command: ferm /etc/ferm/ferm.conf
+      notify: save iptables
+
+    - name: save iptables
+      command: service iptables save
+     
+      

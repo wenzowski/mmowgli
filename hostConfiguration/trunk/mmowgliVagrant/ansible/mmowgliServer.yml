@@ -16,6 +16,22 @@
       ZOOKEEPER_UID: 510
       ZOOKEEPER_GUID: 510
       MYSQL_PORT: 3306
+      ACTIVE_MQ_URL: http://apache.cs.utah.edu/activemq/5.13.0/apache-activemq-5.13.0-bin.tar.gz
+      ACTIVE_MQ_VERSION: apache-activemq-5.13.0
+      ACTIVE_MQ_MANAGEMENT_PORT: 8161
+      ACTIVE_MQ_DATA_PORT: 61616
+      # UDP ports
+      SMB_PORT1: 137
+      SMB_PORT2: 138
+      # TCP port
+      SMB_PORT3: 139
+      
+      # There are better ways to handle passwords in ansible
+      SMB_USER: mmowgli
+      SMB_USER_PASSWORD: mmowgli
+      
+      # The directory we share with tomcats and the front-end web server
+      SMB_EXPORT_DIRECTORY: /exports/mmowgli
       
       
   tasks:
@@ -68,7 +84,7 @@
       copy: src=files/bash_profile dest=/home/zookeeper/.bash_profile owner=zookeeper group=zookeeper
       
     - name: get zookeeper
-      command: "wget http://apache.mirrorcatalogs.com/zookeeper/zookeeper-3.4.7/zookeeper-3.4.7.tar.gz -O /tmp/zookeeper.tar.gz"
+      command: "wget {{ ZOOKEEPER_URL }} -O /tmp/zookeeper.tar.gz"
     
     - name: unarchive zookeeper
       unarchive: copy=no src=/tmp/zookeeper.tar.gz dest=/usr/java
@@ -91,6 +107,13 @@
     - name: start zookeeper
       service: state=started name=zookeeper
       
+    - name: open zookeeper port through firewall
+      lineinfile: dest=/etc/ferm/ferm.conf
+              line='proto tcp dport ({{ ZOOKEEPER_PORT }}) ACCEPT;'
+              insertafter='# Ansible specified rules.'
+      notify: run ferm
+      
+      
     # Install MySQL
     - name: Install mysql
       yum: pkg={{ item }} state=installed enablerepo=remi
@@ -103,7 +126,89 @@
     - name: mysql service startup
       service: name=mysqld state=started
       
-    # Should lock it down with root password, etc here.
+    - name: open mysql port through firewall
+      lineinfile: dest=/etc/ferm/ferm.conf
+              line='proto tcp dport ({{ MYSQL_PORT }}) ACCEPT;'
+              insertafter='# Ansible specified rules.'
+      notify: run ferm
+      
+    # Should lock it down with root password, etc here, or in another configuration
+    # script.
     
     # Install apache-mq. 
     
+    - name: Retrieve apache active-mq
+      command: "wget {{ ACTIVE_MQ_URL }} -O /tmp/activemq.tar.gz"
+      
+    - name: unarchive activemq
+      unarchive: copy=no src=/tmp/activemq.tar.gz dest=/usr/java
+      
+    - name: place the init.d file
+      template: src=templates/activemq.jn2 dest=/etc/init.d/activemq owner=root group=root mode=0755
+      
+    - name: start activemq service
+      service: name=activemq state=started
+      
+    - name: open activemq data port through firewall
+      lineinfile: dest=/etc/ferm/ferm.conf
+              line='proto tcp dport ({{ ACTIVE_MQ_DATA_PORT }}) ACCEPT;'
+              insertafter='# Ansible specified rules.'
+      notify: run ferm
+      
+    - name: open activemq management port through firewall
+      lineinfile: dest=/etc/ferm/ferm.conf
+              line='proto tcp dport ({{ ACTIVE_MQ_MANAGEMENT_PORT }}) ACCEPT;'
+              insertafter='# Ansible specified rules.'
+      notify: run ferm
+      
+    # Install samba file server
+    
+    - name: ensure directory to share is present
+      file: path={{ SMB_EXPORT_DIRECTORY }} state=directory mode=0755 owner={{ SMB_USER }} group={{ SMB_USER }}
+      
+    - name: Start smb service on boot
+      command: chkconfig smb on
+      
+    - name: smb credentials file
+      template: src=templates/smb-credentials.txt.jn2 dest=/etc/smb-credentials.txt
+      
+    - name: SMB server configuration file
+      template: src=templates/smb.conf.jn2 dest=/etc/samba/smb.conf
+      
+    - name: SMB authentication database using tdbsam
+      command: "echo -ne {{ SMB_USER_PASSWORD }}\n{{ SMB_USER_PASSWORD }}) | smbpasswd -a {{ SMB_USER }}"
+    
+    - name: make fstab entry for smb
+      lineinfile: dest=/etc/fstab
+                  line="//mmowgliServer/images /mmowgli/shared/images   cifs    credentials=/etc/smb-credentials.txt,uid={{ SMB_USER }},gid={{ SMB_USER }},rw           0 0"
+    - name: start smb service
+      service: name=smb state=started
+      
+    - name: open smb port through firewall
+      lineinfile: dest=/etc/ferm/ferm.conf
+              line='proto tcp dport ({{ SMB_PORT3 }}) ACCEPT;'
+              insertafter='# Ansible specified rules.'
+      notify: run ferm
+      
+    - name: open smb udp port through firewall
+      lineinfile: dest=/etc/ferm/ferm.conf
+              line='proto udp dport {{ SMB_PORT1 }} ACCEPT;'
+              insertafter='# Ansible specified rules.'
+      notify: run ferm
+      
+    - name: open smb udp port through firewall
+      lineinfile: dest=/etc/ferm/ferm.conf
+              line='proto udp dport {{ SMB_PORT2 }} ACCEPT;'
+              insertafter='# Ansible specified rules.'
+      notify: run ferm
+      
+  # Handlers run once and only once when notified by N tasks
+  handlers:
+      
+    # see http://tjelvarolsson.com/blog/how-to-manage-firewalls-using-ferm-and-ansible/ for details on ferm
+    - name: run ferm
+      command: ferm /etc/ferm/ferm.conf
+      notify: save iptables
+
+    - name: save iptables
+      command: service iptables save

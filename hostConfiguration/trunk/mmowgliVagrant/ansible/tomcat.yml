@@ -10,8 +10,8 @@
       GAME_NAME: mmowgli
       JDK_URL: http://download.oracle.com/otn-pub/java/jdk/8u65-b17/jdk-8u65-linux-x64.tar.gz
       JDK_VERSION: jdk1.8.0_65
-      TOMCAT_URL: http://apache.mesi.com.ar/tomcat/tomcat-7/v7.0.65/bin/apache-tomcat-7.0.65.tar.gz
-      TOMCAT_VERSION: apache-tomcat-7.0.65
+      TOMCAT_URL: http://apache.mesi.com.ar/tomcat/tomcat-7/v7.0.67/bin/apache-tomcat-7.0.67.tar.gz
+      TOMCAT_VERSION: apache-tomcat-7.0.67
       JVM_ROUTE: "{{ ansible_hostname }}"
       JCE_URL: http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip
       AJP_PORT: 8009
@@ -80,8 +80,9 @@
        
       - name: set permissions on tomcat
         file: path=/usr/java/{{ TOMCAT_VERSION }} state=directory recurse=yes owner=tomcat group=tomcat
+      
       - name: install init script
-        template: src=templates/tomcat/tomcat.jn2 dest=/etc/init.d/tomcat mode=755
+        template: src=templates/tomcat/tomcat.jn2 dest=/etc/init.d/tomcat mode=755 owner=root group=root
         
       - name: make tomcat init.d script start on boot
         command: /sbin/chkconfig --add tomcat
