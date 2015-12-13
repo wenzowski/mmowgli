@@ -17,8 +17,14 @@
       AJP_PORT: 8009
       TOMCAT_UID: 501
       TOMCAT_GUID: 501
+       # There are better ways to handle passwords in ansible
+      SMB_USER: mmowgli
+      SMB_USER_PASSWORD: mmowgli
       
   tasks:
+      
+      - name: smb credentials file
+        template: src=templates/smb-credentials.txt.jn2 dest=/etc/smb-credentials.txt
       
       # Tomcat should have a consistent uid and gid across all hosts for the shared filesystem
       - name: create tomcat group

@@ -172,15 +172,17 @@
     - name: smb credentials file
       template: src=templates/smb-credentials.txt.jn2 dest=/etc/smb-credentials.txt
       
+    # The security on the smb file is weak in the interests of generality.
     - name: SMB server configuration file
       template: src=templates/smb.conf.jn2 dest=/etc/samba/smb.conf
       
     - name: SMB authentication database using tdbsam
-      command: "echo -ne {{ SMB_USER_PASSWORD }}\n{{ SMB_USER_PASSWORD }}) | smbpasswd -a {{ SMB_USER }}"
+      command: printf "{{ SMB_USER_PASSWORD }}\n{{ SMB_USER_PASSWORD }}\n" | smbpasswd -a -s {{ SMB_USER }}
     
     - name: make fstab entry for smb
       lineinfile: dest=/etc/fstab
                   line="//mmowgliServer/images /mmowgli/shared/images   cifs    credentials=/etc/smb-credentials.txt,uid={{ SMB_USER }},gid={{ SMB_USER }},rw           0 0"
+                  
     - name: start smb service
       service: name=smb state=started
       

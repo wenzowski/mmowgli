@@ -18,9 +18,17 @@
      
   tasks:
     
-    - name: whatev
-      debug: msg="in base playbook"
+    - name: host variables
+      debug: var=hostvars[inventory_hostname]
 
+    # create hosts file
+    # Idempotent way to build a /etc/hosts file with Ansible using your Ansible hosts inventory for a source.
+    # Will include all hosts the playbook is run on.
+    - name: "Build hosts file"
+      lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_all_ipv4_addresses[1] }} {{item}}" state=present
+      when: hostvars[item].ansible_default_ipv4.address is defined
+      with_items: groups['all']
+      
       
     # Install epel and remi repositories. Remi is needed for more
     # recent versions of mysql.
