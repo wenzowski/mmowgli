@@ -321,13 +321,12 @@ DocumentRoot "/var/www/html"
   # from the DMZ behind a firewall. The tomcat host must have port 8009
   # (or whatever port you configure for ajp) open in the firewall.
 
-  BalancerMember ajp://tomcat1:8009 route=tomcat1 loadfactor=10
+  {% for host in groups['tomcats'] %}
+  BalancerMember ajp://{{ host }}:8009 route={{ host }} loadfactor=10
+  {% endfor %}
 
   # Other members of the load-balancing pool here. Each must have unique route setting,
   # which is configured in the server.xml jvmRoute connector in the tomcat instance.
-
-  # BalancerMember ajp://tomcatHost1:8009/mmowgli route=mmowgli2 loadfactor=10
-  # BalancerMember ajp://tomcatHost2:8009/mmowgli route=mmowgli3 loadfactor=10
 
   ProxySet stickysession=JSESSIONID
 </Proxy>

@@ -23,6 +23,14 @@
       
   tasks:
       
+      - name: mysql client libraries
+        yum: pkg={{ item }} state=installed enablerepo=remi
+        with_items:
+          - mysql
+          - mysql-devel
+          - mysql-libs
+          - MySQL-python
+            
       - name: smb credentials file
         template: src=templates/smb-credentials.txt.jn2 dest=/etc/smb-credentials.txt
       
@@ -95,6 +103,26 @@
         
       - name: start tomcat
         service: state=started name=tomcat
+         
+      - name: open tomcat AJP port through firewall
+        lineinfile: dest=/etc/ferm/ferm.conf
+              line='proto tcp dport ({{ AJP_PORT }}) ACCEPT;'
+              insertafter='# Ansible specified rules.'
+        notify: run ferm
         
-      #- name: Open tomcat AJP port
-      #  ufw: rule=allow proto=tcp state=reloaded to_port={{ AJP_PORT }}
+      - name: mount point for smb
+        file: path=/mmowgli/shared/images state=directory mode=0755
+      
+      - name: mount shared filesystem
+        mount: name=/mmowgli/shared/images fstype=cifs src=//mmowgliServer/images state=mounted opts="rw,username={{ SMB_USER }},password={{ SMB_USER_PASSWORD }}"
+      
+      # Handlers run once and only once when notified by N tasks
+  handlers:
+      
+    # see http://tjelvarolsson.com/blog/how-to-manage-firewalls-using-ferm-and-ansible/ for details on ferm
+    - name: run ferm
+      command: ferm /etc/ferm/ferm.conf
+      notify: save iptables
+
+    - name: save iptables
+      command: service iptables save

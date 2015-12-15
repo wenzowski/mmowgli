@@ -33,12 +33,19 @@
       # The directory we share with tomcats and the front-end web server
       SMB_EXPORT_DIRECTORY: /exports/mmowgli
       
+      # Mysql passwords. MYSQL_USER and MYSQL_PASSWORD are the uname and pw
+      # used by the application to contact the database. MYSQL_ROOT_PASSWORD
+      # is the root password for mysql.
+      MYSQL_USER: mmowgli
+      MYSQL_PASSWORD: mmowgli
+      MYSQL_ROOT_PASSWORD: mmowgli
+      
+      # Email, used to receive warnings from crontab
+      SYSADMIN_EMAIL: whatever@whereever.com
+      
       
   tasks:
       
-    - name: debug
-      debug: msg="Hello world"
-
     - name: get jdk
       command: "wget --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' {{ JDK_URL }} -O /tmp/jdk1.8.tar.gz"
 
@@ -122,9 +129,37 @@
           - mysql-devel
           - mysql-server
           - mysql-libs
+          - MySQL-python
           
     - name: mysql service startup
-      service: name=mysqld state=started
+      service: name=mysqld state=started enabled=true
+     
+    # You'll probably want greater security here
+    - name: set mysql root password
+      mysql_user: name=root host={{ item }} password={{ MYSQL_ROOT_PASSWORD }} priv=*.*:ALL,GRANT
+      with_items:
+          #- "{{ ansible_hostname }}"
+          - ::1
+          - localhost
+      
+    - name: copy the .my.cnf file with root password credentials. This makes it idempotent; otherwise the above fails the second time its run
+      template: src=templates/my.cnf.jn2 dest=/root/.my.cnf owner=root mode=0600
+      
+    - name: create a mysql database for the game. Must have the same name as the game.
+      mysql_db: name={{ GAME_NAME }} login_user=root login_password={{ MYSQL_ROOT_PASSWORD }} state=present
+      
+    - name: create mmowgli application user, and grant them privs on the database
+      mysql_user: name={{ MYSQL_USER }} 
+                  host={{ item }} 
+                  password={{ MYSQL_PASSWORD }} 
+                  login_user=root 
+                  login_password={{ MYSQL_ROOT_PASSWORD }}
+                  priv={{ GAME_NAME }}.*:ALL
+                  state=present
+      with_items:
+          groups['tomcats']
+     
+ 
       
     - name: open mysql port through firewall
       lineinfile: dest=/etc/ferm/ferm.conf
@@ -168,6 +203,12 @@
       
     - name: Start smb service on boot
       command: chkconfig smb on
+ 
+    # Note that "shell" is used here instead of "command". The later has problems
+    # handling piping, metacharacters, and the other usual unix command line stuff.
+    # So this basically runs the line in bash.
+    - name: SMB authentication database using tdbsam
+      shell: "printf '{{ SMB_USER_PASSWORD }}\n{{ SMB_USER_PASSWORD }}\n' | smbpasswd -a -s {{ SMB_USER }}"
       
     - name: smb credentials file
       template: src=templates/smb-credentials.txt.jn2 dest=/etc/smb-credentials.txt
@@ -175,16 +216,21 @@
     # The security on the smb file is weak in the interests of generality.
     - name: SMB server configuration file
       template: src=templates/smb.conf.jn2 dest=/etc/samba/smb.conf
+
+    - name: mount point for smb client
+      file: path=/mmowgli/shared/images state=directory mode=0755
       
-    - name: SMB authentication database using tdbsam
-      command: printf "{{ SMB_USER_PASSWORD }}\n{{ SMB_USER_PASSWORD }}\n" | smbpasswd -a -s {{ SMB_USER }}
-    
-    - name: make fstab entry for smb
-      lineinfile: dest=/etc/fstab
-                  line="//mmowgliServer/images /mmowgli/shared/images   cifs    credentials=/etc/smb-credentials.txt,uid={{ SMB_USER }},gid={{ SMB_USER }},rw           0 0"
-                  
-    - name: start smb service
+    - name: directory for smb to export to clients
+      file: path=/exports/mmowgli/{{ GAME_NAME }} state=directory
+      
+    - name: directory for smb to export reports to clients
+      file: path=/exports/mmowgli/reports/{{ GAME_NAME }} state=directory
+     
+    - name: start SMB service
       service: name=smb state=started
+      
+    #- name: directory for reports
+    #  file: path=/exports/mmowgli/reports/{{ GAME_NAME }} state=directory
       
     - name: open smb port through firewall
       lineinfile: dest=/etc/ferm/ferm.conf
@@ -203,6 +249,9 @@
               line='proto udp dport {{ SMB_PORT2 }} ACCEPT;'
               insertafter='# Ansible specified rules.'
       notify: run ferm
+      
+    - name: mount shared filesystem
+      mount: name=/mmowgli/shared/images fstype=cifs src=//mmowgliServer/images state=mounted opts="rw,username={{ SMB_USER }},password={{ SMB_USER_PASSWORD }}"
       
   # Handlers run once and only once when notified by N tasks
   handlers:
