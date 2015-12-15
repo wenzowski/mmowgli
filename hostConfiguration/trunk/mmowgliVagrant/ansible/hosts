@@ -15,3 +15,4 @@ mmowgliServer ansible_ssh_host=10.1.100.3 ansible_ssh_port=22 ansible_ssh_user=v
 ; One or more tomcat servers
 [tomcats] 
 tomcat1 ansible_ssh_host=10.1.100.4 ansible_ssh_port=22 ansible_ssh_user=vagrant ansible_ssh_private_key_file=/Users/mcgredo/projects/mmowgli-code/hostConfiguration/trunk/mmowgliVagrant/.vagrant/machines/tomcat1/virtualbox/private_key
+tomcat2 ansible_ssh_host=10.1.100.5 ansible_ssh_port=22 ansible_ssh_user=vagrant ansible_ssh_private_key_file=/Users/mcgredo/projects/mmowgli-code/hostConfiguration/trunk/mmowgliVagrant/.vagrant/machines/tomcat2/virtualbox/private_key

@@ -1,0 +1,72 @@
+## YAML Template.
+---
+- hosts: mmowgli
+  sudo: true
+  remote_user: vagrant
+  
+  vars:
+      GAME_NAME: mmowgli
+       # There are better ways to handle passwords in ansible
+      SMB_USER: mmowgli
+      SMB_USER_PASSWORD: mmowgli
+      
+      HTTP_PORT: 80
+      HTTPS_PORT: 443
+      
+      
+  tasks:
+    
+    - name: install web server packages
+      yum: pkg={{ item }} state=installed
+      with_items:
+          - httpd
+          - httpd-devel
+          - mod_ssl
+    
+    - name: install httpd.conf file
+      template: src=templates/httpd/httpd.conf.jn2 dest=/etc/httpd/conf/httpd.conf mode=0644 owner=root group=root
+      notify: reload httpd
+      
+    - name: open http port through firewall
+      lineinfile: dest=/etc/ferm/ferm.conf
+              line='proto tcp dport {{ HTTP_PORT }} ACCEPT;'
+              insertafter='# Ansible specified rules.'
+      notify: run ferm
+      
+    - name: open https port through firewall
+      lineinfile: dest=/etc/ferm/ferm.conf
+              line='proto tcp dport {{ HTTPS_PORT }} ACCEPT;'
+              insertafter='# Ansible specified rules.'
+      notify: run ferm
+      
+    - name: smb credentials file
+      template: src=templates/smb-credentials.txt.jn2 dest=/etc/smb-credentials.txt
+     
+    - name: make directory for game content
+      file: path=/var/www/html/{{ GAME_NAME }} owner=apache group=apache state=directory
+      
+    - name: mount point for smb
+      file: path=/mmowgli/shared/images state=directory mode=0755
+      
+    - name: mount shared filesystem
+      mount: name=/mmowgli/shared/images fstype=cifs src=//mmowgliServer/images state=mounted opts="ro,username={{ SMB_USER }},password={{ SMB_USER_PASSWORD }}"
+    
+    - name: symlink from http directory to shared filesystem
+      file: name=/var/www/html/{{ GAME_NAME }}/images src=/mmowgli/shared/images/{{ GAME_NAME }} state=link
+      
+    - name: symlink from http directory to shared reports dir
+      file: name=/var/www/html/{{ GAME_NAME }}/reports src=/mmowgli/shared/images/reports/{{ GAME_NAME }} state=link
+      
+    # Handlers run once and only once when notified by N tasks
+  handlers:
+      
+    # see http://tjelvarolsson.com/blog/how-to-manage-firewalls-using-ferm-and-ansible/ for details on ferm
+    - name: run ferm
+      command: ferm /etc/ferm/ferm.conf
+      notify: save iptables
+
+    - name: save iptables
+      command: service iptables save
+      
+    - name: reload httpd
+      service: name=httpd state=reloaded
