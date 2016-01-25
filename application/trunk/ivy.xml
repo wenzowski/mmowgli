@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE ivy-module [
-	<!ENTITY vaadin.version "7.5.8">	
+	<!ENTITY vaadin.version "7.6.1">	
 ]>
 
 <ivy-module version="2.0"
@@ -54,7 +54,7 @@
 		<dependency org="net.bull.javamelody" name="javamelody-core" rev="1.48.0"/>
 		<dependency org="org.glassfish" name="javax.json" rev="1.0.4"/>
 		<!-- for mobile -->
- 	    <dependency org="com.vaadin.addon" name="vaadin-touchkit-agpl" rev="4.0.4"/>    
+ 	    <dependency org="com.vaadin.addon" name="vaadin-touchkit-agpl" rev="4.1.0.rc1"/>    
         <dependency org="org.vaadin.addon" name="ios7hotfixes" rev="6.0.2" />
         <dependency org="net.sf.saxon" name="Saxon-HE" rev="9.5.1-5"/>
         <dependency org="org.vaadin" name="viritin" rev="1.35" />
