@@ -130,6 +130,7 @@ public class AuthorThisPlanPopup extends MmowgliDialog implements ClickListener
       @HibernateUserUpdate
       public void buttonClick(ClickEvent event)
       { 
+        // A session leak has been seen here...sess created by ActionPlanTable$columnCustomizer.generateCell() line 293
         HSess.init();
         MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
         User me = globs.getUserTL(); //feb refactor DBGet.getUserFreshTL(globs.getUserID());
