@@ -75,7 +75,7 @@ public class BrowserPerformanceLogger
     @Override
     public void call(JsonArray param)
     {
-      System.out.println("loadStatsCallback() entered from browser");
+      //System.out.println("loadStatsCallback() entered from browser");
       statsQ.add(param);
     }
   };
