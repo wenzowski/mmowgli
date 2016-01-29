@@ -99,7 +99,7 @@ public class ActionPlanPageTabThePlan2 extends ActionPlanPageTabPanel //implemen
     leftLay.addComponent(flowLay);
     flowLay.setSpacing(true);
     
-    Label missionLab = new Label("Authors, this is your workspace.");
+    Label missionLab = new Label("Authors, this is your team workspace.");
     flowLay.addComponent(missionLab);
     flowLay.setComponentAlignment(missionLab, Alignment.TOP_LEFT);
     missionLab.addStyleName("m-actionplan-mission-title-text");
