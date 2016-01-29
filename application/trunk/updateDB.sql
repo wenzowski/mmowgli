@@ -1,6 +1,14 @@
 # This is a list of SQL commands which may be useful to update old game databases. This file is not intended to be run in its entirety.
 # Remember to also update the MmowgliConstants field DATABASE_VERSION
 
+UPDATE `Game` SET `version` = '20160128' WHERE `id` = '1';
+CREATE TABLE `HashTag` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `tag` varchar(255) DEFAULT NULL,
+  `url` varchar(512) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 UPDATE `Game` SET `version` = '20150529' WHERE `id` = '1';
 ALTER TABLE `Game` ADD `requireCACregistration` BIT(1)  NOT NULL  DEFAULT b'0'  AFTER `reportsShowHiddenCards`;
 ALTER TABLE `Game` ADD `enforceCACdataRegistration` BIT(1)  NOT NULL  DEFAULT b'0'  AFTER `requireCACregistration`;
