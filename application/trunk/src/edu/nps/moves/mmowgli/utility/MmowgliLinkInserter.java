@@ -21,21 +21,18 @@
 */
 
 package edu.nps.moves.mmowgli.utility;
-import static edu.nps.moves.mmowgli.MmowgliEvent.ACTIONPLANSHOWCLICK;
-import static edu.nps.moves.mmowgli.MmowgliEvent.CARDCLICK;
-import static edu.nps.moves.mmowgli.MmowgliEvent.SHOWUSERPROFILECLICK;
+import static edu.nps.moves.mmowgli.MmowgliEvent.*;
 
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 
-import edu.nps.moves.mmowgli.db.ActionPlan;
-import edu.nps.moves.mmowgli.db.Card;
-import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.Game.RegexPair;
-import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateUserRead;
 
@@ -52,15 +49,21 @@ import edu.nps.moves.mmowgli.markers.HibernateUserRead;
  */
 public class MmowgliLinkInserter
 {
-  static enum linkType {CARD,ACTIONPLAN,USER};
+  static enum linkType {CARD,ACTIONPLAN,USER,HASHTAG};
   
-	// todo convert to Java regex
   public static final String USERLINK_REGEX   = "user\\s+(\\d+)";
   public static final String USERLINK_REGEX2  = "player\\s+(\\d+)";
   public static final String USERLINK_REGEX3  = "@(\\d+)";
   public static final String ACTPLNLINK_2_REGEX = "ap\\s+(\\d+)";
   public static final String CARDLINK_REGEX   = "card\\s+(\\d+)"; //"(([Gg][Aa][Mm][Ee]\s*(\d|\.)+\s*)?([Ii][Dd][Ee][Aa]\s*)?[Cc][Aa][Rr][Dd]\s*#?\s*([Cc][Hh][Aa][Ii][Nn]\s*#?\s*)?(\d+))";
   public static final String ACTPLNLINK_REGEX = "(?:action\\s)?plan\\s+(\\d+)"; //(([Gg][Aa][Mm][Ee]\s*(\d|\.)+\s*)?([Aa][Cc][Tt][Ii][Oo][Nn]\s*#?\s*)?[Pp][Ll][Aa][Nn]\s*#?\s*(\d+))"
+  public static final String HASHTAG_REGEX = "(^|\\s)(#\\S+)($|\\s)";
+  
+  public static final int USERLINK_REGEX_GROUP = 1;
+  public static final int ACTIONPLAN_REGEX1_GROUP = 1;
+  public static final int ACTIONPLAN_REGEX2_GROUP = 2;
+  public static final int CARDLINK_REGEX_GROUP = 1;
+  public static final int HASHTAG_REGEX_GROUP = 2;
 
   // This allows us to avoid linkifying the above sequences when they appear in tooltips; we would build bogus html otherwise
   // One for each of the 4 above; avoid using strings which would match above
@@ -115,7 +118,7 @@ public class MmowgliLinkInserter
   private static Pattern actPlnLinkPattern = Pattern.compile(ACTPLNLINK_REGEX,Pattern.CASE_INSENSITIVE);
   private static Pattern urlLinkPattern    = Pattern.compile(URLLINK_REGEX,   Pattern.CASE_INSENSITIVE);
   private static Pattern apLinkPattern     = Pattern.compile(ACTPLNLINK_2_REGEX,Pattern.CASE_INSENSITIVE);
- 
+  private static Pattern hashTagPattern    = Pattern.compile(HASHTAG_REGEX,   Pattern.CASE_INSENSITIVE);
   /**
    * Replaces strings of "user nnn" with game name
    * @param s original
@@ -183,22 +186,25 @@ public class MmowgliLinkInserter
     urlLoopMatcher(sb,matcher);
 
     matcher = cardLinkPattern.matcher(sb);
-    loopMatcher(sb,matcher,CARD_EVENTNUM, linkType.CARD, sess);
+    loopMatcher(sb,matcher,CARD_EVENTNUM, linkType.CARD, sess, CARDLINK_REGEX_GROUP);
 
     matcher = actPlnLinkPattern.matcher(sb);
-    loopMatcher(sb,matcher,ACTPLN_EVENTNUM, linkType.ACTIONPLAN, sess);
+    loopMatcher(sb,matcher,ACTPLN_EVENTNUM, linkType.ACTIONPLAN, sess, ACTIONPLAN_REGEX2_GROUP);
 
     matcher = apLinkPattern.matcher(sb);
-    loopMatcher(sb,matcher,ACTPLN_EVENTNUM, linkType.ACTIONPLAN, sess);
+    loopMatcher(sb,matcher,ACTPLN_EVENTNUM, linkType.ACTIONPLAN, sess, ACTIONPLAN_REGEX1_GROUP);
    
     matcher = userLinkPattern.matcher(sb);
-    loopMatcher(sb,matcher,USER_EVENTNUM, linkType.USER, sess);
+    loopMatcher(sb,matcher,USER_EVENTNUM, linkType.USER, sess, USERLINK_REGEX_GROUP);
     
     matcher = userLinkPattern2.matcher(sb);
-    loopMatcher(sb,matcher,USER_EVENTNUM, linkType.USER, sess);
+    loopMatcher(sb,matcher,USER_EVENTNUM, linkType.USER, sess, USERLINK_REGEX_GROUP);
     
     matcher = userLinkPattern3.matcher(sb);
-    loopMatcher(sb,matcher,USER_EVENTNUM, linkType.USER, sess);
+    loopMatcher(sb,matcher,USER_EVENTNUM, linkType.USER, sess, USERLINK_REGEX_GROUP);
+    
+    matcher = hashTagPattern.matcher(sb);
+    loopMatcher(sb,matcher,null,linkType.HASHTAG,sess,HASHTAG_REGEX_GROUP);
     
     return sb.toString();
   }
@@ -231,19 +237,37 @@ public class MmowgliLinkInserter
    * @param matcher Reg Ex expression matcher
    * @param eventNum event # from ApplicationConstants which can be used in a URL to move the the appropriate screen
    */
-  private static void loopMatcher(StringBuilder sb, Matcher matcher, String eventNum, linkType lTyp, Session sess)
+  private static void loopMatcher(StringBuilder sb, Matcher matcher, String eventNum, linkType lTyp, Session sess, int grp)
   {
     int start = 0;
     while(matcher.find(start)) {
-      String idnum = matcher.group(1);  // since we matched, I know there is a group 1 which is the card/ap id
-      Object cardOrApOrUser = checkExistence(lTyp,idnum,sess);
-      if(cardOrApOrUser != null ) {
-        String link = buildLink(lTyp,matcher.group(),idnum,eventNum,sess,cardOrApOrUser);
-        sb.replace(matcher.start(), matcher.end(), link);
-        start = matcher.start()+link.length();
+      if(lTyp == linkType.HASHTAG) {
+        int totlen = matcher.group().length();
+        String tag = matcher.group(grp);
+        Criteria crit = sess.createCriteria(HashTag.class).add(Restrictions.eq("tag",tag));
+
+        @SuppressWarnings("rawtypes")
+        List lis = crit.list();
+        if(!lis.isEmpty()) {
+          HashTag ht = (HashTag)lis.get(0);
+          String taglink = buildNewWindowLink(tag,ht.getUrl());
+          sb.replace(matcher.start(grp),matcher.end(grp),taglink);
+          start = matcher.start()+totlen-tag.length()+taglink.length();
+        }
+        else
+          start = matcher.end();
       }
-      else
-        start = matcher.end();
+      else {  //other than hashtag
+        String idnum = matcher.group(1);  // since we matched, I know there is a group 1 which is the card/ap id
+        Object cardOrApOrUser = checkExistence(lTyp,idnum,sess);
+        if(cardOrApOrUser != null ) {
+          String link = buildLink(lTyp,matcher.group(),idnum,eventNum,sess,cardOrApOrUser);
+          sb.replace(matcher.start(), matcher.end(), link);
+          start = matcher.start()+link.length();
+        }
+        else
+          start = matcher.end();
+      }
     }
   }
   
@@ -260,6 +284,18 @@ public class MmowgliLinkInserter
     }
     catch(Throwable t) {}
     return null;
+  }
+  
+  private static String buildNewWindowLink(String tag, String url)
+  {
+    StringBuilder sb = new StringBuilder("<a href=\"");
+    sb.append(url);
+    sb.append("\" target=\"hashtagframe\" title=\"");
+    sb.append(url);
+    sb.append("\">");
+    sb.append(tag);
+    sb.append("</a>");
+    return sb.toString();
   }
   
   /**
