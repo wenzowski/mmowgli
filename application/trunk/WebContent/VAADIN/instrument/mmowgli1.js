@@ -23,7 +23,7 @@ UserInfo.getInfo(
 
 // executed inline
 //if (window.performance.getEntriesByType && document.addEventListener)
-if(!(typeof(window.performance) == "undefinded") &&
+if(!(typeof(window.performance) == "undefined") &&
    !(typeof(window.performance.getEntriesByType) == "undefined") &&
    !(typeof(document.addEventListener) == 'undefined')) 
 	document.addEventListener('DOMContentLoaded', _mmowgliFinishedLoading);
