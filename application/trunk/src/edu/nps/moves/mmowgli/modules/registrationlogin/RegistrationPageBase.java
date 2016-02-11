@@ -851,7 +851,7 @@ public class RegistrationPageBase extends VerticalLayout implements Button.Click
         User.updateTL(_u_);
       }
       
-      HSess.closeAndReopen(); // should be ok
+      HSess.closeAndReopen(); // should be ok ....riptide web6 may not be advisable
       _u_ = User.merge(_u_, HSess.get());
       
       MmowgliController cntlr = globs.getController();
