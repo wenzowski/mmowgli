@@ -1,5 +1,7 @@
 # This is a list of SQL commands which may be useful to update old game databases. This file is not intended to be run in its entirety.
 # Remember to also update the MmowgliConstants field DATABASE_VERSION
+UPDATE `Game` SET `version` = '20160210' WHERE `id` = '1';
+ALTER TABLE `Game` ADD `numTopCardsInRows` INT(11)  UNSIGNED  NOT NULL  DEFAULT '4'  AFTER `useCAClogin`;
 
 UPDATE `Game` SET `version` = '20160128' WHERE `id` = '1';
 CREATE TABLE `HashTag` (
