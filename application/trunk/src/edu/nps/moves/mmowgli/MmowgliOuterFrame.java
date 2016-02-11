@@ -26,7 +26,7 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.MESSAGING_LOGS;
 
 import java.io.Serializable;
 
-import org.vaadin.viritin.layouts.MHorizontalLayout;
+import org.vaadin.viritin.layouts.MGridLayout;
 
 import com.vaadin.ui.*;
 
@@ -62,17 +62,20 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
   public MmowgliOuterFrame(User me)
   {
     setSizeUndefined();
-    setWidth("1040px");
+
     addStyleName("m-mmowgliouterframe");
-   // addStyleName("m-redborder");   this is a good debugging border
+
     if(me == null)
       me = Mmowgli2UI.getGlobals().getUserTL();
 
     addMenuBarAndFouoRowTL(me);
     addComponent(header=new Header());
+    setComponentAlignment(header,Alignment.TOP_CENTER);
     header.initGui();
     addComponent(mContentFr = new MmowgliContentFrame());
+    setComponentAlignment(mContentFr,Alignment.TOP_CENTER);
     addComponent(footer=new Footer());
+    setComponentAlignment(footer,Alignment.TOP_CENTER);
     footer.initGui();
     Instrumentation.addInstrumentation(this);
   }
@@ -81,11 +84,14 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
   {
   	footer.pingPush();
   }
-  
-  public void addMenuBarAndFouoRowTL(User me)
+/*  
+  public void oldaddMenuBarAndFouoRowTL(User me)
   {
     HorizontalLayout hlay = new MHorizontalLayout().withMargin(false).withSpacing(false).withFullHeight();
     addComponent(hlay);
+
+    hlay.setWidth(MENUBAR_ROW_WIDTH,Unit.PIXELS);  // so it doesn't look too bad w/ six cards across
+    setComponentAlignment(hlay,Alignment.TOP_CENTER);
     
     if(me.isGameMaster() || me.isAdministrator() || me.isDesigner()) {
       menubar = new AppMenuBar(me.isGameMaster(),me.isAdministrator(),me.isDesigner());
@@ -102,9 +108,48 @@ public class MmowgliOuterFrame extends VerticalLayout implements WantsMoveUpdate
     
     Label lab = new Label();
     hlay.addComponent(lab);
-    hlay.setExpandRatio(lab, 0.5f);
+    hlay.setExpandRatio(lab, 0.5f);    
   }
-  
+*/  
+  private int MENUBAR_ROW_WIDTH = 981;
+  private int MENUBAR_ROW_WIDTH_THIRD = MENUBAR_ROW_WIDTH/3;
+  /*
+   * This is a slight improvement, but the 3 menus for full gm/gd/ga users misaligns the fouo image
+   * slightly
+   */
+  public void addMenuBarAndFouoRowTL(User me)
+  {
+    GridLayout glay = new MGridLayout().withWidth(""+MENUBAR_ROW_WIDTH+"px").withMargin(false).
+        withSpacing(false);
+    glay.setColumns(3);
+    glay.setRows(1);
+    
+    addComponent(glay);
+    setComponentAlignment(glay,Alignment.TOP_CENTER);
+    
+    if(me.isGameMaster() || me.isAdministrator() || me.isDesigner()) {
+      menubar = new AppMenuBar(me.isGameMaster(),me.isAdministrator(),me.isDesigner());
+      menubar.setWidth(MENUBAR_ROW_WIDTH_THIRD,Unit.PIXELS);
+      glay.addComponent(menubar);
+      glay.setColumnExpandRatio(0, 0.0f);
+    }
+    else {
+      Label lab = new Label();
+      lab.setWidth(MENUBAR_ROW_WIDTH_THIRD+25,Unit.PIXELS);
+      glay.addComponent(lab);
+      glay.setColumnExpandRatio(0, 0.0f);
+    }
+    fouoButton = makeFouoButtonTL();
+    glay.addComponent(fouoButton = makeFouoButtonTL());
+    glay.setColumnExpandRatio(1,1.0f);
+    glay.setComponentAlignment(fouoButton, Alignment.MIDDLE_CENTER);
+    
+    Label lab = new Label();
+    lab.setWidth(MENUBAR_ROW_WIDTH_THIRD,Unit.PIXELS);
+    glay.addComponent(lab);
+    glay.setColumnExpandRatio(2, 0.0f);
+  }
+
   private Component makeFouoButtonTL()
   {
     Component comp =  Footer.buildFouoNoticeTL();

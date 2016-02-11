@@ -86,9 +86,7 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
   static int CARDWIDTH = 242;
   static String CARDHEIGHT_STR = "166px";
   static String CARDWIDTH_STR = "242px";
-  
-  static int NUMCARDS = 4;
-  
+    
   private Label topNewCardLabel, bottomNewCardLabel;
   
   private HorizontalLayout topHL;
@@ -99,6 +97,7 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
   CardType leftType, rightType;
   HorizontalCardDisplay topholder, bottomholder;
   NewCardListener newCardListener;
+  int NUMCARDS_ACROSS = 4;
   
   public PlayAnIdeaPage2()
   {
@@ -116,6 +115,10 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
   public void initGui()
   {
     setSpacing(true);
+    
+    Game g = Game.getTL();
+    NUMCARDS_ACROSS = g.getNumTopCardsInRows();
+    
     Label lab = new Label();
     lab.setWidth(CALLTOACTION_HOR_OFFSET_STR);
     addComponent(lab);
@@ -129,21 +132,25 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
       lab.addStyleName("m-calltoaction-playprompt");
     }
     AbsoluteLayout mainAbsL = new AbsoluteLayout();
-    mainAbsL.setWidth(PAIP_WIDTH);
+    mainAbsL.setSizeUndefined();
+    mainAbsL.setWidth(Math.max(CARDWIDTH*NUMCARDS_ACROSS,1020),Unit.PIXELS);
     mainAbsL.setHeight("675px");
-    
     addComponent(mainAbsL);
+    setComponentAlignment(mainAbsL,Alignment.TOP_CENTER);
     
-   // do this at the bottom so z order is top: mainAbsL.addComponent(topHL = new HorizontalLayout(),"top:0px;left:0px");
+    VerticalLayout topVL = new VerticalLayout();
+    topVL.setWidth("100%");
+   
     topHL = new HorizontalLayout();
+    topVL.addComponent(topHL);
+    topVL.setComponentAlignment(topHL, Alignment.TOP_CENTER);
     topHL.addComponent(leftAbsL = new AbsoluteLayout());
     topHL.addComponent(rightAbsL = new AbsoluteLayout());
-
     leftAbsL.setWidth(PAIP_HALFWIDTH);
     rightAbsL.setWidth(PAIP_HALFWIDTH);
     leftAbsL.setHeight(PAIP_TOP_HEIGHT);
     rightAbsL.setHeight(PAIP_TOP_HEIGHT);
-    
+
     GameLinks gl = GameLinks.getTL();
     final String howToPlayLink = gl.getHowToPlayLink();
     if(howToPlayLink != null && howToPlayLink.length()>0) {
@@ -181,34 +188,57 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     // end of top gui
     
     VerticalLayout bottomVLay = new VerticalLayout();
-    mainAbsL.addComponent(bottomVLay,"top:200px;left:0px");
-    mainAbsL.addComponent(topHL,"top:0px;left:0px");    // doing this at the bottom so z order is top: 
+
+    VerticalLayout bottomWideVL = new VerticalLayout();
+    bottomWideVL.setWidth("100%");
+    mainAbsL.addComponent(bottomWideVL,"top:200px;left:0px");
     
-    HorizontalLayout hLay = buildLabelPopupRow(
+    bottomWideVL.addComponent(bottomVLay);
+    bottomWideVL.setComponentAlignment(bottomVLay, Alignment.TOP_CENTER);
+    mainAbsL.addComponent(topVL,"top:0px;left:0px");    // doing this at the bottom so z order is top:     
+        
+    // First card row
+    VerticalLayout rowVL = new VerticalLayout();
+    rowVL.setSizeUndefined();
+    rowVL.setWidth(CARDWIDTH*NUMCARDS_ACROSS,Unit.PIXELS);
+    bottomVLay.addComponent(rowVL);
+    
+    bottomVLay.setComponentAlignment(rowVL, Alignment.MIDDLE_CENTER);
+      HorizontalLayout hLay = buildLabelPopupRow(
         leftType.getTitle(),
         topNewCardLabel = new Label("new card played"));
-
-    bottomVLay.addComponent(hLay);
-    bottomVLay.setComponentAlignment(hLay,Alignment.MIDDLE_LEFT);
+      hLay.setWidth("100%");
+      rowVL.addComponent(hLay);
+      rowVL.setComponentAlignment(hLay, Alignment.MIDDLE_CENTER);
     
-    User me = Mmowgli2UI.getGlobals().getUserTL();
+      User me = Mmowgli2UI.getGlobals().getUserTL();
     
-    topholder = new HorizontalCardDisplay(new Dimension(CARDWIDTH,CARDHEIGHT),NUMCARDS,me,mockupOnly,"top");
-    bottomVLay.addComponent(topholder);;
-    topholder.initGui();
-
+      topholder = new HorizontalCardDisplay(new Dimension(CARDWIDTH,CARDHEIGHT),NUMCARDS_ACROSS,me,mockupOnly,"top");
+      rowVL.addComponent(topholder);
+      rowVL.setComponentAlignment(topholder, Alignment.TOP_CENTER);
+      topholder.initGui();
+    
+    // Spacer
     bottomVLay.addComponent(lab=new Label());
     lab.setHeight("10px");
-        
-    hLay = buildLabelPopupRow(
+    
+    // Second card row
+    rowVL = new VerticalLayout();
+    rowVL.setSizeUndefined();
+    rowVL.setWidth(CARDWIDTH*NUMCARDS_ACROSS,Unit.PIXELS);
+    bottomVLay.addComponent(rowVL);
+    
+    bottomVLay.setComponentAlignment(rowVL, Alignment.MIDDLE_CENTER);
+      hLay = buildLabelPopupRow(
         rightType.getTitle(),
         bottomNewCardLabel=new Label("new card played"));
+      hLay.setWidth("100%");
 
-    bottomVLay.addComponent(hLay);
-    bottomVLay.setComponentAlignment(hLay,Alignment.MIDDLE_LEFT);
-    bottomholder = new HorizontalCardDisplay(new Dimension(CARDWIDTH,CARDHEIGHT),NUMCARDS,me,mockupOnly,"bottom");
-    bottomVLay.addComponent(bottomholder);
-    bottomholder.initGui();
+      rowVL.addComponent(hLay);
+      bottomholder = new HorizontalCardDisplay(new Dimension(CARDWIDTH,CARDHEIGHT),NUMCARDS_ACROSS,me,mockupOnly,"bottom");
+      rowVL.addComponent(bottomholder);
+      rowVL.setComponentAlignment(bottomholder, Alignment.TOP_CENTER);
+      bottomholder.initGui();
     
     MCacheManager cMgr = AppMaster.instance().getMcache();
     
@@ -217,7 +247,6 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
       addCardsTL(bottomholder,cMgr.getNegativeIdeaCardsCurrentMove());
     }
     else {
-      Game g = Game.getTL();
       if(g.isShowPriorMovesCards() || me.isAdministrator()) {
         addCardsTL(   topholder,cMgr.getAllPositiveIdeaCards());
         addCardsTL(bottomholder,cMgr.getAllNegativeIdeaCards());
@@ -233,7 +262,6 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
   {
     HorizontalLayout hLay = new HorizontalLayout();
     hLay.setHeight("25px");
-    hLay.setWidth("980px");
     
     Label lab;
     hLay.addComponent(lab=new Label());
@@ -241,19 +269,24 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     
     hLay.addComponent(lab=new HtmlLabel(text+"&nbsp;&nbsp;")); // to keep italics from clipping
     lab.setSizeUndefined();   
-    lab.addStyleName("m-playanidea-heading-text");
-    hLay.setExpandRatio(lab, 0.5f);
+    lab.addStyleName("m-playanidea-heading-text");    
+    
+    hLay.addComponent(lab = new Label());
+    lab.setSizeUndefined();
+    hLay.setExpandRatio(lab, 1.0f);
+    
     popup.addStyleName("m-newcardpopup");
     hLay.addComponent(popup);
-    hLay.setExpandRatio(popup, 0.5f);
     popup.setImmediate(true);
+    popup.setSizeUndefined();
     Animator.animate(popup,new Css().opacity(0.0d));
+    
     hLay.addComponent(lab=new Label());
     lab.setWidth("20px");
 
     return hLay;
   }
-  
+ 
   private void addCardsTL(HorizontalCardDisplay hcd, Collection<Card> coll)
   {
     User me = Mmowgli2UI.getGlobals().getUserTL(); //DBGet.getUser(app.getUser());

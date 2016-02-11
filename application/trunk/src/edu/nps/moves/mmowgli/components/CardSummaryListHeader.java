@@ -107,7 +107,6 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
   private Object ctId;
   private CardType ct;
   BuilderDrawer drawerComponent;
-
   private boolean mockupOnly = false;
   private Card parent = null; // may remain null
   private String HEIGHT_NODRAWER = CARDLISTHEADER_H;
@@ -181,8 +180,7 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
     }
     else
       markedAsNoCreate = true;
-    
-    drawerComponent = new BuilderDrawer();
+    drawerComponent = new BuilderDrawer();   
     addComponent(drawerComponent, CARDLISTHEADER_DRAWER_POS);
     drawerComponent.setVisible(false);
 
