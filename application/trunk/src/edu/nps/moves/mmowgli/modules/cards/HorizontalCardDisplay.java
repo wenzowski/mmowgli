@@ -29,28 +29,19 @@ import java.util.Vector;
 import org.hibernate.Session;
 import org.vaadin.teemu.VaadinIcons;
 
-import com.vaadin.event.LayoutEvents.LayoutClickEvent;
-import com.vaadin.event.LayoutEvents.LayoutClickListener;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.NativeButton;
-import com.vaadin.ui.VerticalLayout;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.MmowgliSessionGlobals;
 import edu.nps.moves.mmowgli.components.CardSummary;
-import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
-import edu.nps.moves.mmowgli.utility.BackArrowFontIcon;
 
 /**
  * HorizontalCardDisplay.java
@@ -81,13 +72,11 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
   int myWidth;
   private String PANELSTATEKEY;
   Button start, left, right, end;
-  Label leftLab;
   
   public HorizontalCardDisplay(Dimension componentSize, int numVisible, User me, boolean mockupOnly, String key)
   {
     componentWidth = componentSize.width;
     componentHeight = componentSize.height;
-    
     cardHL = new HorizontalLayout();
     cardHL.setMargin(false);
     cardHL.setSpacing(false);
@@ -110,14 +99,17 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
   public void initGui()
   {
     myWidth = componentWidth*numVisible;
-    String width = ""+myWidth+"px";
+    //String width = ""+myWidth+"px";    
+    //setWidth(width);
+    //cardHL.setWidth(width);
     
-    setWidth(width);
-    cardHL.setWidth(width);
     cardHL.setHeight(""+componentHeight+"px"); 
 
     addComponent(cardHL);
-    addComponent(new ButtonBar());
+    setComponentAlignment(cardHL,Alignment.TOP_CENTER);
+    ButtonBar bb = new ButtonBar();
+    addComponent(bb);
+    setComponentAlignment(bb,Alignment.TOP_CENTER);
     Object o = Mmowgli2UI.getGlobals().getPanelState(PANELSTATEKEY);
     if(o != null)
       leftIndex = (Integer)o;
@@ -128,8 +120,7 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
   {
     ButtonBar()
     {
-     // setHeight("15px");
-      setWidth(""+myWidth+"px");
+      setWidth(""+(myWidth-20)+"px");
       setSpacing(true);
       Label sp;
       addComponent(sp=new Label());
@@ -149,7 +140,7 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       start.addStyleName("m-vcr-fonticon");
       start.setDescription("show earliest cards");
       start.setHtmlContentAllowed(true);
-      start.setIcon(VaadinIcons.STEP_BACKWARD);
+      start.setIcon(VaadinIcons.ANGLE_DOUBLE_LEFT);
       
       addComponent(start);
     
@@ -158,34 +149,10 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       left.addStyleName("m-vcr-fonticon");
       left.setDescription("show earlier cards");
       left.setHtmlContentAllowed(true);
+      left.setIcon(VaadinIcons.ANGLE_LEFT);
       
-      // All these attempts below didn't work to make us be able to rotate the fontawesome play icon like we could in Vaadin 7.3
-      // The method to used the Fontawesome.com-supported way works with a Vaadin label, not a button.
-      // We still use the button, although it's not added to layout to process the click
+      addComponent(left);
       
-      //left.setIcon(new BackArrowFontIcon()); //FontAwesome.PLAY); 
-      //left.setCaption(new BackArrowFontIcon().getHtml());
-      //left.setCaption("<i class=\"fa fa-play fa-rotate-180\"></i>");       // want to get a reverse play button
-      //left.setCaption("<i class=\"fa-rotate-180\"></i>");       // want to get a reverse play button
-      //addComponent(left);
-      
-      // instead:
-      addComponent(leftLab = new HtmlLabel(new BackArrowFontIcon().getHtml()));
-      leftLab.setWidth("14px");
-      setComponentAlignment(leftLab, Alignment.MIDDLE_CENTER);  //the icon dive cannot be resized to fit (setSize(100%"), but this aligns it properly
-      leftLab.setDescription("show earlier cards");
-      leftLab.addStyleName("m-cursor-pointer");
-      leftLab.addStyleName("m-vcr-fonticon");
-      this.addLayoutClickListener(new LayoutClickListener()
-      {
-        @Override
-        public void layoutClick(LayoutClickEvent event)
-        {
-          if(event.getChildComponent() == leftLab)
-            left.click();          
-        }        
-      });
-           
       addComponent(sp=new Label());
       sp.setWidth("35px");
       
@@ -194,7 +161,7 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       right.addStyleName("m-vcr-fonticon");
       right.setDescription("show newer cards");
       right.setHtmlContentAllowed(true);
-      right.setIcon(VaadinIcons.PLAY);
+      right.setIcon(VaadinIcons.ANGLE_RIGHT);
       addComponent(right);
       
       end = new NativeButton(null,endLis);
@@ -202,7 +169,7 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       end.addStyleName("m-vcr-fonticon");
       end.setDescription("show newest cards");
       end.setHtmlContentAllowed(true);
-      end.setIcon(VaadinIcons.STEP_FORWARD);
+      end.setIcon(VaadinIcons.ANGLE_DOUBLE_RIGHT);
       addComponent(end);
       
       addComponent(sp=new Label());
@@ -252,7 +219,7 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
     CardSummary[] arr = new CardSummary[numVisible];
     int i =0;
     
-    int start = Math.min(idx, cardIds.size()-4); // make sure it's filled
+    int start = Math.min(idx, cardIds.size()-numVisible); // make sure it's filled
     start = Math.max(0, start);  // don't go below 0
     MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
     
@@ -318,7 +285,7 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
   private void buttonsEnabledSet(Boolean startb, Boolean leftb, Boolean rightb, Boolean endb)
   {
     if(startb != null) start.setEnabled(startb);
-    if(leftb != null) leftLab.setEnabled(leftb);//left.setEnabled(leftb);
+    if(leftb != null)  left.setEnabled(leftb);
     if(rightb != null) right.setEnabled(rightb);
     if(endb != null) end.setEnabled(endb);
   }
