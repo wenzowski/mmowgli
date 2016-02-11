@@ -48,6 +48,14 @@
     transform: rotate(180deg);             /* W3C compliant browsers */
   }
   /* Insert your theme rules here */
+  /*
+  .v-slot-m-overflowvisible .v-absolutelayout-m-overflowvisible .v-absolutelayout-wrapper,
+  .v-absolutelayout-m-overflowvisible div .v-absolutelayout-margin
+   {
+   margin-left: -100px;
+    overflow: visible;
+  }
+  */
   .m-redborder {
 	border: 1px solid #FF0000;
   }
@@ -1009,8 +1017,9 @@ div div .m-vcr-fonticon{
   border-style:none;
   padding:0px;
   margin:0px;
-  color: #58595B;
-  font-size:large;
+  color: black;
+  font-size:xx-large;
+  font-weight: bolder;
 }
 /* not used? */
 .v-nativebutton-m-vcrFwdButtonLA{
@@ -2226,5 +2235,20 @@ div div .m-useradmin-search-combo .v-filterselect-button {
 .m-cloud-size28 .v-nativebutton-caption {
   font-size: 28px;
   margin: 5px;
+}
+
+/* addStyleName('horizontal') to show side-by-side */
+.v-select-optiongroup-horizontal .v-select-option {
+  display: inline-block;
+}
+/* Avoid wrapping if the layout is too tight */
+
+.v-select-optiongroup-horizontal {
+  white-space: nowrap;
+}
+
+/* Some extra spacing is needed */
+.v-select-optiongroup-horizontal .v-select-option.v-radiobutton {
+  padding-right: 10px;
 }
 }
