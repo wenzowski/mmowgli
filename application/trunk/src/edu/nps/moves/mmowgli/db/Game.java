@@ -150,6 +150,8 @@ public class Game implements Serializable
     boolean      requireCAClogin;
     boolean      useCAClogin;
     
+    int          numTopCardsInRows;
+    
 //@formatter:on
 /*    
   public static short LOGIN_ALLOW_GAMEADMINS    = 0x0001;
@@ -1037,6 +1039,17 @@ public int getMapZoom()
 
 public void setMapZoom(int mapZoom) {
 	this.mapZoom = mapZoom;
+}
+
+@Basic
+public int getNumTopCardsInRows()
+{
+  return numTopCardsInRows;
+}
+
+public void setNumTopCardsInRows(int i)
+{
+  numTopCardsInRows = i;
 }
 
 public boolean isRequireCACregistration()
