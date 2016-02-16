@@ -134,7 +134,7 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     AbsoluteLayout mainAbsL = new AbsoluteLayout();
     mainAbsL.setSizeUndefined();
     mainAbsL.setWidth(Math.max(CARDWIDTH*NUMCARDS_ACROSS,1020),Unit.PIXELS);
-    mainAbsL.setHeight("675px");
+    mainAbsL.setHeight("700px");
     addComponent(mainAbsL);
     setComponentAlignment(mainAbsL,Alignment.TOP_CENTER);
     
@@ -188,7 +188,6 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     // end of top gui
     
     VerticalLayout bottomVLay = new VerticalLayout();
-
     VerticalLayout bottomWideVL = new VerticalLayout();
     bottomWideVL.setWidth("100%");
     mainAbsL.addComponent(bottomWideVL,"top:200px;left:0px");
@@ -221,13 +220,13 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     // Spacer
     bottomVLay.addComponent(lab=new Label());
     lab.setHeight("10px");
-    
+   
     // Second card row
     rowVL = new VerticalLayout();
     rowVL.setSizeUndefined();
     rowVL.setWidth(CARDWIDTH*NUMCARDS_ACROSS,Unit.PIXELS);
     bottomVLay.addComponent(rowVL);
-    
+   
     bottomVLay.setComponentAlignment(rowVL, Alignment.MIDDLE_CENTER);
       hLay = buildLabelPopupRow(
         rightType.getTitle(),
@@ -235,11 +234,13 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
       hLay.setWidth("100%");
 
       rowVL.addComponent(hLay);
+      rowVL.setComponentAlignment(hLay,  Alignment.MIDDLE_CENTER);
+
       bottomholder = new HorizontalCardDisplay(new Dimension(CARDWIDTH,CARDHEIGHT),NUMCARDS_ACROSS,me,mockupOnly,"bottom");
       rowVL.addComponent(bottomholder);
       rowVL.setComponentAlignment(bottomholder, Alignment.TOP_CENTER);
       bottomholder.initGui();
-    
+  
     MCacheManager cMgr = AppMaster.instance().getMcache();
     
     if(mockupOnly) {
