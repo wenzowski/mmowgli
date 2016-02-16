@@ -136,7 +136,7 @@ public abstract class AbstractVHib// implements SessionManager
         dbUrl = dbUrl + "/";
       String dbPath = dbUrl + dbName;
 
-      boolean dbDropAndCreate = Boolean.parseBoolean(dbDropAndCreateS);
+      boolean dbDropAndCreate = dbDropAndCreateS==null?false:Boolean.parseBoolean(dbDropAndCreateS);
 
       // Here are the db properties gotten from web.xml:
       cnf.setProperty(URL, dbPath); // "jdbc:mysql://localhost:3306/mmowgliOne"
