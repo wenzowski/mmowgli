@@ -843,6 +843,7 @@ CREATE TABLE `Game` (
   `enforceCACdataRegistration` bit(1) NOT NULL DEFAULT b'0',
   `requireCAClogin` bit(1) NOT NULL DEFAULT b'0',
   `useCAClogin` bit(1) NOT NULL DEFAULT b'0',
+  `numTopCardsInRows` int(11) unsigned NOT NULL  DEFAULT '4',
   PRIMARY KEY (`id`),
   KEY `FK21C01217AD211E` (`currentMove_id`),
   KEY `FK21C012E29785A9` (`question_id`),
