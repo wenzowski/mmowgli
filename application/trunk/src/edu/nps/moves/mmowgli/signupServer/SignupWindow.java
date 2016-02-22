@@ -170,7 +170,7 @@ public class SignupWindow extends VerticalLayout//Window
       vl.addComponent(new HtmlLabel("<b>Email address:</b>")); 
       vl.addComponent(emailTF = new TextField());
       emailTF.setWidth("100%");
-      vl.addComponent(new HtmlLabel("<b>What is your interest in mmowgli?</b>"));
+      vl.addComponent(new HtmlLabel("<b>What is your interest in "+brand+" mmowgli?</b>"));
       vl.addComponent(interestTF = new TextField());
       interestTF.setInputPrompt("required for approval");
       interestTF.setWidth("100%");
