@@ -242,13 +242,14 @@ public class CardSummaryListHeader extends AbsoluteLayout implements MmowgliComp
   }
   
   //todo the "no child" marking needs to be enabled with game switch
+  /*
   private boolean checkNoCreateBecauseParentMarkedNoChild(Card c)
   {
     if (c == null)
       return false; // ok to create
   	return CardMarkingManager.isNoChildren(c);
   }
-  
+  */
   private void handleCanCreate()
   {
     if (markedAsNoCreate) {
