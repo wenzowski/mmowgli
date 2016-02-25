@@ -118,7 +118,7 @@
   <context-param>
     <description>Where mmowgli sends emails to be delivered</description>
     <param-name>smtpHost</param-name>
-    <param-value>mule.nps.edu</param-value>
+    <param-value>127.0.0.1</param-value>
   </context-param>
   <!--
   <context-param>
