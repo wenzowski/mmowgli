@@ -47,7 +47,8 @@ import com.vaadin.shared.ui.ui.Transport;
           "https://fonts.googleapis.com/css?family=Varela+Round", // like vagabond
           "https://fonts.googleapis.com/css?family=Special+Elite",// typewriter
           "https://fonts.googleapis.com/css?family=Open+Sans:700&subset=latin,latin-ext", // army sci tech
-          "https://fonts.googleapis.com/css?family=Gentium+Book+Basic&subset=latin,latin-ext"})
+          "https://fonts.googleapis.com/css?family=Gentium+Book+Basic&subset=latin,latin-ext",
+          "https://daneden.github.io/animate.css/animate.min.css"})  // horizontal card display animations
 //Loading the google code this way (anno) runs into the X-Frame-Options SAMEORIGIN error
 @JavaScript ({
            "https://platform.twitter.com/widgets.js",

@@ -67,7 +67,7 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
   private User me;
   private boolean mockupOnly = false;
   private HorizontalLayout cardHL;
-  
+  private HorizontalLayout outerCardHL;
   int leftIndex = -1;
   int myWidth;
   private String PANELSTATEKEY;
@@ -77,9 +77,10 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
   {
     componentWidth = componentSize.width;
     componentHeight = componentSize.height;
-    cardHL = new HorizontalLayout();
-    cardHL.setMargin(false);
-    cardHL.setSpacing(false);
+    
+    outerCardHL = new HorizontalLayout();
+    outerCardHL.setMargin(false);
+    outerCardHL.setSpacing(false);
     
     this.numVisible = numVisible;
     this.me = me;
@@ -94,19 +95,15 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
     
     PANELSTATEKEY = getClass().getName()+key;
   }
-  
+
   @Override
   public void initGui()
   {
     myWidth = componentWidth*numVisible;
-    //String width = ""+myWidth+"px";    
-    //setWidth(width);
-    //cardHL.setWidth(width);
-    
-    cardHL.setHeight(""+componentHeight+"px"); 
-
-    addComponent(cardHL);
-    setComponentAlignment(cardHL,Alignment.TOP_CENTER);
+    cardHL = makeCardHL(""+componentHeight+"px",true,false);
+    outerCardHL.addComponent(cardHL);
+    addComponent(outerCardHL);
+    setComponentAlignment(outerCardHL,Alignment.TOP_CENTER);
     ButtonBar bb = new ButtonBar();
     addComponent(bb);
     setComponentAlignment(bb,Alignment.TOP_CENTER);
@@ -181,7 +178,20 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       lab.addStyleName("m-playidea-help-text");   
     }   
   }
-    
+  
+  private HorizontalLayout makeCardHL(String height, boolean fromLeft, boolean animated)
+  {
+    HorizontalLayout hl = new HorizontalLayout();
+    hl.setMargin(false);
+    hl.setSpacing(false);
+    hl.setHeight(height);
+    if(animated) {
+      hl.addStyleName("animated");
+      hl.addStyleName(fromLeft?"fadeIn":"fadeIn");  // can be other styles, e.g., fadeInLeft, fadeInRight
+    }
+    return hl;
+  } 
+  
   public void loadWrappers(ArrayList<Object>cardIds)
   {
     this.cardIds = cardIds;
@@ -196,25 +206,32 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
   public void show(Session sess)
   {
     if(leftIndex != -1)
-      showLeftSideTL(leftIndex,sess);
+      showLeftSideTL(leftIndex,sess,false);
     else
-      showEnd(sess);
-      
+      showEnd(sess,false);      
   }
+ 
   public void showEnd(Session sess)
   {
-     showRightSideTL(cardIds.size()-1, sess); //0 based index, so -1   
+    showEnd(sess,false);
   }
-
+  private void showEnd(Session sess, boolean animated)
+  {
+    showRightSideTL(cardIds.size()-1, sess,animated); //0 based index, so -1       
+  }
   public void showStart(Session sess)
   {
-    showLeftSideTL(0, sess);
+    showStart(sess,false);
+  }
+  private void showStart(Session sess, boolean animated)
+  {
+    showLeftSideTL(0, sess, animated);  
   }
   
   /*
-   *  display 4 cards with the specified one being as far right as possible (don't think that's right...recompute
+   *  display 4 (default) cards with the specified one being as far right as possible (don't think that's right...recompute
    */
-  private void showRightSideTL(int idx, Session sess)
+  private void showRightSideTL(int idx, Session sess, boolean animated)
   {
     CardSummary[] arr = new CardSummary[numVisible];
     int i =0;
@@ -231,10 +248,10 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       }
       start++;
     }
-    fillDisplayTL(arr);    
+    fillDisplayTL(arr,false, animated);    
   }
   
-  private void showLeftSideTL(int idx, Session sess)
+  private void showLeftSideTL(int idx, Session sess, boolean animated)
   {
     CardSummary[] arr = new CardSummary[numVisible];
     int i=0;
@@ -248,15 +265,17 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       }
       idx++;
     }
-    fillDisplayTL(arr);
+    fillDisplayTL(arr,true,animated);
   }
   
-  private void fillDisplayTL(CardSummary[] cards)
+  private void fillDisplayTL(CardSummary[] cards, boolean fromLeft, boolean animated)
   {
-    for(CardSummary cs : displayedCards)
-      cardHL.removeComponent(cs);
+ //   for(CardSummary cs : displayedCards)
+ //     cardHL.removeComponent(cs);
+    
     displayedCards.clear();
     
+    cardHL = makeCardHL(""+componentHeight+"px",fromLeft,animated);
     int start = 0;
     for(CardSummary cs : cards)
       if(cs != null) {
@@ -265,6 +284,8 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
         displayedCards.add(cs);
       }
     
+    outerCardHL.removeAllComponents();
+    outerCardHL.addComponent(cardHL);
     showHideVcrButtons();
    }
   
@@ -311,16 +332,16 @@ public class HorizontalCardDisplay extends VerticalLayout implements MmowgliComp
       Session sess = HSess.get();
       switch(typ) {
       case START:
-        showStart(sess);
+        showStart(sess,true);
         break;
       case LEFT:
-        showLeftSideTL(Math.max(leftIndex-numVisible,0),sess);
+        showLeftSideTL(Math.max(leftIndex-numVisible,0),sess,true);
         break;
       case RIGHT:
-        showRightSideTL(Math.min(leftIndex+numVisible, cardIds.size()-1),sess);
+        showRightSideTL(Math.min(leftIndex+numVisible, cardIds.size()-1),sess,true);
         break;
       case END:
-        showEnd(sess);
+        showEnd(sess,true);
         break;
       }
       HSess.close();
