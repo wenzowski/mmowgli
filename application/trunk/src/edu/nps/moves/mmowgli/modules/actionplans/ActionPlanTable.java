@@ -286,136 +286,142 @@ public class ActionPlanTable extends Table
     private static final long serialVersionUID = 1938821794468835620L;
     StringBuilder sb = new StringBuilder();
 
+    /*
+     * I had suspected that this routine was throwing non-shown exceptions, perhaps expected by its callers, and was leaving the db session un closed.
+     * Adding a try/catch/finally makes sure that we get to close before going back in the stack.
+     */
     @SuppressWarnings("rawtypes")
     @Override
     public Component generateCell(Table source, Object itemId, Object columnId)
     {
       Object sessKey = HSess.checkInit();
-      ActionPlan ap;
-      MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
-      Object obj = ActionPlanTable.this.getItem(itemId);
-      
-      if(obj instanceof BeanItem<?>) {
-        Object bean = ((BeanItem<?>)obj).getBean();
-        if(bean instanceof QuickActionPlan)
-          return generateCellFromQuickActionPlan(source,itemId, columnId);
-        ap = (ActionPlan)((BeanItem<?>)obj).getBean();
-      }
-      else {
-        EntityItem ei = (EntityItem) obj;
-        ap = (ActionPlan) ei.getPojo();
-      }
-      ap = ActionPlan.mergeTL(ap);
-      if (IDFORSORTING_COLUMN_NAME.equals(columnId)) {
-        Label lab = new HtmlLabel(""+ap.getId());
-        String hw=null;
-        if((hw=ap.getHelpWanted()) != null) {
-          lab.addStyleName("m-actionplan-redtext");
-          lab.setDescription("Help wanted: "+hw);
-        }
-        if(ap.isHidden()) {
-          lab.setValue(lab.getValue().toString()+"<span style='color:#CB0613'>(H)</span>");
-          lab.setDescription("hidden");
-        } 
-        HSess.checkClose(sessKey);
-        return lab;
-      }
-      if (ROUND_COLUMN_NAME.equals(columnId)) {
-        Label lab = new Label("" + ap.getCreatedInMove().getNumber());
-        lab.setDescription("Creation round");
-        HSess.checkClose(sessKey);
-        return lab;
-      }
-      if(TITLE_COLUMN_NAME.equals(columnId)) {
-        Label lab = null;     
-        if(ap.isSuperInteresting()) {
-          lab = new HtmlLabel("<b>"+VaadinIcons.STAR.getHtml()+"&nbsp;"+ap.getTitle()+"</b>");
-          lab.addStyleName("m-actionplan-highlighted_background");
-          lab.setDescription("SUPER INTERESTING: "+ap.getTitle());
+      try {
+        ActionPlan ap;
+        MmowgliSessionGlobals globs = Mmowgli2UI.getGlobals();
+        Object obj = ActionPlanTable.this.getItem(itemId);
+
+        if (obj instanceof BeanItem<?>) {
+          Object bean = ((BeanItem<?>) obj).getBean();
+          if (bean instanceof QuickActionPlan)
+            return generateCellFromQuickActionPlan(source, itemId, columnId);
+          ap = (ActionPlan) ((BeanItem<?>) obj).getBean();
         }
         else {
-          lab = new Label(ap.getTitle());
-          lab.setDescription(lab.getValue().toString());
+          EntityItem ei = (EntityItem) obj;
+          ap = (ActionPlan) ei.getPojo();
         }
-        HSess.checkClose(sessKey);
-        return lab;
-      }
-      if(HELPWANTED_COLUMN_NAME.equals(columnId)) {
-        Label lab = new Label(ap.getHelpWanted());
-        lab.setDescription(lab.getValue().toString());
-        HSess.checkClose(sessKey);
-        return lab;        
-      }
-      if (MYTHUMBS_COLUMN_NAME.equals(columnId)) {
-        Map<User,Integer>map = ap.getUserThumbs();       
-        Integer myRating = map.get(User.getTL(ActionPlanTable.this.myUserId));
-        Label lab;
-        if(myRating == null || myRating.intValue()==0)
-          lab = new Label("--");
-        else
-          lab = new Label(""+myRating.intValue());
-        lab.setDescription("My thumb rating for this action plan");
-        HSess.checkClose(sessKey);
-        return lab;
-      }
-      if (AVGTHUMBS_COLUMN_NAME.equals(columnId)) {
-        double avg = ap.getAverageThumb();
-        Label lab;
-        if(avg == 0.0d)
-          lab = new HtmlLabel("--");
-        else
-          lab = new HtmlLabel(avgThumbFormatter.format(avg));
-        int numVoters = ap.getUserThumbs().size();
-        lab.setDescription("<center>Average thumb rating for this action plan<br/>(\"--\" means no votes received)<br/>"
-            +"Total voters: "+numVoters+"</center>");
-        HSess.checkClose(sessKey);
-        return lab;
-      }
-      if (AUTHORS_COLUMN_NAME.equals(columnId)) {
-        // First see if I've been invited to any action plans, put up the link if so
-        User me = getUser(globs.getUserID());
-        Set<User> invitees = ap.getInvitees();
-        
-        if(invitees != null && invitees.size()>0) {
-          for(User invited : invitees) {
-            if(invited.getId() == me.getId()) {
-              Button b = new Button("you're invited to join");
-              b.setStyleName(BaseTheme.BUTTON_LINK);
-              b.addClickListener(new AuthorPlanListener(ap));
-              b.setDescription("You've been invited to become an author of this plan");
-              b.setEnabled(!globs.isGameReadOnly() && !globs.isViewOnlyUser());
-              HSess.checkClose(sessKey);
-              return b;
+        ap = ActionPlan.mergeTL(ap);
+        if (IDFORSORTING_COLUMN_NAME.equals(columnId)) {
+          Label lab = new HtmlLabel("" + ap.getId());
+          String hw = null;
+          if ((hw = ap.getHelpWanted()) != null) {
+            lab.addStyleName("m-actionplan-redtext");
+            lab.setDescription("Help wanted: " + hw);
+          }
+          if (ap.isHidden()) {
+            lab.setValue(lab.getValue().toString() + "<span style='color:#CB0613'>(H)</span>");
+            lab.setDescription("hidden");
+          }
+          return lab;
+        }
+        if (ROUND_COLUMN_NAME.equals(columnId)) {
+          Label lab = new Label("" + ap.getCreatedInMove().getNumber());
+          lab.setDescription("Creation round");
+          return lab;
+        }
+        if (TITLE_COLUMN_NAME.equals(columnId)) {
+          Label lab = null;
+          if (ap.isSuperInteresting()) {
+            lab = new HtmlLabel("<b>" + VaadinIcons.STAR.getHtml() + "&nbsp;" + ap.getTitle() + "</b>");
+            lab.addStyleName("m-actionplan-highlighted_background");
+            lab.setDescription("SUPER INTERESTING: " + ap.getTitle());
+          }
+          else {
+            lab = new Label(ap.getTitle());
+            lab.setDescription(lab.getValue().toString());
+          }
+          return lab;
+        }
+        if (HELPWANTED_COLUMN_NAME.equals(columnId)) {
+          Label lab = new Label(ap.getHelpWanted());
+          lab.setDescription(lab.getValue().toString());
+          return lab;
+        }
+        if (MYTHUMBS_COLUMN_NAME.equals(columnId)) {
+          Map<User, Integer> map = ap.getUserThumbs();
+          Integer myRating = map.get(User.getTL(ActionPlanTable.this.myUserId));
+          Label lab;
+          if (myRating == null || myRating.intValue() == 0)
+            lab = new Label("--");
+          else
+            lab = new Label("" + myRating.intValue());
+          lab.setDescription("My thumb rating for this action plan");
+          return lab;
+        }
+        if (AVGTHUMBS_COLUMN_NAME.equals(columnId)) {
+          double avg = ap.getAverageThumb();
+          Label lab;
+          if (avg == 0.0d)
+            lab = new HtmlLabel("--");
+          else
+            lab = new HtmlLabel(avgThumbFormatter.format(avg));
+          int numVoters = ap.getUserThumbs().size();
+          lab.setDescription(
+              "<center>Average thumb rating for this action plan<br/>(\"--\" means no votes received)<br/>" + "Total voters: " + numVoters + "</center>");
+          return lab;
+        }
+        if (AUTHORS_COLUMN_NAME.equals(columnId)) {
+          // First see if I've been invited to any action plans, put up the link
+          // if so
+          User me = getUser(globs.getUserID());
+          Set<User> invitees = ap.getInvitees();
+
+          if (invitees != null && invitees.size() > 0) {
+            for (User invited : invitees) {
+              if (invited.getId() == me.getId()) {
+                Button b = new Button("you're invited to join");
+                b.setStyleName(BaseTheme.BUTTON_LINK);
+                b.addClickListener(new AuthorPlanListener(ap));
+                b.setDescription("You've been invited to become an author of this plan");
+                b.setEnabled(!globs.isGameReadOnly() && !globs.isViewOnlyUser());
+                return b;
+              }
             }
           }
+
+          // Else list authors
+          Label lab;
+
+          String quickAuthors = ap.getQuickAuthorList();
+          if (quickAuthors != null && quickAuthors.length() > 0) {
+            lab = new Label(quickAuthors);
+            lab.setDescription(quickAuthors);
+          }
+          else if (ap.getInvitees().size() > 0) { // no authors, if there are
+                                                  // invitees, put "pending"
+            lab = new Label("pending"); // sb.append("pending");
+            lab.setDescription("This plan has outstanding invitations");
+          }
+          else {
+            // No authors, no invitees, Let anybody in
+            Button b = new Button("author this plan");
+            b.setStyleName(BaseTheme.BUTTON_LINK);
+            b.addClickListener(new AuthorPlanListener(ap));
+            b.setDescription("You are free to become an author of this plan");
+            return b;
+          }
+          return lab;
         }
-        
-        // Else list authors
-        Label lab;
-        
-        String quickAuthors = ap.getQuickAuthorList();
-        if(quickAuthors != null && quickAuthors.length()>0) {
-          lab = new Label(quickAuthors);
-          lab.setDescription(quickAuthors);
-        }       
-        else if(ap.getInvitees().size()>0){ // no authors, if there are invitees, put "pending"
-          lab = new Label("pending"); //sb.append("pending");
-          lab.setDescription("This plan has outstanding invitations");
-        }
-        else {
-          // No authors, no invitees, Let anybody in
-          Button b = new Button("author this plan");
-          b.setStyleName(BaseTheme.BUTTON_LINK);
-          b.addClickListener(new AuthorPlanListener(ap));
-          b.setDescription("You are free to become an author of this plan");
-          HSess.checkClose(sessKey);
-          return b;
-        }
-        HSess.checkClose(sessKey);
-        return lab;
+        return new Label("Program error in ActionPlanTable.java");
       }
-      HSess.checkClose(sessKey);
-      return new Label("Program error in ActionPlanTable.java");
+      catch (Throwable t) {
+        throw (t);
+      }
+      finally {
+        // This gets hit before a return from the the try, or the external catching of
+        // the rethrow in the catch clause -- just what we want.
+        HSess.checkClose(sessKey);
+      }
     }
     
     public Component generateCellFromQuickActionPlan(Table source, Object itemId, Object columnId)
