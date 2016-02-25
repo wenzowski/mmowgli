@@ -273,7 +273,8 @@ public class ActionPlanPage2 extends AbsoluteLayout implements MmowgliComponent,
   {
     ActionPlan actPln = ActionPlan.getTL(apId);
     User me = Mmowgli2UI.getGlobals().getUserTL();
-    addStyleName("m-cssleft-45");
+      
+    addStyleName("m-cssright-plus-12"); //addStyleName("m-cssleft-45");
     
     setWidth("1089px");
     setHeight("1821px");
