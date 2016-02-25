@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+<project name="Mmowgli" default="build" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+	<!--
+	  This file will create a default mmowgli.war.  It will go into a ./dist directory relative to this build file.
+	  To run this build file, the development machine must have the following installed:
+	  	Java Development Kit, 1.7 or greater
+	  	Apache Ivy dependency manager
+	  	Apache Ant build tool	  
+	-->
+	
+	<target name="build" depends="fetchlibs,compile,zipVaadinDir">
+		<sequential>
+			<delete file="dist/mmowgli.war"/>
+			<war destfile="dist/mmowgli.war" webxml="WebContent/WEB-INF/mmowgli_web.xml">
+				<classes dir="build/classes"/>
+				<lib dir="build/ivylibs"/>
+				<fileset dir="WebContent" includes="VAADIN/**"/>
+			</war>
+		</sequential>
+	</target>
+
+	<target name="zipVaadinDir" depends="expandVaadinJars">
+		<delete file="dist/VAADIN.ZIP"/>
+		<zip destfile="dist/VAADIN.ZIP" basedir="WebContent/VAADIN"/>
+	</target>
+
+	<!-- in this ant file, we're grabbing all the libraries for the compile, not the deploy.  We need javax.servlet*.jar for that.-->
+	<target name="fetchlibs" description="put ivy dependencies in place">
+		<delete dir="build/ivylibs/" includes="**/*"/>
+      <ivy:retrieve conf="default" pattern="build/ivylibs/[artifact](-[revision]).[ext]"/>
+		  <ivy:retrieve conf="nodeploy" pattern="build/ivylibs/[artifact](-[revision]).[ext]"/> <!-- javax.servlet*.jar here -->
+	    <delete dir="build/ivylibs" includes="servlet-api-2.5*.jar"/>
+	</target>
+
+	<!-- Our Apache/Akamai/Tomcat is setup so that anything in the VAADIN directory will be served -->
+	<!-- by Apache/Akamai...the request never gets to Tomcat.  Therefore we MUST extract all stuff in the VAADIN -->
+	<!-- directories of the vaadin jars into our war file that we're building here. -->
+	<!-- The 4 vaadin jars which have VAADIN directories are below. -->
+	<target name="expandVaadinJars" description="put selected vaadin components in VAADIN dir from distribution jars">
+	  <unzip dest="WebContent">
+		<patternset>
+		  <include name="VAADIN/**" />
+		</patternset>
+		<fileset dir="build/ivylibs">
+		  <include name="vaadin-server*.jar" />
+		  <include name="vaadin-themes*.jar" /> 		  
+		  <include name="vaadin-push*.jar" />             <!-- not shown in latest vaadin pdf doc, but needed -->
+		  <include name="vaadin-client-compiled*.jar" />  <!-- use def. wid set for misc servlets -->
+		</fileset>
+	  </unzip>
+      <delete dir="WebContent/VAADIN/themes/chameleon"/>
+	    <delete dir="WebContent/VAADIN/themes/liferay"/>
+	    <delete dir="WebContent/VAADIN/themes/reindeer-tests"/>
+      <delete dir="WebContent/VAADIN/themes/runo"/>
+  <!--<delete dir="WebContent/Vaadin/themes/valo"/> used by touchkit -->
+	</target>
+	
+	<path id="mmowgli2.classpath">
+    <pathelement location="build/classes"/>
+		<fileset dir="build/ivylibs">
+			<include name="**/*.jar"/>
+		</fileset>			
+	</path>
+	
+	<target name="clean">
+		<delete dir="build/classes"/>
+		<delete dir="build/ivylibs"/>
+	</target>
+	<target name="compile" depends="fetchlibs">
+		<copy todir="build/classes"> <!-- copy non java resource files -->
+		  <fileset dir="src">
+		    <exclude name="**/*.java"/>
+		  </fileset>
+		</copy>
+		<javac debug="true" destdir="build/classes" debuglevel="source,lines,vars" includeantruntime="false" source="1.7" target="1.7">
+			<src path="src"/>
+			<classpath refid="mmowgli2.classpath"/>
+		</javac>
+    <delete dir="build/ivylibs" includes="servlet-api-2.5*.jar"/> <!-- don't want in jar -->
+    <delete dir="build/ivylibs" includes="javax.servlet*.jar"/>	
+	</target>
+</project>

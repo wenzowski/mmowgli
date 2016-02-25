@@ -1,0 +1,35 @@
+22 Feb 2016
+
+Introduction
+This document discusses how to build Mmowgli after receiving a source drop from the Mmowgli source code 
+repository.  Two issues are considered here: 
+1.  Your first Mmowgli build, which must be done in the Eclipse (or Netbeans) IDE context; and 
+2.  Subsequent builds, which can take place in an automated way, necessitating only the presence 
+		of the source, Java JDK, Ant build tool and Ivy dependency manager.
+
+Number 1 is covered by in detail by other documents in the repository, telling how to setup your Eclipse 
+project and the required database.  The reason a first manual build is required has to do with a) compiling 
+the Mmowgli theme (CSS file), and b) building the Mmowgli "widgetset".  (These tasks are described in other 
+documents.)  The actual behind-the-scenes process for doing these tasks is quite involved, and translating the 
+pertinent Java code in the Vaadin Eclipse plugin into an ant task is something that would have to wait for the 
+framework authors to do.  Alternatively, Mmowgli could be turned into a Maven-driven project and the task 
+would be theoretically automate-able.
+
+Number 2 can be done by an execution of an the default ant task within the mmowgli_build.xml Ant file.  This 
+assumes that both the widgetset and the theme have first been manually built through Eclipse.  Two files are 
+produced and put into the dist/ directory:  a) mmowgli.war, the application and all required libraries, and 
+b) VAADIN.ZIP, which is an extracted portion of static content of the mmowgli.war, and which can be optionally 
+deployed separately to a place which can more efficiently serve that type of relative static content, such as 
+a content-delivery-network.
+
+When mmowgli.war is created, it can then be (typically) copied to a Tomcat WebApps directory, which then often 
+will spawn an automatic installation of the application.
+
+Automatic build scripts can run the task by:
+ant -buildfile mmowgli_build.xml
+
+Caveat:  You MUST build the widget set and compile the theme if this file changes:
+		ivy.xml
+A change int this file could mean either or both of a Vaadin version upgrade and/or an add-on library change: both of which
+would necessitate widgetset and theme rebuild.
+
