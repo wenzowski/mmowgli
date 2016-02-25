@@ -217,7 +217,7 @@ public class ActionDashboard extends VerticalLayout implements MmowgliComponent,
       if(b == currentTabButton)
         return;
       
-      HSess.init();
+      Object key = HSess.checkInit();
       currentTabButton.addStyleName("m-transparent-background");
       currentTabPanel.setVisible(false);
       currentTabButton = b;
@@ -237,7 +237,7 @@ public class ActionDashboard extends VerticalLayout implements MmowgliComponent,
         currentTabPanel = needAuthorsTab;
         needAuthorsTab.setVisible(true);      
       }
-      HSess.close();
+      HSess.checkClose(key);
     }
   }
 
