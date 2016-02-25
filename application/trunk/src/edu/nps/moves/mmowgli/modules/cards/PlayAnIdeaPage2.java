@@ -134,7 +134,7 @@ public class PlayAnIdeaPage2 extends VerticalLayout implements MmowgliComponent,
     AbsoluteLayout mainAbsL = new AbsoluteLayout();
     mainAbsL.setSizeUndefined();
     mainAbsL.setWidth(Math.max(CARDWIDTH*NUMCARDS_ACROSS,1020),Unit.PIXELS);
-    mainAbsL.setHeight("700px");
+    mainAbsL.setHeight("705px");
     addComponent(mainAbsL);
     setComponentAlignment(mainAbsL,Alignment.TOP_CENTER);
     

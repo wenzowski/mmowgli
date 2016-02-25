@@ -55,7 +55,7 @@ public class MmowgliMailer implements Runnable
   private boolean cancelled = false;
   private BlockingQueue<QPacket> queue;
 
-  public static boolean debugAndVerbose = false;
+  public static boolean debugAndVerbose = true; //false;
 
   public MmowgliMailer(String hostUrl) {
     // Initialize the JavaMail session
@@ -292,10 +292,28 @@ public class MmowgliMailer implements Runnable
       this.to=to;
       this.from=from;
       this.subject=subject;
-      this.body=body;
       this.cc=cc;
       this.bcc=bcc;
       this.isHtml=isHtml;
+      
+      if(isHtml)
+        this.body = insertTags(body);
+      else
+        this.body=body;
+    }
+    
+    private String insertTags(String sss)
+    {
+      String s = sss.trim();
+      if(s == null)
+        return "<html></html>";
+      
+      if(s.length() >= 5) {
+        String _s = s.substring(0,5).toLowerCase();
+        if(_s.equals("<html"))
+            return sss;
+      }
+      return "<html>"+sss+"</html>";
     }
   }
 }
