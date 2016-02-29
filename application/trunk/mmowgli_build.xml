@@ -67,6 +67,7 @@
 		<delete dir="build/classes"/>
 		<delete dir="build/ivylibs"/>
 	</target>
+	
 	<target name="compile" depends="fetchlibs">
 		<copy todir="build/classes"> <!-- copy non java resource files -->
 		  <fileset dir="src">
