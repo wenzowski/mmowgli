@@ -103,6 +103,10 @@ public class MCacheUserHelper
   
   private void _rebuildUsers(Session sess)
   {
+    usersQuick.clear();
+    usersQuickFull.clear();
+    _usersQuick.clear();
+    
     List<User> usrs = usersQuery(sess);
     for (User u : usrs) {
       if (u.getUserName() == null) {
@@ -324,5 +328,10 @@ public class MCacheUserHelper
 				return false;
 			return ((QuickUser)obj).getUname().compareToIgnoreCase(getUname()) == 0;
 		}        
+  }
+
+  public void rebuildQuickUsersTL()
+  {
+    _rebuildUsers(HSess.get());    
   }
 }

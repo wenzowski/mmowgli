@@ -306,7 +306,9 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       case MENUGAMEADMINKILLALLSESSIONS:
         helper.handleKillAllSessions();
         break;
-        
+      
+      case MENUGAMEADMIN_DB_PII_PURGE:
+        helper.handlePurgePii();
       default:
         MSysOut.println(SYSTEM_LOGS,"TODO, AbstractMmowgliController.menuEvent(): "+mEv);
     }
