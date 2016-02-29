@@ -252,6 +252,10 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     ret.addSeparator();
     ret.addItem("Advance game round and/or phase", advanceRoundClicked).setIcon(VaadinIcons.ARROW_RIGHT);
     ret.addItem("Kill all player sessions", new MCommand(MENUGAMEADMINKILLALLSESSIONS)).setIcon(VaadinIcons.STOP_COG);
+    MenuItem itm = ret.addItem("Purge all player PII", new MCommand(MENUGAMEADMIN_DB_PII_PURGE));
+      itm.setStyleName("m-red-text");
+      itm.setIcon(VaadinIcons.EXCLAMATION);
+      itm.setDescription("Irreversibly remove player emails and real names");
     ret.addSeparator();
     ret.addItem("(Dev only) Add Image to database", addImageClicked).setIcon(VaadinIcons.TOOLS);
     ret.addItem("(Dev only) Display card cache counts", showCardCacheCounts).setIcon(VaadinIcons.TOOLS);
