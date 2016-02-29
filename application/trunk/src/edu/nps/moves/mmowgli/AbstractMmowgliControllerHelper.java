@@ -1380,4 +1380,31 @@ public class AbstractMmowgliControllerHelper
         });
 
   }
+  @SuppressWarnings("serial")
+  public void handlePurgePii()
+  {
+    ConfirmDialog.show(UI.getCurrent(), "Important:",
+      "This is an action that is typically taken only once in the lifetime of a Mmowgli game.  It is IRREVERSIBLE, and will permanently remove player names and email addresses from the database.",
+      "Yes, do it", "No, cancel that request", new ConfirmDialog.Listener()
+      {
+        public void onClose(ConfirmDialog dialog)
+        {
+          if (dialog.isConfirmed()) {
+            ConfirmDialog.show(UI.getCurrent(), "Last Chance!!",
+              "Are you sure you want to purge the database of all personally-identifiable-information?  All other player sessions will first be terminated.",
+              "Yes, do it", "No, cancel that request", new ConfirmDialog.Listener()
+              {
+                public void onClose(ConfirmDialog dialog)
+                {
+                  if (dialog.isConfirmed()) {
+                    HSess.init();
+                    AppMaster.instance().purgeAllPiiTL();
+                    HSess.close();
+                  }
+                }
+              });
+            }
+          }
+        });
+  }
 }

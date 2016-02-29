@@ -401,6 +401,11 @@ public class MCacheManager implements JmsReceiver
     return userHelper.getUsersQuickFullList();
   }
 
+  public void rebuildQuickUsersTL()
+  {
+    userHelper.rebuildQuickUsersTL();    
+  }
+
   public void putObject(Object obj)
   {
     if(obj.getClass().equals(GameEvent.class))

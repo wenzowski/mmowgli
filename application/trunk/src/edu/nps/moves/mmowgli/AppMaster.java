@@ -36,6 +36,7 @@ import javax.imageio.ImageIO;
 import javax.net.ssl.*;
 import javax.servlet.ServletContext;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
@@ -55,6 +56,8 @@ import edu.nps.moves.mmowgli.cache.MCacheManager;
 import edu.nps.moves.mmowgli.components.BadgeManager;
 import edu.nps.moves.mmowgli.components.KeepAliveManager;
 import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.pii.EmailPii;
+import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.export.ReportGenerator;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.hibernate.VHib;
@@ -66,7 +69,9 @@ import edu.nps.moves.mmowgli.messaging.InterTomcatIO;
 import edu.nps.moves.mmowgli.messaging.MMessagePacket;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.modules.scoring.ScoreManager2;
-import edu.nps.moves.mmowgli.utility.*;
+import edu.nps.moves.mmowgli.utility.ClusterMasterController;
+import edu.nps.moves.mmowgli.utility.MailManager;
+import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer;
 import edu.nps.moves.mmowgli.utility.MiscellaneousMmowgliTimer.MSysOut;
 import edu.nps.moves.mmowgliMobile.MmowgliMobileVaadinServlet;
 
@@ -928,12 +933,28 @@ public class AppMaster
   /* This is intended to be used before redeploying */
   public void  killAllSessionsAndTellOtherNodesTL()
   {
-    killAllSessionsTL();
-    appMasterMessaging.sendKillAllSessionsCommand();
+    killAllSessionsAndTellOtherNodesTL(true);
   }
   
+  public void killAllSessionsAndTellOtherNodesTL(boolean meToo)
+  {
+    killAllSessionsTL(meToo);
+    appMasterMessaging.sendKillAllSessionsCommand();    
+  }
+  
+  // This is also entered remotely
   public void killAllSessionsTL()
   {
+    killAllSessionsTL(true);
+  }
+  
+  private boolean sessionsKilled=false;
+  public void killAllSessionsTL(boolean meToo)
+  {
+    if(sessionsKilled)
+      return;
+    sessionsKilled=true;
+    
     GameLinks links = GameLinks.getTL();
     String thanks = links.getThanksForPlayingLink();
     
@@ -941,12 +962,65 @@ public class AppMaster
       Iterator<VaadinSession> itr = sessionsInThisMmowgliNode.iterator();
       while (itr.hasNext()) {
         VaadinSession sess = itr.next();
+        if(!meToo &&(UI.getCurrent().getSession() == sess))
+          continue;
         for (UI ui : sess.getUIs()) {
           ui.getPage().setLocation(thanks);
           ui.close();
         }
         sess.close();
       }
+    }
+  }
+  
+  @SuppressWarnings("unchecked")
+  public void purgeAllPiiTL()
+  {
+    killAllSessionsAndTellOtherNodesTL(false);
+
+    // Handle encrypted classes
+    Session pii_sess = VHibPii.getASession();
+    pii_sess.beginTransaction();
+    
+    fullPurgePii(pii_sess, "Query2Pii", "VipPii");
+    jamEmails(pii_sess, "noone@example.org");
+
+    List<UserPii> lis = (List<UserPii>) pii_sess.createCriteria(UserPii.class).list();
+    for (UserPii upii : lis) {
+      User usr = (User)HSess.get().get(User.class, upii.getUserObjectId());
+      String nm = usr.getUserName();
+      upii.setRealFirstName(nm + "_firstname");
+      upii.setRealLastName(nm + "_lastname");
+      upii.setFacebookId(null);
+      upii.setLinkedInId(null);
+      upii.setTwitterId(null);
+      pii_sess.update(upii);
+    }
+    pii_sess.getTransaction().commit();
+    pii_sess.close();
+    
+    getMcache().rebuildQuickUsersTL();
+    
+    // now we're done, setup for kill all sessions again
+    new Timer("PiiPurgeFinalize").schedule(
+        new TimerTask(){ public void run() {sessionsKilled=false;} }, 5000l);
+  }
+  
+  private void fullPurgePii(Session sess, String... classname)
+  {
+    Query query = sess.createQuery("DELETE FROM Query2Pii"); 
+    query.executeUpdate();
+    query = sess.createQuery("DELETE FROM VipPii");
+    query.executeUpdate();    
+  }
+  
+  @SuppressWarnings("unchecked")
+  private void jamEmails(Session sess, String newAddr)
+  {
+    List<EmailPii> ems = (List<EmailPii>) sess.createCriteria(EmailPii.class).list();
+    for(EmailPii ep : ems) {
+      ep.setAddress(newAddr);
+      sess.update(ep);
     }
   }
   
