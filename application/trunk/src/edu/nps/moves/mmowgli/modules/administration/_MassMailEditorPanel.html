@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="UTF-8" name="design-properties" content="{&quot;RULERS_VISIBLE&quot;:true,&quot;GUIDELINES_VISIBLE&quot;:false,&quot;SNAP_TO_OBJECTS&quot;:true,&quot;SNAP_TO_GRID&quot;:true,&quot;SNAPPING_DISTANCE&quot;:10,&quot;JAVA_SOURCES_ROOT&quot;:&quot;src&quot;,&quot;THEME&quot;:&quot;mmowgli2&quot;}">
+ </head> 
+ <body> 
+  <vaadin-vertical-layout spacing="true" size-full="true" margin="true"> 
+   <vaadin-form-layout width="75%" margin-left="true" margin-right="true" margin-top="false"> 
+    <vaadin-horizontal-layout caption="Choose existing message" primary-style-name="v-horizontallayout" width-full="true"> 
+     <vaadin-combo-box input-prompt="select from message subjects" item-caption-mode="id" width-full="true" _id="existingCombo" :expand=""> 
+      <option>Option 1</option> 
+      <option>Option 2</option> 
+      <option>Option 3</option> 
+     </vaadin-combo-box> 
+     <vaadin-button enabled="false" plain-text="" _id="selectExistingButt">
+       Select 
+     </vaadin-button> 
+    </vaadin-horizontal-layout> 
+    <vaadin-horizontal-layout caption="Create Message" primary-style-name="v-horizontallayout"> 
+     <vaadin-button description="asdfdsaf" plain-text="" _id="newMessageButt">
+       New 
+     </vaadin-button> 
+    </vaadin-horizontal-layout> 
+   </vaadin-form-layout> 
+   <vaadin-label width="80%" plain-text="" _id="hintLab" :center="">
+     Hint: To create a new message that is a modification of an existing one, first choose an existing message, press the "Select" button, then copy the message contents. Next, create a new message with the "New" button and paste the contents in place. The message chooser lists messages by subject, so you may want to make sure your message subjects are unique. 
+   </vaadin-label> 
+   <vaadin-vertical-layout primary-style-name="v-verticallayout" style-name="m-greyborder" size-full="true" margin-left="true" margin-right="true" margin-bottom="true" _id="editorVL" :expand=""> 
+    <vaadin-form-layout margin-top="false"> 
+     <vaadin-horizontal-layout caption="Recipients" primary-style-name="v-horizontallayout" style-name="m-greyborder" width-full="true"> 
+      <vaadin-form-layout margin="true"> 
+       <vaadin-option-group item-caption-mode="id" immediate="true" _id="recipientOptionGroup"> 
+        <option>All signups</option> 
+        <option>All players</option> 
+        <option>Game masters</option> 
+        <option>Game administrators</option> 
+       </vaadin-option-group> 
+       <vaadin-text-field description="Space or comma-separated" enabled="false" width-full="true" _id="customTF"></vaadin-text-field> 
+      </vaadin-form-layout> 
+     </vaadin-horizontal-layout> 
+     <vaadin-text-field caption="Subject" width-full="true" _id="subjectTF"></vaadin-text-field> 
+    </vaadin-form-layout> 
+    <vaadin-rich-text-area size-full="true" _id="richTextArea" :expand=""></vaadin-rich-text-area> 
+   </vaadin-vertical-layout> 
+   <vaadin-horizontal-layout primary-style-name="v-horizontallayout" spacing="true" width-full="true" _id="buttHL" :right=""> 
+    <vaadin-button plain-text="" _id="openMailJobButt" :expand="">
+      Schedule mail job 
+    </vaadin-button> 
+    <vaadin-button enabled="false" plain-text="" _id="saveButt">
+      Save 
+    </vaadin-button> 
+    <vaadin-button plain-text="" _id="cancelButt">
+      Cancel/Close 
+    </vaadin-button> 
+   </vaadin-horizontal-layout> 
+  </vaadin-vertical-layout>  
+ </body>
+</html>
