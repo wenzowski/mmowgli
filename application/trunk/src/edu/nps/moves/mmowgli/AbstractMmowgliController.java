@@ -51,6 +51,7 @@ import edu.nps.moves.mmowgli.modules.actionplans.ActionDashboard;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2;
 import edu.nps.moves.mmowgli.modules.actionplans.HowToWinActionPopup;
 import edu.nps.moves.mmowgli.modules.administration.GameDesignPanel;
+import edu.nps.moves.mmowgli.modules.administration.MassMailEditorPanel;
 import edu.nps.moves.mmowgli.modules.administration.VipListManager;
 import edu.nps.moves.mmowgli.modules.cards.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.*;
@@ -309,6 +310,12 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
       
       case MENUGAMEADMIN_DB_PII_PURGE:
         helper.handlePurgePii();
+        break;
+        
+      case MENUGAMEMASTERMASSMAIL:
+        MassMailEditorPanel.showDialog();
+        break;
+        
       default:
         MSysOut.println(SYSTEM_LOGS,"TODO, AbstractMmowgliController.menuEvent(): "+mEv);
     }

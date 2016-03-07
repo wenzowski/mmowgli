@@ -132,7 +132,7 @@ public class AppMaster
     //sysOutLogLevel |= JMS_LOGS;
     sysOutLogLevel |= ERROR_LOGS;
     //sysOutLogLevel |= MISC_LOGS;
-    //sysOutLogLevel |= MAIL_LOGS;
+    sysOutLogLevel |= MAIL_LOGS;
     //sysOutLogLevel |= MOBILE_LOGS;
     sysOutLogLevel |= NEWUSER_CREATION_LOGS;
     //sysOutLogLevel |= DEBUG_LOGS;

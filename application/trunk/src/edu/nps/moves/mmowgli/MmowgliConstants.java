@@ -55,7 +55,7 @@ public class MmowgliConstants
   public static String MOBILE_QR_IMAGE_FILETYPE = "png";
   
   // Database version matching this code
-  public static long DATABASE_VERSION = 20160210; // db which matches this code
+  public static long DATABASE_VERSION = 20160307; // db which matches this code
   /*
   public static long DATABASE_VERSION_BEFORE_EMAILPII_DIGESTS = 20130626;
   public static long DATABASE_VERSION_AFTER_EMAILPII_DIGESTS = 20130627;
