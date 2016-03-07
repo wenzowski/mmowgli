@@ -411,7 +411,6 @@ public class GameEventLogger
 		sb.append("\".");
 		GameEvent ev = new GameEvent(GameEvent.EventType.EMAILSENT, sb.toString());
 		GameEvent.saveTL(ev);
-		;
 	}
 
 	public static void logEmailFailureTL(QPacket qp, Throwable ex)
@@ -423,4 +422,12 @@ public class GameEventLogger
 		GameEvent ev = new GameEvent(GameEvent.EventType.EMAILFAILURE,sb.toString());
 		GameEvent.saveTL(ev);
 	}
+
+  public static void logMassMailJobSubmitted(String userName)
+  {
+    StringBuilder sb = new StringBuilder(userName );
+    sb.append(" submitted a mass mail job");
+    GameEvent ev = new GameEvent(GameEvent.EventType.MASSMAILSUBMITTED,sb.toString());
+    GameEvent.saveTL(ev);     
+  }
 }
