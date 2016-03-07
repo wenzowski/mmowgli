@@ -1,5 +1,20 @@
 # This is a list of SQL commands which may be useful to update old game databases. This file is not intended to be run in its entirety.
 # Remember to also update the MmowgliConstants field DATABASE_VERSION
+
+UPDATE `Game` SET `version` = '20160307' WHERE `id` = '1';
+CREATE TABLE `MailJob` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `subject` varchar(255) DEFAULT NULL,
+  `text` longtext,
+  `receivers` int(11) DEFAULT NULL,
+  `complete` bit(1) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `results` varchar(255) DEFAULT NULL,
+  `whenStarted` datetime DEFAULT NULL,
+  `whenCompleted` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 UPDATE `Game` SET `version` = '20160210' WHERE `id` = '1';
 ALTER TABLE `Game` ADD `numTopCardsInRows` INT(11)  UNSIGNED  NOT NULL  DEFAULT '4'  AFTER `useCAClogin`;
 

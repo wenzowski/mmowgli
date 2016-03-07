@@ -168,6 +168,11 @@ public class MailManager
     mailToUserTL(from, to, subject, body, null, Channel.BOTH);
   }
   
+  public void massMail(String to, String from, String subject, String body, boolean isHtml)
+  {
+    mailer.send(to, from, subject, body, isHtml);    
+  }
+  
   @HibernateUserUpdate
   @HibernateUpdate
   public void mailToUserTL(Object from, Object to, String subject, String body, String ccEmail, Channel chan)

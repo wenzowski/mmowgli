@@ -272,6 +272,10 @@ public class MCacheUserHelper
       update(u);
     }
     
+    public QuickUser()
+    {
+      
+    }
     public void update(User u)
     {
       setId(u.getId());
