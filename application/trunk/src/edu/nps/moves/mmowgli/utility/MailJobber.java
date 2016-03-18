@@ -1,5 +1,7 @@
 package edu.nps.moves.mmowgli.utility;
 
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
+
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -7,7 +9,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.hibernate.Session;
 
 import edu.nps.moves.mmowgli.AppMaster;
-import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 import edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser;
 import edu.nps.moves.mmowgli.db.MailJob;
 import edu.nps.moves.mmowgli.db.MailJob.Receivers;
@@ -25,6 +26,11 @@ public class MailJobber implements Runnable
     MailJobber.instance().startJob(job);
   }
 
+  public static void killJob(MailJob job)
+  {
+    MailJobber.instance().stopJob(job);
+  }
+  
   private static MailJobber me;
 
   public static MailJobber instance()
@@ -37,7 +43,8 @@ public class MailJobber implements Runnable
   /**************/
   private Thread thread;
   private BlockingQueue<MailJob> jobQueue;
-
+  private MailJob runningJob;
+  
   private MailJobber()
   {
     jobQueue = new LinkedBlockingQueue<MailJob>();
@@ -54,16 +61,18 @@ public class MailJobber implements Runnable
   @Override
   public void run()
   {
-    MailJob job;
-    try {
-      while (true) {
-        job = jobQueue.take();
-        processJob(job);
+    while (true) {
+      try {
+        synchronized(jobQueue) {
+          runningJob = jobQueue.take();
+        }
+        processJob();
       }
-    }
-    catch (InterruptedException ex) {
-      MSysOut.println(ERROR_LOGS,"MailJobber thread interrupted and terminated");
-      thread = null;
+      catch (InterruptedException ex) {
+        MSysOut.println(ERROR_LOGS, "MailJobber thread interrupted and terminated");
+        thread = null;
+        runningJob = null;
+      }
     }
   }
 
@@ -73,41 +82,76 @@ public class MailJobber implements Runnable
       startThread();
     jobQueue.add(job);
   }
-
-  private void processJob(MailJob _j)
+  
+  private void stopJob(MailJob job)
+  {
+    synchronized(jobQueue) {
+      Iterator<MailJob> itr = jobQueue.iterator();
+      while(itr.hasNext()) {
+        MailJob j = itr.next();
+        if(j.getId() == job.getId()) {
+          jobQueue.remove(j);
+          break;
+        }
+      }
+      
+      if(runningJob != null && runningJob.getId()==job.getId())
+        if(thread != null)
+          thread.interrupt();
+    }
+  }
+  
+  private void processJob() throws InterruptedException
   {
     HSess.init();
-    MailJob job = (MailJob)HSess.get().merge(_j);
-    job.setStatus("Begun");
-    job.setWhenStarted(new Date());
-    HSess.get().update(job);
-    HSess.close();
-    
-    HSess.init();
-    
-    List<QuickUser> lis = buildRecvList(job);
-    
-    Iterator<QuickUser> itr = lis.iterator();
-    MailManager mmgr = AppMaster.instance().getMailManager();
-    String ret = mmgr.buildMmowgliReturnAddressTL();
-    HSess.close();
-    
-    while(itr.hasNext()) {
-      QuickUser uu = itr.next();
-      if(!uu.isLockedOut()) {
-        mmgr.massMail(uu.getEmail(), ret, job.getSubject(), "<html>"+job.getText()+"<html>", true);
-        MSysOut.println(MAIL_LOGS, "Mass mail sent to "+uu.email);
-        try{Thread.sleep(SEND_SEPARATION_MS);}catch(Exception ex){}
+    try {
+      MailJob job = (MailJob) HSess.get().merge(runningJob);
+      job.setStatus("Begun");
+      job.setWhenStarted(new Date());
+      HSess.get().update(job);
+      HSess.close();
+
+      HSess.init();
+
+      List<QuickUser> lis = buildRecvList(job);
+
+      Iterator<QuickUser> itr = lis.iterator();
+      MailManager mmgr = AppMaster.instance().getMailManager();
+      String ret = mmgr.buildMmowgliReturnAddressTL();
+      HSess.close();
+
+      while (itr.hasNext()) {
+        QuickUser uu = itr.next();
+        if (!uu.isLockedOut()) {
+          mmgr.massMail(uu.getEmail(), ret, job.getSubject(), "<html>" + job.getText() + "<html>", true);
+          MSysOut.println(MAIL_LOGS, "Mass mail sent to " + uu.email);
+          Thread.sleep(SEND_SEPARATION_MS);
+        }
       }
+
+      HSess.init();
+      updateJob(job,"Complete");
     }
     
-    HSess.init();
-    MailJob jj = (MailJob)HSess.get().merge(job);
-    jj.setStatus("Complete");
+    catch (Throwable t) {
+      if(HSess.get() == null)
+        HSess.init();
+      updateJob(runningJob,"Killed");
+      throw t; // back up to run() catch
+    }
+    
+    finally {
+      HSess.close();
+    }
+  }
+  
+  private void updateJob(MailJob job, String status)
+  {
+    MailJob jj = (MailJob) HSess.get().merge(job);
+    jj.setStatus(status);
     jj.setComplete(true);
     jj.setWhenCompleted(new Date());
-    HSess.get().update(jj);
-    HSess.close();
+    HSess.get().update(jj);    
   }
   
   private List<QuickUser> buildRecvList(MailJob job)
