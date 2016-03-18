@@ -45,7 +45,6 @@ import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.registrationlogin.RegistrationPagePopupFirstA;
 import edu.nps.moves.mmowgli.modules.registrationlogin.Vips;
 import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
-import edu.nps.moves.mmowgli.utility.BulkMailHandler;
 
 
 /**
@@ -296,8 +295,6 @@ public class SignupsTable extends Table
   @SuppressWarnings("serial")
   public static void showDialog(String title)
   {
-    final Button bulkMailButt = new Button("Initiate bulk mail job sending to filtered list");
-    
     final Button emailButt = new Button("Compose email");
     emailButt.setDescription("Opens editing dialog to compose an email message to the selected individuals");
     final Button displayButt = new Button("Display as plain text");
@@ -332,8 +329,6 @@ public class SignupsTable extends Table
     HorizontalLayout buttHL = new HorizontalLayout();
     buttHL.setSpacing(true);
    
-    buttHL.addComponent(bulkMailButt);
-    bulkMailButt.setImmediate(true);;
     Label lab = new Label("");
     buttHL.addComponent(lab );
     buttHL.setExpandRatio(lab, 1.0f);
@@ -388,16 +383,7 @@ public class SignupsTable extends Table
         HSess.close();
       }
     });
-    
-    bulkMailButt.addClickListener(new ClickListener()
-    {
-      @Override
-      public void buttonClick(ClickEvent event)
-      {
-        BulkMailHandler.showDialog((QueryContainer)tab.getContainerDataSource());
-      }     
-    });
-    
+        
     vl.addComponent(buttHL);
     vl.setComponentAlignment(buttHL, Alignment.MIDDLE_RIGHT);
 
