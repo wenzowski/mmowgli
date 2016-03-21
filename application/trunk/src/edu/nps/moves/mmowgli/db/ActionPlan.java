@@ -96,7 +96,7 @@ public class ActionPlan implements Serializable
   SortedSet<Message> comments = new TreeSet<Message>();
   SortedSet<Message> authorMessages = new TreeSet<Message>();
   String       discussion; // replaces authorMessages?
-  ChatLog      chatLog = new ChatLog();
+  ChatLog      chatLog;
   List<Media>  media = new ArrayList<Media>(); // images and videos
   
   String       planInstructions;
@@ -118,7 +118,7 @@ public class ActionPlan implements Serializable
   String             howWillItChangeText;
   SortedSet<Edits>   howChangeEditHistory = new TreeSet<Edits>();
 
-  GoogleMap    map = new GoogleMap();
+  GoogleMap    map;
   double       priceToInvest = 200.0d;
   
   Date        creationDate;
