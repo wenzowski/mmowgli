@@ -291,7 +291,12 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
           try {
             if (checkInvitees() && checkChainRoot()) {
               unloadTextFields();//form.commit();
-              ChatLog.saveTL(ap.getChatLog());
+              ChatLog log = new ChatLog();
+              ap.setChatLog(log);
+              ChatLog.saveTL(log);
+              GoogleMap map = new GoogleMap();
+              ap.setMap(map);
+              GoogleMap.saveTL(map);
               
               notifyInviteesTL();   //@HibernateUserUpdate  // put invitees on list, but doesn't update (which was a bug)
               
