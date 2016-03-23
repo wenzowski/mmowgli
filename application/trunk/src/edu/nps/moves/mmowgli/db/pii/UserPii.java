@@ -213,9 +213,11 @@ public class UserPii implements Serializable
   }
 
   /**
-   * This user can have many email addressess
+   * This user can have many email addressess, one would think the java List would keep the data ordered,
+   * but you have to use the orderby anno to keep the last ones entered on the top of the list
    */
   @OneToMany
+  @OrderBy("id DESC")
   public List<EmailPii> getEmailAddresses()
   {
     return emailAddresses;
