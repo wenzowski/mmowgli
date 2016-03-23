@@ -26,9 +26,12 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.APPLICATION_SCREEN_WIDTH;
 import static edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser.*;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jasypt.util.password.StrongPasswordEncryptor;
@@ -49,7 +52,9 @@ import com.vaadin.ui.Window.CloseListener;
 
 import edu.nps.moves.mmowgli.*;
 import edu.nps.moves.mmowgli.cache.MCacheUserHelper.QuickUser;
-import edu.nps.moves.mmowgli.components.*;
+import edu.nps.moves.mmowgli.components.HtmlLabel;
+import edu.nps.moves.mmowgli.components.MmowgliComponent;
+import edu.nps.moves.mmowgli.components.SendMessageWindow;
 import edu.nps.moves.mmowgli.db.*;
 import edu.nps.moves.mmowgli.db.pii.UserPii;
 import edu.nps.moves.mmowgli.hibernate.HSess;
@@ -391,7 +396,7 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     });
     return tab;
   }
-
+ 
   class columnCustomizer implements Table.ColumnGenerator
   {
     private static final long serialVersionUID = 1938821794468835620L;
@@ -887,7 +892,10 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       user.setEmailConfirmed(confirmedCb.getValue());
       user.setUserName(newUname);
       
-      UserPii upii = VHibPii.getUserPii((Long)uid);
+      Session sessPii = VHibPii.getASession();
+      sessPii.beginTransaction();
+
+      UserPii upii = VHibPii.getUserPii((Long)uid, sessPii, false);
       upii.setRealFirstName(tweekString(firstTf.getValue()));
       upii.setRealLastName(tweekString(lastTf.getValue()));
       
@@ -895,11 +903,14 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
         upii.setPassword(new StrongPasswordEncryptor().encryptPassword(newPw));
       
       //todo Somehow some were sneaking in w/out emails
-
-      VHibPii.newUserPiiEmail((Long)uid,newEmail);
-
+      VHibPii.newUserPiiEmail(upii,newEmail,sessPii);
+      sessPii.update(upii);
+      
+      sessPii.getTransaction().commit();
+      sessPii.close();
+      //VHibPii.update(upii);
+      
       User.updateTL(user);
-      VHibPii.update(upii);
       
       // if the user name has been changed, a few more things need to happen
       if(!newUname.equals(oldUname)) {

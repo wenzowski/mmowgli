@@ -188,7 +188,19 @@ public class VHibPii extends AbstractVHib
     }
     sess.close();
   }
-   
+ 
+  public static void newUserPiiEmail(UserPii upii, String newEmail, Session sessWactiveTrans)
+  {
+    List<EmailPii> lis = upii.getEmailAddresses();
+    if(lis.size()<=0 || ! lis.get(0).getAddress().equalsIgnoreCase(newEmail)) {
+      EmailPii ePii = new EmailPii();
+      ePii.setAddress(newEmail);
+      sessWactiveTrans.save(ePii);     
+      lis.add(0, ePii);  // adds to the top, pushing the existing one down...!! except it doesn't persist!
+      // 23 Mar 2016, need annotation in UserPii email collection to keep it sorted by reverse idå
+    }
+  }
+  
   /* clears the email list, and forces as entry 0 */
   public static void setUserPiiEmail(Long uid, String newEmail)
   {
