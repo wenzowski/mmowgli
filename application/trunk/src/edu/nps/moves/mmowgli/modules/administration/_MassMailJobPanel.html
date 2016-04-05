@@ -1,36 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
  <head> 
   <meta charset="UTF-8" name="design-properties" content="{&quot;RULERS_VISIBLE&quot;:true,&quot;GUIDELINES_VISIBLE&quot;:false,&quot;SNAP_TO_OBJECTS&quot;:true,&quot;SNAP_TO_GRID&quot;:true,&quot;SNAPPING_DISTANCE&quot;:10,&quot;JAVA_SOURCES_ROOT&quot;:&quot;src&quot;,&quot;THEME&quot;:&quot;mmowgli2&quot;}">
   <meta charset="UTF-8" name="package-mapping" content="edu_nps_moves_mmowgli_modules_administration:edu.nps.moves.mmowgli.modules.administration">
  </head> 
  <body> 
-  <vaadin-vertical-layout spacing="true" size-full="true" margin="true"> 
-   <vaadin-form-layout> 
-    <vaadin-horizontal-layout caption="To" primary-style-name="v-horizontallayout" style-name="m-greyborder" width-full="true"> 
-     <vaadin-text-field width-full="true" _id="recipientTF"></vaadin-text-field> 
-    </vaadin-horizontal-layout> 
-    <vaadin-horizontal-layout caption="Subject" primary-style-name="v-horizontallayout" style-name="m-greyborder" width-full="true"> 
-     <vaadin-text-field width-full="true" _id="subjectTF"></vaadin-text-field> 
-    </vaadin-horizontal-layout> 
-   </vaadin-form-layout> 
-   <vaadin-horizontal-layout primary-style-name="v-horizontallayout" spacing="true" size-full="true" :expand=""> 
-    <vaadin-label size-auto="true">
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Text&nbsp;&nbsp; 
-    </vaadin-label> 
-    <vaadin-rich-text-area style-name="m-greyborder" size-full="true" _id="textArea" :expand="">
-      0.0 
-    </vaadin-rich-text-area> 
-   </vaadin-horizontal-layout> 
-   <vaadin-grid caption="Existing Mail Jobs" width-full="true" height="200px" _id="grid"></vaadin-grid> 
-   <vaadin-horizontal-layout primary-style-name="v-horizontallayout" width-full="true" margin-left="true" margin-right="true" _id="buttsHL"> 
-    <vaadin-button plain-text="" _id="scheduleButt">
+  <vaadin-vertical-layout spacing size-full margin> 
+   <vaadin-grid caption="Existing Mail Jobs" width-full height="200px" _id="grid"></vaadin-grid> 
+   <vaadin-horizontal-layout width-full margin-left margin-right _id="buttsHL"> 
+    <vaadin-button plain-text _id="scheduleButt">
       Schedule selected job 
     </vaadin-button> 
-    <vaadin-button plain-text="" _id="closeButt" :right="">
+    <vaadin-button plain-text _id="closeButt" :right>
       Close 
     </vaadin-button> 
    </vaadin-horizontal-layout> 
+   <vaadin-vertical-layout style-name="m-lightgrey-border" spacing margin :expand> 
+    <vaadin-grid-layout width-full _id="topGridLay"> 
+     <row> 
+      <column> 
+       <vaadin-label size-auto :right> 
+        <b>To</b>:&nbsp;&nbsp; 
+       </vaadin-label> 
+      </column> 
+      <column> 
+       <vaadin-label _id="toLabel"></vaadin-label> 
+      </column> 
+     </row> 
+     <row> 
+      <column> 
+       <vaadin-label size-auto :right> 
+        <b>Subject:</b>&nbsp;&nbsp; 
+       </vaadin-label> 
+      </column> 
+      <column> 
+       <vaadin-label _id="subjectLabel"></vaadin-label> 
+      </column> 
+     </row> 
+    </vaadin-grid-layout> 
+    <vaadin-label _id="textLabel" :expand> 
+     <br> 
+     <br> 
+     <br> 
+    </vaadin-label> 
+   </vaadin-vertical-layout> 
   </vaadin-vertical-layout>  
  </body>
 </html>

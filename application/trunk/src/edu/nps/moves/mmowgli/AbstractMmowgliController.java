@@ -50,9 +50,7 @@ import edu.nps.moves.mmowgli.messaging.MessagingManager2.MMMessageListener2;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionDashboard;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPage2;
 import edu.nps.moves.mmowgli.modules.actionplans.HowToWinActionPopup;
-import edu.nps.moves.mmowgli.modules.administration.GameDesignPanel;
-import edu.nps.moves.mmowgli.modules.administration.MassMailEditorPanel;
-import edu.nps.moves.mmowgli.modules.administration.VipListManager;
+import edu.nps.moves.mmowgli.modules.administration.*;
 import edu.nps.moves.mmowgli.modules.cards.*;
 import edu.nps.moves.mmowgli.modules.gamemaster.*;
 import edu.nps.moves.mmowgli.modules.maps.LeafletMap;
@@ -312,8 +310,12 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
         helper.handlePurgePii();
         break;
         
-      case MENUGAMEMASTERMASSMAIL:
+      case MENUGAMEMASTERCREATEMASSMAIL:
         MassMailEditorPanel.showDialog();
+        break;
+        
+      case MENUGAMEMASTERSUBMITMASSMAIL:
+        MassMailJobPanel.show(null);
         break;
         
       default:

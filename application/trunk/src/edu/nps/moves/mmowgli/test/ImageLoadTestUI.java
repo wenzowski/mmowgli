@@ -23,7 +23,8 @@ public class ImageLoadTestUI extends UI
   @Override
   protected void init(VaadinRequest request)
   {
-    BrowserPerformanceLogger.registerCurrentPage();
+    BrowserPerformanceLogger.registerCurrentPageLoadTest();
+    BrowserPerformanceLogger.registerCurrentPage(); // for previous test
     vl = new VerticalLayout();
     setContent(vl);    
 
@@ -38,7 +39,8 @@ public class ImageLoadTestUI extends UI
   @Override
   public void detach()
   {
-    BrowserPerformanceLogger.unregisterCurrentPage();
+    BrowserPerformanceLogger.unregisterCurrentPage(); // previous test
+    BrowserPerformanceLogger.unregisterCurrentPageLoadTest();
     super.detach();
   }
 

@@ -1,5 +1,7 @@
 package edu.nps.moves.mmowgli.modules.administration;
 
+import java.util.Collection;
+
 import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.event.SelectionEvent.SelectionListener;
@@ -25,7 +27,7 @@ public class MassMailJobPanel extends _MassMailJobPanel implements SelectionList
     Window win=new Window();
     win.setCaption("Mass Mail Job Window");
     win.setContent(new MassMailJobPanel(job,win));
-    win.setWidth("850px");
+    win.setWidth("950px");
     win.setHeight("780px");
     UI.getCurrent().addWindow(win);
     win.center();    
@@ -35,8 +37,10 @@ public class MassMailJobPanel extends _MassMailJobPanel implements SelectionList
   public MassMailJobPanel(MailJob job, Window win)
   {
     this.win = win;
-    fillWidgets(job);
+    if(job != null)
+     fillWidgets(job);
     
+    topGridLay.setColumnExpandRatio(1, 1.0f);
     HbnContainer<MailJob> cont = new HbnContainer<MailJob>(MailJob.class,HSess.getSessionFactory());
     grid.setContainerDataSource(cont);
     grid.setColumns((Object[])columns);
@@ -44,10 +48,16 @@ public class MassMailJobPanel extends _MassMailJobPanel implements SelectionList
     grid.setSelectionMode(SelectionMode.SINGLE);
 
     grid.addSelectionListener(this);
-    grid.select(job.getId());
+    if(job != null)
+      grid.select(job.getId());
     
     closeButt.addClickListener(closeListener);
-    this.scheduleButt.addClickListener(scheduleListener);
+    scheduleButt.addClickListener(scheduleListener);
+    
+    if(job == null && cont.size()>0) {
+      Collection<?> ids = cont.getItemIds();
+      grid.select(ids.toArray()[0]);
+    }
   }
   
   @SuppressWarnings("serial")
@@ -73,17 +83,9 @@ public class MassMailJobPanel extends _MassMailJobPanel implements SelectionList
   
   private void fillWidgets(MailJob job)
   {
-    subjectTF.setReadOnly(false);
-    recipientTF.setReadOnly(false);
-    textArea.setReadOnly(false);
-    
-    subjectTF.setValue(job.getSubject());
-    recipientTF.setValue(job.getReceivers().toString());
-    textArea.setValue(job.getText());
-    
-    subjectTF.setReadOnly(true);
-    recipientTF.setReadOnly(true);
-    textArea.setReadOnly(true);    
+    subjectLabel.setValue(job.getSubject());
+    toLabel.setValue(job.getReceivers().toString());
+    textLabel.setValue(job.getText());
   }
   
   @Override
@@ -96,6 +98,8 @@ public class MassMailJobPanel extends _MassMailJobPanel implements SelectionList
   private MailJob getSelected()
   {
     Object id = grid.getSelectedRow();
+    if(id == null) return null;
+    
     @SuppressWarnings("rawtypes")
     HbnContainer.EntityItem o = (HbnContainer.EntityItem)grid.getContainerDataSource().getItem(id);
     MailJob job = (MailJob) o.getPojo();

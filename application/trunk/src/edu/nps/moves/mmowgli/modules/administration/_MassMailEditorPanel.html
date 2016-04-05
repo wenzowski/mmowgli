@@ -5,29 +5,28 @@
  </head> 
  <body> 
   <vaadin-vertical-layout spacing size-full margin> 
-   <vaadin-form-layout width="75%" margin-left margin-right margin-top="false"> 
-    <vaadin-horizontal-layout caption="Choose existing message" spacing width-full> 
+   <vaadin-form-layout style-name="m-greyborder" width="75%" margin-left margin-right margin-top="false"> 
+    <vaadin-horizontal-layout caption="Choose existing message to edit" spacing width-full> 
      <vaadin-combo-box input-prompt="select from message subjects" item-caption-mode="id" width-full _id="existingCombo" :expand> 
       <option>Option 1</option> 
       <option>Option 2</option> 
       <option>Option 3</option> 
      </vaadin-combo-box> 
-     <vaadin-button enabled="false" plain-text _id="selectExistingButt">
-       Select 
-     </vaadin-button> 
     </vaadin-horizontal-layout> 
-    <vaadin-horizontal-layout caption="Create Message"> 
-     <vaadin-button description="asdfdsaf" plain-text _id="newMessageButt">
+    <vaadin-label caption="or" size-auto></vaadin-label> 
+    <vaadin-horizontal-layout caption="Create message"> 
+     <vaadin-button description="" plain-text _id="newMessageButt">
        New 
      </vaadin-button> 
     </vaadin-horizontal-layout> 
    </vaadin-form-layout> 
    <vaadin-label width="80%" plain-text _id="hintLab" :center>
-     Hint: To create a new message that is a modification of an existing one, first choose an existing message, press the "Select" button, then copy the message contents. Next, create a new message with the "New" button and paste the contents in place. The message chooser lists messages by subject, so you may want to make sure your message subjects are unique. 
+     Hint: To create a new message that is a modification of an existing one, first choose an existing message, then copy the message contents. Next, create a new message with the "New" button and paste the contents in place. The message chooser lists messages by subject, so you may want to make sure your message subjects are unique. 
    </vaadin-label> 
    <vaadin-vertical-layout style-name="m-greyborder" size-full margin-left margin-right margin-bottom _id="editorVL" :expand> 
     <vaadin-form-layout margin-top="false"> 
-     <vaadin-horizontal-layout caption="Recipients" style-name="m-greyborder" width-full> 
+     <vaadin-text-field caption="Subject" enabled="false" null-representation="" width-full _id="subjectTF"></vaadin-text-field> 
+     <vaadin-horizontal-layout caption="Recipients" enabled="false" style-name="m-greyborder" width-full _id="recipientsHL"> 
       <vaadin-form-layout margin> 
        <vaadin-option-group item-caption-mode="id" immediate _id="recipientOptionGroup"> 
         <option>All signups</option> 
@@ -38,13 +37,12 @@
        <vaadin-text-field description="Space or comma-separated" enabled="false" width-full _id="customTF"></vaadin-text-field> 
       </vaadin-form-layout> 
      </vaadin-horizontal-layout> 
-     <vaadin-text-field caption="Subject" width-full _id="subjectTF"></vaadin-text-field> 
     </vaadin-form-layout> 
-    <vaadin-rich-text-area size-full _id="richTextArea" :expand></vaadin-rich-text-area> 
+    <vaadin-rich-text-area enabled="false" size-full _id="richTextArea" :expand></vaadin-rich-text-area> 
    </vaadin-vertical-layout> 
    <vaadin-horizontal-layout spacing width-full _id="buttHL" :right> 
     <vaadin-button plain-text _id="openMailJobButt" :expand>
-      Schedule mail job 
+      Go to mail job scheduling window 
     </vaadin-button> 
     <vaadin-button enabled="false" plain-text _id="saveButt">
       Save 

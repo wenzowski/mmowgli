@@ -26,13 +26,13 @@ import com.vaadin.ui.declarative.Design;
 public class _MassMailEditorPanel extends VerticalLayout
 {
   protected ComboBox existingCombo;
-  protected Button selectExistingButt;
   protected Button newMessageButt;
   protected Label hintLab;
   protected VerticalLayout editorVL;
+  protected TextField subjectTF;
+  protected HorizontalLayout recipientsHL;
   protected OptionGroup recipientOptionGroup;
   protected TextField customTF;
-  protected TextField subjectTF;
   protected RichTextArea richTextArea;
   protected HorizontalLayout buttHL;
   protected Button openMailJobButt;
