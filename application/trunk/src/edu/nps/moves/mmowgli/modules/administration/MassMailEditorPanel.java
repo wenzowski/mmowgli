@@ -21,7 +21,8 @@ public class MassMailEditorPanel extends _MassMailEditorPanel implements ClickLi
   
   private Window win;
   private MailJob mailJob = null;
-  private boolean editorDirty=false;
+  private boolean editorDirty = false;
+  private boolean fillingFields = false;
   
   public MassMailEditorPanel(Window w)
   {
@@ -35,7 +36,6 @@ public class MassMailEditorPanel extends _MassMailEditorPanel implements ClickLi
     openMailJobButt.addClickListener(this);
 
     saveButt.addClickListener(this);
-    selectExistingButt.addClickListener(this);
     
     recipientOptionGroup.select("All signups");
     
@@ -72,8 +72,6 @@ public class MassMailEditorPanel extends _MassMailEditorPanel implements ClickLi
       handleOpenJobWindow(event);
     else if(butt == this.saveButt)
       handleSave(event);
-    else if(butt == selectExistingButt)
-      handleSelectExisting(event);
   }
 
   @Override
@@ -81,19 +79,28 @@ public class MassMailEditorPanel extends _MassMailEditorPanel implements ClickLi
   {
     Property<?> prop = event.getProperty();
     if(prop == existingCombo) {
-      selectExistingButt.setEnabled(existingCombo.getValue() != null && existingCombo.getValue().toString().length()>0);
+      handleSelectExisting();      
       return;
     }
-    else if(prop == recipientOptionGroup)
+    else if(prop == recipientOptionGroup) {
       customTF.setEnabled(recipientOptionGroup.getValue().toString().equalsIgnoreCase("custom list"));
-    else if(prop == richTextArea)
-      ;
-    else if(prop == subjectTF)
-      ;
-    else if(prop == customTF)
-      ;
-    
-    editorDirty=true;
+      if(!fillingFields)
+        diddleSaveButt(true);
+    }
+    else if(prop == richTextArea) {
+      if(!fillingFields)
+        diddleSaveButt(true);
+    }
+    else if(prop == subjectTF) {
+      if(!fillingFields)
+        diddleSaveButt(true);
+    }
+    else if(prop == customTF) {
+      if(!fillingFields)
+        diddleSaveButt(true);
+    }
+    if(!fillingFields)
+      editorDirty=true;
   }
 
   @SuppressWarnings("serial")
@@ -135,6 +142,10 @@ public class MassMailEditorPanel extends _MassMailEditorPanel implements ClickLi
   
   private void _handleNewMessage()
   {
+    subjectTF.setEnabled(true);
+    richTextArea.setEnabled(true);
+    recipientsHL.setEnabled(true);
+    
     clearWidgets();
     mailJob = null;
     diddleSaveButt(true);
@@ -146,8 +157,8 @@ public class MassMailEditorPanel extends _MassMailEditorPanel implements ClickLi
   {
     if (editorDirty)
       Notification.show("Save your message first");
-    else if (mailJob == null)
-      Notification.show("First choose and select an existing message or create and save a new one.");
+    //else if (mailJob == null)
+      //Notification.show("First choose and select an existing message or create and save a new one.");
     else {
       MassMailJobPanel.show(mailJob);
       _handleCancel(); // close
@@ -164,11 +175,16 @@ public class MassMailEditorPanel extends _MassMailEditorPanel implements ClickLi
     diddleCreateWidgets(true);
     editorDirty=false;
     existingCombo.setValue(mailJob.getId());
+    
+    diddleSaveButt(false);
     HSess.close();
   }
       
-  private void handleSelectExisting(ClickEvent e)
+  private void handleSelectExisting()
   {
+    boolean valid  = existingCombo.getValue() != null && existingCombo.getValue().toString().length()>0;
+    if(!valid )
+      return;
     if(!askDirtyEditorOK(new Continuer(){public void further(){_handleSelectExisting();}}))
       return;
     _handleSelectExisting();
@@ -176,15 +192,19 @@ public class MassMailEditorPanel extends _MassMailEditorPanel implements ClickLi
   
   private void _handleSelectExisting()
   {
-    HSess.init();
+    Object key = HSess.checkInit();
     
     Long id =(Long) existingCombo.getValue();
     mailJob = (MailJob)HSess.get().get(MailJob.class, id);
     fillFieldsTL(mailJob);
-    diddleSaveButt(true);
     diddleCreateWidgets(false);
     editorDirty=false;
-    HSess.close();
+    
+    subjectTF.setEnabled(true);
+    recipientsHL.setEnabled(true);
+    richTextArea.setEnabled(true);
+    
+    HSess.checkClose(key);
   }
   
   private void diddleSaveButt(boolean save)
@@ -196,14 +216,15 @@ public class MassMailEditorPanel extends _MassMailEditorPanel implements ClickLi
   {
     newMessageButt.setEnabled(b);
     existingCombo.setEnabled(b);
-    selectExistingButt.setEnabled(b);
   }
   
   private void fillFieldsTL(MailJob mj)
   {
+    fillingFields = true;
     subjectTF.setValue(mj.getSubject());
     recipientOptionGroup.setValue(mj.getReceivers().toString());
     richTextArea.setValue(mj.getText());
+    fillingFields = false;
   }
   
   private void fillObject()

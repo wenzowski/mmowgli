@@ -67,15 +67,23 @@ public class BrowserPerformanceLogger
   public static void registerCurrentPage()
   {
     JavaScript.getCurrent().addFunction(BROWSERPERFORMANCELOGGER_CALLBACK_NAME, loadStatsCallback);
-    JavaScript.getCurrent().addFunction(BROWSERLOADTIME_CALLBACK_NAME, loadTimeCallback);
   }
-
+  
+  public static void registerCurrentPageLoadTest()
+  {
+    JavaScript.getCurrent().addFunction(BROWSERLOADTIME_CALLBACK_NAME, loadTimeCallback);    
+  }
+  
   public static void unregisterCurrentPage()
   {
     JavaScript.getCurrent().removeFunction(BROWSERPERFORMANCELOGGER_CALLBACK_NAME);
-    JavaScript.getCurrent().removeFunction(BROWSERLOADTIME_CALLBACK_NAME);
   }
-
+  
+  public static void unregisterCurrentPageLoadTest()
+  {
+    JavaScript.getCurrent().removeFunction(BROWSERLOADTIME_CALLBACK_NAME);    
+  }
+  
   @SuppressWarnings("serial")
   public static JavaScriptFunction loadStatsCallback = new JavaScriptFunction()
   {

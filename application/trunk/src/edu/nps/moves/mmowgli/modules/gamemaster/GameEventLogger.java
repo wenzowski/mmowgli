@@ -425,9 +425,11 @@ public class GameEventLogger
 
   public static void logMassMailJobSubmitted(String userName)
   {
+    Object key = HSess.checkInit();
     StringBuilder sb = new StringBuilder(userName );
     sb.append(" submitted a mass mail job");
     GameEvent ev = new GameEvent(GameEvent.EventType.MASSMAILSUBMITTED,sb.toString());
-    GameEvent.saveTL(ev);     
+    GameEvent.saveTL(ev);
+    HSess.checkClose(key);
   }
 }
