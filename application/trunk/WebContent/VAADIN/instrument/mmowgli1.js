@@ -1,5 +1,6 @@
 function _mmowgliFinishedLoading() {
 	console.log("_mmowgliFinishedLoading() called");
+	finishLoadTime = new Date().getTime();
 	// Set css for dbug divs
 	var node = document.createElement('style');
 	node.innerHTML = '#triggerDbugDiv {position:fixed;bottom:10px;left:10px;width:10px;height:10px;z-index:10000;} \
@@ -7,6 +8,7 @@ function _mmowgliFinishedLoading() {
 	 #displayDiv {position:fixed; top:0px; left:0px; font-family:monospace; font-size:10px; background:white; border: 2px solid black; z-index:10000; word-break: break-all;}';
 	document.body.appendChild(node);
 	
+	shipLoadTime()
 	shipStats();
 }
 
@@ -65,9 +67,12 @@ function triggerDbugDivMouseDown() {
 		}
 	}
 }
+var startLoadTime = new Date().getTime();
+var finishLoadTime;
 
 // Javascript functions called from Java
 var doShipStats = true;  // starts off true
+var doShipLoadTime = true;
 
 function shipStatsOn() {
 	doShipStats = true;
@@ -75,7 +80,19 @@ function shipStatsOn() {
 function shipStatsOff() {
 	doShipStats = false;
 }
-
+function shipLoadTime() {
+	if(!doShipLoadTime)
+		return;
+	if(typeof(edu_nps_moves_mmowgli_utility_browserperformancelogger_loadtimescallback) == "undefined") {
+		setTimeout("shipLoadTime()",250);
+	}
+	else {
+		var times = {};
+		times.start = startLoadTime;
+		times.finish = finishLoadTime;
+		edu_nps_moves_mmowgli_utility_browserperformancelogger_loadtimescallback(times);
+	}
+}
 function shipStats() {
 	if(!doShipStats)
 		return;
