@@ -98,9 +98,11 @@ public class BrowserPerformanceLogger
       Double o1 = obj.getNumber("start");
       Double o2 = obj.getNumber("finish");
       Double result = (o2-o1)/1000.;
+      System.out.println("loadtime(ms); "+o2+" - "+o1);
       DecimalFormat df = new DecimalFormat("####0.000");
       Notification notif = new Notification("Page load time in sec: "+df.format(result));
       notif.setPosition(Position.TOP_CENTER);
+      notif.setDelayMsec(10*1000);
       notif.show(Page.getCurrent());
     }
   };
