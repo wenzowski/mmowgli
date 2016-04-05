@@ -3,10 +3,14 @@ package edu.nps.moves.mmowgli.utility;
 import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.sql.*;
+import java.text.DecimalFormat;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.vaadin.server.Page;
+import com.vaadin.shared.Position;
 import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.JavaScriptFunction;
+import com.vaadin.ui.Notification;
 
 import edu.nps.moves.mmowgli.AppMaster;
 import elemental.json.JsonArray;
@@ -18,6 +22,7 @@ public class BrowserPerformanceLogger
   private static QReader statsQReader=null;
   
   public static String BROWSERPERFORMANCELOGGER_CALLBACK_NAME = "edu_nps_moves_mmowgli_utility_browserperformancelogger_loadstatscallback";
+  public static String BROWSERLOADTIME_CALLBACK_NAME          = "edu_nps_moves_mmowgli_utility_browserperformancelogger_loadtimescallback";
   
   private static String connectionString = null; // "jdbc:mysql://localhost/piracydup?user=mmowgli&password=gwtservelet";
   private static Connection connection = null;
@@ -62,11 +67,13 @@ public class BrowserPerformanceLogger
   public static void registerCurrentPage()
   {
     JavaScript.getCurrent().addFunction(BROWSERPERFORMANCELOGGER_CALLBACK_NAME, loadStatsCallback);
+    JavaScript.getCurrent().addFunction(BROWSERLOADTIME_CALLBACK_NAME, loadTimeCallback);
   }
 
   public static void unregisterCurrentPage()
   {
     JavaScript.getCurrent().removeFunction(BROWSERPERFORMANCELOGGER_CALLBACK_NAME);
+    JavaScript.getCurrent().removeFunction(BROWSERLOADTIME_CALLBACK_NAME);
   }
 
   @SuppressWarnings("serial")
@@ -77,6 +84,24 @@ public class BrowserPerformanceLogger
     {
       //System.out.println("loadStatsCallback() entered from browser");
       statsQ.add(param);
+    }
+  };
+
+  @SuppressWarnings("serial")
+  public static JavaScriptFunction loadTimeCallback = new JavaScriptFunction()
+  {
+    @Override
+    public void call(JsonArray param)
+    {
+      //System.out.println("loadTimeCallback() entered from browser");
+      JsonObject obj = param.getObject(0);
+      Double o1 = obj.getNumber("start");
+      Double o2 = obj.getNumber("finish");
+      Double result = (o2-o1)/1000.;
+      DecimalFormat df = new DecimalFormat("####0.000");
+      Notification notif = new Notification("Page load time in sec: "+df.format(result));
+      notif.setPosition(Position.TOP_CENTER);
+      notif.show(Page.getCurrent());
     }
   };
   
