@@ -5,9 +5,11 @@ import java.util.Collection;
 import com.vaadin.data.hbnutil.HbnContainer;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.event.SelectionEvent.SelectionListener;
+import com.vaadin.server.Page;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 
@@ -21,7 +23,8 @@ public class MassMailJobPanel extends _MassMailJobPanel implements SelectionList
 {
   private static final long serialVersionUID = -2223465617366209803L;
   private String[] columns = {"subject","receivers","complete","status","whenStarted","whenCompleted"};
-
+  private HbnContainer<MailJob> container;
+  
   public static void show (MailJob job)
   {
     Window win=new Window();
@@ -41,8 +44,8 @@ public class MassMailJobPanel extends _MassMailJobPanel implements SelectionList
      fillWidgets(job);
     
     topGridLay.setColumnExpandRatio(1, 1.0f);
-    HbnContainer<MailJob> cont = new HbnContainer<MailJob>(MailJob.class,HSess.getSessionFactory());
-    grid.setContainerDataSource(cont);
+    container = new HbnContainer<MailJob>(MailJob.class,HSess.getSessionFactory());
+    grid.setContainerDataSource(container);
     grid.setColumns((Object[])columns);
     grid.getColumn("subject").setMaximumWidth(300.d);
     grid.setSelectionMode(SelectionMode.SINGLE);
@@ -53,13 +56,25 @@ public class MassMailJobPanel extends _MassMailJobPanel implements SelectionList
     
     closeButt.addClickListener(closeListener);
     scheduleButt.addClickListener(scheduleListener);
+    refreshButt.addClickListener(refreshListener);
     
-    if(job == null && cont.size()>0) {
-      Collection<?> ids = cont.getItemIds();
+    if(job == null && container.size()>0) {
+      Collection<?> ids = container.getItemIds();
       grid.select(ids.toArray()[0]);
     }
   }
   
+  @SuppressWarnings("serial")
+  ClickListener refreshListener = new ClickListener()
+  {
+    @Override
+    public void buttonClick(ClickEvent event)
+    {
+      container = new HbnContainer<MailJob>(MailJob.class,HSess.getSessionFactory());
+      grid.setContainerDataSource(container);
+    }
+  };
+
   @SuppressWarnings("serial")
   ClickListener closeListener = new ClickListener()
   {
@@ -78,14 +93,24 @@ public class MassMailJobPanel extends _MassMailJobPanel implements SelectionList
     {
       MailJobber.submitJob(getSelected());
       GameEventLogger.logMassMailJobSubmitted(Mmowgli2UI.getGlobals().getUserName());
+      Notification notif = new Notification("Job submitted");
+      notif.setDelayMsec(5*1000);
+      notif.show(Page.getCurrent());
     }
   };
   
   private void fillWidgets(MailJob job)
   {
-    subjectLabel.setValue(job.getSubject());
-    toLabel.setValue(job.getReceivers().toString());
-    textLabel.setValue(job.getText());
+    if (job != null) {
+      subjectLabel.setValue(job.getSubject());
+      toLabel.setValue(job.getReceivers().toString());
+      textLabel.setValue(job.getText());
+    }
+    else {
+      subjectLabel.setValue("");
+      toLabel.setValue("");
+      textLabel.setValue("");
+    }
   }
   
   @Override

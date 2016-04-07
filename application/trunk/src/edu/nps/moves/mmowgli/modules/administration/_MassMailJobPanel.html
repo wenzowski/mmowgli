@@ -8,10 +8,13 @@
   <vaadin-vertical-layout spacing size-full margin> 
    <vaadin-grid caption="Existing Mail Jobs" width-full height="200px" _id="grid"></vaadin-grid> 
    <vaadin-horizontal-layout width-full margin-left margin-right _id="buttsHL"> 
-    <vaadin-button plain-text _id="scheduleButt">
+    <vaadin-button plain-text _id="scheduleButt" :expand="0.5">
       Schedule selected job 
     </vaadin-button> 
-    <vaadin-button plain-text _id="closeButt" :right>
+    <vaadin-button plain-text _id="refreshButt">
+      Refresh job list 
+    </vaadin-button> 
+    <vaadin-button plain-text _id="closeButt" :right :expand="0.5">
       Close 
     </vaadin-button> 
    </vaadin-horizontal-layout> 
@@ -19,7 +22,7 @@
     <vaadin-grid-layout width-full _id="topGridLay"> 
      <row> 
       <column> 
-       <vaadin-label size-auto :right> 
+       <vaadin-label size-auto> 
         <b>To</b>:&nbsp;&nbsp; 
        </vaadin-label> 
       </column> 
@@ -29,7 +32,7 @@
      </row> 
      <row> 
       <column> 
-       <vaadin-label size-auto :right> 
+       <vaadin-label size-auto> 
         <b>Subject:</b>&nbsp;&nbsp; 
        </vaadin-label> 
       </column> 

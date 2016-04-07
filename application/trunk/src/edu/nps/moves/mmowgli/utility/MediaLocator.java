@@ -138,7 +138,7 @@ public class MediaLocator implements Serializable
 		  String path = url;
 			if(m.getType() == MediaType.AVATARIMAGE)
 				path = "avatars/"+path;
-			else if(m.getType() == MediaType.VIDEO)
+			else if(m.getType() == MediaType.HTML5VIDEO)
 			  path = "mov/"+path;			
 			try {
 			  if(path.indexOf(':') == -1)

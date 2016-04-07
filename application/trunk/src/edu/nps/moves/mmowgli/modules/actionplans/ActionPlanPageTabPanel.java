@@ -174,7 +174,7 @@ public abstract class ActionPlanPageTabPanel extends HorizontalLayout implements
     switch(m.getType())
     {
       case IMAGE:  //0       
-      case VIDEO:  //1
+      case HTML5VIDEO:  //1
       case AVATARIMAGE: // 2
         if((i=url.lastIndexOf("/")) != -1)
           url = url.substring(i+1);

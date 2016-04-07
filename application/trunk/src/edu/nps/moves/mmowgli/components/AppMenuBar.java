@@ -147,9 +147,10 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     
     ret.addItem("Broadcast message to game masters", new MCommand(MENUGAMEMASTERBROADCASTTOGMS)).setIcon(VaadinIcons.MEGAFONE);
     ret.addItem("Broadcast message to all players", new MCommand(MENUGAMEMASTERBROADCAST)).setIcon(VaadinIcons.MEGAFONE);
+    ret.addItem("Edit blog headline", new MCommand(MENUGAMEMASTERBLOGHEADLINE)).setIcon(VaadinIcons.EXCLAMATION_CIRCLE);
+    ret.addSeparator();
     ret.addItem("Create/edit mass mail message", new MCommand(MENUGAMEMASTERCREATEMASSMAIL)).setIcon(VaadinIcons.ENVELOPE);
     ret.addItem("Submit mass mail job", new MCommand(MENUGAMEMASTERSUBMITMASSMAIL)).setIcon(VaadinIcons.ENVELOPE_O);
-    ret.addItem("Edit blog headline", new MCommand(MENUGAMEMASTERBLOGHEADLINE)).setIcon(VaadinIcons.EXCLAMATION_CIRCLE);
     ret.addSeparator();
 
     if (Game.getTL().isActionPlansEnabled()) {

@@ -35,6 +35,7 @@ import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateClosed;
 import edu.nps.moves.mmowgli.markers.HibernateOpened;
 import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
+import edu.nps.moves.mmowgli.utility.HistoryDialog.DoneListener;
 
 /**
  * VideoChangerComponent.java
@@ -72,7 +73,9 @@ public class VideoChangerComponent extends HorizontalLayout implements ClickList
 
     addComponent(roTF = new TextField());
     roTF.addStyleName("m-textarea-greyborder");
-    //tf.setColumns(20);
+    //roTf.setColumns(20);
+    roTF.setWidth("100%");
+    setExpandRatio(roTF, 1.0f);
     roTF.setValue(currentMedia==null?"":currentMedia.getUrl());
     roTF.setReadOnly(true);
     Button butt;
@@ -92,11 +95,44 @@ public class VideoChangerComponent extends HorizontalLayout implements ClickList
     roTF.setReadOnly(true);    
   }
 
+  private SetVideoPanel vidPan;
   @Override
   public void buttonClick(ClickEvent event)
   {
-    new EditYoutubeIdDialog().showDialog(this);    
+    //new EditYoutubeIdDialog().showDialog(this); 
+    vidPan = SetVideoPanel.show(doneLis);    
   }
+  
+  public static interface ImDoneListener { public void done();}
+  ImDoneListener doneLis = new ImDoneListener()
+  {
+    @Override
+    public void done()
+    {
+      Media med = vidPan.getMedia();
+      if(med != null) {
+        Notification.show("Mike here!!!");
+        
+        HSess.init();
+
+        Media.saveTL(med);         
+        try {
+          movePhaseSetter.invoke(mp, med);
+        }
+        catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+        MovePhase.updateTL(mp);
+        
+        currentMedia = med;
+        roTF.setReadOnly(false);
+        roTF.setValue(med.getUrl());
+        roTF.setReadOnly(true);
+        
+        HSess.close();
+      }       
+    }    
+  };
   
   @SuppressWarnings("serial")
   public class EditYoutubeIdDialog extends Window

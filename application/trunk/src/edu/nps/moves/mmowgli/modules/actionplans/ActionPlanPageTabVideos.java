@@ -154,7 +154,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     ActionPlan actionPlan = ActionPlan.get(apId, sess);
     List<Media> lis = actionPlan.getMedia();
     for (Media m : lis) {
-      if (m.getType() == MediaType.VIDEO || m.getType() == MediaType.YOUTUBE)
+      if (m.getType() == MediaType.HTML5VIDEO || m.getType() == MediaType.YOUTUBE)
         addOneVideo(m);
     }
   }
@@ -441,7 +441,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     List<Media> mLis = ap.getMedia();
     
     for(Media m : mLis) {
-      if(m.getType() == MediaType.YOUTUBE || m.getType() == MediaType.VIDEO)
+      if(m.getType() == MediaType.YOUTUBE || m.getType() == MediaType.HTML5VIDEO)
         videosInAp.add(m);
     }
     
