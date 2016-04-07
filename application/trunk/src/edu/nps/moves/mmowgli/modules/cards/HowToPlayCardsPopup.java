@@ -61,7 +61,7 @@ public class HowToPlayCardsPopup extends MmowgliDialog implements ClickListener
     Media m = getMedia();
     Component comp = new Label("Not found");
 
-    if (m.getType() == Media.MediaType.VIDEO) {
+    if (m.getType() == Media.MediaType.HTML5VIDEO) {
       /*
        * Quicktime qt = new Quicktime(null,res); qt.setWidth("94%"); qt.setHeight("340px"); //"100%"); qt.setScale(Scale.Aspect); qt.setAutoplay(true); comp =
        * qt;

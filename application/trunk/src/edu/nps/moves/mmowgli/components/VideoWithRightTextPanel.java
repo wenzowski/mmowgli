@@ -25,6 +25,7 @@ package edu.nps.moves.mmowgli.components;
 import static edu.nps.moves.mmowgli.MmowgliConstants.PORTALTARGETWINDOWNAME;
 
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.BorderStyle;
 import com.vaadin.ui.*;
 
@@ -103,7 +104,8 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
 
     horLay.addComponent(lab = new Label());
     lab.setWidth("38px");
-
+    VerticalLayout playerVL = new VerticalLayout();;
+    
     if (vidMedia != null && vidMedia.getUrl() != null && vidMedia.getUrl().trim().length() > 0) {
       if (vidMedia.getType() == MediaType.YOUTUBE) {
         try {
@@ -114,25 +116,39 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
           ytp.setWidth(539.0f,Unit.PIXELS); //VID_W_PX,Unit.PIXELS);
           ytp.setHeight(342.0f, Unit.PIXELS); //VID_H_PX,Unit.PIXELS);
           player = ytp;
+          playerVL.setWidth("539px");
+          playerVL.setHeight("342px");
         }
         catch (Exception ex) {
           System.err.println("Exception instantiating YouTubePlayer: " + ex.getClass().getSimpleName() + ": " + ex.getLocalizedMessage());
         }
       }
+      else if(vidMedia.getType() == MediaType.HTML5VIDEO) {
+        Video vid = new Video();
+        vid.addStyleName("m-htmlvideo");  // sizes properly
+        Resource res = new ExternalResource(vidMedia.getUrl());
+        vid.setSource(res);
+        vid.setCaption(null);
+        vid.setSizeFull();
+        vid.setPoster(new ExternalResource("http://movesinstitute.org/~jmbailey/videos/vlcsnap-00001.png"));
+        vid.setHtmlContentAllowed(true);
+        vid.setAltText("Can't play media");
+        player = vid;
+        playerVL.setWidth(540.0f, Unit.PIXELS);
+        playerVL.setHeight(304.0f, Unit.PIXELS);//303.75f, Unit.PIXELS);
+      }
       else {
         System.err.println("Bad media file in VideoWithRightTextPanel");
         player = new Label("missing video");
       }
+      playerVL.addStyleName("m-boxshadow-5");
+      playerVL.addComponent(player);
+
       VerticalLayout plyrLinkWrap = new VerticalLayout();
       plyrLinkWrap.setMargin(false);
       plyrLinkWrap.setSpacing(true);
       plyrLinkWrap.setSizeUndefined();
 
-      VerticalLayout playerVL = new VerticalLayout(); //AbsoluteLayout();
-      playerVL.setWidth("539px");
-      playerVL.setHeight("342px");
-      playerVL.addStyleName("m-boxshadow-5");
-      playerVL.addComponent(player);
       plyrLinkWrap.addComponent(playerVL);
 
       Link link = getAlternateVideoLink(vidMedia);

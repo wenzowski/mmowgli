@@ -49,6 +49,7 @@ public class CallToActionGameDesignPanel extends AbstractGameBuilderPanel implem
     super(false,globs);
     
     addEditComponent("1 Video", "MovePhase.callToActionBriefingVideo",vidComp=new VideoChangerComponent(phase,"setCallToActionBriefingVideo",phase.getCallToActionBriefingVideo(),globs)).auxListener = auxLis;
+    vidComp.setWidth("100%");
     addEditLine("2 Summary", "MovePhase.callToActionBriefingSummary", phase, phase.getId(), "CallToActionBriefingSummary").auxListener = auxLis;
     EditLine edLine = addEditLine("3 Text ","MovePhase.callToActionBriefingText",phase, phase.getId(), "CallToActionBriefingText");
     TextArea ta = (TextArea)edLine.ta;

@@ -53,6 +53,8 @@ public class WelcomeScreenGameDesignPanel extends AbstractGameBuilderPanel imple
     super(false,globs);
 
     addEditComponent("1 Video", "MovePhase.orientationVideo",vidComp=new VideoChangerComponent(phase,"setOrientationVideo",phase.getOrientationVideo(),globs)).auxListener = auxLis;
+    vidComp.setWidth("100%");
+    
     addEditLine("2 Text", "MovePhase.orientationCallToActionText", phase, phase.getId(), "OrientationCallToActionText").auxListener = auxLis;
     EditLine edLine = addEditLine("3 Headline","MovePhase.orientationHeadline",phase, phase.getId(), "OrientationHeadline");
     TextArea ta = (TextArea)edLine.ta;

@@ -59,12 +59,13 @@ public class Media implements Serializable
      DATABASE
   };
   
-  public static enum MediaType { IMAGE, VIDEO, AVATARIMAGE, YOUTUBE };
+  public static enum MediaType { IMAGE, HTML5VIDEO, AVATARIMAGE, YOUTUBE };
   
 //@formatter:off
   long      id;           // Primary key, auto-generated.
   String    url;          // the path filename and where it sits
   String    alternateUrl;
+  String    posterUrl;    // for html5 vids
   MediaType type;         // one of the above 
   Source    source;       // one of the above
   Long      width;
@@ -139,7 +140,31 @@ public class Media implements Serializable
   
   public static Media newYoutubeMedia(String url)
   {
-    return new Media(url, "YouTubeVideo", "YouTubeVideo", MediaType.YOUTUBE, Source.WEB_FULL_URL);
+    return newYoutubeMedia(url, "YouTubeVideo", "YouTubeVideo", null,null);
+    //return new Media(url, "YouTubeVideo", "YouTubeVideo", MediaType.YOUTUBE, Source.WEB_FULL_URL);
+  }
+  
+  public static Media newYoutubeMedia(String url, String titleHandle,String description, Long width, Long height)
+  {
+    Media m = new Media(url,titleHandle,description,MediaType.YOUTUBE,Source.WEB_FULL_URL);
+    m.setTitle(titleHandle);
+    m.setWidth(width);
+    m.setHeight(height);
+    return m;
+  }
+  
+  public static Media newHtml5Video(String url, String posterUrl, String titleHandle, String description, Long width, Long height)
+  {
+    Media m = new Media(url,titleHandle,description,MediaType.HTML5VIDEO, Source.WEB_FULL_URL);
+    m.setTitle(titleHandle);
+    if(titleHandle == null || titleHandle.trim().length()<=0) {
+      m.setTitle("HTML 5 video");
+      m.setHandle("HTML 5 video");
+    }
+    m.setWidth(width);
+    m.setHeight(height);
+    m.setPosterUrl(posterUrl);
+    return m;    
   }
   
   @Id
@@ -285,6 +310,17 @@ public class Media implements Serializable
   public void setHeight(Long height)
   {
     this.height = height;
+  }
+  
+  @Lob
+  public String getPosterUrl()
+  {
+    return posterUrl;
+  }
+  
+  public void setPosterUrl(String posterUrl)
+  {
+    this.posterUrl = posterUrl;
   }
   
   public void cloneFrom(Media existing)

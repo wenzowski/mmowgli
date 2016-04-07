@@ -26,6 +26,7 @@ public class _MassMailJobPanel extends VerticalLayout
   protected Grid grid;
   protected HorizontalLayout buttsHL;
   protected Button scheduleButt;
+  protected Button refreshButt;
   protected Button closeButt;
   protected GridLayout topGridLay;
   protected Label toLabel;

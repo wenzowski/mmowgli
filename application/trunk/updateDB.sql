@@ -1,6 +1,9 @@
 # This is a list of SQL commands which may be useful to update old game databases. This file is not intended to be run in its entirety.
 # Remember to also update the MmowgliConstants field DATABASE_VERSION
 
+UPDATE `Game` SET `version` = '20160406' WHERE `id` = '1';
+ALTER TABLE `Media` ADD `posterUrl` LONGTEXT  NULL  AFTER `height`;
+
 UPDATE `Game` SET `version` = '20160307' WHERE `id` = '1';
 CREATE TABLE `MailJob` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,

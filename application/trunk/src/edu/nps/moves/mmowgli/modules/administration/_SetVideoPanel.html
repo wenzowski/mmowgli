@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+ <head>
+  <meta charset="UTF-8" name="design-properties" content="{&quot;RULERS_VISIBLE&quot;:true,&quot;GUIDELINES_VISIBLE&quot;:false,&quot;SNAP_TO_OBJECTS&quot;:true,&quot;SNAP_TO_GRID&quot;:true,&quot;SNAPPING_DISTANCE&quot;:10,&quot;JAVA_SOURCES_ROOT&quot;:&quot;src&quot;,&quot;THEME&quot;:&quot;mmowgli2&quot;}">
+ </head> 
+ <body> 
+  <vaadin-vertical-layout spacing height="299px" margin> 
+   <vaadin-option-group caption="Video Source/Type" style-name="m-greyborder" item-caption-mode="id" _id="typeOptionGroup"> 
+    <option>HTML5 video (text set in code)</option> 
+    <option>YouTube (text set in code);</option> 
+   </vaadin-option-group> 
+   <vaadin-form-layout caption="HTML5 Video (text set in code)" style-name="m-greyborder" margin _id="html5FL"> 
+    <vaadin-horizontal-layout caption="Url" spacing width-full _id="urlHL"> 
+     <vaadin-text-field input-prompt="e.g.: http://videoserver.com/myvideo.mp4" null-representation="" width-full _id="urlTF" :expand></vaadin-text-field> 
+     <vaadin-button description="Open video in another window/tab to confirm url" style-name="small" plain-text _id="urlTestButt">
+       test 
+     </vaadin-button> 
+    </vaadin-horizontal-layout> 
+    <vaadin-text-field caption="Poster Url" input-prompt="Full url of image 16x9 image file for initial display" null-representation="" null-setting-allowed width-full _id="posterTF"></vaadin-text-field> 
+   </vaadin-form-layout> 
+   <vaadin-form-layout caption="YouTube Video (text set in code)" style-name="m-greyborder" margin _id="youTubeFL"> 
+    <vaadin-horizontal-layout caption="YouTube ID" description="Open video in another browser window/tab to confirm ID" spacing width-full _id="youtubeidHL"> 
+     <vaadin-text-field input-prompt="e.g. mDK4Ab9gjVM" null-representation="" width-full _id="youtubeIdTF" :expand></vaadin-text-field> 
+     <vaadin-button style-name="small" plain-text _id="youTubeIdTestButt">
+       test 
+     </vaadin-button> 
+    </vaadin-horizontal-layout> 
+   </vaadin-form-layout> 
+   <vaadin-form-layout caption="Optional fields" style-name="m-greyborder" margin _id="optionalFL"> 
+    <vaadin-text-field caption="Alternate Url" null-representation="" null-setting-allowed width-full _id="altUrlTF"></vaadin-text-field> 
+    <vaadin-text-field caption="Title" null-representation="" null-setting-allowed width-full _id="titleTF"></vaadin-text-field> 
+    <vaadin-text-field caption="Description" null-representation="" null-setting-allowed width-full _id="descriptionTF"></vaadin-text-field> 
+    <vaadin-text-field caption="Width (pixels)" null-representation="" null-setting-allowed _id="widthTF"></vaadin-text-field> 
+    <vaadin-text-field caption="Height (pixels)" null-representation="" null-setting-allowed _id="heightTF"></vaadin-text-field> 
+   </vaadin-form-layout> 
+   <vaadin-horizontal-layout spacing width-full _id="buttHL" :expand> 
+    <vaadin-button plain-text _id="cancelButt" :right :expand>
+      Cancel 
+    </vaadin-button> 
+    <vaadin-button plain-text _id="saveButt">
+      Save and close 
+    </vaadin-button> 
+   </vaadin-horizontal-layout> 
+  </vaadin-vertical-layout>  
+ </body>
+</html>
