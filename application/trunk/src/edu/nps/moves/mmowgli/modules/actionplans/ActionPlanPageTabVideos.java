@@ -48,6 +48,7 @@ import edu.nps.moves.mmowgli.db.Media.MediaType;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 import edu.nps.moves.mmowgli.modules.actionplans.ActionPlanPageTabImages.IndexListener;
+import edu.nps.moves.mmowgli.modules.administration.SetVideoPanel;
 import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.BrowserWindowOpener;
 
@@ -267,6 +268,40 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     return ap;
   }
 
+  @SuppressWarnings("serial")
+  class newVideoAdder implements ClickListener
+  {
+    @Override
+    public void buttonClick(ClickEvent event)
+    {
+      HSess.init();
+      hideExistingVideos(); // if ie
+      
+      Window win = SetVideoPanel.show(0, 50); // MIS VIDEOS
+      win.addCloseListener(new CloseListener()
+      {
+        @Override
+        public void windowClose(CloseEvent e)
+        {
+          showExistingVideos();
+          SetVideoPanel pan = (SetVideoPanel)e.getWindow().getContent();
+          Media med = pan.getMedia();
+          if (med != null) {
+            Object key = HSess.checkInit();
+            Media.saveTL(med);
+            addOneVideo(med);
+            ActionPlan ap = ActionPlan.getTL(apId);
+            ap.getMedia().add(med);
+            ActionPlan.updateTL(ap);
+            User u = Mmowgli2UI.getGlobals().getUserTL();
+            GameEventLogger.logActionPlanVideoAddedTL(ap, u.getUserName(), med.getTitle());
+            HSess.checkClose(key);
+          }
+        }
+      });
+    }
+  }
+  
   @SuppressWarnings("serial")
   class VideoAdder implements ClickListener
   {

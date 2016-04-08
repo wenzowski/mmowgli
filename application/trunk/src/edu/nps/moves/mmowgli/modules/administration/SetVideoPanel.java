@@ -26,15 +26,27 @@ public class SetVideoPanel extends _SetVideoPanel
   
   public static SetVideoPanel show(ImDoneListener lis)
   {
-    SetVideoPanel pan;
+    Window win = showCommon(lis);
+    win.center();
+    return (SetVideoPanel)win.getContent();   
+  }
+  
+  public static Window show(int xpos, int ypos)
+  {
+    Window win = showCommon(null);
+    win.setPosition(xpos, ypos); 
+    return win;   
+  }
+  
+  private static Window showCommon(ImDoneListener lis)
+  {
     Window win=new Window();
     win.setCaption("New Video Window");
-    win.setContent(pan = new SetVideoPanel(win,lis));
+    win.setContent(new SetVideoPanel(win,lis));
     win.setWidth("440px");
-    win.setHeight("575px");
-    UI.getCurrent().addWindow(win);
-    win.center(); 
-    return pan;
+    win.setHeight(550+60,Unit.PIXELS); // 60=top & bottom window frame
+    UI.getCurrent().addWindow(win); 
+    return win;
   }
   
   public SetVideoPanel(Window win, ImDoneListener lis)
@@ -73,7 +85,7 @@ public class SetVideoPanel extends _SetVideoPanel
   private IntegerRangeValidator posIntValidator = new IntegerRangeValidator("Must be blank or positive integer",null,null);  
   private StringLengthValidator urlValidator = new StringLengthValidator("Full url is required", 10, 500, false) ;
   private StringLengthValidator posterUrlValidator = new StringLengthValidator("Full url is needed unless null", 10, 500, true) ;
-  private StringLengthValidator youtubeIdValidator = new StringLengthValidator("Approx. 10 digit video idea required here",5,50,false);
+  private StringLengthValidator youtubeIdValidator = new StringLengthValidator("Approx. 10 digit video ID required here",5,50,false);
 
   public Media getMedia()
   {
@@ -116,7 +128,8 @@ public class SetVideoPanel extends _SetVideoPanel
                                       descriptionTF.getValue(),longOrNull(widthTF.getValue()),longOrNull(heightTF.getValue()));
         }
         else if(typ.equals(YOUTUBETAG)) {
-          media = Media.newYoutubeMedia(SetVideoPanel.this.urlTF.getValue());
+          media = Media.newYoutubeMedia(youtubeIdTF.getValue(), titleTF.getValue(), descriptionTF.getValue(),
+                                          longOrNull(widthTF.getValue()), longOrNull(heightTF.getValue()));
         }
       
         win.close();

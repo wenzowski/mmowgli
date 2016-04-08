@@ -19,6 +19,9 @@
     <vaadin-text-field caption="Poster Url" input-prompt="Full url of image 16x9 image file for initial display" null-representation="" null-setting-allowed width-full _id="posterTF"></vaadin-text-field> 
    </vaadin-form-layout> 
    <vaadin-form-layout caption="YouTube Video (text set in code)" style-name="m-greyborder" margin _id="youTubeFL"> 
+    <vaadin-label caption="Warning:" plain-text>
+      YouTube videos may not be visible to players on some networks (e.g., NMCI). 
+    </vaadin-label> 
     <vaadin-horizontal-layout caption="YouTube ID" description="Open video in another browser window/tab to confirm ID" spacing width-full _id="youtubeidHL"> 
      <vaadin-text-field input-prompt="e.g. mDK4Ab9gjVM" null-representation="" width-full _id="youtubeIdTF" :expand></vaadin-text-field> 
      <vaadin-button style-name="small" plain-text _id="youTubeIdTestButt">

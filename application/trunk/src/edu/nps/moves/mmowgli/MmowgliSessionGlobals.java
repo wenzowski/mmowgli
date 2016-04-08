@@ -26,25 +26,19 @@ import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 import javax.servlet.http.Cookie;
 
 import org.hibernate.Session;
 
-import com.vaadin.server.SessionInitEvent;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinService;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.server.WebBrowser;
+import com.vaadin.server.*;
 import com.vaadin.ui.UI;
 
 import edu.nps.moves.mmowgli.CACManager.CACData;
 import edu.nps.moves.mmowgli.components.AppMenuBar;
 import edu.nps.moves.mmowgli.db.Game;
+import edu.nps.moves.mmowgli.db.GameLinks;
 import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.HibernateUserRead;
@@ -511,13 +505,20 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     if( webBr.isWindowsPhone()) { return "Windows Phone"; }
     return "Unknown OS/platform";
   }
-  
+/*  
   public String getAlternateVideoUrlTL()
   {
     return getAlternateVideoUrl(HSess.get());
   }
 
   public String getAlternateVideoUrl(Session sess)
+  {
+    GameLinks links = GameLinks.get(sess);
+    return links.getVideosLink();
+  }
+  
+  @Deprecated
+  public String old_bad_getAlternateVideoUrl(Session sess)
   {
     Game g = Game.get(sess);
     StringBuilder sb = new StringBuilder();
@@ -532,7 +533,7 @@ public class MmowgliSessionGlobals implements Serializable, WantsGameUpdates
     }
     return sb.toString();
   }
-
+*/
   public void setCACInfo(CACData cData)
   {
     this.cacData = cData;    
