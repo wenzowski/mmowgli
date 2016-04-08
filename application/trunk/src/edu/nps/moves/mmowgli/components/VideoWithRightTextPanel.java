@@ -29,7 +29,7 @@ import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.BorderStyle;
 import com.vaadin.ui.*;
 
-import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.db.GameLinks;
 import edu.nps.moves.mmowgli.db.Media;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
 
@@ -151,7 +151,7 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
 
       plyrLinkWrap.addComponent(playerVL);
 
-      Link link = getAlternateVideoLink(vidMedia);
+      Link link = getAlternateVideoLinkTL(vidMedia);
       if (link != null) {
          plyrLinkWrap.addComponent(link);
          plyrLinkWrap.setComponentAlignment(link, Alignment.BOTTOM_CENTER);
@@ -207,14 +207,14 @@ public class VideoWithRightTextPanel extends VerticalLayout implements MmowgliCo
     lab.setHeight("25px");
   }
 
-  private Link getAlternateVideoLink(Media vidMedia)
+  private Link getAlternateVideoLinkTL(Media vidMedia)
   { try {
     Link link;
     String alternateUrl = vidMedia.getAlternateUrl();
     if(alternateUrl != null)
       link = new Link("Can't see the video?",new ExternalResource(alternateUrl));
     else {
-      String url = Mmowgli2UI.getGlobals().getAlternateVideoUrlTL();
+      String url = GameLinks.getTL().getVideosLink();
       if(url == null)
         return null;
       link = new Link("Can't see the video?",new ExternalResource(url));
