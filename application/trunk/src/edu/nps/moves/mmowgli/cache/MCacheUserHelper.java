@@ -54,6 +54,8 @@ public class MCacheUserHelper
   private SortedMap<Long,String> _usersQuick; // key = id
   private SortedMap<Long,QuickUser> usersQuickFull; // key = id, full data
 
+  private Object globalLock = new Object();
+  
   private static int myLogLevel = MCACHE_LOGS;
 
   // package-local
@@ -81,11 +83,14 @@ public class MCacheUserHelper
   // Only used by add authordialog; list won't include guest account(s) or banished accounts
   public List<QuickUser> getUsersQuickList()
   {
-    ArrayList<QuickUser> lis = new ArrayList<QuickUser>(usersQuick.size());
-    Set<String> keySet = usersQuick.keySet();
-    for (String key : keySet) {
-      long id = usersQuick.get(key);
-      lis.add(new QuickUser(id, key));
+    ArrayList<QuickUser> lis;
+    synchronized(globalLock) {
+      lis = new ArrayList<QuickUser>(usersQuick.size());
+      Set<String> keySet = usersQuick.keySet();
+      for (String key : keySet) {
+        long id = usersQuick.get(key);
+        lis.add(new QuickUser(id, key));
+      }
     }
     return lis;
   }
@@ -93,34 +98,39 @@ public class MCacheUserHelper
   // Used by UserAdminPanel
   public List<QuickUser> getUsersQuickFullList()
   {
-    ArrayList<QuickUser> lis = new ArrayList<QuickUser>(usersQuickFull.size());
-    Collection<QuickUser> coll = usersQuickFull.values();
-    Iterator<QuickUser> itr = coll.iterator();
-    while (itr.hasNext())
-      lis.add(itr.next());
+    ArrayList<QuickUser> lis;
+    synchronized(globalLock) {
+      lis = new ArrayList<QuickUser>(usersQuickFull.size());
+      Collection<QuickUser> coll = usersQuickFull.values();
+      Iterator<QuickUser> itr = coll.iterator();
+      while (itr.hasNext())
+        lis.add(itr.next());
+    }
     return lis;
   }
   
   private void _rebuildUsers(Session sess)
   {
-    usersQuick.clear();
-    usersQuickFull.clear();
-    _usersQuick.clear();
+    synchronized(globalLock) {
+      usersQuick.clear();
+      usersQuickFull.clear();
+      _usersQuick.clear();
     
-    List<User> usrs = usersQuery(sess);
-    for (User u : usrs) {
-      if (u.getUserName() == null) {
-        System.err.println("User in db with null userName: " + u.getId());
-        continue;
-      }
+      List<User> usrs = usersQuery(sess);
+      for (User u : usrs) {
+        if (u.getUserName() == null) {
+          System.err.println("User in db with null userName: " + u.getId());
+          continue;
+        }
       
-      _usersQuick.put(u.getId(), u.getUserName());    // before below
-      usersQuickFull.put(u.getId(),new QuickUser(u));
+        _usersQuick.put(u.getId(), u.getUserName());    // before below
+        usersQuickFull.put(u.getId(),new QuickUser(u));
 
-      if (u.isViewOnly() || u.isAccountDisabled())
-        ; // don't add
-      else {
-        usersQuick.put(u.getUserName(), u.getId());
+        if (u.isViewOnly() || u.isAccountDisabled())
+          ; // don't add
+        else {
+          usersQuick.put(u.getUserName(), u.getId());
+        }
       }
     }
   }
