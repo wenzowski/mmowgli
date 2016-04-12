@@ -197,6 +197,8 @@ public class AddImageDialog extends Window
         Object key = HSess.checkInit();
         System.out.println("AddImageDialog.uploadFinished()");
         String fpath = handler.getFullUploadedPath();
+        System.out.println("local image file path = "+fpath);
+        
         if(fpath != null) {  // error of some kind if null 
           if(!MalwareChecker.isFileVirusFree(fpath)) {
             panel.state.setValue("<span style='color:red;'>Failed malware check</span>");
@@ -205,11 +207,11 @@ public class AddImageDialog extends Window
             HSess.checkClose(key);
             return;
           }
-
-          File f = new File(fpath);
-          f.deleteOnExit();
-          
+         
           try {
+            File f = new File(fpath);
+            f.deleteOnExit();
+            
             MediaImage mediaImage = InstallImageDialog.putFileImageIntoDbTL(f, f.getName(), event.getMIMEType());
             f.delete();
             media = mediaImage.media;
@@ -219,7 +221,7 @@ public class AddImageDialog extends Window
             setupEmbeddedImageThumbnail(res,media);
             localTF.setValue(event.getFilename());
           }
-          catch(IOException ex) {
+          catch(Throwable ex) {
             Notification.show("Error loading image", Notification.Type.ERROR_MESSAGE);
             MSysOut.println(ERROR_LOGS,"Error in AddImageDialog loading image: "+ex.getClass().getSimpleName()+": "+ex.getLocalizedMessage());
           }
