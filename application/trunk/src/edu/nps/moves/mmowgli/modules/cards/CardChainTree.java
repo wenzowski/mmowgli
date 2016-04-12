@@ -32,12 +32,15 @@ import org.hibernate.criterion.Restrictions;
 import com.vaadin.data.hbnutil.HbnContainer.EntityItem;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.server.Resource;
 import com.vaadin.ui.*;
 
-import edu.nps.moves.mmowgli.*;
+import edu.nps.moves.mmowgli.AppEvent;
+import edu.nps.moves.mmowgli.Mmowgli2UI;
+import edu.nps.moves.mmowgli.MmowgliEvent;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
-import edu.nps.moves.mmowgli.db.*;
+import edu.nps.moves.mmowgli.db.Card;
+import edu.nps.moves.mmowgli.db.CardType;
+import edu.nps.moves.mmowgli.db.User;
 import edu.nps.moves.mmowgli.hibernate.HSess;
 import edu.nps.moves.mmowgli.markers.*;
 
@@ -83,6 +86,7 @@ public class CardChainTree extends TreeTable implements ItemClickListener
     isGameMaster = Mmowgli2UI.getGlobals().getUserTL().isGameMaster();
     
     setSizeFull();
+    setHeight("99%");
     setEditable(false);
     setSelectable(true);
     this.addItemClickListener((ItemClickListener)this);
@@ -145,10 +149,9 @@ public class CardChainTree extends TreeTable implements ItemClickListener
         Label lab = new HtmlLabel();
         lab.addStyleName("m-display-inline");   // put the colored square on same line as arrow
         lab.addStyleName("m-cardchain-icon");   // line up the colored square
-        //lab.addStyleName(getTypeBackground(card));
-        lab.setId(getTypeBackground(card));  //this does it in v7
-        lab.setValue("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-        lab.setWidth("19px");
+        lab.addStyleName(getTypeBackground(card));
+        //lab.setWidth("19px"); // doesn't do anything
+        lab.setValue("&nbsp;&nbsp;");
         // This tooltip doesn't work!  Can't figure it out.
         lab.setDescription(card.getCardType().getTitle());
         return lab;
@@ -157,7 +160,7 @@ public class CardChainTree extends TreeTable implements ItemClickListener
       if ("text".equals(columnId)) {
         Label lab = new HtmlLabel();
         lab.addStyleName("m-display-inline");
-        String txtStr = "&nbsp;&nbsp;(" + card.getId() + ")&nbsp;"+card.getText();
+        String txtStr = "&nbsp;(" + card.getId() + ")&nbsp;"+card.getText();
         lab.setValue(txtStr);
         CardType ct = card.getCardType();
         lab.setDescription(ct.getTitle()+" "+card.getText()); // tooltip
@@ -167,8 +170,9 @@ public class CardChainTree extends TreeTable implements ItemClickListener
         HorizontalLayout hl = new HorizontalLayout();
         hl.setSpacing(true);
         Label lab;
-        
+
         User auth = card.getAuthor();
+        /*
         Avatar av = auth.getAvatar();
         if(av != null) {
           Media med = av.getMedia();
@@ -182,7 +186,7 @@ public class CardChainTree extends TreeTable implements ItemClickListener
           hl.addComponent(lab=new Label());
           lab.setWidth("25px");
         }
-
+        */
         lab = new Label(auth.getUserName());
         hl.addComponent(lab);
         hl.setComponentAlignment(lab, Alignment.MIDDLE_LEFT);
