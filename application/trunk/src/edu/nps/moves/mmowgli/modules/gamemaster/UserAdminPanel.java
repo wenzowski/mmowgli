@@ -83,7 +83,8 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
   private Table table;
   private AbstractOrderedLayout tableContainer;
   private TableFiller lastTableFiller = null;
-
+  private Button rebuildButt;
+  
   // This table does not use the HbnContainer and db access, it uses the quickuser cache
   private String USER_ID_COL = QUICKUSER_ID;
   private String ADMIN_COL = QUICKUSER_ADMIN;
@@ -212,7 +213,13 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
     {
       HorizontalLayout srchHL = this;
       srchHL.setSpacing(true);
+      srchHL.setWidth("920px");
       Label lab;
+      
+      srchHL.addComponent(lab=new Label());
+      lab.setWidth("1px");
+      srchHL.setExpandRatio(lab, 0.5f); // centering spacer
+ 
       srchHL.addComponent(lab = new Label("Search"));
       srchHL.setComponentAlignment(lab, Alignment.MIDDLE_LEFT);
 
@@ -233,9 +240,29 @@ public class UserAdminPanel extends VerticalLayout implements MmowgliComponent, 
       srchTF.setColumns(20);
       srchTF.setImmediate(true);
       srchHL.addComponent(srchTF);
+      
+      srchHL.addComponent(rebuildButt=new Button("Rebuild list",rebuildListener));
+      rebuildButt.setDescription("Do not overuse: may cause temporary performance pause for other users");
+      srchHL.setExpandRatio(rebuildButt, 0.5f);
+      srchHL.setComponentAlignment(rebuildButt, Alignment.MIDDLE_RIGHT);
+      
       srchTF.addValueChangeListener(this);
       fldCombo.addValueChangeListener(this);
     }
+    
+    @SuppressWarnings("serial")
+    private ClickListener rebuildListener = new ClickListener() {
+      @Override
+      public void buttonClick(ClickEvent event)
+      {
+        Object key = HSess.checkInit();
+        AppMaster.instance().getMcache().rebuildQuickUsersTL();        
+        HSess.checkClose(key);
+        
+        srchTF.setValue(""); // clear filter
+        valueChange(null);
+      }
+    };
     
     private boolean listenerEnabled = true;
     @Override
