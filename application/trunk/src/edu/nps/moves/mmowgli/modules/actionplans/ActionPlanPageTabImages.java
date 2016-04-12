@@ -22,8 +22,7 @@
 
 package edu.nps.moves.mmowgli.modules.actionplans;
 
-import static edu.nps.moves.mmowgli.MmowgliConstants.ERROR_LOGS;
-import static edu.nps.moves.mmowgli.MmowgliConstants.MISC_LOGS;
+import static edu.nps.moves.mmowgli.MmowgliConstants.*;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -177,7 +176,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
   {
     private static final long serialVersionUID = 1L;
     NativeButton killButt;
-    MediaPanel ip;
+    MediaPanel2 ip;
     public MPanelWrapper()
     {
       setSizeUndefined();
@@ -193,18 +192,20 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     MPanelWrapper wrap = new MPanelWrapper();
     wrap.setMargin(false);
     wrap.setSpacing(false);
-    wrap.ip = new MediaPanel(m,apId,0, replaceLis);
+    wrap.ip = new MediaPanel2(m,apId,0, replaceLis);
     wrap.addComponent(wrap.ip);
     
     HorizontalLayout hl = new HorizontalLayout();
-    hl.setWidth(MediaPanel.WIDTH);
+    hl.setWidth(MediaPanel2.WIDTH);
     Label lab;
     hl.addComponent(lab = new Label());
     lab.setWidth("3px");
     hl.addComponent(lab = new Label(getDisplayedName(m)));
     lab.addStyleName("m-font-size-11");
+    hl.setComponentAlignment(lab, Alignment.MIDDLE_LEFT);
     hl.setExpandRatio(lab, 1.0f);
     hl.addComponent(wrap.killButt = new NativeButton(null));
+    hl.setComponentAlignment(wrap.killButt, Alignment.MIDDLE_LEFT);
     hl.addComponent(lab = new Label());
     lab.setWidth("3px");
     
@@ -264,18 +265,18 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     }
   }
     
-  private MediaPanel findImagePanel(Button butt)
+  private MediaPanel2 findImagePanel(Button butt)
   {
     Component com = butt;
-    while (!(com instanceof MediaPanel)) {
+    while (!(com instanceof MediaPanel2)) {
       com = com.getParent();
     }
-    return (MediaPanel) com;
+    return (MediaPanel2) com;
   }
 
   private int findMediaIndex(Button butt)
   {
-    MediaPanel pan = findImagePanel(butt);
+    MediaPanel2 pan = findImagePanel(butt);
     Media m = pan.getMedia();
     return getMediaIndexTL(m);
   }
@@ -320,7 +321,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
     {
       HSess.init();
       final Media oldM = findMediaTL(event.getButton());
-      final MediaPanel iPan = findImagePanel(event.getButton());
+      final MediaPanel2 iPan = findImagePanel(event.getButton());
       if (oldM != null) {
         /* if(addDialog == null) */{ // this was an attempt to persist the dialog, retaining file path, etc., but it was screwing with the media objects in some
                                      // way I don't have time to figure out

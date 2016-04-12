@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+ <head>
+  <meta charset="UTF-8" name="design-properties" content="{&quot;RULERS_VISIBLE&quot;:true,&quot;GUIDELINES_VISIBLE&quot;:false,&quot;SNAP_TO_OBJECTS&quot;:true,&quot;SNAP_TO_GRID&quot;:true,&quot;SNAPPING_DISTANCE&quot;:10,&quot;JAVA_SOURCES_ROOT&quot;:&quot;src&quot;,&quot;THEME&quot;:&quot;mmowgli2&quot;}">
+ </head> 
+ <body> 
+  <vaadin-vertical-layout style-name="m-actionplan-image-panel" width="307px"> 
+   <vaadin-horizontal-layout spacing width="307px" _id="titleHL"> 
+    <vaadin-label width="3px" _id="sp"></vaadin-label> 
+    <vaadin-label size-auto _id="indexLab" :middle :center></vaadin-label> 
+    <vaadin-text-field input-prompt="Title" style-name="m-actionplan-image-title" width-full _id="title" :expand></vaadin-text-field> 
+   </vaadin-horizontal-layout> 
+   <vaadin-text-area input-prompt="Description" style-name="m-actionplan-images-caption" width-full height="65px" _id="caption"></vaadin-text-area> 
+   <vaadin-horizontal-layout visible="false" spacing width="99%" _id="captionSavePan"> 
+    <vaadin-label width="1px" _id="lab" :expand></vaadin-label> 
+    <vaadin-button style-name="small" plain-text _id="canButt">
+      Button 
+    </vaadin-button> 
+    <vaadin-button style-name="small m-redbutton" plain-text _id="saveButt">
+      Button 
+    </vaadin-button> 
+    <vaadin-label width="5px" _id="lab2"></vaadin-label> 
+   </vaadin-horizontal-layout> 
+  </vaadin-vertical-layout>  
+ </body>
+</html>

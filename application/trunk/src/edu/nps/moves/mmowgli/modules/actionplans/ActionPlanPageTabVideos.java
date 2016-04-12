@@ -165,7 +165,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     private static final long serialVersionUID = 1L;
     
     NativeButton killButt;
-    MediaPanel ip;
+    MediaPanel2 ip;
     
     public void setIndex(int i)
     {
@@ -178,17 +178,18 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     VMPanelWrapper vl = new VMPanelWrapper();
     vl.setMargin(false);
     vl.setSpacing(false);
-    vl.ip = new MediaPanel(m,apId,0, replaceLis);
+    vl.ip = new MediaPanel2(m,apId,0, replaceLis);
     vl.addComponent(vl.ip);
     
     HorizontalLayout hl = new HorizontalLayout();
-    hl.setWidth(MediaPanel.WIDTH);
+    hl.setWidth(MediaPanel2.WIDTH);
     Label lab;
     hl.addComponent(lab = new Label());
     lab.setWidth("3px");
     
     if(m.getType() != MediaType.YOUTUBE) {
       hl.addComponent(lab = new Label( getDisplayedName(m)));  // label
+      hl.setComponentAlignment(lab, Alignment.MIDDLE_LEFT);
       lab.addStyleName("m-font-size-11");
       hl.setExpandRatio(lab, 1.0f);
     }
@@ -199,6 +200,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
       linkButt.setStyleName(BaseTheme.BUTTON_LINK);
       linkButt.addStyleName("borderless");
       linkButt.addStyleName("m-actionplan-nothumbs-button");
+      hl.setComponentAlignment(linkButt, Alignment.MIDDLE_LEFT);
       linkButt.addClickListener(new LinkVisitor(m));
       
       hl.addComponent(lab = new Label());
@@ -207,6 +209,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
    }
     
     hl.addComponent(vl.killButt = new NativeButton(null));
+    hl.setComponentAlignment(vl.killButt, Alignment.MIDDLE_LEFT);
     vl.killButt.setCaption("delete");
     vl.killButt.setStyleName(BaseTheme.BUTTON_LINK);
     vl.killButt.addStyleName("borderless");
@@ -235,18 +238,18 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
 
   private int findMediaIndexTL(Button butt)
   {
-    MediaPanel pan = findVideoPanel(butt);
+    MediaPanel2 pan = findVideoPanel(butt);
     Media m = pan.getMedia();
     return getMediaIndexTL(m);
   }
 
-  private MediaPanel findVideoPanel(Button butt)
+  private MediaPanel2 findVideoPanel(Button butt)
   {
     Component com = butt;
-    while (!(com instanceof MediaPanel)) {
+    while (!(com instanceof MediaPanel2)) {
       com = com.getParent();
     }
-    return (MediaPanel) com;
+    return (MediaPanel2) com;
   }
 
   private int getMediaIndexTL(Media m)
@@ -410,7 +413,7 @@ public class ActionPlanPageTabVideos extends ActionPlanPageTabPanel
     {
       HSess.init();
       final Media oldM = findMediaTL(event.getButton());
-      final MediaPanel vPan = findVideoPanel(event.getButton());
+      final MediaPanel2 vPan = findVideoPanel(event.getButton());
       if (oldM != null) {
         //if (addDialog == null) {
           hideExistingVideos(); //if ie
