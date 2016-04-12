@@ -758,6 +758,8 @@ public class UserProfile3Top extends AbsoluteLayout implements MmowgliComponent,
       expertiseTA.setReadOnly(true);
       avatarButt.setReadOnly(true);
       learnTA.setReadOnly(true);
+      affiliationTA.setReadOnly(true);
+      affiliationCombo.setReadOnly(true);
     }
   }
 
