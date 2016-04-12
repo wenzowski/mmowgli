@@ -148,9 +148,13 @@ public class MmowgliDialogContent extends HorizontalLayout implements MmowgliCom
       header.removeComponent(titleLab);
     titleLab = new Label(s);
     titleLab.addStyleName(small?titleStyleSmall:titleStyle);
-    titleLab.setWidth("450px"); // can't overlay cancel butt
+   // titleLab.setWidth("450px"); // can't overlay cancel butt
+    Label spacer;
+    header.addComponent(spacer=new Label());
+    spacer.setWidth("20px");
     header.addComponent(titleLab); //, "top:25px;left:50px");
     header.setComponentAlignment(titleLab, Alignment.MIDDLE_LEFT);
+    header.setExpandRatio(titleLab, 1.0f);
   }
   
   private CSSInject css = null;
