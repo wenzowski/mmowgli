@@ -109,20 +109,20 @@ public abstract class ActionPlanPageTabPanel extends HorizontalLayout implements
   abstract public void setICanEdit(boolean yn);
   
   /* a utility routing used by images and video tabs */
-  protected MediaPanel findMed(Component c)
+  protected MediaPanel2 findMed(Component c)
   {
-    if(c instanceof MediaPanel)
-      return (MediaPanel)c;
+    if(c instanceof MediaPanel2)
+      return (MediaPanel2)c;
     if(! (c instanceof ComponentContainer))
       return null;
     
     Iterator<Component> itr = ((ComponentContainer)c).iterator();
     while(itr.hasNext()) {
       Object o;
-      if((o=itr.next()) instanceof MediaPanel)
-        return (MediaPanel) o;
+      if((o=itr.next()) instanceof MediaPanel2)
+        return (MediaPanel2) o;
       if(o instanceof ComponentContainer) {
-        MediaPanel mp = findMed((ComponentContainer)o);
+        MediaPanel2 mp = findMed((ComponentContainer)o);
         if(mp != null)
           return mp;
       }
@@ -135,7 +135,7 @@ public abstract class ActionPlanPageTabPanel extends HorizontalLayout implements
   {
     Iterator<Component> itr = cont.iterator();
     while (itr.hasNext()) {
-      MediaPanel imp = findMed(itr.next());
+      MediaPanel2 imp = findMed(itr.next());
       if (imp !=null && imp.getMedia().getId() == (Long) medId) {
         imp.mediaUpdatedOobTL();
         return true;
