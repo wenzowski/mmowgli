@@ -75,6 +75,7 @@ public abstract class MmowgliDialog2 extends Window implements MmowgliComponent
     content = new MmowgliDialogContent();
     setContent(content);
     content.setSizeFull();
+    content.setHeight("99%");
     content.initGui();
     contentVLayout = content.getContentVLayout();
     content.setCancelListener(new ThisCancelListener());
