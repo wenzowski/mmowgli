@@ -11,7 +11,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
-import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.components.MmowgliComponent;
 import edu.nps.moves.mmowgli.db.Media;
 import edu.nps.moves.mmowgli.db.Media.MediaType;
@@ -48,18 +47,12 @@ public class MediaPanel2 extends _MediaPanel2 implements MmowgliComponent
     this.m = m;
     
     zoom = new NativeButton();
-    caption = new TextArea();
-    caption.setInputPrompt("Description");
-    title = new TextField();
-    title.setInputPrompt("Title");
-    titleHL = new HorizontalLayout();
-    indexLab = new HtmlLabel("");
     
-    FocusHandler fHandler = new FocusHandler();
-    caption.addFocusListener((FocusListener)fHandler);
-    title.addFocusListener((FocusListener)fHandler);     
-    canButt.addClickListener((ClickListener)fHandler);
-    saveButt.addClickListener((ClickListener)fHandler);
+    ThisFocusHandler fHandler = new ThisFocusHandler();
+    caption.addFocusListener(fHandler);
+    title.addFocusListener(fHandler);     
+    canButt.addClickListener(fHandler);
+    saveButt.addClickListener(fHandler);
   }
   
   public void setIndex(int i)
@@ -67,7 +60,7 @@ public class MediaPanel2 extends _MediaPanel2 implements MmowgliComponent
     indexLab.setValue("<b style='font-size:150%'>"+i+"</b>");    
   }
   
-  class FocusHandler implements FocusListener,ClickListener //BlurListener,
+  class ThisFocusHandler implements FocusListener,ClickListener
   {
     private static final long serialVersionUID = -5412529699678903650L;
 
@@ -120,7 +113,7 @@ public class MediaPanel2 extends _MediaPanel2 implements MmowgliComponent
       titleFocused = false;
       captionFocused = false;
       HSess.close();
-    }     
+    }
   }
   
   public void setIdx(int idx)
