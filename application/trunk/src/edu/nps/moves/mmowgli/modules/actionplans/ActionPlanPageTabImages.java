@@ -400,15 +400,16 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
           Media med = addDialog.getMedia();
           if (med != null) {
             HSess.init();
+            Media.saveTL(med);
             addOneImage(med);
             ActionPlan ap = ActionPlan.getTL(apId);
             ap.getMedia().add(med);
             ActionPlan.updateTL(ap);
             User u = Mmowgli2UI.getGlobals().getUserTL();
             GameEventLogger.logActionPlanImageAddedTL(ap, u.getUserName(), med.getTitle());
+            HSess.close();
             
             spawnImageSizeThread(med.getId());
-            HSess.close();
           }
         }
       });
@@ -422,7 +423,6 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
   {
     Thread thr = new Thread(new Runnable()
     {
-
       @Override
       public void run()
       {
@@ -443,6 +443,7 @@ public class ActionPlanPageTabImages extends ActionPlanPageTabPanel implements W
             MSysOut.println(ERROR_LOGS,"Error computing image size: "+e.getClass().getSimpleName()+": "+e.getLocalizedMessage());
             m.setHeight(null);
             m.setWidth(null);
+            Media.updateTL(m);
           }
          HSess.checkClose(key);
         }         

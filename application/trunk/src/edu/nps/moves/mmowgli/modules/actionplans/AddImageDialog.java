@@ -348,6 +348,7 @@ public class AddImageDialog extends Window
       ExternalResource extRes = new ExternalResource(webaddr);
 
       media = new Media(extRes.getURL(),"handle","",mediaType);
+      
       media.setCaption("");
       media.setSource(Media.Source.WEB_FULL_URL);
       
@@ -368,12 +369,19 @@ public class AddImageDialog extends Window
     holder.removeAllComponents();
     holder.addComponent(comp,"top:0px;left:0px");
     
-    long w = m.getWidth();
-    long h = m.getHeight();
-    float scale = (float)(w>h ? 150./(double)w : 150./(double)h);
-    comp.setWidth(w*scale,Unit.PIXELS);
-    comp.setHeight(h*scale,Unit.PIXELS);
-    //embedded.addStyleName("m-greyborder");
+    Long wl = m.getWidth();
+    Long hl = m.getHeight();
+    long w = wl==null?0:wl;
+    long h = hl==null?0:hl;
+    if(w==0 || h == 0) {
+      comp.setWidth(150,Unit.PIXELS);
+      comp.setHeight(150,Unit.PIXELS);
+    }
+    else {
+      float scale = (float)(w>h ? 150./(double)w : 150./(double)h);
+      comp.setWidth(w*scale,Unit.PIXELS);
+      comp.setHeight(h*scale,Unit.PIXELS);
+    }
   }
 
   /**
