@@ -134,7 +134,9 @@ public class UserExporter extends BaseExporter
       doAffiliationDefaults(root,HSess.get());
       
       @SuppressWarnings("unchecked")
-      List<User> lis = HSess.get().createCriteria(User.class).addOrder(Order.asc("id")).list();
+      List<User> lis = HSess.get().createCriteria(User.class)
+        .add(Restrictions.ne("accountDisabled", true))
+        .addOrder(Order.asc("id")).list();
       HSess.close();
       
       int highestMove = g.getCurrentMove().getNumber();  //1-based  
@@ -327,7 +329,11 @@ public class UserExporter extends BaseExporter
     }
     Element cardsPlayed = createAppend(uElem,"CardsPlayed");
     @SuppressWarnings("unchecked")
-    List<Card> cds = HSess.get().createCriteria(Card.class).add(Restrictions.eq("author", u)).list();
+    List<Card> cds = HSess.get().createCriteria(Card.class)
+    .add(Restrictions.eq("author", u))
+    .add(Restrictions.ne("hidden",true))
+    .list();
+    
     cardsPlayed.setAttribute("count", ""+cds.size());
     for(Card cd : cds) {
       Element c = createAppend(cardsPlayed, "CardID");
