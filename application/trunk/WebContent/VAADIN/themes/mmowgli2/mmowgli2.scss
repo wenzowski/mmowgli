@@ -1065,6 +1065,16 @@ div div .m-vcr-fonticon{
 	font-size: 21px;
 	line-height: 110%;
 }
+.m-cardchainlist table .v-grid-body .v-grid-row .v-grid-cell {
+	color: #808285;
+	font-family: helvetica;
+	font-size: 14px;
+}
+.m-cardchainlist table .v-grid-body .v-grid-row-selected .v-grid-cell {
+	color: #fff;
+  font-family: helvetica;
+	font-size: 14px;	text-shadow: #3b5a7a 0 1px 0;
+}
 .m-cardlarge-user {
 	color: #808285;
 	font-family: helvetica;
