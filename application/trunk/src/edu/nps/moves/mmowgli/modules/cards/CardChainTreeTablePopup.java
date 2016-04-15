@@ -47,7 +47,7 @@ public class CardChainTreeTablePopup extends MmowgliDialog2 implements ClickList
 {
   private static final long serialVersionUID = -2617923342376583365L;
   
-  private CardChainTree treeT;
+  private CardChainList cardList;
   private Object selectedId;
   private Object tempSelectedId;
   private SaveListener saveListener;
@@ -76,22 +76,18 @@ public class CardChainTreeTablePopup extends MmowgliDialog2 implements ClickList
     
     contentVLayout.setSpacing(true);
  
-    treeT = new CardChainTree(rootId,false,!modal);
+    cardList = new CardChainList(rootId,false,!modal); //CardChainTree(rootId,false,!modal);
     if(rootId == null) {
       setTitleString("Card chains");
      // instead, do some creative backgrounding to pseudo select children of a card, treeT.setMultiSelect(true);
     }
-    //treeT.setSizeFull();
-    treeT.setWidth("99%");
-    treeT.setHeight("99%");
-    treeT.addItemClickListener((ItemClickListener)this);
-    treeT.addStyleName("m-greyborder");
-    contentVLayout.addComponent(treeT);
-    contentVLayout.setComponentAlignment(treeT, Alignment.MIDDLE_CENTER);
-    contentVLayout.setExpandRatio(treeT, 1.0f);
-    
-    /* todo...the saved data was never being retrieved, should pass it back to create action plan panel */
-    
+    cardList.setSizeFull();
+    cardList.addItemClickListener((ItemClickListener)this);
+    cardList.addStyleName("m-greyborder");
+    contentVLayout.addComponent(cardList);
+    contentVLayout.setComponentAlignment(cardList, Alignment.MIDDLE_CENTER);
+    contentVLayout.setExpandRatio(cardList, 1.0f);
+        
     if(wantSaveButton) {
       // need a save button
       HorizontalLayout hl = new HorizontalLayout();
@@ -123,7 +119,7 @@ public class CardChainTreeTablePopup extends MmowgliDialog2 implements ClickList
     {
       saveClicked = true;
       if(tempSelectedId == null)
-        tempSelectedId = treeT.getCardIdFromSelectedItem(treeT.getValue());
+        tempSelectedId = cardList.getCardIdFromSelectedItem(cardList.getSelectedRow());
       selectedId = tempSelectedId; 
       UI.getCurrent().removeWindow(CardChainTreeTablePopup.this);
     }   
@@ -141,12 +137,7 @@ public class CardChainTreeTablePopup extends MmowgliDialog2 implements ClickList
   }
 
   public boolean saveClicked = false;
-  
-  public TreeTable getTreeTable()
-  {
-    return treeT;
-  }
-  
+
   @Override
   public void buttonClick(ClickEvent event)
   {
@@ -157,7 +148,8 @@ public class CardChainTreeTablePopup extends MmowgliDialog2 implements ClickList
   @Override
   public void itemClick(ItemClickEvent event)
   {
-    tempSelectedId = treeT.getCardIdFromSelectedItem(event.getItemId());
+    tempSelectedId = cardList.getCardIdFromSelectedItem(event.getItemId());
+
     if(this.isModal())
       if(event.isDoubleClick() && saveListener != null) {
         saveListener.buttonClick(null);
