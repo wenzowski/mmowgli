@@ -69,57 +69,56 @@ public class GameEvent implements Serializable
     public String description()
     {
       switch(this) {
-        case UNSPECIFIED: return "";
+   /*0*/case UNSPECIFIED: return "";
         case IDEACARDPLAYED: return "Strategy card played ";
         case CHILDCARDPLAYED: return "Card played on a parent card ";
         case CARDMARKED: return "Card marked by gamemaster ";
         case SCORECHANGE: return "User score changed ";
-        case USERLOGIN: return "User logged in ";
+   /*5*/case USERLOGIN: return "User logged in ";
         case USERUPDATE: return "User data updated ";
         case USERLOGOUT: return "User logged out ";
         case USERTIMEOUT: return "User time-out ";
         case USERLOCKOUT: return "User lock-out ";
-        case USERUNLOCKOUT: return "User un-lock-out ";
+  /*10*/case USERUNLOCKOUT: return "User un-lock-out ";
         case USERNEW: return "New user registered ";
         case MESSAGEBROADCAST: return "Message broadcast";
         case MESSAGEBROADCASTGM: return "Game master message broadcast";
         case LOGINLIMITCHANGE: return "User login limit change";
-        case GAMEMASTERNOTE: return "Game master comment";
+  /*15*/case GAMEMASTERNOTE: return "Game master comment";
         case APPLICATIONSTARTUP: return "Application startup";
         case CARDSREADONLY: return "Cards set to read-only";
         case CARDSREADWRITE: return "Cards set to read-write";
         case GAMEREADONLY: return "Game set to read-only";
-        case GAMEREADWRITE: return "Game set to read-write";
+  /*20*/case GAMEREADWRITE: return "Game set to read-write";
         case ACTIONPLANUPDATED: return "Action plan updated";
         case SESSIONEND: return "Session timeout";
         case GAMESIGNUPRESTRICTED: return "Set new user sign-up restricted to Query entries";
         case GAMESIGNUPOPEN: return "Removed new user sign-up restriction to Query entries";
-        case GAMESIGNUPINTERVALRESTRICTED: return "Set new user sign-up restricted to Query database markers";
+  /*25*/case GAMESIGNUPINTERVALRESTRICTED: return "Set new user sign-up restricted to Query database markers";
         case GAMESIGNUPINTERVALOPEN: return "Removed new user sign-up restriction to Query database markers";
         case BLOGHEADLINEPOST: return "Blog headline updated";
         case ACTIONPLANHELPWANTED: return "Action plan help-wanted";
         case TOPCARDSREADONLY: return "Top cards set to read-only";
-        case TOPCARDSREADWRITE: return "Top cards set to read-write";
+  /*30*/case TOPCARDSREADWRITE: return "Top cards set to read-write";
         case NEWUSERSRESTRICTED: return "Game locking out new users";
         case NEWUSERSUNRESTRICTED: return "Game opening up to new users";
         case REGISTRATIONATTEMPT: return "Registration attempted and refused";
         case AUTOREPORTGENERATION: return "Report generation";
-        case GAMEEMAILCONFIRMATIONSTART: return "Game now requires email confirmation for new users";
+  /*35*/case GAMEEMAILCONFIRMATIONSTART: return "Game now requires email confirmation for new users";
         case GAMEEMAILCONFIRMATIONEND: return "Game now does NOT require email confirmation for new users";
         case CARDTEXTEDITED: return "Card text edited by gamemaster";
         case GAMEDESIGNEDITED: return "Game design edited";
         case COMMENTSUPERINTERESTING: return "Comment super-interesting";
-        case USERGAMENAMECHANGED: return "User game name changed";
+  /*40*/case USERGAMENAMECHANGED: return "User game name changed";
         case COMMENTEDITED: return "Action plan comment edited";
         case CHATEDITED: return "Action plan chat edited";
         case USERPASSWORDCHANGED: return "User password changed";
         case GAMELOGINBUTTONSTATUS: return "Game login button status";
-        case REPORTGENERATIONREQUESTED: return "Game reports generation requested";
+  /*45*/case REPORTGENERATIONREQUESTED: return "Game reports generation requested";
         case EMAILSENT: return "Email successfully sent from game";
         case EMAILFAILURE: return "Email transmit failure";
         case ACTIONPLANCREATED: return "Action plan created";
         case MASSMAILSUBMITTED: return "Mass mailing job submitted";
-
       }
       throw new AssertionError("Unknown op: " + this);
     }
