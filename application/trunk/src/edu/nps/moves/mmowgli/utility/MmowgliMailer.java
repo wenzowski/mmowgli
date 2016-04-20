@@ -296,7 +296,7 @@ public class MmowgliMailer implements Runnable
       this.bcc=bcc;
       this.isHtml=isHtml;
       
-      if(isHtml)
+      if(this.isHtml)
         this.body = insertTags(body);
       else
         this.body=body;
@@ -313,7 +313,7 @@ public class MmowgliMailer implements Runnable
         if(_s.equals("<html"))
             return sss;
       }
-      return "<html>"+sss+"</html>";
+      return "<html><head><title>Mmowgli Mail</title></head><body>"+sss+"</body></html>";
     }
   }
 }
