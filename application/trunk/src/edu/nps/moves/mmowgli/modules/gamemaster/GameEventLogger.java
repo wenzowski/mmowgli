@@ -242,6 +242,12 @@ public class GameEventLogger
    return ret;
   }
 
+  public static void logLoginPermissionsChange(String s)
+  {
+    GameEvent ev = new GameEvent(GameEvent.EventType.GAMELOGINBUTTONSTATUS," / "+s);
+    GameEvent.saveTL(ev);
+  }
+  
   public static void logActionPlanCreationTL(ActionPlan ap)
   {
     GameEvent ev = new GameEvent(GameEvent.EventType.ACTIONPLANCREATED," / action plan "+ap.getId()+" created, \""+clampTitleLength(ap.getTitle())+"\"");

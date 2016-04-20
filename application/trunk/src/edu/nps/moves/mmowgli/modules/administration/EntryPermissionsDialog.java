@@ -27,30 +27,17 @@ import java.util.Iterator;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.ui.AbstractOrderedLayout;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.ComponentContainer;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 
 import edu.nps.moves.mmowgli.Mmowgli2UI;
 import edu.nps.moves.mmowgli.components.HtmlLabel;
 import edu.nps.moves.mmowgli.db.Game;
 import edu.nps.moves.mmowgli.db.MovePhase;
 import edu.nps.moves.mmowgli.hibernate.HSess;
-import edu.nps.moves.mmowgli.markers.HibernateClosed;
-import edu.nps.moves.mmowgli.markers.HibernateOpened;
-import edu.nps.moves.mmowgli.markers.HibernateSessionThreadLocalConstructor;
-import edu.nps.moves.mmowgli.markers.MmowgliCodeEntry;
+import edu.nps.moves.mmowgli.markers.*;
+import edu.nps.moves.mmowgli.modules.gamemaster.GameEventLogger;
 import edu.nps.moves.mmowgli.utility.MediaLocator;
 
 /**
@@ -597,7 +584,9 @@ public class EntryPermissionsDialog extends Window
         HSess.init();
         MovePhase mp = Game.getTL().getCurrentMove().getCurrentMovePhase();
         EntryPermissionsPanel me = EntryPermissionsPanel.this;
-
+        
+        checkCurrentSettings(mp);
+        
         mp.loginAllowNone();
         mp.loginAllowGameAdmins(true); // always
 
@@ -630,8 +619,65 @@ public class EntryPermissionsDialog extends Window
 
         MovePhase.updateTL(mp);
 
+        logChangedSettings(mp);
+        
         myDialog.close();
         HSess.close();
+      }
+      boolean allowgms,allowgds,allowvip,allowguests,allownew;
+      boolean newVIP,signupemailpageenabled,signupButtshow,signupButtenabled;
+      boolean newButtshow,newButtenabled,loginButtshow,loginButtenabled;
+      boolean guestButtshow,guestButtenabled;
+      
+      private void checkCurrentSettings(MovePhase mp)
+      {
+        signupemailpageenabled = mp.isSignupPageEnabled();
+        guestButtenabled = mp.isGuestButtonEnabled();
+        guestButtshow = mp.isGuestButtonShow();
+        loginButtenabled = mp.isLoginButtonEnabled();
+        loginButtshow = mp.isLoginButtonShow();
+        newButtenabled = mp.isNewButtonEnabled();
+        newButtshow = mp.isNewButtonShow();
+        signupButtenabled = mp.isSignupButtonEnabled();
+        signupButtshow = mp.isSignupButtonShow();
+        newVIP = mp.isRestrictByQueryList();
+        allownew = mp.isLoginAllowNewUsers();
+        allowguests = mp.isLoginAllowGuests();
+        allowvip = mp.isLoginAllowVIPList();
+        allowgds = mp.isLoginAllowGameDesigners();
+        allowgms = mp.isLoginAllowGameMasters();        
+      }
+      
+      private void logChangedSettings(MovePhase mp)
+      {
+        if(signupemailpageenabled != mp.isSignupPageEnabled()){submitEvent(getGameName()+ " / Signup page "+(signupemailpageenabled?"disabled":"enabled"));}
+        if(guestButtenabled != mp.isGuestButtonEnabled()){submitEvent(getGameName()+ " / Guest button "+(guestButtenabled?"disabled":"enabled"));}
+        if(guestButtshow != mp.isGuestButtonShow()){submitEvent(getGameName()+ " / Guest button "+(guestButtshow?"hide":"show"));}
+        if(loginButtenabled != mp.isLoginButtonEnabled()){submitEvent(getGameName()+ " / Login button "+(loginButtenabled?"disabled":"enabled"));}
+        if(loginButtshow != mp.isLoginButtonShow()){submitEvent(getGameName()+ " / Login button "+(loginButtshow?"hide":"show"));}
+        if(newButtenabled != mp.isNewButtonEnabled()){submitEvent(getGameName()+ " / New button "+(newButtenabled?"disabled":"enabled"));}
+        if(newButtshow != mp.isNewButtonShow()){submitEvent(getGameName()+ " / New button "+(newButtshow?"hide":"show"));}
+        if(signupButtenabled != mp.isSignupButtonEnabled()){submitEvent(getGameName()+ " / Signup button "+(signupButtenabled?"disabled":"enabled"));}
+        if(signupButtshow != mp.isSignupButtonShow()){submitEvent(getGameName()+ " / Signup button "+(signupButtshow?"hide":"show"));}
+        if(newVIP != mp.isRestrictByQueryList()){submitEvent(getGameName()+ " / Allow new from VIP "+(newVIP?"false":"true"));}
+        if(allownew != mp.isLoginAllowNewUsers()){submitEvent(getGameName()+ " / Allow all new "+(allownew?"false":"true"));}
+        if(allowguests != mp.isLoginAllowGuests()){submitEvent(getGameName()+ " / Allow guests "+(allowguests?"false":"true"));}
+        if(allowvip != mp.isLoginAllowVIPList()){submitEvent(getGameName()+ " / Allow VIPS "+(allowvip?"false":"true"));}
+        if(allowgds != mp.isLoginAllowGameDesigners()){submitEvent(getGameName()+ " / Allow designers "+(allowgds?"false":"true"));}
+        if(allowgms != mp.isLoginAllowGameMasters()){submitEvent(getGameName()+ " / Allow game masters "+(allowgms?"false":"true"));}     
+      }
+      
+      private String name = null;
+      private String getGameName()
+      {
+        if(name == null)
+          name = Mmowgli2UI.getGlobals().getUserTL().getUserName();
+        return name;
+      }
+      
+      private void submitEvent(String s)
+      {
+        GameEventLogger.logLoginPermissionsChange(s);
       }
     };
 
