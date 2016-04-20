@@ -229,7 +229,7 @@ public class AppMenuBar extends CustomComponent implements WantsGameUpdates
     gameRoMI.setChecked(game.isReadonly());
     ret.addSeparator();
 
-    ret.addItem("Game login button displays and permissions", gamePermissionsClicked).setIcon(VaadinIcons.SIGN_IN);
+    ret.addItem("Game login buttons displays and permissions", gamePermissionsClicked).setIcon(VaadinIcons.SIGN_IN);
     
     emailConfirmationMI = ret.addItem("Require new signup email confirmation",emailConfirmationChecked); emailConfirmationMI.setIcon(VaadinIcons.USER_CHECK);
     emailConfirmationMI.setCheckable(true);
