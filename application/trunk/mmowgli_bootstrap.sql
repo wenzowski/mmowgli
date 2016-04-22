@@ -946,7 +946,7 @@ CREATE TABLE `GameLinks` (
   `faqLink` varchar(255) NOT NULL DEFAULT 'http://portal.mmowgli.nps.edu/faq',
   `fixesLink` varchar(255) NOT NULL DEFAULT 'https://portal.mmowgli.nps.edu/fixes',
   `fouoLink` varchar(255) NOT NULL DEFAULT 'https://portal.mmowgli.nps.edu/fouo',
-  `gameFromEmail` varchar(255) NOT NULL DEFAULT 'mmowgli@nps.navy.mil',
+  `gameFromEmail` varchar(255) NOT NULL DEFAULT 'mmowgli@nps.edu',
   `gameFullLink` varchar(255) NOT NULL DEFAULT 'http://mmowgli.nps.edu/pleaseWaitGameFull.html',
   `gameHomeUrl` varchar(255) NOT NULL DEFAULT 'mmowgli.nps.edu',
   `glossaryLink` varchar(255) NOT NULL DEFAULT 'https://portal.mmowgli.nps.edu/game-wiki/-/wiki/PlayerResources/Glossary',
