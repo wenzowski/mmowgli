@@ -158,14 +158,27 @@ public class MmowgliMailer implements Runnable
       msg.setSentDate(date);
 
       MimeMultipart mmp = new MimeMultipart();
-      MimeBodyPart mbp = new MimeBodyPart();
+      MimeBodyPart mbp;
 
-      if (qp.isHtml)
+      if (qp.isHtml){
+        mmp = new MimeMultipart("alternative");
+
+        mbp = new MimeBodyPart(); // add text, too...highest prior = last
+        mbp.setText(removeTags(qp.body));
+        mmp.addBodyPart(mbp);
+        
+        mbp = new MimeBodyPart();
         mbp.setContent(qp.body, "text/html");
-      else
+        mmp.addBodyPart(mbp);
+     }
+      else { 
+        mmp = new MimeMultipart();
+        
+        mbp = new MimeBodyPart();
         mbp.setText(qp.body);
-
-      mmp.addBodyPart(mbp);
+        mmp.addBodyPart(mbp);
+      }
+      
       msg.setContent(mmp);
 
       // Send the message
@@ -246,6 +259,14 @@ public class MmowgliMailer implements Runnable
 	  HSess.close();
   }
 
+  private String removeTags(String s)
+  {
+    String ret = s.replace("<","");
+    ret = ret.replace(">", ""); 
+    //todo better method
+    
+    return ret;
+  }
 	public static String explainException(Throwable ex)
 	{
 		StringBuilder sb = new StringBuilder(" Exception type: ");

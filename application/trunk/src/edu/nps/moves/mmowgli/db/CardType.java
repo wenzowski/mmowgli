@@ -23,7 +23,9 @@
 package edu.nps.moves.mmowgli.db;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.persistence.*;
 
@@ -32,7 +34,6 @@ import org.hibernate.criterion.Restrictions;
 
 import edu.nps.moves.mmowgli.hibernate.DB;
 import edu.nps.moves.mmowgli.hibernate.HSess;
-import edu.nps.moves.mmowgli.modules.cards.CardStyler;
 
 /**
  * @author Mike Bailey, jmbailey@nps.edu
@@ -264,8 +265,7 @@ public class CardType implements Serializable
     for(CardType ct : typs)
       if(ct.isPositiveIdeaCard())
         return ct;
-    return null;
-    
+    return null;   
   }
 
   public static CardType getCurrentNegativeIdeaCardTypeTL()
@@ -273,25 +273,8 @@ public class CardType implements Serializable
     return getCurrentNegativeIdeaCardType(HSess.get());
   }
   
- public static CardType getCurrentNegativeIdeaCardType(Session sess)
+  public static CardType getCurrentNegativeIdeaCardType(Session sess)
   {
-//    Disjunction disj = Restrictions.disjunction();
-//    disj.add(Restrictions.eq("title", "Worst Strategy"));
-//    disj.add(Restrictions.eq("titleAlternate", "Worst Strategy"));
-//    disj.add(Restrictions.eq("title", "Defend"));
-//    disj.add(Restrictions.eq("titleAlternate", "Risk"));
- /*   
-    List<CardType> lis =  (List<CardType>) sess.createCriteria(CardType.class).
-                              add(Restrictions.eq("cardClass", CardClass.NEGATIVEIDEA)).
-                              // add(disj).
-                              list();
-    return lis.get(0);
-*/    
-//    Set<CardType> typs = Game.get(sess).currentMove.getCurrentMovePhase().getAllowedCards();
-//    for(CardType ct : typs)
-//      if(ct.isNegativeIdeaCard())
-//        return ct;
-//    return null;
      return getCurrentNegativeIdeaCardType(Game.get(sess).getCurrentMove());
   }
   
@@ -343,27 +326,17 @@ public class CardType implements Serializable
   {
     this.summaryHeader = summaryHeader;
   }
-//  private Boolean isInnovate;
-//  private Boolean isDefend;
 
-  //This is bogus.  Need to redefine the 2 top level types as "positive root" and "negative root", separate from the text....done
   @Transient
   public boolean isPositiveIdeaCard()
   {
     return getCardClass() == CardClass.POSITIVEIDEA;
-//    if(isInnovate == null)
-//      isInnovate = (summaryHeader.equalsIgnoreCase("innovate") || summaryHeader.equalsIgnoreCase("resource") || summaryHeader.equalsIgnoreCase("disrupt") || summaryHeader.toLowerCase().contains("best") ||
-//                            title.equalsIgnoreCase("innovate") ||         title.equalsIgnoreCase("resource") ||         title.equalsIgnoreCase("disrupt") ||         title.toLowerCase().contains("best"));
-//    return isInnovate;
   }
+  
   @Transient
   public boolean isNegativeIdeaCard()
   {
     return getCardClass() == CardClass.NEGATIVEIDEA;
-//    if(isDefend == null)
-//      isDefend = (summaryHeader.equalsIgnoreCase("defend") || summaryHeader.equalsIgnoreCase("risk") || summaryHeader.equalsIgnoreCase("protect") || summaryHeader.toLowerCase().contains("worst") ||
-//                          title.equalsIgnoreCase("defend") ||         title.equalsIgnoreCase("risk") ||         title.equalsIgnoreCase("protect") ||         title.toLowerCase().contains("worst"));
-//    return isDefend;
   }
   
   @Basic
@@ -448,7 +421,7 @@ public class CardType implements Serializable
   }
 
   @Basic
-  public String getCssLightColorStyle()
+  private String getCssLightColorStyle()
   {
     return cssLightColorStyle;
   }
@@ -457,26 +430,29 @@ public class CardType implements Serializable
   {
     this.cssLightColorStyle = cssLightColorStyle;
   }
-
+  
   @SuppressWarnings("unchecked")
-  public static List<CardType> getDefinedDescendantsByType(Session sess, int descTyp)
+  private static List<CardType> getDefinedDescendantsByType(Session sess, int descTyp)
   {
     return (List<CardType>) sess.createCriteria(CardType.class).
         add(Restrictions.eq("ideaCard", false)).
         add(Restrictions.eq("descendantOrdinal", descTyp)).
         list();
   } 
+  
   @SuppressWarnings("unchecked")
-  public static List<CardType> getDefinedIdeaCardsByClass(Session sess, CardClass cls)
+  private static List<CardType> getDefinedIdeaCardsByClass(Session sess, CardClass cls)
   {
     return (List<CardType>) sess.createCriteria(CardType.class).
         add(Restrictions.eq("cardClass", cls)).
         list();
   }
+  
   public static List<CardType> getDefinedPositiveTypesTL()
   {
     return getDefinedIdeaCardsByClass(HSess.get(),CardClass.POSITIVEIDEA);
   }
+  
   public static List<CardType> getDefinedNegativeTypesTL()
   {
     return getDefinedIdeaCardsByClass(HSess.get(),CardClass.NEGATIVEIDEA);
@@ -486,87 +462,70 @@ public class CardType implements Serializable
   {
     return getDefinedDescendantsByType(HSess.get(),EXPAND_CARD_TYPE);
   }
+  /*
   public static List<CardType> getDefinedExpandTypes(Session sess)
   {
     return getDefinedDescendantsByType(sess,EXPAND_CARD_TYPE);
   }
+  */
   public static List<CardType> getDefinedCounterTypesTL()
   {
     return getDefinedDescendantsByType(HSess.get(),COUNTER_CARD_TYPE);
   }
+  
+  /*
   public static List<CardType> getDefinedCounterTypes(Session sess)
   {
     return getDefinedDescendantsByType(sess,COUNTER_CARD_TYPE);
   }
+  */
   public static List<CardType> getDefinedAdaptTypesTL()
   {
     return getDefinedDescendantsByType(HSess.get(),ADAPT_CARD_TYPE);
   }
+  /*
   public static List<CardType> getDefinedAdaptTypes(Session sess)
   {
     return getDefinedDescendantsByType(sess,ADAPT_CARD_TYPE);
   }
+  */
   public static List<CardType> getDefinedExploreTypesTL()
   {
     return getDefinedDescendantsByType(HSess.get(),EXPLORE_CARD_TYPE);
   }
+  /*
   public static List<CardType> getDefinedExploreTypes(Session sess)
   {
     return getDefinedDescendantsByType(sess,EXPLORE_CARD_TYPE);
   }
-/*
-  public static void setExpandCardTypeTL(Move m, CardType ct)
-  {
-    setChildCardTypeTL(m,ct,EXPAND_CARD_TYPE);
-  }
-*/  
+ */
   public static void setExpandCardTypeAllPhasesTL(Move m, CardType ct)
   {
     setChildCardTypeAllPhasesTL(m,ct,EXPAND_CARD_TYPE);
   }
-/*
-  public static void setCounterTLCardType(Move m, CardType ct)
-  {
-    setChildCardTypeTL(m,ct,COUNTER_CARD_TYPE);
-  }
-*/
+
   public static void setCounterCardTypeAllPhasesTL(Move m, CardType ct)
   {
     setChildCardTypeAllPhasesTL(m,ct,COUNTER_CARD_TYPE);
   }
- /*
-  public static void setAdaptCardTypeTL(Move m, CardType ct)
-  {
-    setChildCardTypeTL(m,ct,ADAPT_CARD_TYPE);
-  }
-*/
+
   public static void setAdaptCardTypeAllPhasesTL(Move m, CardType ct)
   {
     setChildCardTypeAllPhasesTL(m,ct,ADAPT_CARD_TYPE);
   }
-  /*
-  public static void setExploreCardTypeTL(Move m, CardType ct)
-  {
-    setChildCardTypeTL(m,ct,EXPLORE_CARD_TYPE);
-  }
-  */
+
   public static void setExploreCardTypeAllPhasesTL(Move m, CardType ct)
   {
     setChildCardTypeAllPhasesTL(m,ct,EXPLORE_CARD_TYPE);    
   }
-  /*
-  private static void setChildCardTypeTL(Move m, CardType newCt, int ordinal)
-  {
-    MovePhase phase = m.getCurrentMovePhase();
-    setChildCardTypeTL(phase, newCt, ordinal);
-  }
-  */
+
   private static void setChildCardTypeAllPhasesTL(Move m, CardType newCt, int ordinal)
   {
     List<MovePhase> lis = m.getMovePhases();
     for(MovePhase mp : lis)
       setChildCardTypeTL(mp,newCt,ordinal);
   }
+  
   private static void setChildCardTypeTL(MovePhase phase, CardType newCt, int ordinal)
   {
     Set<CardType> typs = phase.getAllowedCards();
@@ -588,38 +547,49 @@ public class CardType implements Serializable
   public static CardType[] getAllCurrentTypesTL()
   {
     return new CardType[] {
-        CardType.getCurrentNegativeIdeaCardTypeTL(), //CardTypeManager.getNegativeIdeaCardTypeTL(),
-        CardType.getCurrentPositiveIdeaCardTypeTL(), //CardTypeManager.getPositiveIdeaCardTypeTL(),
-        CardType.getAdaptTypeTL(), //CardTypeManager.getAdaptTypeTL(),
-        CardType.getCounterTypeTL(), //CardTypeManager.getCounterTypeTL(),
-        CardType.getExpandTypeTL(), //CardTypeManager.getExpandTypeTL(),
-        CardType.getExploreTypeTL() //CardTypeManager.getExploreTypeTL()
+        CardType.getCurrentNegativeIdeaCardTypeTL(),
+        CardType.getCurrentPositiveIdeaCardTypeTL(),
+        CardType.getAdaptTypeTL(),
+        CardType.getCounterTypeTL(),
+        CardType.getExpandTypeTL(),
+        CardType.getExploreTypeTL()
     };
   }
-  @SuppressWarnings("unchecked")
-  public static CardType getDescendantOrdinal(int i)
+
+  public static CardType getCurrentDescendantOrdinalTL(int i)
   {
-    Session sess = HSess.getSessionFactory().openSession();      // no leaked sessions
-    List<CardType> types = (List<CardType>)
-                                  sess.createCriteria(CardType.class).
-                                  add(Restrictions.eq("descendantOrdinal",i)).
-                                  list();
-    assert types.size()==1 : "CardType table error, descendantOrdinal: "+i;
-    
-    sess.close();
-    return types.get(0);
+    return getCurrentDescendantOrdinal(HSess.get(),i);
   }
-  @SuppressWarnings("unchecked")
-  public static CardType getDescendantOrdinalTL(int i)
+  
+  public static CardType getCurrentDescendantOrdinal(int i)
   {
-    List<CardType> types = (List<CardType>)
-                                  HSess.get().createCriteria(CardType.class).
-                                  add(Restrictions.eq("descendantOrdinal",i)).
-                                  list();
-    assert types.size()==1 : "CardType table error, descendantOrdinal: "+i;
-    return types.get(0);
+    return getCurrentDescendantOrdinal(null,i);
+  }
+  
+  public static CardType getCurrentDescendantOrdinal(Session sess, int i)
+  {
+    Session nsess = null;
+    if(sess == null) {
+      nsess = HSess.getSessionFactory().openSession();      // no leaked sessions
+      sess = nsess;
+    }
+    CardType ret = getCurrentDescendantOrdinal(Game.get(sess).getCurrentMove(),sess,i); 
+
+    if(nsess != null)
+      nsess.close();
+    return ret;
   }
 
+  public static CardType getCurrentDescendantOrdinal(Move m, Session sess, int i)
+  {
+    Set<CardType> typs = m.getCurrentMovePhase().getAllowedCards();
+    for(CardType ct : typs)
+      if(!ct.isIdeaCard && ct.getDescendantOrdinal() == i)
+        return ct;
+    return null;    
+  }
+  
+ /* 
   @SuppressWarnings("unchecked")
   public static List<CardType> getDefinedPositiveIdeaCardsTL()
   {
@@ -640,6 +610,7 @@ public class CardType implements Serializable
   {
     return CardStyler.getCardBaseColor(ct);// new way
   }
+  */
   
   public static String getColorStyle(CardType ct)
   {
@@ -649,6 +620,7 @@ public class CardType implements Serializable
     return sty;
   }
   
+  /*
   public static String getColorStyle_light(CardType ct)
   {
     String sty = ct.getCssLightColorStyle();
@@ -656,5 +628,5 @@ public class CardType implements Serializable
       sty = "m-lightergray";
     return sty;
   }
-
+  */
 }
