@@ -58,7 +58,7 @@ public class ReportGenerator implements Runnable
   boolean killed = false;
   boolean asleep = false;
   boolean poked  = false;
-
+  
   private long INITIAL_SLEEP_PERIOD = 1 * 60 * 1000; // 1 minute
 
   private long reportPeriod;
@@ -107,7 +107,7 @@ public class ReportGenerator implements Runnable
     while (!killed) {
       HSess.init();
       Game g = Game.getTL();
-      HSess.close();
+
       // Get report period (which can be changed during game play, or even while a generation run is happening)
       reportPeriod = g.getReportIntervalMinutes() * 60 * 1000;
 
@@ -116,8 +116,16 @@ public class ReportGenerator implements Runnable
       if(lastReportMS == null)  // first time
         lastReportMS = nowMS;
       
+      boolean nofirstlogin = AppMaster.instance().getAppUrl() == null;
+      if(nofirstlogin) {
+        String err = "Report generator cannot run until the first user login to the master cluster node, "+AppMaster.instance().getServerName();
+        MSysOut.println(REPORT_LOGS,err);
+        GameEventLogger.logReportGenerationErrorTL(err);
+      }
       MSysOut.println(REPORT_LOGS,"poked="+poked+" now="+nowMS+" lastReportMS="+lastReportMS+" period="+reportPeriod);
-      if(poked || ( (reportPeriod >0) && (nowMS-lastReportMS) > reportPeriod) ) {
+      HSess.close();
+      
+      if(!nofirstlogin && (poked || ( (reportPeriod >0) && (nowMS-lastReportMS) > reportPeriod) ) ) {
         lastReportMS = nowMS;  // also done below
         poked = false;
 
