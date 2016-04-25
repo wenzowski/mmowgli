@@ -338,7 +338,13 @@ public class GameEventLogger
   {
     logReportGenerationTL(" begun");  
   }
-  
+
+  public static void logReportGenerationErrorTL(String err)
+  {
+    GameEvent ev = new GameEvent(GameEvent.EventType.AUTOREPORTGENERATION, err);
+    GameEvent.saveTL(ev);    
+  }
+
   private static void logReportGenerationTL(String txt)
   {
     String url = AppMaster.instance().getAppUrlString();
