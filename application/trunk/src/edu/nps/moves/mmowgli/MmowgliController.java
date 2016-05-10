@@ -43,6 +43,7 @@ public interface MmowgliController
 {
   void menuClick(MmowgliEvent mEv, MenuBar menubar);
   void handleEventTL(MmowgliEvent mEv, Object param, Component source);
+  void miscEvent(AppEvent ev);
   void miscEventTL(AppEvent ev);
   void buttonClick(ClickEvent ev);
 

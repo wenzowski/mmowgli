@@ -96,6 +96,13 @@ public abstract class AbstractMmowgliController implements MmowgliController, MM
     nav.setErrorProvider(new MyErrorViewProvider());
   }
   
+  public void miscEvent(AppEvent appEvent)
+  {
+    Object sessKey = HSess.checkInit();
+    miscEventTL(appEvent);
+    HSess.checkClose(sessKey);
+  }
+  
   public void miscEventTL(AppEvent appEvent)
   {
     MmowgliEvent mEv = appEvent.getEvent();
