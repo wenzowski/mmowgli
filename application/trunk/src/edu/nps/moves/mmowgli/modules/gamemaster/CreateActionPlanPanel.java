@@ -319,10 +319,14 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
                 ActionPlan.saveTL(ap); // saveorupdate does not get broadcast, save and update do
                 GameEventLogger.logActionPlanCreationTL(ap);
               }
-              else
+              else {
                 ActionPlan.updateTL(ap);
-                       
-              Mmowgli2UI.getGlobals().getController().miscEventTL(new AppEvent(MmowgliEvent.TAKEACTIONCLICK, CreateActionPlanLayout.this, null));
+              }
+
+              HSess.close();
+              
+              // Need to commit/flush to avoid Hibernate bug/feature: DB.Get(user) done in next method somewhere
+              Mmowgli2UI.getGlobals().getController().miscEvent(new AppEvent(MmowgliEvent.TAKEACTIONCLICK, CreateActionPlanLayout.this, null));
             }
             else {
               HSess.close();
@@ -332,9 +336,9 @@ public class CreateActionPlanPanel extends Panel implements MmowgliComponent
           catch (Exception e) {
             System.err.println(e.getLocalizedMessage());
             // Ignored, we'll let the Form handle the errors
+            HSess.close();
           }
-          HSess.close();
-          
+
           if(closer != null)
             closer.buttonClick(event);
         }
